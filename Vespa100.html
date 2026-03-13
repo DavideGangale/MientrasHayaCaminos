@@ -1114,11 +1114,30 @@ function dataURLToFile(dataUrl, filename = 'foto.jpg') {
 }
 
 
-window.testShareClick = function() {
-  alert('CLICK OK'); // se non compare, il click non arriva proprio
+
+    
+window.testShareClick = function () {
+  alert(
+    'HTTPS secureContext: ' + window.isSecureContext +
+    '\nnavigator.share: ' + (!!navigator.share) +
+    '\nnavigator.canShare: ' + (!!navigator.canShare)
+  );
+
+  if (!navigator.share) return;
+
+  // IMPORTANTISSIMO: chiamata DIRETTA, senza setTimeout e senza await prima
+  navigator.share({ text: 'Test share VespaTrek' })
+    .then(() => alert('Share OK'))
+    .catch(e => {
+      console.warn(e);
+      alert('Share error: ' + e.name);
+    });
 };
 
 
+
+
+    
     
 async function shareToInstagram({ text, dataUrl, filename }) {
   // fallback se non supportato
