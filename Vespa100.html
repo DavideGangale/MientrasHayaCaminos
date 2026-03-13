@@ -394,7 +394,9 @@
 
         <button class="btn-azione" style="background:#9c27b0;" onclick="apriModal('modalTappe')">🗺️ APRI DIARIO TAPPE</button>
 
-    <button class="btn-secondary" style="margin-top:10px;" onclick="condividiMomentoPreview()">📤 Condividi su Instagram</button>
+        <button class="btn-secondary" style="margin-top:10px;" onclick="condividiMomentoPreview()">📤 Condividi su Instagram</button>
+
+        <button class="btn-secondary" style="margin-top:10px;" onclick="testShareClick()">📤 Condividi su Instagram (TEST)</button>
         
         <button class="btn-azione" style="background:#2196F3;" onclick="apriModalPaesi()">🌎 STATISTICHE PER PAESE</button>
 
@@ -1111,6 +1113,13 @@ function dataURLToFile(dataUrl, filename = 'foto.jpg') {
   return new File([u8arr], filename, { type: mime });
 }
 
+
+window.testShareClick = function() {
+  alert('CLICK OK'); // se non compare, il click non arriva proprio
+};
+
+
+    
 async function shareToInstagram({ text, dataUrl, filename }) {
   // fallback se non supportato
   if (!navigator.share) {
