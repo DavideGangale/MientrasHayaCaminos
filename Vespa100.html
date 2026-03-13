@@ -922,16 +922,19 @@ function toggleTracking() {
         }, 1000);
         showToast('▶ Tracking avviato');
     }
-}
+
 
 
 updateWakeLockPolicy();
+    
+}
+
+
 
 
 // Pausa automatica quando app va in background
 document.addEventListener('visibilitychange', () => {
-
- updateWakeLockPolicy();
+    updateWakeLockPolicy();
 
     if (document.hidden && inViaggio) {
         clearInterval(timerGuida);
