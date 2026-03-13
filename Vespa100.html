@@ -638,8 +638,10 @@ let tappaAttuale     = { kmInizio:0, kmPercorsi:0, altMin:9999, altMax:0, second
 const CONSUMO_MEDIO  = 28; // km/L stimato PX150
 const MAX_PUNTI_MAPPA = 500;
 
+let wakeLockEnabled = false;
+
 let wakeLock = null;
-let wakeLockEnabled = true; // se vuoi poterlo disattivare in futuro
+//let wakeLockEnabled = true; // se vuoi poterlo disattivare in futuro
 
 // ============================================================
 //  STORAGE SICURO
@@ -923,18 +925,15 @@ function toggleTracking() {
         showToast('▶ Tracking avviato');
     }
 
+//updateWakeLockPolicy();
 
-
-updateWakeLockPolicy();
-    
 }
-
 
 
 
 // Pausa automatica quando app va in background
 document.addEventListener('visibilitychange', () => {
-    updateWakeLockPolicy();
+    //updateWakeLockPolicy();
 
     if (document.hidden && inViaggio) {
         clearInterval(timerGuida);
@@ -946,6 +945,7 @@ document.addEventListener('visibilitychange', () => {
         }, 1000);
     }
 });
+
 
 function aggiornaTempoGuidaUI() {
     const h = Math.floor(tappaAttuale.secondiGuida / 3600);
@@ -1059,7 +1059,7 @@ function updateWakeLockPolicy() {
   if (shouldKeepOn) enableWakeLock();
   else disableWakeLock();
 
-updateWakeLockPolicy();
+//updateWakeLockPolicy();
 }
 
 
@@ -1843,7 +1843,7 @@ async function inizializzaApp() {
     aggiornaTempoGuidaUI();
     renderDiario();
 
-updateWakeLockPolicy();
+//updateWakeLockPolicy();
 
     await setLoadingProgress(100, '✅ Pronto!');
     await new Promise(r => setTimeout(r, 400));
