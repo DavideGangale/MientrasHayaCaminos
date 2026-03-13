@@ -643,6 +643,37 @@ let wakeLockEnabled = false;
 let wakeLock = null;
 //let wakeLockEnabled = true; // se vuoi poterlo disattivare in futuro
 
+let wakeLock = null;
+let wakeLockEnabled = true;
+
+async function requestWakeLock() {
+  if (!wakeLockEnabled) return;
+  if (!('wakeLock' in navigator)) return;
+  if (wakeLock) return;
+  if (document.visibilityState !== 'visible') return;
+
+  try {
+    wakeLock = await navigator.wakeLock.request('screen');
+    wakeLock.addEventListener('release', () => { wakeLock = null; });
+  } catch (e) {
+    console.warn('WakeLock request error:', e);
+  }
+}
+
+async function releaseWakeLock() {
+  if (!wakeLock) return;
+  try { await wakeLock.release(); } catch (e) {}
+  wakeLock = null;
+}
+
+function syncWakeLock() {
+  if (inViaggio && document.visibilityState === 'visible') requestWakeLock();
+  else releaseWakeLock();
+}
+    
+
+
+    
 // ============================================================
 //  STORAGE SICURO
 // ============================================================
@@ -1053,55 +1084,6 @@ function cambiaPagina(id, btn) {
 }
 
 
-async function enableWakeLock() {
-  if (!wakeLockEnabled) return;
-
-  // disponibile solo in contesti sicuri (https) e browser compatibili
-  if (!('wakeLock' in navigator)) return;
-
-  try {
-    wakeLock = await navigator.wakeLock.request('screen');
-    // console.log('WakeLock attivo');
-
-    wakeLock.addEventListener('release', () => {
-      // console.log('WakeLock rilasciato');
-    });
-  } catch (err) {
-    console.warn('WakeLock error:', err);
-  }
-}
-
-async function disableWakeLock() {
-  try {
-    if (wakeLock) {
-      await wakeLock.release();
-      wakeLock = null;
-    }
-  } catch (err) {
-    console.warn('WakeLock release error:', err);
-  }
-}
-
-/**
- * Regola: tieni schermo acceso se:
- * - tracking attivo
- * - oppure sei in pagina guida
- */
-function updateWakeLockPolicy() {
-  const guidaAttiva = document.getElementById('guida')?.classList.contains('active');
-  const shouldKeepOn = inViaggio || guidaAttiva;
-
-  if (document.visibilityState !== 'visible') {
-    // se tab/app in background, rilascia
-    disableWakeLock();
-    return;
-  }
-
-  if (shouldKeepOn) enableWakeLock();
-  else disableWakeLock();
-
-//updateWakeLockPolicy();
-}
 
 
 // ============================================================
