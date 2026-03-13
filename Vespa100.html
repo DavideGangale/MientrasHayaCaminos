@@ -974,7 +974,7 @@ function toggleTracking() {
         showToast('▶ Tracking avviato');
     }
 
-//updateWakeLockPolicy();
+
 
 syncWakeLock();
 
@@ -985,12 +985,14 @@ syncWakeLock();
 
 // Pausa automatica quando app va in background
 document.addEventListener('visibilitychange', () => {
-    //updateWakeLockPolicy();
-   syncWakeLock();
+    syncWakeLock();
 
     if (document.hidden && inViaggio) {
         clearInterval(timerGuida);
+        timerGuida = null;
     } else if (!document.hidden && inViaggio) {
+        // evita duplicati
+        if (timerGuida) clearInterval(timerGuida);
         timerGuida = setInterval(() => {
             tappaAttuale.secondiGuida++;
             salva('vt_tappaAttuale', tappaAttuale);
@@ -998,7 +1000,6 @@ document.addEventListener('visibilitychange', () => {
         }, 1000);
     }
 });
-
 
 function aggiornaTempoGuidaUI() {
     const h = Math.floor(tappaAttuale.secondiGuida / 3600);
@@ -1142,6 +1143,31 @@ async function shareToInstagram({ text, dataUrl, filename }) {
   }
 }
 
+
+
+async function condividiMomentoPreview() {
+  const testo = document.getElementById('momento-testo').value.trim();
+  const foto  = document.getElementById('momento-foto-preview').dataset.src || null;
+
+  const paese = carica('vt_paeseAttuale','Colombia');
+  const km    = parseFloat(carica('vt_kmTotali','0')).toFixed(1);
+
+  const caption =
+`🛵 VespaTrek PX150
+📍 ${paese} — km ${km}
+${testo ? '\n' + testo : ''}
+
+#vespa #overland #sudamerica`;
+
+  const ok = await shareToInstagram({
+    text: caption,
+    dataUrl: foto,
+    filename: `momento_${Date.now()}.jpg`
+  });
+
+  if (ok) showToast('📤 Condivisione aperta!');
+}
+    
 
 // ============================================================
 //  MODALI
@@ -1982,7 +2008,6 @@ async function inizializzaApp() {
     aggiornaTempoGuidaUI();
     renderDiario();
 
-//updateWakeLockPolicy();
 
     await setLoadingProgress(100, '✅ Pronto!');
     await new Promise(r => setTimeout(r, 400));
