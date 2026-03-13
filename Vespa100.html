@@ -1,0 +1,3160 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VespaTrek PX150</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-image/leaflet-image.js"></script>
+    <style>
+        :root {
+            --rosso: #d32f2f;
+            --sfondo: #121212;
+            --grigio: #2c2c2c;
+            --testo: #ffffff;
+            --verde: #4caf50;
+            --blu: #2196F3;
+            --giallo: #ff9800;
+            --pink: #e91e63;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background-color: var(--sfondo);
+            color: var(--testo);
+            padding-bottom: 80px;
+        }
+        .header {
+            background-color: var(--rosso);
+            padding: 15px;
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.8);
+            position: sticky;
+            top: 0;
+            z-index: 500;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        .page { display: none; padding: 15px; animation: fadeIn 0.3s; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* ---- CARDS ---- */
+        .dash-card {
+            background: var(--grigio);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+        }
+
+        /* ---- SPEEDOMETER ---- */
+        .speed { font-size: 70px; font-weight: bold; color: var(--rosso); margin: 0; line-height: 1; }
+        .altitude { font-size: 30px; color: var(--blu); font-weight: bold; margin-bottom: 5px; text-shadow: 0 0 10px rgba(33,150,243,0.3); }
+
+        /* ---- BOTTONI ---- */
+        .btn-track {
+            width: 100%; padding: 15px; font-size: 18px; font-weight: bold;
+            border: none; border-radius: 10px; color: white; cursor: pointer;
+            text-transform: uppercase; margin-bottom: 10px; transition: opacity 0.2s;
+        }
+        .btn-track:active { opacity: 0.8; }
+        .btn-track.start { background-color: var(--verde); }
+        .btn-track.stop  { background-color: #f44336; animation: pulse 1.5s infinite; }
+        @keyframes pulse {
+            0%   { box-shadow: 0 0 0 0 rgba(244,67,54,0.6); }
+            70%  { box-shadow: 0 0 0 10px rgba(244,67,54,0); }
+            100% { box-shadow: 0 0 0 0 rgba(244,67,54,0); }
+        }
+        .btn-tappa { background: #9c27b0; }
+        .btn-azione {
+            width: 100%; padding: 15px; background: var(--rosso); color: white;
+            border: none; border-radius: 10px; font-size: 16px; font-weight: bold;
+            margin-top: 10px; text-transform: uppercase; cursor: pointer; transition: opacity 0.2s;
+        }
+        .btn-azione:active { opacity: 0.8; }
+        .btn-secondary {
+            background: #555; width: 100%; padding: 12px; border: none;
+            border-radius: 10px; color: white; font-weight: bold;
+            margin-top: 10px; cursor: pointer; transition: opacity 0.2s;
+        }
+        .btn-secondary:active { opacity: 0.8; }
+        .btn-small {
+            padding: 6px 12px; border: none; border-radius: 8px;
+            font-size: 12px; font-weight: bold; cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .btn-small:active { opacity: 0.7; }
+
+        /* ---- MAPPA ---- */
+        #map { height: 180px; border-radius: 10px; width: 100%; border: 2px solid #444; margin-bottom: 10px; }
+
+        /* ---- INPUT ---- */
+        select.country-select {
+            width: 100%; padding: 12px; border-radius: 10px; background: #111;
+            color: var(--giallo); border: 2px solid var(--giallo); font-size: 18px;
+            font-weight: bold; margin-bottom: 15px; text-align: center;
+        }
+        input, textarea, select.inp-select {
+            width: 100%; padding: 12px; margin: 6px 0; border-radius: 10px;
+            border: 1px solid #555; background: #333; color: white; font-size: 16px;
+            text-align: center; transition: border-color 0.2s;
+        }
+        input:focus, textarea:focus { outline: none; border-color: var(--blu); }
+        input.input-error { border-color: #f44336 !important; }
+        label.inp-label { font-size: 12px; color: #aaa; display: block; text-align: left; margin-top: 8px; }
+
+        /* ---- ODOMETRO ---- */
+        .odometer-container {
+            display: flex; justify-content: space-around; background: #000;
+            padding: 10px; border-radius: 10px; border: 2px solid #444; margin: 10px 0;
+        }
+        .odo-box { text-align: center; }
+        .odo-label { font-size: 10px; color: #888; text-transform: uppercase; }
+        .odo-value { font-size: 24px; font-family: monospace; font-weight: bold; color: white; }
+        .odo-value.trip { color: var(--blu); }
+
+        /* ---- STATS ---- */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .stat-box { background: #333; padding: 10px; border-radius: 10px; text-align: center; border: 1px solid #444; }
+        .stat-num { font-size: 20px; font-weight: bold; color: var(--verde); margin-top: 5px; }
+
+        /* ---- TOGGLE ---- */
+        .toggle-container { display: flex; gap: 10px; margin-bottom: 10px; }
+        .toggle-btn {
+            flex: 1; padding: 12px; background: #333; color: #aaa;
+            border: 2px solid #555; border-radius: 10px; font-weight: bold;
+            font-size: 14px; cursor: pointer; transition: all 0.2s;
+        }
+        .toggle-btn.active.unita  { background: var(--blu);    border-color: var(--blu);    color: white; }
+        .toggle-btn.active.dest-v { background: var(--rosso);  border-color: var(--rosso);  color: white; }
+        .toggle-btn.active.dest-t { background: var(--giallo); border-color: var(--giallo); color: white; }
+
+        /* ---- MISCELA % ---- */
+        .pct-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 5px; margin: 10px 0; }
+        .pct-btn {
+            padding: 12px 5px; background: #333; color: #aaa;
+            border: 2px solid #555; border-radius: 8px; font-weight: bold;
+            font-size: 16px; cursor: pointer; transition: all 0.2s;
+        }
+        .pct-btn.active { background: var(--rosso); border-color: var(--rosso); color: white; }
+
+        /* ---- INVENTARIO ---- */
+        .inv-item {
+            display: flex; align-items: center; background: #2a2a2a;
+            padding: 12px; margin-bottom: 8px; border-radius: 10px;
+            border-left: 4px solid #555; gap: 8px;
+        }
+        .inv-item.warn-high  { border-left-color: #f44336; }
+        .inv-item.warn-med   { border-left-color: #ff9800; }
+        .inv-item.warn-ok    { border-left-color: var(--verde); }
+        .inv-info { flex-grow: 1; text-align: left; }
+        .inv-nome { font-size: 14px; font-weight: bold; }
+        .inv-sub  { font-size: 11px; color: #888; margin-top: 2px; }
+        .inv-usura-bar { height: 4px; border-radius: 2px; background: #444; margin-top: 4px; overflow: hidden; }
+        .inv-usura-fill { height: 100%; border-radius: 2px; transition: width 0.5s; }
+        .inv-btn {
+            background: #555; border: none; color: white;
+            width: 32px; height: 32px; border-radius: 50%;
+            font-size: 18px; font-weight: bold; cursor: pointer; flex-shrink: 0;
+        }
+        .inv-btn.minus { background: #ff9800; }
+        .inv-btn.plus  { background: var(--verde); }
+        .inv-qta { font-size: 18px; font-weight: bold; min-width: 28px; text-align: center; flex-shrink: 0; }
+        .inv-qta.zero { color: var(--rosso); }
+
+        /* ---- MODALI ---- */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; background: rgba(0,0,0,0.92);
+            z-index: 2000; justify-content: center; align-items: flex-start;
+            padding-top: 20px;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-content {
+            background: #1a1a1a; width: 93%; max-width: 520px;
+            max-height: 90vh; border-radius: 18px; padding: 20px;
+            overflow-y: auto; border: 2px solid var(--rosso); position: relative;
+        }
+        .close-modal {
+            position: absolute; top: 12px; right: 12px; font-size: 22px; color: #fff;
+            background: #f44336; border: none; width: 34px; height: 34px;
+            border-radius: 50%; font-weight: bold; cursor: pointer; z-index: 10;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* ---- RISULTATO BOX ---- */
+        .risultato-box {
+            display: none; margin-top: 15px; padding: 15px;
+            background: rgba(76,175,80,0.1); border: 2px dashed var(--verde);
+            color: var(--verde); font-size: 16px; text-align: center; border-radius: 10px;
+        }
+
+
+
+
+/* Pagina dettaglio tappa */
+#tappa-detail-page{
+  display:none;
+  position:fixed; top:0; left:0;
+  width:100%; height:100%;
+  background: var(--sfondo);
+  z-index: 1600;
+  overflow-y:auto;
+}
+#tappa-detail-page.open{ display:block; }
+
+.waypoint-card{
+  background:#1e1e1e;
+  border:1px solid #333;
+  border-radius:12px;
+  padding:12px;
+  margin-bottom:10px;
+}
+.waypoint-meta{ font-size:11px; color:#777; margin-top:6px; display:flex; justify-content:space-between; gap:10px; }
+.waypoint-text{ font-size:14px; color:#ddd; line-height:1.5; white-space:pre-wrap; }
+
+
+
+        /* ========================================
+           DIARIO — STILE FANCY
+        ======================================== */
+        .diario-card {
+            position: relative;
+            background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
+            border-radius: 16px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #333;
+        }
+        .diario-card:active { transform: scale(0.98); }
+        .diario-card-foto {
+            width: 100%; height: 180px;
+            object-fit: cover; display: block;
+        }
+        .diario-card-nofoto {
+            width: 100%; height: 80px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 36px;
+        }
+        .diario-card-body { padding: 14px; }
+        .diario-card-meta {
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 8px;
+        }
+        .diario-card-data { font-size: 11px; color: #888; }
+        .diario-card-paese {
+            background: rgba(233,30,99,0.2); color: var(--pink);
+            padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: bold;
+            border: 1px solid rgba(233,30,99,0.4);
+        }
+        .diario-card-testo {
+            font-size: 15px; line-height: 1.5; color: #ddd;
+            overflow: hidden; text-overflow: ellipsis;
+            display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+        }
+        .diario-card-km {
+            display: inline-block; margin-top: 8px;
+            font-size: 11px; color: #666; font-style: italic;
+        }
+        .diario-card-footer {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 14px; background: rgba(0,0,0,0.3);
+            border-top: 1px solid #333;
+        }
+        .diario-card-tag {
+            display: flex; gap: 6px; flex-wrap: wrap;
+        }
+        .tag-pill {
+            background: #333; color: #aaa; padding: 2px 8px;
+            border-radius: 10px; font-size: 10px;
+        }
+        /* Pagina dettaglio diario */
+        #diario-detail-page {
+            display: none;
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--sfondo);
+            z-index: 1500; overflow-y: auto;
+        }
+        #diario-detail-page.open { display: block; }
+        .detail-header {
+            position: sticky; top: 0;
+            background: rgba(18,18,18,0.95);
+            backdrop-filter: blur(10px);
+            padding: 12px 15px;
+            display: flex; align-items: center; gap: 12px;
+            border-bottom: 1px solid #333; z-index: 10;
+        }
+        .detail-back {
+            background: #333; border: none; color: white;
+            width: 36px; height: 36px; border-radius: 50%;
+            font-size: 18px; cursor: pointer; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .detail-foto-hero {
+            width: 100%; max-height: 320px;
+            object-fit: cover; display: block;
+        }
+        .detail-body { padding: 20px 15px; }
+        .detail-testo-full {
+            font-size: 17px; line-height: 1.7; color: #e0e0e0;
+            white-space: pre-wrap; margin-bottom: 20px;
+        }
+        .detail-add-note {
+            background: #2a2a2a; border-radius: 12px; padding: 15px;
+            border: 1px dashed #444; margin-top: 10px;
+        }
+        .detail-note-item {
+            background: #1e1e1e; border-radius: 8px; padding: 12px;
+            margin-bottom: 8px; border-left: 3px solid var(--pink);
+            font-size: 14px; line-height: 1.5; text-align: left;
+        }
+        .detail-note-meta { font-size: 11px; color: #666; margin-top: 4px; }
+        .detail-info-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;
+        }
+        .detail-info-box {
+            background: #2a2a2a; border-radius: 10px; padding: 12px; text-align: center;
+        }
+        .detail-info-label { font-size: 10px; color: #888; text-transform: uppercase; }
+        .detail-info-val { font-size: 18px; font-weight: bold; margin-top: 4px; }
+
+        /* ---- LOG MANUTENZIONE ---- */
+        .log-card {
+            background: #2a2a2a; border-radius: 12px; margin-bottom: 12px;
+            overflow: hidden; border: 1px solid #3a3a3a;
+        }
+        .log-card-header {
+            padding: 12px 15px; display: flex;
+            justify-content: space-between; align-items: center;
+            cursor: pointer; transition: background 0.2s;
+        }
+        .log-card-header:hover { background: #333; }
+        .log-card-title { font-weight: bold; color: #ff9800; font-size: 15px; }
+        .log-card-meta  { font-size: 11px; color: #888; margin-top: 2px; }
+        .log-card-arrow { color: #666; font-size: 18px; transition: transform 0.3s; }
+        .log-card-arrow.open { transform: rotate(180deg); }
+        .log-card-body {
+            display: none; padding: 15px; border-top: 1px solid #3a3a3a;
+        }
+        .log-card-body.open { display: block; }
+        .log-card-foto { width: 100%; border-radius: 8px; margin: 10px 0; }
+        .log-aggiornamento {
+            background: #1a1a1a; border-radius: 10px; padding: 12px;
+            margin-top: 8px; border-left: 3px solid #2196F3; font-size: 13px;
+        }
+        .log-aggiornamento-meta { font-size: 10px; color: #666; margin-top: 4px; }
+        .add-update-form {
+            background: #1e1e1e; border-radius: 10px; padding: 12px; margin-top: 10px;
+            border: 1px dashed #444;
+        }
+
+        /* ---- SPESE CARBURANTE ---- */
+        .spesa-card {
+            background: #2a2a2a; border-radius: 12px; padding: 15px;
+            margin-bottom: 10px; border-left: 4px solid var(--giallo);
+        }
+        .spesa-totale {
+            font-size: 28px; font-weight: bold; color: var(--giallo);
+        }
+        .spesa-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .spesa-box { background: #1e1e1e; border-radius: 8px; padding: 10px; text-align: center; }
+        .spesa-label { font-size: 10px; color: #888; text-transform: uppercase; }
+        .spesa-val { font-size: 16px; font-weight: bold; margin-top: 3px; }
+
+        /* ---- RIFORNIMENTO LOG ---- */
+        .rif-card {
+            background: #2a2a2a; border-radius: 10px; padding: 12px;
+            margin-bottom: 8px; display: flex; gap: 12px; align-items: flex-start;
+        }
+        .rif-icon { font-size: 24px; flex-shrink: 0; padding-top: 2px; }
+        .rif-body { flex-grow: 1; }
+        .rif-title { font-weight: bold; font-size: 14px; }
+        .rif-sub   { font-size: 12px; color: #888; margin-top: 2px; }
+        .rif-badge {
+            background: rgba(255,152,0,0.2); color: var(--giallo);
+            padding: 2px 8px; border-radius: 8px; font-size: 12px;
+            font-weight: bold; flex-shrink: 0;
+        }
+
+        /* ---- NAVIGAZIONE ---- */
+        .nav {
+            position: fixed; bottom: 0; width: 100%; background: #000;
+            display: flex; justify-content: space-around;
+            padding: 10px 0; border-top: 1px solid #333; z-index: 1000;
+        }
+        .nav-btn {
+            background: none; border: none; color: #666; font-size: 11px;
+            width: 25%; font-weight: bold; display: flex; flex-direction: column;
+            align-items: center; gap: 5px; padding: 5px; cursor: pointer; transition: color 0.2s;
+        }
+        .nav-btn.active { color: var(--rosso); }
+        .nav-icon { font-size: 24px; }
+
+        /* ---- LOADING ---- */
+        #loading {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--sfondo); z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        .loading-bar-container {
+            width: 200px; height: 6px; background: #333;
+            border-radius: 3px; margin-top: 15px; overflow: hidden;
+        }
+        .loading-bar { height: 100%; background: var(--rosso); border-radius: 3px; transition: width 0.3s ease; width: 0%; }
+        #loading-label { margin-top: 10px; font-size: 13px; color: #aaa; }
+
+        /* ---- ALERT PAESE ---- */
+        #alert-paese {
+            display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: #333; border: 3px solid var(--giallo); border-radius: 15px;
+            padding: 15px; z-index: 3000; text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.8); min-width: 280px;
+        }
+        .alert-btn { margin: 5px; padding: 10px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
+        .alert-confirm { background: var(--verde); color: white; }
+        .alert-cancel  { background: #555; color: white; }
+
+        /* ---- TOAST ---- */
+        #toast {
+            position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+            background: #333; color: white; padding: 12px 20px; border-radius: 25px;
+            font-size: 14px; z-index: 4000; opacity: 0; transition: opacity 0.3s;
+            pointer-events: none; white-space: nowrap; max-width: 85vw;
+            text-align: center;
+        }
+        #toast.show { opacity: 1; }
+
+        /* ---- GPS BADGE ---- */
+        .gps-badge { display: inline-block; padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; }
+        .gps-ok   { background: rgba(76,175,80,0.3);  color: var(--verde); }
+        .gps-weak { background: rgba(255,152,0,0.3);  color: var(--giallo); }
+        .gps-off  { background: rgba(211,47,47,0.3);  color: #f44336; }
+
+        /* ---- CHECKLIST ---- */
+        .checklist-item {
+            display: flex; align-items: center; padding: 10px;
+            background: #2a2a2a; margin-bottom: 5px; border-radius: 8px; cursor: pointer;
+        }
+        .checklist-item input[type="checkbox"] { margin-right: 10px; transform: scale(1.3); }
+        .checklist-item.done { opacity: 0.6; text-decoration: line-through; color: #aaa; }
+
+        /* ---- PAESE STATS ---- */
+        .paese-stat { background: #2a2a2a; padding: 12px; margin-bottom: 10px; border-radius: 10px; border-left: 4px solid var(--giallo); }
+        .paese-name { font-size: 18px; font-weight: bold; color: var(--giallo); }
+        .paese-numbers { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 8px; }
+
+        /* ---- CONFIRM DIALOG ---- */
+        #confirm-dialog {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; background: rgba(0,0,0,0.9);
+            z-index: 5000; justify-content: center; align-items: center;
+        }
+        #confirm-dialog.open { display: flex; }
+        .confirm-box {
+            background: #2a2a2a; border-radius: 16px; padding: 24px;
+            width: 88%; max-width: 380px; border: 2px solid #ff9800;
+            text-align: center;
+        }
+        .confirm-title { font-size: 18px; font-weight: bold; color: #ff9800; margin-bottom: 12px; }
+        .confirm-msg   { font-size: 15px; color: #ccc; line-height: 1.5; margin-bottom: 20px; }
+        .confirm-btns  { display: flex; gap: 10px; }
+
+        /* ---- RESPONSIVE ---- */
+        @media (min-width: 768px) {
+            .header { font-size: 28px; padding: 20px; }
+            .dash-card { max-width: 500px; margin-left: auto; margin-right: auto; }
+            .nav { max-width: 768px; left: 50%; transform: translateX(-50%); }
+            .page { max-width: 768px; margin: 0 auto; padding: 20px; }
+        }
+        @media (max-height: 500px) and (orientation: landscape) {
+            #map { height: 120px; }
+            .speed { font-size: 50px; }
+            .header { padding: 8px; font-size: 18px; }
+        }
+
+
+/* ---- CONFIRM DIALOG: supporta \n in innerText ---- */
+#confirm-msg { white-space: pre-line; }
+
+
+    </style>
+</head>
+<body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ===== LOADING ===== -->
+<div id="loading">
+    <div style="font-size:48px; margin-bottom:15px;">🛵</div>
+    <div style="font-size:20px; font-weight:bold; letter-spacing:2px;">VESPATREK PX150</div>
+    <div class="loading-bar-container"><div class="loading-bar" id="loading-bar"></div></div>
+    <div id="loading-label">Inizializzazione...</div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div id="toast"></div>
+<!-- ===== MAP SNAPSHOT OFFSCREEN ===== -->
+<div id="map-snapshot-host" style="position:fixed; left:-9999px; top:-9999px; width:700px; height:420px;"></div>
+<!-- ===== CONFIRM DIALOG CUSTOM ===== -->
+<div id="confirm-dialog">
+    <div class="confirm-box">
+        <div class="confirm-title" id="confirm-title">Conferma</div>
+        <div class="confirm-msg"   id="confirm-msg">Sicuro?</div>
+        <div class="confirm-btns">
+            <button id="confirm-no"  class="btn-secondary" style="margin:0; flex:1;">❌ No</button>
+            <button id="confirm-yes" class="btn-azione"    style="margin:0; flex:1;">✅ Sì</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== ALERT CAMBIO PAESE ===== -->
+<div id="alert-paese">
+    <h3 style="color:var(--giallo); margin-top:0;">🛑 CAMBIO PAESE</h3>
+    <div id="alert-testo"></div>
+    <div style="margin-top:12px;">
+        <button class="alert-btn alert-confirm" onclick="confermaCambioPaese()">✅ Conferma</button>
+        <button class="alert-btn alert-cancel"  onclick="annullaCambioPaese()">❌ Annulla</button>
+    </div>
+</div>
+
+<!-- ===== HEADER ===== -->
+<div class="header">
+    VESPATREK PX150
+    <span id="gps-badge" class="gps-badge gps-off">GPS OFF</span>
+</div>
+
+<!-- ===== PAGINA DETTAGLIO DIARIO (full screen) ===== -->
+<div id="diario-detail-page">
+    <div class="detail-header">
+        <button class="detail-back" onclick="chiudiDettaglioDiario()">←</button>
+        <div style="flex-grow:1;">
+            <div style="font-weight:bold; font-size:16px;" id="detail-paese-header">—</div>
+            <div style="font-size:11px; color:#888;" id="detail-data-header">—</div>
+        </div>
+        <button onclick="eliminaDiarioCorrente()"
+            style="background:#f44336; border:none; color:white; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:13px;">
+            🗑️ Elimina
+        </button>
+    </div>
+
+    <div id="detail-foto-container"></div>
+
+    <div class="detail-body">
+        <div class="detail-info-grid">
+            <div class="detail-info-box">
+                <div class="detail-info-label">📍 Paese</div>
+                <div class="detail-info-val" id="detail-paese" style="color:var(--giallo); font-size:14px;">—</div>
+            </div>
+            <div class="detail-info-box">
+                <div class="detail-info-label">📏 Km al momento</div>
+                <div class="detail-info-val" id="detail-km" style="color:var(--blu);">—</div>
+            </div>
+            <div class="detail-info-box">
+                <div class="detail-info-label">📅 Data</div>
+                <div class="detail-info-val" id="detail-data" style="font-size:13px; color:#ccc;">—</div>
+            </div>
+            <div class="detail-info-box">
+                <div class="detail-info-label">⛰️ Altitudine</div>
+                <div class="detail-info-val" id="detail-alt" style="color:var(--verde);">—</div>
+            </div>
+        </div>
+
+        <div class="detail-testo-full" id="detail-testo"></div>
+
+        <!-- Note aggiuntive già salvate -->
+        <div id="detail-note-lista" style="margin-bottom:15px;"></div>
+
+        <!-- Form aggiungi nota -->
+        <div class="detail-add-note">
+            <div style="font-size:13px; color:#aaa; margin-bottom:8px;">✏️ Aggiungi una nota a questo post:</div>
+            <textarea id="detail-nuova-nota" placeholder="Aggiungi pensieri, aggiornamenti..." rows="3" style="font-size:14px;"></textarea>
+            <div style="display:flex; gap:10px; margin-top:8px;">
+                <input type="file" id="detail-foto-extra" accept="image/*" capture="environment"
+                    style="display:none;" onchange="anteprimaDetailFoto()">
+                <button class="btn-secondary" style="margin:0; flex:1;" onclick="document.getElementById('detail-foto-extra').click()">📷 Foto</button>
+                <button class="btn-azione"    style="margin:0; flex:2;" onclick="salvaNota()">💾 Salva Nota</button>
+            </div>
+            <div id="detail-foto-preview" style="display:none; margin-top:8px;"></div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ===== PAGINA DETTAGLIO TAPPA (full screen) ===== -->
+<div id="tappa-detail-page">
+  <div class="detail-header">
+    <button class="detail-back" onclick="chiudiDettaglioTappa()">←</button>
+    <div style="flex-grow:1;">
+      <div style="font-weight:bold; font-size:16px;" id="tappa-detail-title">—</div>
+      <div style="font-size:11px; color:#888;" id="tappa-detail-subtitle">—</div>
+    </div>
+    <button onclick="eliminaTappaCorrente()"
+      style="background:#f44336; border:none; color:white; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:13px;">
+      Elimina
+    </button>
+  </div>
+
+  <div id="tappa-detail-hero"></div>
+
+  <div class="detail-body">
+    <div class="detail-info-grid" id="tappa-detail-grid"></div>
+
+    <div style="margin: 10px 0 6px; color:#aaa; font-size:12px;">Mappa tappa</div>
+    <div id="tappa-detail-map" style="height:260px; border-radius:10px; border:2px solid #444;"></div>
+
+    <div style="margin-top:16px; color:#aaa; font-size:12px;">Momenti della tappa</div>
+    <div id="tappa-detail-waypoints" style="margin-top:8px;"></div>
+  </div>
+</div>
+
+<!-- ==================== PAGINA 1: GUIDA ==================== -->
+<div id="guida" class="page active">
+    <select id="selectPaese" class="country-select" onchange="cambiaPaese()">
+        <option value="Colombia">🇨🇴 Colombia</option>
+        <option value="Ecuador">🇪🇨 Ecuador</option>
+        <option value="Peru">🇵🇪 Perù</option>
+        <option value="Bolivia">🇧🇴 Bolivia</option>
+        <option value="Chile">🇨🇱 Cile</option>
+        <option value="Argentina">🇦🇷 Argentina</option>
+    </select>
+
+    <button id="btn-start-stop" class="btn-track start" onclick="toggleTracking()">▶ START GUIDA</button>
+    <button class="btn-track btn-tappa" onclick="concludiTappa()">🏁 CONCLUDI TAPPA</button>
+
+    <button class="btn-track" style="background:#2196F3;" onclick="apriModal('modalMomento')">📍 MOMENTO (FOTO/NOTA)</button>
+
+    <div class="dash-card">
+        <div style="font-size:12px; color:#aaa;">VELOCITÀ</div>
+        <div class="speed" id="speedometer">0</div>
+        <div style="font-size:12px; color:#888; margin-bottom:10px;">KM/H</div>
+        <div style="font-size:12px; color:#aaa;">ALTITUDINE (MSNM)</div>
+        <div class="altitude" id="ui-altitudine">0 m</div>
+        <div class="odometer-container">
+            <div class="odo-box">
+                <div class="odo-label">ODO TOTALE</div>
+                <div class="odo-value" id="ui-odo-tot">0.0</div>
+            </div>
+            <div class="odo-box">
+                <div class="odo-label">TRIP TAPPA</div>
+                <div class="odo-value trip" id="ui-odo-trip">0.0</div>
+            </div>
+        </div>
+        <div style="font-size:11px; color:#888; margin-top:5px;">
+            Ore guida tappa: <span id="ui-tempo-guida">00:00:00</span>
+        </div>
+    </div>
+
+    <div id="map"></div>
+
+    <div class="dash-card" style="padding:10px; border:1px solid #333;">
+        <div style="font-size:11px; color:#aaa;">AUTONOMIA STIMATA</div>
+        <div id="ui-autonomia-rapida" style="font-size:22px; font-weight:bold; color:var(--verde);">-- km</div>
+        <div style="font-size:11px; color:#888;">Scorta: <span id="ui-scorta-rapida">0.0</span> <span class="txt-unita">L</span></div>
+    </div>
+</div>
+
+<!-- ==================== PAGINA 2: VIAGGIO ==================== -->
+<div id="viaggio" class="page">
+    <div class="dash-card">
+        <h2 style="margin-top:0;">Stats: <span id="titolo-stat-paese" style="color:var(--giallo);">Globali</span></h2>
+        <div style="display:flex; gap:10px; margin-bottom:10px;">
+            <button class="btn-secondary" style="margin-top:0;" onclick="mostraStats('Globali')">🌍 Globali</button>
+            <button class="btn-secondary" style="margin-top:0; background:var(--giallo); color:black;" onclick="mostraStats('Paese')">📍 Paese</button>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div style="font-size:11px; color:#aaa;">KM PERCORSI</div>
+                <div class="stat-num" id="statKm">0.0</div>
+            </div>
+            <div class="stat-box">
+                <div style="font-size:11px; color:#aaa;">CONSUMO</div>
+                <div class="stat-num" id="statConsumo" style="color:#00bcd4;">--</div>
+            </div>
+            <div class="stat-box">
+                <div style="font-size:11px; color:#aaa;">BENZINA</div>
+                <div class="stat-num" id="statBenzina" style="color:#f44336;">0.0</div>
+            </div>
+            <div class="stat-box">
+                <div style="font-size:11px; color:#aaa;">OLIO 2T</div>
+                <div class="stat-num" id="statOlio">0.00 L</div>
+            </div>
+            <div class="stat-box" style="grid-column:span 2; border-color:var(--giallo);">
+                <div style="font-size:12px; color:#aaa;">SCORTA TANICHE</div>
+                <div class="stat-num" id="statScorta" style="color:var(--giallo); font-size:28px;">0.0</div>
+            </div>
+        </div>
+
+        <button class="btn-azione" style="background:#9c27b0;" onclick="apriModal('modalTappe')">🗺️ DIARIO TAPPE</button>
+        <button class="btn-azione" style="background:#2196F3;" onclick="apriModalPaesi()">🌎 STATS PER PAESE</button>
+
+        <button class="btn-secondary" style="background:#444;" onclick="creaTappaDemo()">🧪 CREA TAPPA DEMO</button>
+
+    </div>
+
+    <!-- DIARIO -->
+    <div class="dash-card">
+        <h3 style="margin-top:0; color:var(--pink);">📖 Diario di Viaggio</h3>
+        <textarea id="diario-testo" placeholder="Scrivi un pensiero, un incontro, un'esperienza..." rows="3"></textarea>
+        <div style="display:flex; gap:10px; margin-top:8px;">
+            <input type="file" id="foto-input" accept="image/*" capture="environment"
+                style="display:none;" onchange="anteprima('foto-input','anteprima-foto')">
+            <button class="btn-secondary" style="margin:0; flex:1;" onclick="document.getElementById('foto-input').click()">📷 Foto</button>
+            <button class="btn-azione"    style="margin:0; flex:2; background:var(--pink);" onclick="salvaDiario()">💾 Pubblica</button>
+        </div>
+        <div id="anteprima-foto" style="margin-top:8px; display:none;"></div>
+        <div id="lista-diario" style="margin-top:20px;"></div>
+    </div>
+
+    <!-- BACKUP -->
+    <div class="dash-card" style="border:2px solid #555;">
+        <h3 style="margin-top:0; color:#aaa;">💾 Backup Dati</h3>
+        <button class="btn-azione" style="background:#607d8b;" onclick="esportaDati()">⬇️ ESPORTA BACKUP</button>
+        <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importaDati(this)">
+        <button class="btn-secondary" onclick="document.getElementById('import-file').click()">⬆️ IMPORTA BACKUP</button>
+    </div>
+
+    <button class="btn-secondary" style="background:#8b0000; margin-top:10px;" onclick="resetTutto()">⚠️ RESET COMPLETO APP</button>
+</div>
+
+<!-- ==================== PAGINA 3: BENZINA ==================== -->
+<div id="miscela" class="page">
+    <div class="toggle-container">
+        <button id="btn-litri"   class="toggle-btn active unita" onclick="cambiaUnita('L')">LITRI</button>
+        <button id="btn-galloni" class="toggle-btn unita"        onclick="cambiaUnita('G')">GALLONI</button>
+    </div>
+
+    <div style="text-align:center; font-size:13px; color:#aaa; margin-bottom:10px;">
+        Paese attuale: <strong id="lbl-paese-benzina" style="color:var(--giallo);">Colombia</strong>
+    </div>
+
+    <!-- RIEPILOGO SPESE -->
+    <div class="dash-card" style="border:2px solid var(--giallo);">
+        <h3 style="margin:0 0 12px; color:var(--giallo);">💰 Riepilogo Spese Carburante</h3>
+        <div class="spesa-grid">
+            <div class="spesa-box">
+                <div class="spesa-label">Benzina</div>
+                <div class="spesa-val" id="spesa-benzina" style="color:#f44336;">\$0.00</div>
+            </div>
+            <div class="spesa-box">
+                <div class="spesa-label">Olio 2T</div>
+                <div class="spesa-val" id="spesa-olio" style="color:#00bcd4;">\$0.00</div>
+            </div>
+            <div class="spesa-box">
+                <div class="spesa-label">TOTALE</div>
+                <div class="spesa-val" id="spesa-totale" style="color:var(--giallo);">\$0.00</div>
+            </div>
+        </div>
+        <button class="btn-secondary" style="margin-top:10px;" onclick="apriModal('modalSpesePaesi')">🌎 Spese per Paese</button>
+    </div>
+
+    <!-- DAL BENZINAIO -->
+    <div class="dash-card" style="border:2px solid #4285F4;">
+        <h2 style="margin-top:0; color:#4285F4;">⛽ Dal Benzinaio</h2>
+        <div class="toggle-container">
+            <button id="btn-dest-vespa"  class="toggle-btn active dest-v" onclick="selezionaDest('V')">🏍️ IN VESPA</button>
+            <button id="btn-dest-tanica" class="toggle-btn dest-t"        onclick="selezionaDest('T')">🛢️ NELLE TANICHE</button>
+        </div>
+
+        <label class="inp-label">Quantità acquistata</label>
+        <input type="number" id="inputCompra" placeholder="Es. 5.5" step="0.1" min="0.1" max="999">
+
+        <div id="sezioneMiscelaCompra">
+            <label class="inp-label">% Olio Miscela</label>
+            <div class="pct-grid">
+                <button class="pct-btn active" onclick="selMix(2.0,this,'compra')">2.0%</button>
+                <button class="pct-btn"        onclick="selMix(2.5,this,'compra')">2.5%</button>
+                <button class="pct-btn"        onclick="selMix(3.0,this,'compra')">3.0%</button>
+                <button class="pct-btn"        onclick="selMix(3.5,this,'compra')">3.5%</button>
+            </div>
+        </div>
+
+        <label class="inp-label">💰 Prezzo per litro (USD)</label>
+        <input type="number" id="inputPrezzoBenz" placeholder="Es. 0.85" step="0.01" min="0">
+
+        <label class="inp-label">💰 Costo olio 2T (USD, opzionale)</label>
+        <input type="number" id="inputPrezzoOlio" placeholder="Es. 3.50" step="0.01" min="0">
+
+        <label class="inp-label">📍 Luogo rifornimento</label>
+        <input type="text" id="inputLuogo" placeholder="Es. Medellín - Estación El Rápido">
+
+        <button class="btn-azione" onclick="registraAcquisto()">💾 Salva & Calcola</button>
+        <div id="risultatoCompra" class="risultato-box"></div>
+    </div>
+
+    <!-- USA TANICHE -->
+    <div class="dash-card" style="border:2px solid var(--giallo);">
+        <h2 style="margin-top:0; color:var(--giallo);">🛢️ Usa Scorta Taniche</h2>
+        <div style="font-size:13px; color:#aaa; margin-bottom:10px;">
+            Disponibile: <strong style="color:white; font-size:18px;" id="scorta-ui">0.0</strong>
+            <span class="txt-unita">L</span>
+        </div>
+        <input type="number" id="inputTravaso" placeholder="Qtà versata in Vespa" step="0.1" min="0.1" max="999">
+        <label class="inp-label">% Olio Miscela</label>
+        <div class="pct-grid">
+            <button class="pct-btn active" onclick="selMix(2.0,this,'travaso')">2.0%</button>
+            <button class="pct-btn"        onclick="selMix(2.5,this,'travaso')">2.5%</button>
+            <button class="pct-btn"        onclick="selMix(3.0,this,'travaso')">3.0%</button>
+            <button class="pct-btn"        onclick="selMix(3.5,this,'travaso')">3.5%</button>
+        </div>
+        <button class="btn-azione" style="background:var(--giallo); color:black;" onclick="registraTravaso()">🛢️ Travasa & Calcola Olio</button>
+        <div id="risultatoTravaso" class="risultato-box"></div>
+    </div>
+
+    <!-- AUTONOMIA -->
+    <div class="dash-card" style="border:2px solid var(--verde);">
+        <h2 style="margin-top:0; color:var(--verde);">📏 Autonomia Stimata</h2>
+        <div id="autonomia-info" style="font-size:15px; line-height:1.8;">Calcolo in corso...</div>
+    </div>
+
+    <button class="btn-azione" style="background:#795548;" onclick="apriModal('modalLogCarburanti')">📊 LOG RIFORNIMENTI</button>
+</div>
+
+<!-- ==================== PAGINA 4: OFFICINA ==================== -->
+<div id="officina" class="page">
+
+    <!-- RICAMBI -->
+    <div class="dash-card" style="padding:15px;">
+        <h2 style="margin:0 0 10px 0; color:#ff9800;">⚙️ Bauletto & Ricambi</h2>
+        <div id="listaRicambi"></div>
+        <div style="display:flex; gap:10px; margin-top:15px;">
+            <input type="text"   id="nuovoRicambioNome" style="margin:0; text-align:left;" placeholder="Nome ricambio (es. CDI)...">
+            <input type="number" id="nuovoRicambioDurata" style="margin:0; width:110px;" placeholder="km durata">
+            <button class="btn-azione" style="margin:0; width:50px; padding:0; font-size:24px;" onclick="aggiungiRicambio()">+</button>
+        </div>
+        <button class="btn-azione" style="background:#2196F3; margin-top:10px;" onclick="apriModal('modalRegistro')">📄 LOG MANUTENZIONE</button>
+        <button class="btn-secondary" onclick="apriModal('modalLogDettaglio')">🔧 NUOVO INTERVENTO</button>
+    </div>
+
+    <!-- CARBURAZIONE -->
+    <div class="dash-card" style="padding:15px; border:2px solid #00bcd4;">
+        <h2 style="margin:0 0 10px 0; color:#00bcd4;">🌬️ Setup Carburatore 30</h2>
+        <div style="font-size:12px; color:#aaa; margin-bottom:10px;">
+            Altitudine Attuale: <strong id="carb-alt" style="color:white;">0</strong> m
+        </div>
+        <div style="display:flex; gap:10px;">
+            <input type="number" id="carbChiclerMax" placeholder="Chicler Max (es. 115)" min="1" max="999">
+            <input type="number" id="carbChiclerMin" placeholder="Minimo (es. 55)"        min="1" max="999">
+        </div>
+        <input type="text" id="carbNote" placeholder="Note (es. Fuma in altitudine...)">
+        <button class="btn-azione" style="background:#00bcd4; color:black;" onclick="salvaCarburazione()">💾 Salva Setup</button>
+        <button class="btn-secondary" onclick="apriModal('modalCarb')">📖 Storico Altitudini</button>
+    </div>
+
+    <!-- CHECKLIST -->
+    <div class="dash-card" style="border:2px solid #ff9800;">
+        <h2 style="margin:0 0 10px 0; color:#ff9800;">✅ Checklist Pre-Partenza</h2>
+        <div id="checklist-container"></div>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <input type="text" id="nuovaCheckItem" style="margin:0; text-align:left;" placeholder="Nuovo elemento...">
+            <button class="btn-azione" style="margin:0; width:50px; padding:0; font-size:24px;" onclick="aggiungiCheckItem()">+</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== MODALI ==================== -->
+
+<div id="modalTappe" class="modal-overlay">
+    <div class="modal-content" style="border-color:#9c27b0;">
+        <button class="close-modal" onclick="chiudiModal('modalTappe')">×</button>
+        <h2 style="color:#9c27b0; text-align:center;">🏁 Diario Tappe</h2>
+        <div id="contenutoTappe"></div>
+    </div>
+</div>
+
+<div id="modalRegistro" class="modal-overlay">
+    <div class="modal-content" style="border-color:#ff9800;">
+        <button class="close-modal" onclick="chiudiModal('modalRegistro')">×</button>
+        <h2 style="color:#ff9800; text-align:center;">🔧 Log Manutenzione</h2>
+        <div id="contenutoRegistro"></div>
+    </div>
+</div>
+
+<div id="modalCarb" class="modal-overlay">
+    <div class="modal-content" style="border-color:#00bcd4;">
+        <button class="close-modal" onclick="chiudiModal('modalCarb')">×</button>
+        <h2 style="color:#00bcd4; text-align:center;">🌬️ Storico Carburazione</h2>
+        <div id="contenutoCarb"></div>
+    </div>
+</div>
+
+<div id="modalPaesi" class="modal-overlay">
+    <div class="modal-content" style="border-color:#4CAF50;">
+        <button class="close-modal" onclick="chiudiModal('modalPaesi')">×</button>
+        <h2 style="color:#4CAF50; text-align:center;">🌎 Statistiche per Paese</h2>
+        <div id="contenutoPaesi"></div>
+    </div>
+</div>
+
+<div id="modalLogCarburanti" class="modal-overlay">
+    <div class="modal-content" style="border-color:#795548;">
+        <button class="close-modal" onclick="chiudiModal('modalLogCarburanti')">×</button>
+        <h2 style="color:#795548; text-align:center;">⛽ Log Rifornimenti</h2>
+        <div id="contenutoLogCarburanti"></div>
+    </div>
+</div>
+
+<div id="modalSpesePaesi" class="modal-overlay">
+    <div class="modal-content" style="border-color:var(--giallo);">
+        <button class="close-modal" onclick="chiudiModal('modalSpesePaesi')">×</button>
+        <h2 style="color:var(--giallo); text-align:center;">💰 Spese per Paese</h2>
+        <div id="contenutoSpesePaesi"></div>
+    </div>
+</div>
+
+<div id="modalLogDettaglio" class="modal-overlay">
+    <div class="modal-content" style="border-color:#ff9800; max-width:500px;">
+        <button class="close-modal" onclick="chiudiModal('modalLogDettaglio')">×</button>
+        <h2 style="color:#ff9800; text-align:center;" id="modal-log-titolo">🔧 Nuovo Intervento</h2>
+
+        <label class="inp-label">Nome intervento</label>
+        <input type="text" id="log-nome" placeholder="Es. Cambio candela">
+
+        <label class="inp-label">Descrizione dettagliata</label>
+        <textarea id="log-descrizione" placeholder="Descrizione..." rows="3" style="width:100%;"></textarea>
+
+        <label class="inp-label">📍 Luogo</label>
+        <input type="text" id="log-luogo" placeholder="Es. Cuzco, Perù">
+
+        <label class="inp-label">🗺️ Paese</label>
+        <input type="text" id="log-paese-input" placeholder="Es. Perù">
+
+        <label class="inp-label">📏 Km attuale (automatico)</label>
+        <input type="number" id="log-km" placeholder="Km" readonly style="color:var(--verde); font-weight:bold;">
+
+        <label class="inp-label">💰 Costo (USD)</label>
+        <input type="number" id="log-costo" placeholder="Es. 12.50" step="0.01" min="0">
+
+        <input type="file" id="log-foto-input" accept="image/*"
+            style="width:100%; margin:8px 0;" onchange="anteprima('log-foto-input','anteprima-log-foto')">
+        <div id="anteprima-log-foto" style="margin-bottom:10px; display:none;"></div>
+
+        <button class="btn-azione" onclick="salvaIntervento()">💾 Salva Intervento</button>
+    </div>
+</div>
+
+
+
+<div id="modalMomento" class="modal-overlay">
+  <div class="modal-content" style="border-color:#2196F3; max-width:520px;">
+    <button class="close-modal" onclick="chiudiModal('modalMomento')">×</button>
+    <h2 style="color:#2196F3; text-align:center;">📍 Momento di Tappa</h2>
+
+    <div style="font-size:12px;color:#888; text-align:center; margin-bottom:10px;">
+      Salva una foto/nota geolocalizzata nella tappa corrente (e anche nel diario).
+    </div>
+
+    <label class="inp-label">Testo</label>
+    <textarea id="momento-testo" placeholder="Cosa sta succedendo qui?" rows="3"></textarea>
+
+    <input type="file" id="momento-foto-input" accept="image/*" capture="environment"
+      style="width:100%; margin:8px 0;" onchange="anteprima('momento-foto-input','momento-foto-preview')">
+
+    <div id="momento-foto-preview" style="display:none; margin-bottom:10px;"></div>
+
+    <button class="btn-azione" style="background:#2196F3; color:black;" onclick="salvaMomentoTappa()">
+      💾 Salva Momento
+    </button>
+  </div>
+</div>
+
+
+
+<!-- ==================== NAV ==================== -->
+<div class="nav">
+    <button class="nav-btn active" onclick="cambiaPagina('guida',this)">
+        <span class="nav-icon">🏍️</span>GUIDA
+    </button>
+    <button class="nav-btn" onclick="cambiaPagina('viaggio',this)">
+        <span class="nav-icon">🗺️</span>VIAGGIO
+    </button>
+    <button class="nav-btn" onclick="cambiaPagina('miscela',this)">
+        <span class="nav-icon">⛽</span>BENZINA
+    </button>
+    <button class="nav-btn" onclick="cambiaPagina('officina',this)">
+        <span class="nav-icon">🔧</span>OFFICINA
+    </button>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+// ============================================================
+//  VARIABILI GLOBALI
+// ============================================================
+let inViaggio            = false;
+let timerGuida           = null;
+let altitudineAttuale    = 0;
+let lastLat              = null;
+let lastLon              = null;
+let lastTimestamp        = null;
+let coordinateTracciato  = [];
+let watchId              = null;
+let lastCountry          = null;
+let pendingCountryChange = null;
+let ultimoAggiornamentoMappa = 0;
+let puntiDaSalvare       = 0;
+let visualizzazioneStats = 'Globali';
+let unitaAttuale         = 'L';
+const FAT_GAL            = 3.78541;
+let dest                 = 'V';
+let mixC                 = 2.0;
+let mixT                 = 2.0;
+let tappaAttuale = { kmInizio:0, kmPercorsi:0, altMin:9999, altMax:0, secondiGuida:0, benzinaUsata:0, waypoints:[] };
+const CONSUMO_MEDIO      = 28;
+const MAX_PUNTI_MAPPA    = 500;
+let diarioCorrenteId     = null;
+
+let tappaCorrenteId = null;
+let tappaDetailMap = null;
+let tappaDetailPolyline = null;
+let tappaDetailMarkers = [];
+
+
+let ultimoFixGPS = null; // {lat, lon, acc, alt, ts}
+
+// ============================================================
+//  STORAGE SICURO
+// ============================================================
+function salva(key, val) {
+    try {
+        localStorage.setItem(key, typeof val === 'object' ? JSON.stringify(val) : String(val));
+    } catch(e) {
+        console.error('Storage error:', e);
+        showToast('⚠️ Memoria piena! Esporta i dati.');
+    }
+}
+function carica(key, fallback) {
+    try { const v = localStorage.getItem(key); return v !== null ? v : fallback; }
+    catch(e) { return fallback; }
+}
+function caricaJSON(key, fallback) {
+    try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+    catch(e) { return fallback; }
+}
+
+// ============================================================
+//  TOAST
+// ============================================================
+let toastTimer = null;
+function showToast(msg, dur = 2500) {
+    const t = document.getElementById('toast');
+    t.innerText = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), dur);
+}
+
+// ============================================================
+//  CONFIRM DIALOG CUSTOM
+// ============================================================
+function customConfirm(title, msg) {
+    return new Promise(resolve => {
+        document.getElementById('confirm-title').innerText = title;
+        document.getElementById('confirm-msg').innerText   = msg;
+        document.getElementById('confirm-dialog').classList.add('open');
+        document.getElementById('confirm-yes').onclick = () => {
+            document.getElementById('confirm-dialog').classList.remove('open');
+            resolve(true);
+        };
+        document.getElementById('confirm-no').onclick = () => {
+            document.getElementById('confirm-dialog').classList.remove('open');
+            resolve(false);
+        };
+    });
+}
+
+// ============================================================
+//  INIT DATABASE
+// ============================================================
+function initDB(key, def) {
+    if (localStorage.getItem(key) === null) salva(key, def);
+}
+
+function initAllData() {
+    initDB('vt_kmTotali',            '0.0');
+    initDB('vt_kmInizioViaggio',     '0.0');
+    initDB('vt_odoUltimoPieno',      '0.0');
+    initDB('vt_scortaLitri',         '0.0');
+    initDB('vt_olioTotaleMl',        '0');
+    initDB('vt_benzinaUsata',        '0.0');
+    initDB('vt_spesaBenzina',        '0.0');
+    initDB('vt_spesaOlio',           '0.0');
+    initDB('vt_paeseAttuale',        'Colombia');
+    initDB('vt_datiPaesi',           JSON.stringify({}));
+    initDB('vt_tappe',               JSON.stringify([]));
+    initDB('vt_logbook',             JSON.stringify([]));
+    initDB('vt_diario',              JSON.stringify([]));
+    initDB('vt_logCarburanti',       JSON.stringify([]));
+    initDB('vt_coordinateTracciato', JSON.stringify([]));
+    initDB('vt_carburazione',        JSON.stringify([]));
+    initDB('vt_checklist', JSON.stringify([
+        { id:'c1', nome:'Controllo olio motore',          fatto:false },
+        { id:'c2', nome:'Pressione gomme',                fatto:false },
+        { id:'c3', nome:'Controllo freni',                fatto:false },
+        { id:'c4', nome:'Kit attrezzi completo',          fatto:false },
+        { id:'c5', nome:'Documenti (passaporto/patente)', fatto:false },
+        { id:'c6', nome:'Livello benzina/scorta',         fatto:false }
+    ]));
+    initDB('vt_inventario', JSON.stringify([
+        { nome:'Cavi Cambio',   qta:4, durata:6000,  lastKm:0 },
+        { nome:'Cavo Frizione', qta:2, durata:5000,  lastKm:0 },
+        { nome:'Ganasce Freno', qta:3, durata:7000,  lastKm:0 },
+        { nome:'Candela',       qta:2, durata:4000,  lastKm:0 },
+        { nome:'Olio Motore',   qta:1, durata:3000,  lastKm:0 },
+        { nome:'Camera d\'aria',qta:2, durata:15000, lastKm:0 }
+    ]));
+
+    const st = localStorage.getItem('vt_tappaAttuale');
+    if (st) tappaAttuale = JSON.parse(st);
+    if (!tappaAttuale.waypoints) tappaAttuale.waypoints = [];
+
+    coordinateTracciato = caricaJSON('vt_coordinateTracciato', []);
+    lastCountry = carica('vt_paeseAttuale', 'Colombia');
+}
+
+// ============================================================
+//  RILEVAMENTO PAESE
+// ============================================================
+const countryBounds = {
+    'Colombia':  { minLat:-4.2,  maxLat:12.5,  minLon:-79.0, maxLon:-66.9 },
+    'Ecuador':   { minLat:-5.0,  maxLat:1.4,   minLon:-81.0, maxLon:-75.2 },
+    'Peru':      { minLat:-18.3, maxLat:0.0,   minLon:-81.3, maxLon:-68.7 },
+    'Bolivia':   { minLat:-22.9, maxLat:-9.7,  minLon:-69.6, maxLon:-57.5 },
+    'Chile':     { minLat:-56.0, maxLat:-17.5, minLon:-75.6, maxLon:-66.4 },
+    'Argentina': { minLat:-55.0, maxLat:-21.8, minLon:-73.6, maxLon:-53.6 }
+};
+
+function detectCountry(lat, lon) {
+    let best = null, bestArea = Infinity;
+    for (const [paese, b] of Object.entries(countryBounds)) {
+        if (lat >= b.minLat && lat <= b.maxLat && lon >= b.minLon && lon <= b.maxLon) {
+            const area = (b.maxLat - b.minLat) * (b.maxLon - b.minLon);
+            if (area < bestArea) { best = paese; bestArea = area; }
+        }
+    }
+    return best || carica('vt_paeseAttuale', 'Colombia');
+}
+
+function checkCountryChange(lat, lon) {
+    const detected = detectCountry(lat, lon);
+    const current  = carica('vt_paeseAttuale', 'Colombia');
+    if (detected !== current && detected !== pendingCountryChange) {
+        pendingCountryChange = detected;
+        document.getElementById('alert-testo').innerHTML = `
+            <div style="font-size:16px; margin-bottom:8px;">
+                🗺️ Da <span style="color:var(--giallo)">${current}</span>
+                → <span style="color:var(--verde)">${detected}</span>
+            </div>
+            <div style="font-size:13px; color:#aaa;">I dati benzina saranno salvati per il nuovo paese.</div>`;
+        document.getElementById('alert-paese').style.display = 'block';
+    }
+}
+
+function confermaCambioPaese() {
+    if (!pendingCountryChange) return;
+    salva('vt_paeseAttuale', pendingCountryChange);
+    lastCountry = pendingCountryChange;
+    document.getElementById('selectPaese').value           = pendingCountryChange;
+    document.getElementById('lbl-paese-benzina').innerText = pendingCountryChange;
+    document.getElementById('alert-paese').style.display   = 'none';
+    pendingCountryChange = null;
+    aggiornaUI();
+    showToast('🗺️ Paese: ' + lastCountry);
+}
+
+function annullaCambioPaese() {
+    document.getElementById('alert-paese').style.display = 'none';
+    pendingCountryChange = null;
+}
+
+// ============================================================
+//  MAPPA LEAFLET
+// ============================================================
+const map = L.map('map', { zoomControl:true, attributionControl:false })
+             .setView([4.7, -74.1], 5);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19,
+    crossOrigin: true
+}).addTo(map);
+const marker   = L.marker([4.7, -74.1]).addTo(map);
+const polyline = L.polyline([], { color:'#d32f2f', weight:4, opacity:0.8 }).addTo(map);
+
+
+
+// ============================================================
+//  GPS
+// ============================================================
+function aggiornaGpsBadge(stato, acc) {
+    const b = document.getElementById('gps-badge');
+    if (stato === 'ok')   { b.className = 'gps-badge gps-ok';   b.innerText = '📡 GPS ' + Math.round(acc) + 'm'; }
+    if (stato === 'weak') { b.className = 'gps-badge gps-weak'; b.innerText = '📡 GPS debole'; }
+    if (stato === 'off')  { b.className = 'gps-badge gps-off';  b.innerText = 'GPS OFF'; }
+}
+
+let gpsMode = 'off'; // 'off' | 'passive' | 'tracking'
+
+function stopGPS() {
+    if (watchId !== null) {
+        try { navigator.geolocation.clearWatch(watchId); } catch(e) {}
+        watchId = null;
+    }
+    aggiornaGpsBadge('off');
+}
+
+function startGPSWithOptions(options) {
+    if (!navigator.geolocation) { aggiornaGpsBadge('off'); return; }
+
+    watchId = navigator.geolocation.watchPosition(
+        (pos) => {
+            aggiornaGpsBadge(pos.coords.accuracy < 30 ? 'ok' : 'weak', pos.coords.accuracy);
+
+ultimoFixGPS = {
+  lat: pos.coords.latitude,
+  lon: pos.coords.longitude,
+  acc: pos.coords.accuracy,
+  alt: pos.coords.altitude,
+  ts:  pos.timestamp
+};
+
+            updatePosition(pos);
+            checkCountryChange(pos.coords.latitude, pos.coords.longitude);
+        },
+        (err) => {
+            console.warn('GPS err:', err.code);
+            aggiornaGpsBadge('off');
+        },
+        options
+    );
+}
+
+function setGPSMode(mode) {
+    if (mode === gpsMode) return;
+    gpsMode = mode;
+
+    stopGPS();
+
+    if (mode === 'off') return;
+
+    const optsPassive  = { enableHighAccuracy:false, timeout:20000, maximumAge:5000 };
+    const optsTracking = { enableHighAccuracy:true,  timeout:15000, maximumAge:0 };
+
+    startGPSWithOptions(mode === 'tracking' ? optsTracking : optsPassive);
+}
+function calcolaVelocita(pos) {
+    if (pos.coords.speed !== null && pos.coords.speed >= 0) {
+        return Math.round(pos.coords.speed * 3.6);
+    }
+    if (lastLat && lastLon && lastTimestamp) {
+        const dist = calcolaDistanza(lastLat, lastLon, pos.coords.latitude, pos.coords.longitude);
+        const dt   = (pos.timestamp - lastTimestamp) / 3600000;
+        return dt > 0 ? Math.round(dist / dt) : 0;
+    }
+    return 0;
+}
+
+function calcolaDistanza(lat1, lon1, lat2, lon2) {
+    const R    = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a    = Math.sin(dLat/2)**2 +
+                 Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function updatePosition(pos) {
+    const lat   = pos.coords.latitude;
+    const lon   = pos.coords.longitude;
+    const speed = calcolaVelocita(pos);
+    altitudineAttuale = pos.coords.altitude ? Math.round(pos.coords.altitude) : altitudineAttuale;
+
+    document.getElementById('speedometer').innerText   = speed;
+    document.getElementById('ui-altitudine').innerText = altitudineAttuale + ' m';
+    document.getElementById('carb-alt').innerText      = altitudineAttuale;
+
+    const ora = Date.now();
+    if (ora - ultimoAggiornamentoMappa > 3000) {
+        map.setView([lat, lon], 16);
+        marker.setLatLng([lat, lon]);
+        ultimoAggiornamentoMappa = ora;
+    }
+
+    if (inViaggio && pos.coords.accuracy < 50 && speed > 2) {
+        if (altitudineAttuale < tappaAttuale.altMin) tappaAttuale.altMin = altitudineAttuale;
+        if (altitudineAttuale > tappaAttuale.altMax) tappaAttuale.altMax = altitudineAttuale;
+
+        coordinateTracciato.push([lat, lon]);
+        if (coordinateTracciato.length > MAX_PUNTI_MAPPA) {
+            coordinateTracciato = coordinateTracciato.filter((_,i) => i % 2 === 0);
+        }
+        polyline.setLatLngs(coordinateTracciato);
+
+        puntiDaSalvare++;
+        if (puntiDaSalvare >= 10) {
+            salva('vt_coordinateTracciato', coordinateTracciato);
+            puntiDaSalvare = 0;
+        }
+
+        if (lastLat !== null) {
+            const dist = calcolaDistanza(lastLat, lastLon, lat, lon);
+            if (dist < 0.5 && dist > 0) {
+                const kmTot = parseFloat(carica('vt_kmTotali','0')) + dist;
+                salva('vt_kmTotali', kmTot.toFixed(4));
+
+                tappaAttuale.kmPercorsi += dist;
+                salva('vt_tappaAttuale', tappaAttuale);
+
+                const paese     = carica('vt_paeseAttuale','Colombia');
+                const datiPaesi = caricaJSON('vt_datiPaesi', {});
+                if (!datiPaesi[paese]) datiPaesi[paese] = { km:0, benzina:0, spesaBenzina:0, spesaOlio:0 };
+                datiPaesi[paese].km += dist;
+                salva('vt_datiPaesi', datiPaesi);
+
+                aggiornaUI();
+            }
+        }
+        lastLat       = lat;
+        lastLon       = lon;
+        lastTimestamp = pos.timestamp;
+    }
+}
+
+// ============================================================
+//  TRACKING
+// ============================================================
+function toggleTracking() {
+    const btn = document.getElementById('btn-start-stop');
+    if (inViaggio) {
+        inViaggio = false;
+        btn.className = 'btn-track start';
+        btn.innerText = '▶ START GUIDA';
+        clearInterval(timerGuida);
+        timerGuida = null;
+        salva('vt_coordinateTracciato', coordinateTracciato);
+        showToast('⏸ Tracking in pausa');
+	setGPSMode('passive');
+    } else {
+        inViaggio     = true;
+        btn.className = 'btn-track stop';
+        btn.innerText = '⏹ PAUSA GUIDA';
+        lastLat = null; lastLon = null; lastTimestamp = null;
+        timerGuida = setInterval(() => {
+            tappaAttuale.secondiGuida++;
+            salva('vt_tappaAttuale', tappaAttuale);
+            aggiornaTempoGuidaUI();
+        }, 1000);
+        showToast('▶ Tracking avviato');
+	setGPSMode('tracking');
+    }
+}
+
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden && inViaggio) {
+        clearInterval(timerGuida);
+    } else if (!document.hidden && inViaggio) {
+        timerGuida = setInterval(() => {
+            tappaAttuale.secondiGuida++;
+            salva('vt_tappaAttuale', tappaAttuale);
+            aggiornaTempoGuidaUI();
+        }, 1000);
+    }
+});
+
+function aggiornaTempoGuidaUI() {
+    const h = Math.floor(tappaAttuale.secondiGuida / 3600);
+    const m = Math.floor((tappaAttuale.secondiGuida % 3600) / 60);
+    const s = tappaAttuale.secondiGuida % 60;
+    document.getElementById('ui-tempo-guida').innerText =
+        `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+
+
+
+function riduciTraccia(track, maxPoints = 300) {
+    if (!Array.isArray(track)) return [];
+    if (track.length <= maxPoints) return track;
+    const step = Math.ceil(track.length / maxPoints);
+    return track.filter((_, i) => i % step === 0);
+}
+
+async function generaSnapshotDaTraccia(track) {
+    // Se troppo corto, niente snapshot
+    if (!track || track.length < 2) return null;
+
+    return new Promise((resolve) => {
+        const host = document.getElementById('map-snapshot-host');
+
+        // Crea container dedicato (evita problemi di re-init Leaflet)
+        const div = document.createElement('div');
+        div.style.width = '700px';
+        div.style.height = '420px';
+        host.innerHTML = '';
+        host.appendChild(div);
+
+        const m = L.map(div, { zoomControl:false, attributionControl:false, preferCanvas:true });
+
+        const tiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            maxZoom: 19,
+            crossOrigin: true
+        }).addTo(m);
+
+        const pl = L.polyline(track, { color:'#d32f2f', weight:5, opacity:0.9 }).addTo(m);
+
+        try {
+            m.fitBounds(pl.getBounds().pad(0.15));
+        } catch(e) {
+            m.setView(track[track.length - 1], 12);
+        }
+
+        let done = false;
+        const finish = () => {
+            if (done) return;
+            done = true;
+
+            // Aspetta un filo, poi renderizza
+            setTimeout(() => {
+                try {
+                    leafletImage(m, (err, canvas) => {
+                        try { m.remove(); } catch(e) {}
+                        host.innerHTML = '';
+
+                        if (err || !canvas) {
+                            console.warn('Snapshot error:', err);
+                            resolve(null);
+                            return;
+                        }
+
+                        // JPEG: più leggero di PNG
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.80);
+                        resolve(dataUrl);
+                    });
+                } catch(e) {
+                    try { m.remove(); } catch(_) {}
+                    host.innerHTML = '';
+                    resolve(null);
+                }
+            }, 400);
+        };
+
+        // Prova a aspettare il load tile, ma metti anche fallback timeout
+        tiles.once('load', finish);
+        setTimeout(finish, 2500);
+    });
+}
+
+
+
+
+// ============================================================
+//  CONCLUDI TAPPA
+// ============================================================
+async function concludiTappa() {
+    if (tappaAttuale.kmPercorsi < 0.1) {
+        showToast('⚠️ Nessun km registrato in questa tappa');
+        return;
+    }
+
+    const ok = await customConfirm(
+        '🏁 Concludi Tappa',
+        `Tappa di ${tappaAttuale.kmPercorsi.toFixed(1)} km.\nVuoi salvarla?`
+    );
+    if (!ok) return;
+
+    if (inViaggio) toggleTracking();
+
+    const paese = carica('vt_paeseAttuale', 'Colombia');
+    const now   = new Date();
+    const idTappa = Date.now();
+
+    const trackRidotto = riduciTraccia(coordinateTracciato, 320);
+
+    const consumoTappa = tappaAttuale.benzinaUsata > 0
+        ? (tappaAttuale.kmPercorsi / tappaAttuale.benzinaUsata)
+        : null;
+
+    const tappa = {
+        id:     idTappa,
+        data:   now.toLocaleDateString('it-IT'),
+        ora:    now.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' }),
+        paese:  paese,
+        km:     parseFloat(tappaAttuale.kmPercorsi.toFixed(2)),
+        altMin: tappaAttuale.altMin === 9999 ? 0 : tappaAttuale.altMin,
+        altMax: tappaAttuale.altMax,
+        durata: tappaAttuale.secondiGuida,
+        benzina: parseFloat(tappaAttuale.benzinaUsata.toFixed(2)),
+        consumo: consumoTappa ? parseFloat(consumoTappa.toFixed(2)) : null,
+        track: trackRidotto,
+        waypoints: (tappaAttuale.waypoints || []),
+        snapshot: null
+    };
+
+    // 1) Salva subito la tappa
+    const tappe = caricaJSON('vt_tappe', []);
+    tappe.unshift(tappa);
+    salva('vt_tappe', tappe);
+
+    // 2) Genera snapshot (facoltativa)
+    showToast('🖼️ Creo snapshot mappa tappa...');
+    const snap = await generaSnapshotDaTraccia(tappa.track);
+    if (snap) {
+        const tappeAgg = caricaJSON('vt_tappe', []);
+        const idx = tappeAgg.findIndex(x => x.id === idTappa);
+        if (idx !== -1) {
+            tappeAgg[idx].snapshot = snap;
+            salva('vt_tappe', tappeAgg);
+        }
+    }
+
+    // 3) Reset tappa e traccia
+    tappaAttuale = {
+        kmInizio:       parseFloat(carica('vt_kmTotali', '0')),
+        kmPercorsi:     0,
+        altMin:         9999,
+        altMax:         0,
+        secondiGuida:   0,
+        benzinaUsata:   0,
+        waypoints:      []
+    };
+    salva('vt_tappaAttuale', tappaAttuale);
+
+    coordinateTracciato = [];
+    salva('vt_coordinateTracciato', []);
+    polyline.setLatLngs([]);
+
+    showToast(`🏁 Tappa salvata: ${tappa.km} km`);
+    aggiornaUI();
+}
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+// ============================================================
+//  NAVIGAZIONE
+// ============================================================
+function cambiaPagina(id, btn) {
+    
+    // GPS: acceso solo quando serve
+if (id === 'guida') {
+    setGPSMode(inViaggio ? 'tracking' : 'passive');
+} else {
+    setGPSMode(inViaggio ? 'tracking' : 'off');
+}
+
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+    if (id === 'miscela')  { aggiornaAutonomia(); aggiornaSpese(); }
+    if (id === 'officina') { renderInventario(); renderChecklist(); }
+    if (id === 'viaggio')  { aggiornaUI(); renderDiario(); }
+}
+
+// ============================================================
+//  MODALI
+// ============================================================
+function apriModal(id) {
+    document.getElementById(id).classList.add('open');
+    if (id === 'modalTappe')         renderTappe();
+    if (id === 'modalRegistro')      renderLogManutenzione();
+    if (id === 'modalCarb')          renderStoricoCarbur();
+    if (id === 'modalLogCarburanti') renderLogCarburanti();
+    if (id === 'modalSpesePaesi')    renderSpesePaesi();
+    if (id === 'modalLogDettaglio')  {
+        document.getElementById('modal-log-titolo').innerText = '🔧 Nuovo Intervento';
+        document.getElementById('log-km').value =
+            parseFloat(carica('vt_kmTotali','0')).toFixed(1);
+        document.getElementById('log-paese-input').value =
+            carica('vt_paeseAttuale','Colombia');
+    }
+}
+function chiudiModal(id) {
+    document.getElementById(id).classList.remove('open');
+}
+function apriModalPaesi() {
+    apriModal('modalPaesi');
+    renderStatsPaesi();
+}
+document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', (e) => {
+        if (e.target === m) m.classList.remove('open');
+    });
+});
+
+
+
+
+
+function formatDurata(sec) {
+  sec = Math.max(0, sec || 0);
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  return `${h}h ${m}m`;
+}
+
+function chiudiDettaglioTappa() {
+  document.getElementById('tappa-detail-page').classList.remove('open');
+  tappaCorrenteId = null;
+
+  // Pulizia mappa (evita problemi resize / leak)
+  if (tappaDetailMap) {
+    try { tappaDetailMap.remove(); } catch(e) {}
+    tappaDetailMap = null;
+    tappaDetailPolyline = null;
+    tappaDetailMarkers = [];
+  }
+}
+
+function apriDettaglioTappa(id) {
+  const tappe = caricaJSON('vt_tappe', []);
+  const t = tappe.find(x => x.id === id);
+  if (!t) return;
+
+  tappaCorrenteId = id;
+
+  document.getElementById('tappa-detail-title').innerText = `${t.paese} — ${t.data} ${t.ora}`;
+  document.getElementById('tappa-detail-subtitle').innerText = `Km ${t.km} | Durata ${formatDurata(t.durata)}`;
+
+  // Hero: snapshot se c'è
+  const hero = document.getElementById('tappa-detail-hero');
+  hero.innerHTML = t.snapshot
+    ? `<img src="${t.snapshot}" class="detail-foto-hero">`
+    : '';
+
+  // Grid info
+  const consumoTxt = t.consumo ? `${t.consumo} km/L` : '—';
+  document.getElementById('tappa-detail-grid').innerHTML = `
+    <div class="detail-info-box">
+      <div class="detail-info-label">Paese</div>
+      <div class="detail-info-val" style="color:var(--giallo); font-size:14px;">${t.paese}</div>
+    </div>
+    <div class="detail-info-box">
+      <div class="detail-info-label">Km</div>
+      <div class="detail-info-val" style="color:var(--blu);">${(t.km || 0).toFixed ? t.km.toFixed(1) : t.km} km</div>
+    </div>
+    <div class="detail-info-box">
+      <div class="detail-info-label">Durata</div>
+      <div class="detail-info-val">${formatDurata(t.durata)}</div>
+    </div>
+    <div class="detail-info-box">
+      <div class="detail-info-label">Benzina</div>
+      <div class="detail-info-val" style="color:#f44336;">${(t.benzina || 0).toFixed(2)} L</div>
+    </div>
+    <div class="detail-info-box">
+      <div class="detail-info-label">Consumo</div>
+      <div class="detail-info-val" style="color:var(--verde);">${consumoTxt}</div>
+    </div>
+    <div class="detail-info-box">
+      <div class="detail-info-label">Altitudine</div>
+      <div class="detail-info-val" style="color:var(--verde);">${t.altMin} → ${t.altMax} m</div>
+    </div>
+  `;
+
+  // Waypoints
+  renderWaypointsTappa(t);
+
+  // Apri pagina
+  const page = document.getElementById('tappa-detail-page');
+  page.classList.add('open');
+  window.scrollTo(0, 0);
+
+  // Inizializza mappa dopo che la pagina è visibile
+  setTimeout(() => initMappaDettaglioTappa(t), 50);
+}
+
+function initMappaDettaglioTappa(t) {
+  const el = document.getElementById('tappa-detail-map');
+  if (!el) return;
+
+  // crea una nuova mappa (container può essere riusato ma più stabile ricrearla ogni open)
+  tappaDetailMap = L.map(el, { zoomControl:true, attributionControl:false, preferCanvas:true });
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19,
+    crossOrigin: true
+  }).addTo(tappaDetailMap);
+
+  const track = Array.isArray(t.track) ? t.track : [];
+  if (track.length >= 2) {
+    tappaDetailPolyline = L.polyline(track, { color:'#d32f2f', weight:4, opacity:0.9 }).addTo(tappaDetailMap);
+    try { tappaDetailMap.fitBounds(tappaDetailPolyline.getBounds().pad(0.15)); }
+    catch(e) { tappaDetailMap.setView(track[track.length - 1], 12); }
+
+    // Marker start/end
+    const start = track[0];
+    const end   = track[track.length - 1];
+    tappaDetailMarkers.push(L.circleMarker(start, { radius:6, color:'#4caf50', fillOpacity:1 }).addTo(tappaDetailMap).bindPopup('Start'));
+    tappaDetailMarkers.push(L.circleMarker(end,   { radius:6, color:'#2196F3', fillOpacity:1 }).addTo(tappaDetailMap).bindPopup('Fine'));
+  } else {
+    tappaDetailMap.setView([4.7, -74.1], 5);
+  }
+
+  // Waypoints markers
+  (t.waypoints || []).forEach(wp => {
+    if (typeof wp.lat !== 'number' || typeof wp.lon !== 'number') return;
+    const mk = L.circleMarker([wp.lat, wp.lon], { radius:6, color:'#e91e63', fillOpacity:1 })
+      .addTo(tappaDetailMap)
+      .bindPopup(`${wp.ora || ''} — km ${wp.km || '--'}`);
+    tappaDetailMarkers.push(mk);
+  });
+
+  setTimeout(() => { try { tappaDetailMap.invalidateSize(); } catch(e) {} }, 80);
+}
+
+function renderWaypointsTappa(t) {
+  const container = document.getElementById('tappa-detail-waypoints');
+  const wps = t.waypoints || [];
+  if (!wps.length) {
+    container.innerHTML = `<div style="color:#666; text-align:center; padding:10px;">Nessun momento salvato</div>`;
+    return;
+  }
+
+  container.innerHTML = wps.map((wp, idx) => `
+    <div class="waypoint-card">
+      <div class="waypoint-text">${(wp.testo || '').trim() ? wp.testo : '(senza testo)'}</div>
+      ${wp.foto ? `<img src="${wp.foto}" style="width:100%;border-radius:10px;margin-top:8px;max-height:260px;object-fit:cover;">` : ''}
+      <div class="waypoint-meta">
+        <div>Data ${wp.data || ''} ${wp.ora || ''} | km ${wp.km || '--'} | alt ${wp.alt || 0} m</div>
+        <button class="btn-small" style="background:#333;color:#ddd;"
+          onclick="centraWaypoint(${idx});">Centra</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function centraWaypoint(idx) {
+  const tappe = caricaJSON('vt_tappe', []);
+  const t = tappe.find(x => x.id === tappaCorrenteId);
+  if (!t || !tappaDetailMap) return;
+  const wp = (t.waypoints || [])[idx];
+  if (!wp) return;
+  tappaDetailMap.setView([wp.lat, wp.lon], 16);
+}
+
+async function eliminaTappaCorrente() {
+  if (!tappaCorrenteId) return;
+  const ok = await customConfirm('Elimina tappa', 'Vuoi eliminare questa tappa?');
+  if (!ok) return;
+
+  salva('vt_tappe', caricaJSON('vt_tappe', []).filter(t => t.id !== tappaCorrenteId));
+  chiudiDettaglioTappa();
+  renderTappe();
+  showToast('Tappa eliminata');
+}
+
+
+
+
+
+
+
+// ============================================================
+//  AGGIORNA UI PRINCIPALE
+// ============================================================
+function aggiornaUI() {
+    try {
+        const kmTot     = parseFloat(carica('vt_kmTotali','0'));
+        const scorta    = parseFloat(carica('vt_scortaLitri','0'));
+        const benzUsata = parseFloat(carica('vt_benzinaUsata','0'));
+        const olioMl    = parseFloat(carica('vt_olioTotaleMl','0'));
+        const paese     = carica('vt_paeseAttuale','Colombia');
+        const unitaLbl  = unitaAttuale === 'L' ? 'L' : 'gal';
+
+        document.getElementById('ui-odo-tot').innerText  = kmTot.toFixed(1);
+        document.getElementById('ui-odo-trip').innerText = tappaAttuale.kmPercorsi.toFixed(1);
+
+        const scortaVis = unitaAttuale === 'L' ? scorta : scorta / FAT_GAL;
+        const elScortaR = document.getElementById('ui-scorta-rapida');
+        const elScorta  = document.getElementById('scorta-ui');
+        if (elScortaR) elScortaR.innerText = scortaVis.toFixed(1);
+        if (elScorta)  elScorta.innerText  = scortaVis.toFixed(1);
+
+        const autonomiaKm = scorta * CONSUMO_MEDIO;
+        const rapida = document.getElementById('ui-autonomia-rapida');
+        if (rapida) rapida.innerText = autonomiaKm > 0 ? Math.round(autonomiaKm) + ' km' : '-- km';
+
+        let kmVis    = kmTot;
+        let benzVis  = benzUsata;
+        let scortaV2 = scorta;
+
+        if (visualizzazioneStats === 'Paese') {
+            const dp = (caricaJSON('vt_datiPaesi',{}))[paese] || { km:0, benzina:0 };
+            kmVis   = dp.km      || 0;
+            benzVis = dp.benzina || 0;
+            document.getElementById('titolo-stat-paese').innerText = paese;
+        } else {
+            document.getElementById('titolo-stat-paese').innerText = 'Globali';
+        }
+
+        if (unitaAttuale === 'G') {
+            benzVis  = benzVis  / FAT_GAL;
+            scortaV2 = scortaV2 / FAT_GAL;
+        }
+
+        const consumo = benzVis > 0 ? (kmVis / benzVis).toFixed(1) : '--';
+
+        document.getElementById('statKm').innerText =
+            kmVis.toFixed(1) + ' km';
+        document.getElementById('statConsumo').innerHTML =
+            consumo + ' <span style="font-size:12px;">km/' + unitaLbl + '</span>';
+        document.getElementById('statBenzina').innerHTML =
+            benzVis.toFixed(1) + ' <span style="font-size:12px;">' + unitaLbl + '</span>';
+        document.getElementById('statOlio').innerText =
+            (olioMl/1000).toFixed(2) + ' L';
+        document.getElementById('statScorta').innerHTML =
+            scortaV2.toFixed(1) + ' <span style="font-size:14px;">' + unitaLbl + '</span>';
+
+        document.querySelectorAll('.txt-unita').forEach(el => el.innerText = unitaLbl);
+
+        const selP = document.getElementById('selectPaese');
+        const lblP = document.getElementById('lbl-paese-benzina');
+        if (selP) selP.value    = paese;
+        if (lblP) lblP.innerText = paese;
+
+        aggiornaTempoGuidaUI();
+        aggiornaAutonomia();
+        aggiornaSpese();
+    } catch(e) {
+        console.error('aggiornaUI error:', e);
+    }
+}
+
+function mostraStats(tipo) {
+    visualizzazioneStats = tipo;
+    aggiornaUI();
+}
+
+// ============================================================
+//  PAESE / UNITA
+// ============================================================
+function cambiaPaese() {
+    const p = document.getElementById('selectPaese').value;
+    salva('vt_paeseAttuale', p);
+    lastCountry = p;
+    const lbl = document.getElementById('lbl-paese-benzina');
+    if (lbl) lbl.innerText = p;
+    aggiornaUI();
+    showToast('🗺️ Paese: ' + p);
+}
+
+function cambiaUnita(u) {
+    unitaAttuale = u;
+    document.getElementById('btn-litri').classList.toggle('active',   u === 'L');
+    document.getElementById('btn-galloni').classList.toggle('active', u === 'G');
+    aggiornaUI();
+}
+
+// ============================================================
+//  DESTINAZIONE E MISCELA
+// ============================================================
+function selezionaDest(d) {
+    dest = d;
+    document.getElementById('btn-dest-vespa').classList.toggle('active',  d === 'V');
+    document.getElementById('btn-dest-tanica').classList.toggle('active', d === 'T');
+    document.getElementById('sezioneMiscelaCompra').style.display = d === 'V' ? 'block' : 'none';
+}
+
+function selMix(val, btn, tipo) {
+    if (tipo === 'compra')  mixC = val;
+    if (tipo === 'travaso') mixT = val;
+    btn.closest('.pct-grid').querySelectorAll('.pct-btn')
+       .forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
+
+// ============================================================
+//  VALIDAZIONE INPUT
+// ============================================================
+function validaInput(id, min = 0.01, max = 9999) {
+    const el  = document.getElementById(id);
+    const val = parseFloat(el.value);
+    if (isNaN(val) || val < min || val > max) {
+        el.classList.add('input-error');
+        setTimeout(() => el.classList.remove('input-error'), 2000);
+        return null;
+    }
+    el.classList.remove('input-error');
+    return val;
+}
+
+// ============================================================
+//  REGISTRA ACQUISTO BENZINA
+// ============================================================
+function registraAcquisto() {
+    const qtaInput = validaInput('inputCompra', 0.01, 999);
+    if (!qtaInput) { showToast('⚠️ Inserisci una quantità valida'); return; }
+
+    const qtaLitri   = unitaAttuale === 'G' ? qtaInput * FAT_GAL : qtaInput;
+    const paese      = carica('vt_paeseAttuale','Colombia');
+    const prezzoBenz = parseFloat(document.getElementById('inputPrezzoBenz').value) || 0;
+    const prezzoOlio = parseFloat(document.getElementById('inputPrezzoOlio').value)  || 0;
+    const luogo      = document.getElementById('inputLuogo').value.trim() || 'N/D';
+    const now        = new Date();
+    let   risultatoHTML = '';
+
+    const datiPaesi = caricaJSON('vt_datiPaesi', {});
+    if (!datiPaesi[paese]) datiPaesi[paese] = { km:0, benzina:0, spesaBenzina:0, spesaOlio:0 };
+
+    if (dest === 'V') {
+        const olioMl   = Math.round((qtaLitri * mixC / 100) * 1000);
+        const benzPura = qtaLitri - (olioMl / 1000);
+        const costoB   = prezzoBenz * qtaLitri;
+
+        salva('vt_benzinaUsata', parseFloat(carica('vt_benzinaUsata','0')) + benzPura);
+        salva('vt_olioTotaleMl', parseFloat(carica('vt_olioTotaleMl','0')) + olioMl);
+        salva('vt_spesaBenzina', parseFloat(carica('vt_spesaBenzina','0')) + costoB);
+        salva('vt_spesaOlio',    parseFloat(carica('vt_spesaOlio','0'))    + prezzoOlio);
+        salva('vt_odoUltimoPieno', carica('vt_kmTotali','0'));
+
+        datiPaesi[paese].benzina      = (datiPaesi[paese].benzina      || 0) + benzPura;
+        datiPaesi[paese].spesaBenzina = (datiPaesi[paese].spesaBenzina || 0) + costoB;
+        datiPaesi[paese].spesaOlio    = (datiPaesi[paese].spesaOlio    || 0) + prezzoOlio;
+
+        tappaAttuale.benzinaUsata += benzPura;
+        salva('vt_tappaAttuale', tappaAttuale);
+
+        risultatoHTML = `
+    ✅ <b>Messo in Vespa:</b> ${qtaLitri.toFixed(2)} L<br>
+    🧪 <b>Olio 2T da aggiungere:</b>
+    <span style="font-size:22px;color:var(--giallo);font-weight:bold;">${olioMl} ml</span><br>
+    ⛽ Benzina netta: ${benzPura.toFixed(2)} L<br>
+    ${costoB > 0 ? `💰 Costo benzina: <b>
+$$
+{costoB.toFixed(2)}</b><br>` : ''}
+    ${prezzoOlio > 0 ? `🧪 Costo olio: <b>
+$$
+{prezzoOlio.toFixed(2)}</b>` : ''}`;
+    } else {
+        const scortaAtt = parseFloat(carica('vt_scortaLitri','0'));
+        const costoB    = prezzoBenz * qtaLitri;
+        salva('vt_scortaLitri', scortaAtt + qtaLitri);
+        salva('vt_spesaBenzina', parseFloat(carica('vt_spesaBenzina','0')) + costoB);
+        datiPaesi[paese].spesaBenzina = (datiPaesi[paese].spesaBenzina || 0) + costoB;
+
+risultatoHTML = `
+    ✅ <b>Aggiunto nelle taniche:</b> ${qtaLitri.toFixed(2)} L<br>
+    🛢️ <b>Scorta totale:</b> ${(scortaAtt + qtaLitri).toFixed(2)} L<br>
+    ${costoB > 0 ? `💰 Costo: <b>
+$$
+{costoB.toFixed(2)}</b>` : ''}`;
+    }
+
+    salva('vt_datiPaesi', datiPaesi);
+
+    const logCarb = caricaJSON('vt_logCarburanti', []);
+    logCarb.unshift({
+        id:          Date.now(),
+        data:        now.toLocaleDateString('it-IT'),
+        ora:         now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
+        paese:       paese,
+        qta:         qtaLitri.toFixed(2),
+        dest:        dest === 'V' ? 'Vespa' : 'Tanica',
+        mix:         dest === 'V' ? mixC + '%' : '--',
+        prezzoBenz:  prezzoBenz  > 0 ? prezzoBenz  : null,
+        costoTotale: prezzoBenz  > 0 ? (prezzoBenz * qtaLitri).toFixed(2) : null,
+        costoOlio:   prezzoOlio  > 0 ? prezzoOlio  : null,
+        luogo:       luogo,
+        km:          parseFloat(carica('vt_kmTotali','0')).toFixed(1)
+    });
+    salva('vt_logCarburanti', logCarb);
+
+    document.getElementById('inputCompra').value     = '';
+    document.getElementById('inputPrezzoBenz').value = '';
+    document.getElementById('inputPrezzoOlio').value = '';
+    document.getElementById('inputLuogo').value      = '';
+
+    const res = document.getElementById('risultatoCompra');
+    res.innerHTML     = risultatoHTML;
+    res.style.display = 'block';
+    aggiornaUI();
+    showToast('⛽ Rifornimento registrato!');
+}
+
+// ============================================================
+//  REGISTRA TRAVASO DA TANICA
+// ============================================================
+function registraTravaso() {
+    const qtaInput = validaInput('inputTravaso', 0.01, 999);
+    if (!qtaInput) { showToast('⚠️ Inserisci una quantità valida'); return; }
+
+    const qtaLitri = unitaAttuale === 'G' ? qtaInput * FAT_GAL : qtaInput;
+    const scorta   = parseFloat(carica('vt_scortaLitri','0'));
+
+    if (qtaLitri > scorta + 0.01) {
+        showToast('⚠️ Scorta insufficiente! Disponibili: ' + scorta.toFixed(2) + ' L');
+        return;
+    }
+
+    const olioMl      = Math.round((qtaLitri * mixT / 100) * 1000);
+    const benzPura    = qtaLitri - (olioMl / 1000);
+    const nuovaScorta = Math.max(0, scorta - qtaLitri);
+
+    salva('vt_scortaLitri', nuovaScorta);
+    salva('vt_benzinaUsata', parseFloat(carica('vt_benzinaUsata','0')) + benzPura);
+    salva('vt_olioTotaleMl', parseFloat(carica('vt_olioTotaleMl','0')) + olioMl);
+
+    const paese     = carica('vt_paeseAttuale','Colombia');
+    const datiPaesi = caricaJSON('vt_datiPaesi', {});
+    if (!datiPaesi[paese]) datiPaesi[paese] = { km:0, benzina:0, spesaBenzina:0, spesaOlio:0 };
+    datiPaesi[paese].benzina = (datiPaesi[paese].benzina || 0) + benzPura;
+    salva('vt_datiPaesi', datiPaesi);
+
+    tappaAttuale.benzinaUsata += benzPura;
+    salva('vt_tappaAttuale', tappaAttuale);
+
+    const now = new Date();
+    const log = caricaJSON('vt_logCarburanti', []);
+    log.unshift({
+        id:    Date.now(),
+        data:  now.toLocaleDateString('it-IT'),
+        ora:   now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
+        paese: paese, qta: qtaLitri.toFixed(2),
+        dest:  'Tanica→Vespa', mix: mixT + '%',
+        luogo: 'Scorta personale',
+        km:    parseFloat(carica('vt_kmTotali','0')).toFixed(1)
+    });
+    salva('vt_logCarburanti', log);
+
+    const res = document.getElementById('risultatoTravaso');
+    res.innerHTML = `
+        ✅ <b>Versati:</b> ${qtaLitri.toFixed(2)} L<br>
+        🧪 <b>Olio 2T da aggiungere:</b>
+        <span style="font-size:22px;color:var(--giallo);font-weight:bold;">${olioMl} ml</span><br>
+        🛢️ <b>Scorta rimasta:</b> ${nuovaScorta.toFixed(2)} L`;
+    res.style.display = 'block';
+
+    document.getElementById('inputTravaso').value = '';
+    aggiornaUI();
+    showToast('🛢️ Travaso registrato!');
+}
+
+// ============================================================
+//  AUTONOMIA
+// ============================================================
+function aggiornaAutonomia() {
+    try {
+        const scorta       = parseFloat(carica('vt_scortaLitri','0'));
+        const kmTot        = parseFloat(carica('vt_kmTotali','0'));
+        const benzUsata    = parseFloat(carica('vt_benzinaUsata','0'));
+        const consumoReale = benzUsata > 1 && kmTot > 0 ? kmTot / benzUsata : CONSUMO_MEDIO;
+        const autonomiaKm  = scorta * consumoReale;
+        const unitaLbl     = unitaAttuale === 'L' ? 'L' : 'gal';
+        const scortaVis    = unitaAttuale === 'L' ? scorta : scorta / FAT_GAL;
+
+        const el = document.getElementById('autonomia-info');
+        if (el) el.innerHTML = `
+            🛢️ Scorta: <b>${scortaVis.toFixed(2)} ${unitaLbl}</b><br>
+            📊 Consumo reale: <b style="color:var(--giallo)">${consumoReale.toFixed(1)} km/L</b><br>
+            📏 Autonomia stimata:
+            <b style="color:var(--verde);font-size:24px;">${Math.round(autonomiaKm)} km</b>`;
+
+        const rapida = document.getElementById('ui-autonomia-rapida');
+        if (rapida) rapida.innerText = autonomiaKm > 0 ? Math.round(autonomiaKm) + ' km' : '-- km';
+    } catch(e) { console.error('aggiornaAutonomia error:', e); }
+}
+
+// ============================================================
+//  SPESE
+// ============================================================
+function aggiornaSpese() {
+    try {
+        const spesaB = parseFloat(carica('vt_spesaBenzina','0'));
+        const spesaO = parseFloat(carica('vt_spesaOlio','0'));
+        const tot    = spesaB + spesaO;
+        const elB = document.getElementById('spesa-benzina');
+        const elO = document.getElementById('spesa-olio');
+        const elT = document.getElementById('spesa-totale');
+        if (elB) elB.innerText = '$' + spesaB.toFixed(2);
+        if (elO) elO.innerText = '$' + spesaO.toFixed(2);
+        if (elT) elT.innerText = '$' + tot.toFixed(2);
+    } catch(e) { console.error('aggiornaSpese error:', e); }
+}
+
+function renderSpesePaesi() {
+    const datiPaesi = caricaJSON('vt_datiPaesi', {});
+    const container = document.getElementById('contenutoSpesePaesi');
+    const paesi     = Object.entries(datiPaesi);
+    if (!paesi.length) {
+        container.innerHTML = '<div style="color:#888;text-align:center;padding:30px;">Nessun dato ancora</div>';
+        return;
+    }
+    let totB = 0, totO = 0, html = '';
+    paesi.forEach(([nome, d]) => {
+        const sB = d.spesaBenzina || 0;
+        const sO = d.spesaOlio    || 0;
+        totB += sB; totO += sO;
+        html += `
+        <div class="paese-stat">
+            <div class="paese-name">${nome}</div>
+            <div class="paese-numbers">
+                <div style="font-size:13px;color:#aaa;">⛽ Benzina: <b style="color:#f44336;">
+$$
+{sB.toFixed(2)}</b></div>
+                <div style="font-size:13px;color:#aaa;">🧪 Olio: <b style="color:#00bcd4;">
+$$
+{sO.toFixed(2)}</b></div>
+                <div style="font-size:13px;color:#aaa;grid-column:span 2;">
+                    💰 Totale: <b style="color:var(--giallo);">
+$$
+{(sB+sO).toFixed(2)}</b>
+                    &nbsp;|&nbsp; 📏 ${(d.km||0).toFixed(0)} km
+                </div>
+            </div>
+        </div>`;
+    });
+    html += `
+    <div style="background:#1a1a1a;border-radius:12px;padding:15px;text-align:center;
+                margin-top:15px;border:2px solid var(--giallo);">
+        <div style="font-size:13px;color:#aaa;">TOTALE SPESO IN CARBURANTE</div>
+        <div style="font-size:32px;font-weight:bold;color:var(--giallo);margin-top:5px;">
+            
+$$
+{(totB+totO).toFixed(2)}
+        </div>
+        <div style="font-size:12px;color:#888;margin-top:3px;">
+            Benzina:
+$$
+{totB.toFixed(2)} &nbsp;|&nbsp; Olio: 
+$$
+{totO.toFixed(2)}
+        </div>
+    </div>`;
+    container.innerHTML = html;
+}
+
+// ============================================================
+//  LOG RIFORNIMENTI
+// ============================================================
+function renderLogCarburanti() {
+    const log       = caricaJSON('vt_logCarburanti', []);
+    const container = document.getElementById('contenutoLogCarburanti');
+    if (!log.length) {
+        container.innerHTML = '<div style="color:#888;text-align:center;padding:30px;">Nessun rifornimento registrato</div>';
+        return;
+    }
+    container.innerHTML = log.map(l => `
+        <div class="rif-card">
+            <div class="rif-icon">${l.dest === 'Tanica→Vespa' ? '🛢️' : '⛽'}</div>
+            <div class="rif-body">
+                <div class="rif-title">${l.dest} — ${l.qta} L</div>
+                <div class="rif-sub">📅 ${l.data} ${l.ora} &nbsp;|&nbsp; 📍 ${l.paese}</div>
+                <div class="rif-sub">📌 ${l.luogo || 'N/D'} &nbsp;|&nbsp; 📏 km ${l.km || '--'}</div>
+                ${l.mix !== '--' ? `<div class="rif-sub">🧪 Miscela: ${l.mix}</div>` : ''}
+                ${l.prezzoBenz ? `<div class="rif-sub">💲 Prezzo/L:
+$$
+{l.prezzoBenz}</div>` : ''}
+                ${l.costoTotale ? `<div class="rif-sub">💰 Costo benzina: <b style="color:var(--giallo);">
+$$
+{l.costoTotale}</b></div>` : ''}
+                ${l.costoOlio ? `<div class="rif-sub">🧪 Costo olio: <b style="color:#00bcd4;">
+$$
+{l.costoOlio}</b></div>` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+// ============================================================
+//  DIARIO — ANTEPRIMA FOTO
+// ============================================================
+function anteprima(inputId, containerID) {
+    const file = document.getElementById(inputId).files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const div       = document.getElementById(containerID);
+        div.style.display = 'block';
+        div.innerHTML     = `<img src="${e.target.result}"
+            style="width:100%;border-radius:10px;max-height:200px;object-fit:cover;">`;
+        div.dataset.src   = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+// ============================================================
+//  DIARIO — SALVA NUOVO POST
+// ============================================================
+function salvaDiario() {
+    const testo = document.getElementById('diario-testo').value.trim();
+    if (!testo) { showToast('⚠️ Scrivi qualcosa prima di salvare'); return; }
+
+    const antDiv  = document.getElementById('anteprima-foto');
+    const fotoSrc = antDiv.dataset.src || null;
+    const paese   = carica('vt_paeseAttuale','Colombia');
+    const now     = new Date();
+
+    const entry = {
+        id:     Date.now(),
+        data:   now.toLocaleDateString('it-IT'),
+        ora:    now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
+        paese:  paese,
+        km:     parseFloat(carica('vt_kmTotali','0')).toFixed(1),
+        alt:    altitudineAttuale,
+        testo:  testo,
+        foto:   fotoSrc,
+        note:   []
+    };
+
+    const diario = caricaJSON('vt_diario', []);
+    diario.unshift(entry);
+    salva('vt_diario', diario);
+
+    document.getElementById('diario-testo').value = '';
+    antDiv.style.display = 'none';
+    antDiv.dataset.src   = '';
+    document.getElementById('foto-input').value  = '';
+
+    renderDiario();
+    showToast('📖 Post salvato nel diario!');
+}
+
+
+
+
+function aggiungiVoceDiario(entry) {
+    const diario = caricaJSON('vt_diario', []);
+    diario.unshift(entry);
+    salva('vt_diario', diario);
+}
+
+
+
+
+// ============================================================
+//  DIARIO — RENDER CARDS
+// ============================================================
+function renderDiario() {
+    const diario    = caricaJSON('vt_diario', []);
+    const container = document.getElementById('lista-diario');
+    if (!container) return;
+    if (!diario.length) {
+        container.innerHTML = `
+            <div style="text-align:center;padding:30px;color:#555;">
+                <div style="font-size:48px;">📖</div>
+                <div style="margin-top:10px;">Il tuo diario è vuoto.<br>Scrivi la tua prima nota!</div>
+            </div>`;
+        return;
+    }
+    container.innerHTML = diario.map(e => `
+        <div class="diario-card" onclick="apriDettaglioDiario(${e.id})">
+            ${e.foto
+                ? `<img src="${e.foto}" class="diario-card-foto" loading="lazy">`
+                : `<div class="diario-card-nofoto">📝</div>`}
+            <div class="diario-card-body">
+                <div class="diario-card-meta">
+                    <span class="diario-card-data">📅 ${e.data} ${e.ora}</span>
+                    <span class="diario-card-paese">${e.paese}</span>
+                </div>
+                <div class="diario-card-testo">${e.testo}</div>
+                <span class="diario-card-km">📏 ${e.km} km &nbsp;⛰️ ${e.alt || 0} m</span>
+            </div>
+            <div class="diario-card-footer">
+                <div class="diario-card-tag">
+                    ${e.foto ? '<span class="tag-pill">📷 Foto</span>' : ''}
+                    ${e.note && e.note.length > 0
+                        ? `<span class="tag-pill">💬 ${e.note.length} note</span>` : ''}
+                </div>
+                <span style="color:#555;font-size:12px;">Tocca per aprire →</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ============================================================
+//  DIARIO — PAGINA DETTAGLIO
+// ============================================================
+function apriDettaglioDiario(id) {
+    const diario = caricaJSON('vt_diario', []);
+    const entry  = diario.find(e => e.id === id);
+    if (!entry) return;
+    diarioCorrenteId = id;
+
+    document.getElementById('detail-paese-header').innerText = entry.paese;
+    document.getElementById('detail-data-header').innerText  = entry.data + ' ' + entry.ora;
+    document.getElementById('detail-paese').innerText = entry.paese;
+    document.getElementById('detail-km').innerText    = entry.km + ' km';
+    document.getElementById('detail-data').innerText  = entry.data + ' ' + entry.ora;
+    document.getElementById('detail-alt').innerText   = (entry.alt || 0) + ' m';
+    document.getElementById('detail-testo').innerText = entry.testo;
+
+    const fotoC = document.getElementById('detail-foto-container');
+    fotoC.innerHTML = entry.foto ? `<img src="${entry.foto}" class="detail-foto-hero">` : '';
+
+    renderNoteDettaglio(entry);
+
+    document.getElementById('detail-nuova-nota').value     = '';
+    document.getElementById('detail-foto-preview').style.display = 'none';
+    document.getElementById('detail-foto-extra').value     = '';
+
+    document.getElementById('diario-detail-page').classList.add('open');
+    window.scrollTo(0, 0);
+}
+
+function chiudiDettaglioDiario() {
+    document.getElementById('diario-detail-page').classList.remove('open');
+    diarioCorrenteId = null;
+}
+
+function renderNoteDettaglio(entry) {
+    const container = document.getElementById('detail-note-lista');
+    if (!entry.note || !entry.note.length) { container.innerHTML = ''; return; }
+    container.innerHTML =
+        `<div style="font-size:13px;color:#888;margin-bottom:8px;">
+            💬 ${entry.note.length} nota aggiunta:</div>` +
+        entry.note.map((n, i) => `
+        <div class="detail-note-item">
+            ${n.testo}
+            ${n.foto ? `<img src="${n.foto}" style="width:100%;border-radius:8px;margin-top:8px;">` : ''}
+            <div class="detail-note-meta">
+                📅 ${n.data} ${n.ora} &nbsp;|&nbsp; 📏 ${n.km} km
+                <button onclick="eliminaNota(${i})"
+                    style="background:none;border:none;color:#555;font-size:11px;cursor:pointer;margin-left:8px;">
+                    🗑️</button>
+            </div>
+        </div>`).join('');
+}
+
+function anteprimaDetailFoto() {
+    const file = document.getElementById('detail-foto-extra').files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const div       = document.getElementById('detail-foto-preview');
+        div.style.display = 'block';
+        div.innerHTML     = `<img src="${e.target.result}"
+            style="width:100%;border-radius:8px;max-height:160px;object-fit:cover;">`;
+        div.dataset.src   = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function salvaNota() {
+    if (!diarioCorrenteId) return;
+    const testo = document.getElementById('detail-nuova-nota').value.trim();
+    if (!testo) { showToast('⚠️ Scrivi qualcosa'); return; }
+
+    const fotoDiv = document.getElementById('detail-foto-preview');
+    const foto    = fotoDiv.dataset.src || null;
+    const now     = new Date();
+    const nota    = {
+        testo: testo, foto: foto,
+        data:  now.toLocaleDateString('it-IT'),
+        ora:   now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
+        km:    parseFloat(carica('vt_kmTotali','0')).toFixed(1)
+    };
+
+    const diario = caricaJSON('vt_diario', []);
+    const idx    = diario.findIndex(e => e.id === diarioCorrenteId);
+    if (idx === -1) return;
+    if (!diario[idx].note) diario[idx].note = [];
+    diario[idx].note.push(nota);
+    salva('vt_diario', diario);
+
+    document.getElementById('detail-nuova-nota').value = '';
+    fotoDiv.style.display = 'none';
+    fotoDiv.dataset.src   = '';
+    document.getElementById('detail-foto-extra').value = '';
+
+    renderNoteDettaglio(diario[idx]);
+    renderDiario();
+    showToast('💬 Nota aggiunta!');
+}
+
+function eliminaNota(noteIdx) {
+    if (!diarioCorrenteId) return;
+    const diario = caricaJSON('vt_diario', []);
+    const idx    = diario.findIndex(e => e.id === diarioCorrenteId);
+    if (idx === -1) return;
+    diario[idx].note.splice(noteIdx, 1);
+    salva('vt_diario', diario);
+    renderNoteDettaglio(diario[idx]);
+    renderDiario();
+    showToast('🗑️ Nota eliminata');
+}
+
+async function eliminaDiarioCorrente() {
+    const ok = await customConfirm('🗑️ Elimina Post', 'Vuoi eliminare questo post dal diario?');
+    if (!ok) return;
+    const diario = caricaJSON('vt_diario', []).filter(e => e.id !== diarioCorrenteId);
+    salva('vt_diario', diario);
+    chiudiDettaglioDiario();
+    renderDiario();
+    showToast('🗑️ Post eliminato');
+}
+
+
+
+async function salvaMomentoTappa() {
+    const testo = document.getElementById('momento-testo').value.trim();
+    const foto  = document.getElementById('momento-foto-preview').dataset.src || null;
+
+    if (!testo && !foto) {
+        showToast('⚠️ Inserisci testo o una foto');
+        return;
+    }
+
+    // Prendo una posizione "istantanea" (più affidabile del lastLat/lastLon)
+    if (!navigator.geolocation) {
+        showToast('⚠️ GPS non disponibile');
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        const now = new Date();
+
+        const wp = {
+            id: Date.now(),
+            data: now.toLocaleDateString('it-IT'),
+            ora:  now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
+            lat, lon,
+            km: parseFloat(carica('vt_kmTotali','0')).toFixed(1),
+            alt: pos.coords.altitude ? Math.round(pos.coords.altitude) : altitudineAttuale,
+            testo: testo || '',
+            foto: foto
+        };
+
+        // Salva nella tappa attuale
+        if (!tappaAttuale.waypoints) tappaAttuale.waypoints = [];
+        tappaAttuale.waypoints.push(wp);
+        salva('vt_tappaAttuale', tappaAttuale);
+
+        // Aggiungi automaticamente anche al diario
+        const paese = carica('vt_paeseAttuale','Colombia');
+        const diarioEntry = {
+            id: Date.now() + 1,
+            data: wp.data,
+            ora:  wp.ora,
+            paese: paese,
+            km: wp.km,
+            alt: wp.alt || 0,
+            testo: wp.testo || '📍 Momento di tappa',
+            foto: wp.foto,
+            note: [],
+            tipo: 'momento',
+            refWaypointId: wp.id
+        };
+        aggiungiVoceDiario(diarioEntry);
+
+        // Reset UI modal
+        document.getElementById('momento-testo').value = '';
+        const prev = document.getElementById('momento-foto-preview');
+        prev.style.display = 'none';
+        prev.dataset.src = '';
+        document.getElementById('momento-foto-input').value = '';
+
+        chiudiModal('modalMomento');
+        renderDiario();
+        showToast('📍 Momento salvato (tappa + diario)');
+    }, (err) => {
+    console.warn('getCurrentPosition error:', err);
+
+    // fallback: prova ultimo fix del watchPosition (se esiste)
+    if (ultimoFixGPS && (Date.now() - ultimoFixGPS.ts) < 60000) {
+        showToast('📍 Uso ultima posizione disponibile (GPS)');
+        // richiama la logica di salvataggio usando ultimoFixGPS
+        // (se vuoi ti preparo io la versione completa già pronta)
+        return;
+    }
+
+    const msg = err.code === 1 ? 'Permesso negato'
+              : err.code === 2 ? 'Posizione non disponibile'
+              : err.code === 3 ? 'Timeout GPS'
+              : 'Errore GPS';
+    showToast('⚠️ Impossibile leggere la posizione: ' + msg);
+}, { enableHighAccuracy:true, timeout:20000, maximumAge:10000 });
+}
+
+
+
+
+
+
+async function creaTappaDemo() {
+  const ok = await customConfirm(
+    '🧪 Crea tappa demo',
+    'Vuoi creare una tappa finta (solo per test UI)?'
+  );
+  if (!ok) return;
+
+  const now = new Date();
+  const idTappa = Date.now();
+
+  // Traccia demo attorno a Bogotá (coordinate indicative)
+  const track = [
+    [4.7110, -74.0721],
+    [4.7035, -74.0800],
+    [4.6900, -74.0950],
+    [4.6750, -74.1100],
+    [4.6600, -74.1200],
+    [4.6450, -74.1250],
+    [4.6300, -74.1280],
+    [4.6150, -74.1300],
+    [4.6000, -74.1290],
+    [4.5850, -74.1250]
+  ];
+
+  const waypoints = [
+    {
+      id: idTappa + 1,
+      data: now.toLocaleDateString('it-IT'),
+      ora:  now.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' }),
+      lat:  4.6900, lon: -74.0950,
+      km:   '12.3',
+      alt:  2650,
+      testo:'📍 Stop veloce: panorama e caffè',
+      foto: null
+    },
+    {
+      id: idTappa + 2,
+      data: now.toLocaleDateString('it-IT'),
+      ora:  now.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' }),
+      lat:  4.6450, lon: -74.1250,
+      km:   '31.8',
+      alt:  2400,
+      testo:'📍 Benzinaio / check miscela',
+      foto: null
+    },
+    {
+      id: idTappa + 3,
+      data: now.toLocaleDateString('it-IT'),
+      ora:  now.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' }),
+      lat:  4.6000, lon: -74.1290,
+      km:   '54.1',
+      alt:  2100,
+      testo:'📍 Arrivo: tramonto',
+      foto: null
+    }
+  ];
+
+  const tappa = {
+    id: idTappa,
+    data: now.toLocaleDateString('it-IT'),
+    ora:  now.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' }),
+    paese: carica('vt_paeseAttuale','Colombia'),
+    km: 54.1,
+    altMin: 2100,
+    altMax: 2650,
+    durata: 2 * 3600 + 15 * 60, // 2h 15m
+    benzina: 1.95,
+    consumo: 27.7,
+    track: track,
+    waypoints: waypoints,
+    snapshot: null
+  };
+
+  // salva
+  const tappe = caricaJSON('vt_tappe', []);
+  tappe.unshift(tappa);
+  salva('vt_tappe', tappe);
+
+  // Se hai già generaSnapshotDaTraccia, prova a creare anche la snapshot
+  if (typeof generaSnapshotDaTraccia === 'function') {
+    showToast('🖼️ Creo snapshot demo...');
+    const snap = await generaSnapshotDaTraccia(tappa.track);
+    if (snap) {
+      const tappeAgg = caricaJSON('vt_tappe', []);
+      const idx = tappeAgg.findIndex(x => x.id === idTappa);
+      if (idx !== -1) {
+        tappeAgg[idx].snapshot = snap;
+        salva('vt_tappe', tappeAgg);
+      }
+    }
+  }
+
+  showToast('✅ Tappa demo creata! Apri "DIARIO TAPPE".');
+
+  // Se il modal è già aperto, aggiorna la lista
+  const modal = document.getElementById('modalTappe');
+  if (modal && modal.classList.contains('open')) renderTappe();
+}
+
+
+
+
+
+
+// ============================================================
+//  TAPPE
+// ============================================================
+function renderTappe() {
+    const tappe     = caricaJSON('vt_tappe', []);
+    const container = document.getElementById('contenutoTappe');
+    if (!tappe.length) {
+        container.innerHTML = '<div style="color:#888;text-align:center;padding:30px;">Nessuna tappa registrata</div>';
+        return;
+    }
+    container.innerHTML = tappe.map(t => {
+        const h = Math.floor(t.durata / 3600);
+        const m = Math.floor((t.durata % 3600) / 60);
+        const wpCount = (t.waypoints || []).length;
+
+        return `
+
+       <div class="log-entry-full" style="border-color:#9c27b0; cursor:pointer;"
+       onclick="apriDettaglioTappa(${t.id})">
+
+      
+            <div style="font-size:16px;font-weight:bold;color:#9c27b0;">🏁 ${t.data} ${t.ora}</div>
+            <div style="color:var(--giallo);margin:5px 0;font-size:14px;">${t.paese}</div>
+
+            ${t.snapshot ? `<img src="${t.snapshot}" style="width:100%;border-radius:10px;margin:8px 0; border:1px solid #333;">` : ''}
+
+            <div>📏 <b>${t.km} km</b> &nbsp;|&nbsp; ⏱️ ${h}h ${m}m</div>
+            <div>⛰️ Alt: ${t.altMin}m → ${t.altMax}m &nbsp;|&nbsp; ⛽ ${t.benzina} L</div>
+            <div style="font-size:12px;color:#888;margin-top:6px;">
+              ${t.consumo ? `📊 Consumo tappa: <b style="color:var(--verde);">${t.consumo} km/L</b>` : ''}
+              ${wpCount ? ` &nbsp;|&nbsp; 📍 Momenti: <b>${wpCount}</b>` : ''}
+            </div>
+
+            <button onclick="event.stopPropagation(); eliminaTappa(${t.id})"
+                style="background:none;border:none;color:#666;font-size:12px;cursor:pointer;margin-top:8px;">
+                🗑️ Elimina</button>
+        </div>`;
+    }).join('');
+}
+// ============================================================
+//  STATISTICHE PER PAESE
+// ============================================================
+
+function renderStatsPaesi() {
+    const datiPaesi = caricaJSON('vt_datiPaesi', {});
+    const container = document.getElementById('contenutoPaesi');
+    const paesi     = Object.entries(datiPaesi);
+    if (!paesi.length) {
+        container.innerHTML = '<div style="color:#888;text-align:center;padding:30px;">Nessun dato per paese</div>';
+        return;
+    }
+    container.innerHTML = paesi.map(([nome, d]) => {
+        const consumo = d.benzina > 0 ? (d.km / d.benzina).toFixed(1) : '--';
+        const spTot   = ((d.spesaBenzina||0) + (d.spesaOlio||0)).toFixed(2);
+        return `
+        <div class="paese-stat">
+            <div class="paese-name">${nome}</div>
+            <div class="paese-numbers">
+                <div style="font-size:13px;color:#aaa;">📏 <b style="color:white;">${(d.km||0).toFixed(1)} km</b></div>
+                <div style="font-size:13px;color:#aaa;">⛽ <b style="color:white;">${(d.benzina||0).toFixed(1)} L</b></div>
+                <div style="font-size:13px;color:#aaa;">📊 Consumo: <b style="color:var(--verde);">${consumo} km/L</b></div>
+                <div style="font-size:13px;color:#aaa;">💰 Spesa: <b style="color:var(--giallo);">
+$$
+{spTot}</b></div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ============================================================
+//  INVENTARIO RICAMBI
+// ============================================================
+function renderInventario() {
+    const inv       = caricaJSON('vt_inventario', []);
+    const kmTot     = parseFloat(carica('vt_kmTotali','0'));
+    const container = document.getElementById('listaRicambi');
+    if (!container) return;
+
+    if (!inv.length) {
+        container.innerHTML = '<div style="color:#888;text-align:center;padding:20px;">Nessun ricambio aggiunto</div>';
+        return;
+    }
+    container.innerHTML = inv.map((item, i) => {
+        const kmDa   = kmTot - (item.lastKm || 0);
+        const pct    = item.durata > 0 ? Math.min(100, Math.round(kmDa / item.durata * 100)) : 0;
+        const colore = pct >= 80 ? '#f44336' : pct >= 60 ? '#ff9800' : '#4caf50';
+        const wClass = pct >= 80 ? 'warn-high' : pct >= 60 ? 'warn-med' : 'warn-ok';
+        const warn   = pct >= 80 ? ' ⚠️' : '';
+        return `
+        <div class="inv-item ${wClass}">
+            <div class="inv-info">
+                <div class="inv-nome">${item.nome}${warn}</div>
+                <div class="inv-sub">
+                    Ogni ${item.durata} km &nbsp;|&nbsp; Percorsi: ${Math.round(kmDa)} km
+                    &nbsp;(<span style="color:${colore};font-weight:bold;">${pct}% usura</span>)
+                </div>
+                <div class="inv-usura-bar">
+                    <div class="inv-usura-fill" style="width:${pct}%;background:${colore};"></div>
+                </div>
+            </div>
+            <button class="inv-btn minus" onclick="sostituisciPezzo(${i})">−</button>
+            <span class="inv-qta ${item.qta===0?'zero':''}">${item.qta}</span>
+            <button class="inv-btn plus"  onclick="cambiaQta(${i},+1)">+</button>
+        </div>`;
+    }).join('');
+}
+
+// Aggiunge quantità senza sostituzione
+function cambiaQta(i, delta) {
+    const inv = caricaJSON('vt_inventario', []);
+    inv[i].qta = Math.max(0, (inv[i].qta || 0) + delta);
+    salva('vt_inventario', inv);
+    renderInventario();
+}
+
+// Sottrai 1 con dialog di sostituzione
+async function sostituisciPezzo(i) {
+    const inv  = caricaJSON('vt_inventario', []);
+    const item = inv[i];
+    if (item.qta <= 0) { showToast('⚠️ Nessun pezzo disponibile!'); return; }
+
+    const ok = await customConfirm(
+        '🔧 Sostituzione',
+        `Stai sostituendo "${item.nome}"?\n\nVuoi aprire un nuovo log di manutenzione?`
+    );
+
+    // Scala sempre la quantità
+    inv[i].qta    = Math.max(0, inv[i].qta - 1);
+    inv[i].lastKm = parseFloat(carica('vt_kmTotali','0'));
+    salva('vt_inventario', inv);
+    renderInventario();
+    showToast(`✅ ${item.nome} sostituito — usura azzerata`);
+
+    // Se vuole aprire il log, pre-compila e apre il modal
+    if (ok) {
+        document.getElementById('log-nome').value        = `Sostituzione: ${item.nome}`;
+        document.getElementById('log-descrizione').value = `Sostituito ${item.nome} a ${inv[i].lastKm.toFixed(1)} km.`;
+        document.getElementById('log-km').value          = inv[i].lastKm.toFixed(1);
+        document.getElementById('log-paese-input').value = carica('vt_paeseAttuale','Colombia');
+        document.getElementById('modal-log-titolo').innerText = `🔧 Log: ${item.nome}`;
+        apriModal('modalLogDettaglio');
+    }
+}
+
+function aggiungiRicambio() {
+    const nome   = document.getElementById('nuovoRicambioNome').value.trim();
+    const durata = parseInt(document.getElementById('nuovoRicambioDurata').value) || 5000;
+    if (!nome) { showToast('⚠️ Inserisci un nome'); return; }
+    const inv = caricaJSON('vt_inventario', []);
+    inv.push({ nome, qta:1, durata, lastKm: parseFloat(carica('vt_kmTotali','0')) });
+    salva('vt_inventario', inv);
+    document.getElementById('nuovoRicambioNome').value    = '';
+    document.getElementById('nuovoRicambioDurata').value  = '';
+    renderInventario();
+    showToast('✅ Ricambio aggiunto: ' + nome);
+}
+
+// ============================================================
+//  LOG MANUTENZIONE (espandibile)
+// ============================================================
+function salvaIntervento() {
+    const nome = document.getElementById('log-nome').value.trim();
+    if (!nome) { showToast('⚠️ Inserisci un nome per l\'intervento'); return; }
+
+    const desc  = document.getElementById('log-descrizione').value.trim();
+    const luogo = document.getElementById('log-luogo').value.trim()        || 'N/D';
+    const paese = document.getElementById('log-paese-input').value.trim()  || carica('vt_paeseAttuale','Colombia');
+    const costo = parseFloat(document.getElementById('log-costo').value)    || 0;
+    const kmLog = parseFloat(document.getElementById('log-km').value)       || parseFloat(carica('vt_kmTotali','0'));
+    const foto  = document.getElementById('anteprima-log-foto').dataset.src || null;
+    const now   = new Date();
+
+    const entry = {
+        id:           Date.now(),
+        data:         now.toLocaleDateString('it-IT'),
+        ora:          now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
+        paese:        paese,
+        luogo:        luogo,
+        km:           kmLog.toFixed(1),
+        kmInizio:     parseFloat(carica('vt_kmInizioViaggio','0')),
+        nome:         nome,
+        desc:         desc,
+        costo:        costo,
+        foto:         foto,
+        aggiornamenti: []
+    };
+
+    const log = caricaJSON('vt_logbook', []);
+    log.unshift(entry);
+    salva('vt_logbook', log);
+
+    // Reset form
+    ['log-nome','log-descrizione','log-luogo','log-paese-input','log-costo'].forEach(id => {
+        document.getElementById(id).value = '';
+    });
+    document.getElementById('log-km').value = parseFloat(carica('vt_kmTotali','0')).toFixed(1);
+    document.getElementById('anteprima-log-foto').style.display = 'none';
+    document.getElementById('anteprima-log-foto').dataset.src   = '';
+    document.getElementById('log-foto-input').value             = '';
+
+    chiudiModal('modalLogDettaglio');
+    showToast('🔧 Intervento salvato!');
+}
+
+function renderLogManutenzione() {
+    const log       = caricaJSON('vt_logbook', []);
+    const container = document.getElementById('contenutoRegistro');
+    if (!log.length) {
+        container.innerHTML = '<div style="color:#888;text-align:center;padding:30px;">Nessun intervento registrato</div>';
+        return;
+    }
+    container.innerHTML = log.map((e, idx) => `
+        <div class="log-card">
+            <div class="log-card-header" onclick="toggleLogCard(${idx})">
+                <div>
+                    <div class="log-card-title">🔧 ${e.nome}</div>
+                    <div class="log-card-meta">
+                        📅 ${e.data} &nbsp;|&nbsp; 📍 ${e.paese} — ${e.luogo}
+                        &nbsp;|&nbsp; 📏 ${e.km} km
+                    </div>
+                </div>
+                <div class="log-card-arrow" id="arrow-${idx}">▼</div>
+            </div>
+            <div class="log-card-body" id="logbody-${idx}">
+                ${e.desc  ? `<div style="font-size:14px;color:#ccc;line-height:1.5;margin-bottom:10px;">📝 ${e.desc}</div>` : ''}
+                ${e.costo > 0 ? `<div style="color:var(--verde);margin-bottom:8px;">💰 Costo: $${e.costo.toFixed(2)}</div>` : ''}
+                ${e.foto  ? `<img src="${e.foto}" class="log-card-foto" loading="lazy">` : ''}
+
+                <div style="font-size:12px;color:#888;margin:10px 0 5px;">
+                    📏 Km viaggio: ${(parseFloat(e.km) - parseFloat(e.kmInizio || 0)).toFixed(1)} km dall'inizio
+                </div>
+
+                ${(e.aggiornamenti || []).map((a, ai) => `
+                    <div class="log-aggiornamento">
+                        <div>${a.testo}</div>
+                        ${a.foto ? `<img src="${a.foto}" style="width:100%;border-radius:6px;margin-top:6px;">` : ''}
+                        <div class="log-aggiornamento-meta">
+                            📅 ${a.data} ${a.ora} &nbsp;|&nbsp; 📍 ${a.paese} — ${a.luogo}
+                            &nbsp;|&nbsp; 📏 ${a.km} km
+                            <button onclick="eliminaAggiornamento(${e.id}, ${ai})"
+                                style="background:none;border:none;color:#555;font-size:11px;cursor:pointer;margin-left:8px;">
+                                🗑️</button>
+                        </div>
+                    </div>`).join('')}
+
+                <div class="add-update-form">
+                    <div style="font-size:12px;color:#888;margin-bottom:6px;">✏️ Aggiungi aggiornamento:</div>
+                    <textarea id="upd-testo-${e.id}" placeholder="Nuovo aggiornamento, dettaglio..."
+                        rows="2" style="font-size:13px;"></textarea>
+                    <input type="text"   id="upd-luogo-${e.id}" placeholder="📍 Luogo" style="font-size:13px;">
+                    <input type="text"   id="upd-paese-${e.id}" placeholder="🗺️ Paese"
+                        value="${carica('vt_paeseAttuale','Colombia')}" style="font-size:13px;">
+                    <input type="file"   id="upd-foto-${e.id}"  accept="image/*"
+                        style="width:100%;margin:4px 0;" onchange="anteprimaUpd(${e.id})">
+                    <div id="upd-prev-${e.id}" style="display:none;margin-bottom:4px;"></div>
+                    <button class="btn-azione" style="margin-top:6px;padding:10px;"
+                        onclick="salvaAggiornamento(${e.id})">💾 Salva Aggiornamento</button>
+                </div>
+
+                <button onclick="eliminaIntervento(${e.id})"
+                    style="background:none;border:none;color:#555;font-size:12px;cursor:pointer;margin-top:10px;">
+                    🗑️ Elimina intervento</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function toggleLogCard(idx) {
+    const body  = document.getElementById('logbody-' + idx);
+    const arrow = document.getElementById('arrow-'   + idx);
+    const open  = body.classList.toggle('open');
+    arrow.classList.toggle('open', open);
+}
+
+function anteprimaUpd(entryId) {
+    const file = document.getElementById('upd-foto-' + entryId).files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const div = document.getElementById('upd-prev-' + entryId);
+        div.style.display = 'block';
+        div.innerHTML     = `<img src="${e.target.result}"
+            style="width:100%;border-radius:6px;max-height:120px;object-fit:cover;">`;
+        div.dataset.src   = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function salvaAggiornamento(entryId) {
+    const testo = document.getElementById('upd-testo-' + entryId).value.trim();
+    if (!testo) { showToast('⚠️ Scrivi qualcosa'); return; }
+
+    const luogo   = document.getElementById('upd-luogo-' + entryId).value.trim() || 'N/D';
+    const paese   = document.getElementById('upd-paese-' + entryId).value.trim() || carica('vt_paeseAttuale','Colombia');
+    const prevDiv = document.getElementById('upd-prev-'  + entryId);
+    const foto    = prevDiv.dataset.src || null;
+    const now     = new Date();
+
+    const aggiornamento = {
+        testo: testo, foto: foto, luogo: luogo, paese: paese,
+        data:  now.toLocaleDateString('it-IT'),
+        ora:   now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
+        km:    parseFloat(carica('vt_kmTotali','0')).toFixed(1)
+    };
+
+    const log = caricaJSON('vt_logbook', []);
+    const idx = log.findIndex(e => e.id === entryId);
+    if (idx === -1) return;
+    if (!log[idx].aggiornamenti) log[idx].aggiornamenti = [];
+    log[idx].aggiornamenti.push(aggiornamento);
+    salva('vt_logbook', log);
+
+    renderLogManutenzione();
+    // Riapri la card
+    setTimeout(() => {
+        const logIdx = caricaJSON('vt_logbook',[]).findIndex(e => e.id === entryId);
+        if (logIdx >= 0) {
+            const body  = document.getElementById('logbody-' + logIdx);
+            const arrow = document.getElementById('arrow-'   + logIdx);
+            if (body)  body.classList.add('open');
+            if (arrow) arrow.classList.add('open');
+        }
+    }, 50);
+
+    showToast('💾 Aggiornamento salvato!');
+}
+
+function eliminaAggiornamento(entryId, agIdx) {
+    const log = caricaJSON('vt_logbook', []);
+    const idx = log.findIndex(e => e.id === entryId);
+    if (idx === -1) return;
+    log[idx].aggiornamenti.splice(agIdx, 1);
+    salva('vt_logbook', log);
+    renderLogManutenzione();
+}
+
+async function eliminaIntervento(id) {
+    const ok = await customConfirm('🗑️ Elimina Intervento','Eliminare questo intervento?');
+    if (!ok) return;
+    salva('vt_logbook', caricaJSON('vt_logbook',[]).filter(e => e.id !== id));
+    renderLogManutenzione();
+    showToast('🗑️ Intervento eliminato');
+}
+
+// ============================================================
+//  CARBURAZIONE
+// ============================================================
+function salvaCarburazione() {
+    const chicMax = validaInput('carbChiclerMax', 1, 999);
+    const chicMin = validaInput('carbChiclerMin', 1, 999);
+    if (!chicMax || !chicMin) { showToast('⚠️ Inserisci i valori chicler'); return; }
+
+    const nota = document.getElementById('carbNote').value.trim();
+    const now  = new Date();
+    const entry = {
+        id:      Date.now(),
+        data:    now.toLocaleDateString('it-IT'),
+        alt:     altitudineAttuale,
+        chicMax: chicMax,
+        chicMin: chicMin,
+        nota:    nota
+    };
+    const storico = caricaJSON('vt_carburazione', []);
+    storico.unshift(entry);
+    salva('vt_carburazione', storico);
+    document.getElementById('carbChiclerMax').value = '';
+    document.getElementById('carbChiclerMin').value = '';
+    document.getElementById('carbNote').value       = '';
+    showToast('🌬️ Setup carburazione salvato!');
+}
+
+function renderStoricoCarbur() {
+    const storico   = caricaJSON('vt_carburazione', []);
+    const container = document.getElementById('contenutoCarb');
+    if (!storico.length) {
+        container.innerHTML = '<div style="color:#888;text-align:center;padding:30px;">Nessun setup registrato</div>';
+        return;
+    }
+    container.innerHTML = storico.map(e => `
+        <div class="log-entry-full" style="border-color:#00bcd4;">
+            <div style="font-weight:bold;color:#00bcd4;">🌬️ ${e.data}</div>
+            <div>⛰️ Altitudine: <b>${e.alt} m</b></div>
+            <div>🔧 Chicler Max: <b>${e.chicMax}</b> &nbsp;|&nbsp; Min: <b>${e.chicMin}</b></div>
+            ${e.nota ? `<div style="font-style:italic;color:#aaa;margin-top:6px;">📝 ${e.nota}</div>` : ''}
+        </div>
+    `).join('');
+}
+
+// ============================================================
+//  CHECKLIST
+// ============================================================
+function renderChecklist() {
+    const lista     = caricaJSON('vt_checklist', []);
+    const container = document.getElementById('checklist-container');
+    if (!container) return;
+    container.innerHTML = lista.map((item, i) => `
+        <div class="checklist-item ${item.fatto ? 'done' : ''}" onclick="toggleCheck(${i})">
+            <input type="checkbox" ${item.fatto ? 'checked' : ''}
+                onclick="event.stopPropagation(); toggleCheck(${i})">
+            <span>${item.nome}</span>
+            <button onclick="event.stopPropagation(); eliminaCheck(${i})"
+                style="background:none;border:none;color:#666;margin-left:auto;cursor:pointer;font-size:16px;">
+                🗑️</button>
+        </div>
+    `).join('');
+}
+
+function toggleCheck(i) {
+    const lista = caricaJSON('vt_checklist', []);
+    lista[i].fatto = !lista[i].fatto;
+    salva('vt_checklist', lista);
+    renderChecklist();
+}
+
+function eliminaCheck(i) {
+    const lista = caricaJSON('vt_checklist',[]).filter((_,idx) => idx !== i);
+    salva('vt_checklist', lista);
+    renderChecklist();
+}
+
+function aggiungiCheckItem() {
+    const nome = document.getElementById('nuovaCheckItem').value.trim();
+    if (!nome) { showToast('⚠️ Inserisci un testo'); return; }
+    const lista = caricaJSON('vt_checklist', []);
+    lista.push({ id: Date.now(), nome, fatto: false });
+    salva('vt_checklist', lista);
+    document.getElementById('nuovaCheckItem').value = '';
+    renderChecklist();
+    showToast('✅ Elemento aggiunto');
+}
+
+// ============================================================
+//  EXPORT / IMPORT
+// ============================================================
+function esportaDati() {
+    const chiavi = [
+        'vt_kmTotali','vt_kmInizioViaggio','vt_odoUltimoPieno',
+        'vt_scortaLitri','vt_olioTotaleMl','vt_benzinaUsata',
+        'vt_spesaBenzina','vt_spesaOlio','vt_paeseAttuale',
+        'vt_datiPaesi','vt_tappe','vt_logbook','vt_diario',
+        'vt_logCarburanti','vt_coordinateTracciato',
+        'vt_carburazione','vt_checklist','vt_inventario','vt_tappaAttuale'
+    ];
+
+    const backup = { _version:'1.2', _exportDate: new Date().toISOString() };
+    chiavi.forEach(k => { backup[k] = localStorage.getItem(k); });
+
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type:'application/json' });
+    const url  = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `vespatrek_backup_${new Date().toLocaleDateString('it-IT').replace(/\//g,'-')}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    URL.revokeObjectURL(url);
+    showToast('💾 Backup esportato!');
+}
+
+// ============================================================
+//  RESET TOTALE
+// ============================================================
+async function resetTutto() {
+    const ok1 = await customConfirm(
+        '⚠️ RESET COMPLETO',
+        'Questo cancellerà TUTTI i dati.\nEsporta prima un backup!'
+    );
+    if (!ok1) return;
+    const ok2 = await customConfirm(
+        '⚠️ SEI SICURO?',
+        'Operazione IRREVERSIBILE.\nTutti i km, tappe, diario e log verranno eliminati.'
+    );
+    if (!ok2) return;
+    Object.keys(localStorage)
+          .filter(k => k.startsWith('vt_'))
+          .forEach(k => localStorage.removeItem(k));
+    showToast('🔄 Reset completato. Ricarico...');
+    setTimeout(() => location.reload(), 1000);
+}
+
+// ============================================================
+//  LOADING SCREEN
+// ============================================================
+async function setLoadingProgress(pct, label) {
+    document.getElementById('loading-bar').style.width = pct + '%';
+    document.getElementById('loading-label').innerText = label;
+    await new Promise(r => setTimeout(r, 200));
+}
+
+async function inizializzaApp() {
+    try {
+        await setLoadingProgress(10, '🗄️ Database...');
+        initAllData();
+
+        await setLoadingProgress(30, '🗺️ Mappa...');
+        if (coordinateTracciato.length > 0) {
+            polyline.setLatLngs(coordinateTracciato);
+            map.setView(coordinateTracciato[coordinateTracciato.length - 1], 13);
+        }
+
+        await setLoadingProgress(50, '📡 GPS...');
+       setGPSMode('passive');
+
+        await setLoadingProgress(70, '🖥️ Interfaccia...');
+        const paese = carica('vt_paeseAttuale', 'Colombia');
+        const selP  = document.getElementById('selectPaese');
+        const lblP  = document.getElementById('lbl-paese-benzina');
+        if (selP) selP.value     = paese;
+        if (lblP) lblP.innerText = paese;
+
+        await setLoadingProgress(85, '⚙️ Componenti...');
+        aggiornaUI();
+        aggiornaTempoGuidaUI();
+        renderDiario();
+
+        await setLoadingProgress(100, '✅ Pronto!');
+        await new Promise(r => setTimeout(r, 400));
+
+        const loadingEl = document.getElementById('loading');
+        loadingEl.style.transition = 'opacity 0.5s';
+        loadingEl.style.opacity    = '0';
+        setTimeout(() => { loadingEl.style.display = 'none'; }, 500);
+
+    } catch(e) {
+        console.error('Errore inizializzazione:', e);
+        document.getElementById('loading-label').innerText = '❌ Errore: ' + e.message;
+    }
+}
+
+// ============================================================
+//  AVVIO
+// ============================================================
+window.addEventListener('load', inizializzaApp);
+
+</script>
+</body>
+</html>
