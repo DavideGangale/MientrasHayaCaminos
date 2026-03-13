@@ -927,6 +927,9 @@ function toggleTracking() {
 
 //updateWakeLockPolicy();
 
+syncWakeLock();
+
+
 }
 
 
@@ -934,6 +937,7 @@ function toggleTracking() {
 // Pausa automatica quando app va in background
 document.addEventListener('visibilitychange', () => {
     //updateWakeLockPolicy();
+   syncWakeLock();
 
     if (document.hidden && inViaggio) {
         clearInterval(timerGuida);
@@ -995,6 +999,43 @@ function concludiTappa() {
     showToast(`🏁 Tappa salvata: ${tappa.km} km`);
     aggiornaUI();
 }
+
+
+
+
+let wakeLock = null;
+let wakeLockEnabled = true;
+
+async function requestWakeLock() {
+  if (!wakeLockEnabled) return;
+  if (!('wakeLock' in navigator)) return;
+  if (wakeLock) return;
+  if (document.visibilityState !== 'visible') return;
+
+  try {
+    wakeLock = await navigator.wakeLock.request('screen');
+    wakeLock.addEventListener('release', () => { wakeLock = null; });
+  } catch (e) {
+    console.warn('WakeLock request error:', e);
+  }
+}
+
+async function releaseWakeLock() {
+  if (!wakeLock) return;
+  try { await wakeLock.release(); } catch (e) {}
+  wakeLock = null;
+}
+
+function syncWakeLock() {
+  if (inViaggio && document.visibilityState === 'visible') requestWakeLock();
+  else releaseWakeLock();
+}
+
+
+
+
+
+
 </script>
 
 <script>
