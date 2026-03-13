@@ -393,6 +393,9 @@
         </div>
 
         <button class="btn-azione" style="background:#9c27b0;" onclick="apriModal('modalTappe')">🗺️ APRI DIARIO TAPPE</button>
+
+    <button class="btn-secondary" style="margin-top:10px;" onclick="condividiMomentoPreview()">📤 Condividi su Instagram</button>
+        
         <button class="btn-azione" style="background:#2196F3;" onclick="apriModalPaesi()">🌎 STATISTICHE PER PAESE</button>
 
         <!-- DIARIO -->
@@ -412,6 +415,9 @@
         <div class="dash-card" style="border:2px solid #555; margin-top:10px;">
             <h3 style="margin-top:0; color:#aaa;">💾 Backup Dati</h3>
             <button class="btn-azione" style="background:#607d8b;" onclick="esportaDati()">⬇️ ESPORTA BACKUP JSON</button>
+
+<button class="btn-secondary" onclick="esportaDatiLight()">⬇️ ESPORTA BACKUP (LIGHT)</button>
+            
             <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importaDati(this)">
             <button class="btn-secondary" onclick="document.getElementById('import-file').click()">⬆️ IMPORTA BACKUP</button>
         </div>
@@ -608,6 +614,9 @@
     <button class="nav-btn" onclick="cambiaPagina('officina',this)">
         <span class="nav-icon">🔧</span>OFFICINA
     </button>
+
+
+    
 </div>
 
 
@@ -999,6 +1008,31 @@ function aggiornaTempoGuidaUI() {
         `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 }
 
+
+async function condividiMomentoPreview() {
+  const testo = document.getElementById('momento-testo').value.trim();
+  const foto  = document.getElementById('momento-foto-preview').dataset.src || null;
+
+  const paese = carica('vt_paeseAttuale','Colombia');
+  const km    = parseFloat(carica('vt_kmTotali','0')).toFixed(1);
+
+  const caption = [
+    '🛵 VespaTrek PX150',
+    `📍 ${paese} — km ${km}`,
+    testo ? `\n${testo}` : '',
+    '\n#vespa #overland #sudamerica'
+  ].join('');
+
+  await shareToInstagram({
+    text: caption,
+    dataUrl: foto,
+    filename: `momento_${Date.now()}.jpg`
+  });
+}
+
+
+
+    
 // ============================================================
 //  CONCLUDI TAPPA
 // ============================================================
@@ -1066,7 +1100,47 @@ function cambiaPagina(id, btn) {
     if (id === 'viaggio')  aggiornaUI();
 }
 
+function dataURLToFile(dataUrl, filename = 'foto.jpg') {
+  const arr = dataUrl.split(',');
+  const mime = arr[0].match(/:(.*?);/)[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) u8arr[n] = bstr.charCodeAt(n);
+  return new File([u8arr], filename, { type: mime });
+}
 
+async function shareToInstagram({ text, dataUrl, filename }) {
+  // fallback se non supportato
+  if (!navigator.share) {
+    showToast('⚠️ Condivisione non supportata: usa screenshot o copia/incolla');
+    return false;
+  }
+
+  try {
+    const shareData = { text: text || '' };
+
+    // Se c'è una foto, prova a condividere anche il file
+    if (dataUrl) {
+      const file = dataURLToFile(dataUrl, filename || 'vespatrek.jpg');
+
+      // Verifica se il browser supporta la condivisione file
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        shareData.files = [file];
+      } else {
+        // se non può condividere file, condivide solo testo
+        showToast('ℹ️ Il browser non può condividere la foto, invio solo testo');
+      }
+    }
+
+    await navigator.share(shareData);
+    return true;
+  } catch (e) {
+    // user cancel o errore
+    console.warn('share error', e);
+    return false;
+  }
+}
 
 
 // ============================================================
@@ -1759,6 +1833,65 @@ function aggiungiCheckItem() {
     showToast('✅ Elemento aggiunto');
 }
 
+
+function esportaDatiLight() {
+  const chiavi = [
+    'vt_kmTotali','vt_kmInizioViaggio','vt_odoUltimoPieno',
+    'vt_scortaLitri','vt_olioTotaleMl','vt_benzinaUsata',
+    'vt_spesaBenzina','vt_spesaOlio','vt_paeseAttuale',
+    'vt_datiPaesi','vt_tappe','vt_logbook','vt_diario',
+    'vt_logCarburanti','vt_coordinateTracciato',
+    'vt_carburazione','vt_checklist','vt_inventario','vt_tappaAttuale'
+  ];
+
+  const backup = { _version:'1.2-light', _exportDate: new Date().toISOString() };
+
+  chiavi.forEach(k => backup[k] = localStorage.getItem(k));
+
+  // “ripulisci” oggetti JSON dalle immagini (se presenti)
+  try {
+    // TAPPE: rimuovi snapshot + foto waypoint
+    const tappe = JSON.parse(backup.vt_tappe || '[]');
+    tappe.forEach(t => {
+      if (t) t.snapshot = null;
+      (t.waypoints || []).forEach(wp => { if (wp) wp.foto = null; });
+    });
+    backup.vt_tappe = JSON.stringify(tappe);
+
+    // DIARIO: rimuovi foto + foto note
+    const diario = JSON.parse(backup.vt_diario || '[]');
+    diario.forEach(d => {
+      if (d) d.foto = null;
+      (d.note || []).forEach(n => { if (n) n.foto = null; });
+    });
+    backup.vt_diario = JSON.stringify(diario);
+
+    // LOGBOOK: rimuovi foto + foto aggiornamenti
+    const logbook = JSON.parse(backup.vt_logbook || '[]');
+    logbook.forEach(e => {
+      if (e) e.foto = null;
+      (e.aggiornamenti || []).forEach(a => { if (a) a.foto = null; });
+    });
+    backup.vt_logbook = JSON.stringify(logbook);
+  } catch (e) {
+    console.warn('Backup light sanitize error:', e);
+  }
+
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type:'application/json' });
+  const url  = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `vespatrek_backup_LIGHT_${new Date().toLocaleDateString('it-IT').replace(/\//g,'-')}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  URL.revokeObjectURL(url);
+  showToast('💾 Backup LIGHT esportato!');
+}
+
+    
 // ============================================================
 //  EXPORT / IMPORT BACKUP
 // ============================================================
