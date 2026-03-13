@@ -396,6 +396,8 @@
 
         <button class="btn-secondary" style="margin-top:10px;" onclick="condividiMomentoPreview()">📤 Condividi su Instagram</button>
 
+       
+
         <button class="btn-secondary" style="margin-top:10px;" onclick="testShareClick()">📤 Condividi su Instagram (TEST)</button>
         
         <button class="btn-azione" style="background:#2196F3;" onclick="apriModalPaesi()">🌎 STATISTICHE PER PAESE</button>
@@ -1115,24 +1117,76 @@ function dataURLToFile(dataUrl, filename = 'foto.jpg') {
 
 
 
-    
-window.testShareClick = function () {
-  alert(
-    'HTTPS secureContext: ' + window.isSecureContext +
-    '\nnavigator.share: ' + (!!navigator.share) +
-    '\nnavigator.canShare: ' + (!!navigator.canShare)
-  );
 
-  if (!navigator.share) return;
+    window.condividiMomentoPreview = function () {
+  try {
+    if (!navigator.share) {
+      showToast('⚠️ Condivisione non supportata');
+      return;
+    }
 
-  // IMPORTANTISSIMO: chiamata DIRETTA, senza setTimeout e senza await prima
-  navigator.share({ text: 'Test share VespaTrek' })
-    .then(() => alert('Share OK'))
-    .catch(e => {
-      console.warn(e);
-      alert('Share error: ' + e.name);
+    const testoEl = document.getElementById('momento-testo');
+    const prevEl  = document.getElementById('momento-foto-preview');
+
+    const testo = testoEl ? testoEl.value.trim() : '';
+    const foto  = (prevEl && prevEl.dataset && prevEl.dataset.src) ? prevEl.dataset.src : null;
+
+    const paese = carica('vt_paeseAttuale','Colombia');
+    const km    = parseFloat(carica('vt_kmTotali','0') || '0').toFixed(1);
+
+    const caption =
+`🛵 VespaTrek PX150
+📍 ${paese} — km ${km}
+${testo ? '\n' + testo : ''}
+
+#vespa #overland #sudamerica`;
+
+    const shareData = { text: caption };
+
+    if (foto) {
+      const file = dataURLToFile(foto, `momento_${Date.now()}.jpg`);
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        shareData.files = [file];
+      } else {
+        showToast('ℹ️ Non posso condividere la foto, invio solo testo');
+      }
+    } else {
+      showToast('ℹ️ Nessuna foto: invio solo testo');
+    }
+
+    navigator.share(shareData).catch(e => {
+      console.warn('share error:', e);
+      // AbortError = utente ha annullato, non è un problema
+      if (e && e.name !== 'AbortError') showToast('❌ Share: ' + e.name);
     });
+
+  } catch (e) {
+    console.warn('condividiMomentoPreview error:', e);
+    showToast('❌ Errore condivisione');
+  }
 };
+    
+
+
+    
+    
+//window.testShareClick = function () {
+//  alert(
+//    'HTTPS secureContext: ' + window.isSecureContext +
+//    '\nnavigator.share: ' + (!!navigator.share) +
+//    '\nnavigator.canShare: ' + (!!navigator.canShare)
+//  );
+//
+//  if (!navigator.share) return;
+//
+//  // IMPORTANTISSIMO: chiamata DIRETTA, senza setTimeout e senza await prima
+//  navigator.share({ text: 'Test share VespaTrek' })
+//    .then(() => alert('Share OK'))
+//    .catch(e => {
+//      console.warn(e);
+//      alert('Share error: ' + e.name);
+//    });
+//};
 
 
 
