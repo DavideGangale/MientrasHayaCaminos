@@ -638,11 +638,20 @@ let tappaAttuale     = { kmInizio:0, kmPercorsi:0, altMin:9999, altMax:0, second
 const CONSUMO_MEDIO  = 28; // km/L stimato PX150
 const MAX_PUNTI_MAPPA = 500;
 
-let wakeLockEnabled = false;
+let tappaAttuale = {
+  kmInizio: 0,
+  kmPercorsi: 0,
+  altMin: 9999,
+  altMax: 0,
+  secondiGuida: 0,
+  benzinaUsata: 0,
+  waypoints: []
+};
 
-let wakeLock = null;
-//let wakeLockEnabled = true; // se vuoi poterlo disattivare in futuro
+const CONSUMO_MEDIO   = 28; // km/L stimato PX150
+const MAX_PUNTI_MAPPA = 500;
 
+// ===== WAKE LOCK (schermo acceso durante tracking) =====
 let wakeLock = null;
 let wakeLockEnabled = true;
 
@@ -1034,33 +1043,7 @@ function concludiTappa() {
 
 
 
-let wakeLock = null;
-let wakeLockEnabled = true;
 
-async function requestWakeLock() {
-  if (!wakeLockEnabled) return;
-  if (!('wakeLock' in navigator)) return;
-  if (wakeLock) return;
-  if (document.visibilityState !== 'visible') return;
-
-  try {
-    wakeLock = await navigator.wakeLock.request('screen');
-    wakeLock.addEventListener('release', () => { wakeLock = null; });
-  } catch (e) {
-    console.warn('WakeLock request error:', e);
-  }
-}
-
-async function releaseWakeLock() {
-  if (!wakeLock) return;
-  try { await wakeLock.release(); } catch (e) {}
-  wakeLock = null;
-}
-
-function syncWakeLock() {
-  if (inViaggio && document.visibilityState === 'visible') requestWakeLock();
-  else releaseWakeLock();
-}
 
 
 
