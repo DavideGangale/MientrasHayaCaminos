@@ -1039,6 +1039,12 @@ const CONSUMO_MEDIO      = 28;
 const MAX_PUNTI_MAPPA    = 500;
 let diarioCorrenteId     = null;
 
+
+const GPS_ACC_MAX_TRACK = 80;   // accettazione punti per sommare km (metri)
+const GPS_MIN_STEP_KM   = 0.01; // 10 metri: sotto è rumore
+const GPS_MAX_SPEED_KMH = 140;  // filtro anti-salti GPS
+
+
 let tappaCorrenteId = null;
 let tappaDetailMap = null;
 let tappaDetailPolyline = null;
@@ -1207,7 +1213,7 @@ function annullaCambioPaese() {
 // ============================================================
 const map = L.map('map', { zoomControl:true, attributionControl:false })
              .setView([4.7, -74.1], 5);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     maxZoom: 19,
     crossOrigin: true
 }).addTo(map);
@@ -1297,15 +1303,25 @@ function calcolaDistanza(lat1, lon1, lat2, lon2) {
 }
 
 function updatePosition(pos) {
-    const lat   = pos.coords.latitude;
-    const lon   = pos.coords.longitude;
-    const speed = calcolaVelocita(pos);
-    altitudineAttuale = pos.coords.altitude ? Math.round(pos.coords.altitude) : altitudineAttuale;
+    const lat = pos.coords.latitude;
+    const lon = pos.coords.longitude;
 
+    const acc = (typeof pos.coords.accuracy === 'number') ? pos.coords.accuracy : 9999;
+
+    // velocità (km/h) — può essere stimata
+    const speed = calcolaVelocita(pos);
+
+    // altitudine
+    altitudineAttuale = (pos.coords.altitude !== null && pos.coords.altitude !== undefined)
+        ? Math.round(pos.coords.altitude)
+        : altitudineAttuale;
+
+    // UI base
     document.getElementById('speedometer').innerText   = speed;
     document.getElementById('ui-altitudine').innerText = altitudineAttuale + ' m';
     document.getElementById('carb-alt').innerText      = altitudineAttuale;
 
+    // aggiorna mappa (anche se non stai tracciando)
     const ora = Date.now();
     if (ora - ultimoAggiornamentoMappa > 3000) {
         map.setView([lat, lon], 16);
@@ -1313,44 +1329,82 @@ function updatePosition(pos) {
         ultimoAggiornamentoMappa = ora;
     }
 
-    if (inViaggio && pos.coords.accuracy < 50 && speed > 2) {
-        if (altitudineAttuale < tappaAttuale.altMin) tappaAttuale.altMin = altitudineAttuale;
-        if (altitudineAttuale > tappaAttuale.altMax) tappaAttuale.altMax = altitudineAttuale;
+    // Se non sei in viaggio non sommare km, ma tieni comunque aggiornati riferimenti minimi
+    if (!inViaggio) {
+        // aggiorna riferimenti per velocità stimata
+        lastLat = lat; lastLon = lon; lastTimestamp = pos.timestamp;
+        return;
+    }
 
+    // In viaggio: filtra per accuratezza (se GPS è troppo impreciso, non registrare)
+    if (acc > GPS_ACC_MAX_TRACK) {
+        // però aggiorna comunque last* per evitare "blocco" totale quando l'acc migliora
+        lastLat = lat; lastLon = lon; lastTimestamp = pos.timestamp;
+        return;
+    }
+
+    // Aggiorna min/max altitudine tappa
+    if (altitudineAttuale < tappaAttuale.altMin) tappaAttuale.altMin = altitudineAttuale;
+    if (altitudineAttuale > tappaAttuale.altMax) tappaAttuale.altMax = altitudineAttuale;
+
+    // Se è il primo punto valido della tappa, inizializza traccia e riferimenti
+    if (lastLat === null || lastLon === null || !lastTimestamp) {
+        coordinateTracciato.push([lat, lon]);
+        polyline.setLatLngs(coordinateTracciato);
+        lastLat = lat; lastLon = lon; lastTimestamp = pos.timestamp;
+        salva('vt_tappaAttuale', tappaAttuale);
+        return;
+    }
+
+    // Calcola distanza e dt
+    const distKm = calcolaDistanza(lastLat, lastLon, lat, lon);
+    const dtH    = (pos.timestamp - lastTimestamp) / 3600000; // ore
+    const dtS    = (pos.timestamp - lastTimestamp) / 1000;    // secondi
+
+    // filtro anti-salti: distanza massima plausibile in base al tempo trascorso
+    const maxDistPlausibile =
+        dtH > 0 ? (GPS_MAX_SPEED_KMH * dtH + 0.05) : 0.2; // +50m margine
+
+    // Registra solo se è un passo "sensato"
+    const passoValido =
+        distKm >= GPS_MIN_STEP_KM &&
+        distKm <= Math.min(2.0, maxDistPlausibile) &&  // mai oltre 2km a step
+        dtS >= 1;                                      // evita duplicati rapidissimi
+
+    if (passoValido) {
+        // aggiorna traccia
         coordinateTracciato.push([lat, lon]);
         if (coordinateTracciato.length > MAX_PUNTI_MAPPA) {
-            coordinateTracciato = coordinateTracciato.filter((_,i) => i % 2 === 0);
+            coordinateTracciato = coordinateTracciato.filter((_, i) => i % 2 === 0);
         }
         polyline.setLatLngs(coordinateTracciato);
 
+        // salva traccia ogni tot punti
         puntiDaSalvare++;
         if (puntiDaSalvare >= 10) {
             salva('vt_coordinateTracciato', coordinateTracciato);
             puntiDaSalvare = 0;
         }
 
-        if (lastLat !== null) {
-            const dist = calcolaDistanza(lastLat, lastLon, lat, lon);
-            if (dist < 0.5 && dist > 0) {
-                const kmTot = parseFloat(carica('vt_kmTotali','0')) + dist;
-                salva('vt_kmTotali', kmTot.toFixed(4));
+        // somma km totali e km tappa
+        const kmTot = parseFloat(carica('vt_kmTotali', '0')) + distKm;
+        salva('vt_kmTotali', kmTot.toFixed(4));
 
-                tappaAttuale.kmPercorsi += dist;
-                salva('vt_tappaAttuale', tappaAttuale);
+        tappaAttuale.kmPercorsi += distKm;
+        salva('vt_tappaAttuale', tappaAttuale);
 
-                const paese     = carica('vt_paeseAttuale','Colombia');
-                const datiPaesi = caricaJSON('vt_datiPaesi', {});
-                if (!datiPaesi[paese]) datiPaesi[paese] = { km:0, benzina:0, spesaBenzina:0, spesaOlio:0 };
-                datiPaesi[paese].km += dist;
-                salva('vt_datiPaesi', datiPaesi);
+        // stats per paese
+        const paese     = carica('vt_paeseAttuale', 'Colombia');
+        const datiPaesi = caricaJSON('vt_datiPaesi', {});
+        if (!datiPaesi[paese]) datiPaesi[paese] = { km:0, benzina:0, spesaBenzina:0, spesaOlio:0 };
+        datiPaesi[paese].km += distKm;
+        salva('vt_datiPaesi', datiPaesi);
 
-                aggiornaUI();
-            }
-        }
-        lastLat       = lat;
-        lastLon       = lon;
-        lastTimestamp = pos.timestamp;
+        aggiornaUI();
     }
+
+    // aggiorna sempre riferimento (anche se il passo non era valido)
+    lastLat = lat; lastLon = lon; lastTimestamp = pos.timestamp;
 }
 
 // ============================================================
@@ -1428,10 +1482,10 @@ async function generaSnapshotDaTraccia(track) {
 
         const m = L.map(div, { zoomControl:false, attributionControl:false, preferCanvas:true });
 
-        const tiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            maxZoom: 19,
-            crossOrigin: true
-        }).addTo(m);
+const tiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19,
+    crossOrigin: true
+}).addTo(m);
 
         const pl = L.polyline(track, { color:'#d32f2f', weight:5, opacity:0.9 }).addTo(m);
 
@@ -1714,10 +1768,10 @@ function initMappaDettaglioTappa(t) {
   // crea una nuova mappa (container può essere riusato ma più stabile ricrearla ogni open)
   tappaDetailMap = L.map(el, { zoomControl:true, attributionControl:false, preferCanvas:true });
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    maxZoom: 19,
-    crossOrigin: true
-  }).addTo(tappaDetailMap);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  maxZoom: 19,
+  crossOrigin: true
+}).addTo(tappaDetailMap);
 
   const track = Array.isArray(t.track) ? t.track : [];
   if (track.length >= 2) {
