@@ -1660,7 +1660,7 @@ function registraAcquisto() {
     const qtaLitri = (unitaAttuale === 'G') ? (qtaInput * FAT_GAL) : qtaInput;
 
     const paese = carica('vt_paeseAttuale', 'Colombia');
-    const luogo = document.getElementById('inputLuogo').value.trim() || 'N/D';
+    //const luogo = document.getElementById('inputLuogo').value.trim() || 'N/D';
     const now   = new Date();
 
     // Totale pagato benzina (USD) (opzionale)
