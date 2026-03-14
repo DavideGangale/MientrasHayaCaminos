@@ -2778,6 +2778,28 @@ function resetTutto() {
   setTimeout(() => location.reload(), 1000);
 }
 
+
+
+function aggiornaTempoGuidaUI() {
+  const el = document.getElementById('ui-tempo-guida');
+  if (!el) return;
+
+  const sec = (tappaAttuale && tappaAttuale.secondiGuida) ? tappaAttuale.secondiGuida : 0;
+
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  const s = sec % 60;
+
+  el.innerText = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+
+
+
+
+
+
+  
 /* ============================================================
    LOADING SCREEN
 ============================================================ */
