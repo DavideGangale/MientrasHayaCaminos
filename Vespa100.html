@@ -813,6 +813,7 @@
 
 
 
+
   
 <div id="modalFuelStart" class="modal-overlay">
   <div class="modal-content" style="border-color:#4caf50; max-width:520px;">
@@ -840,6 +841,8 @@
     </button>
   </div>
 </div>
+
+
 
 
 
@@ -1440,9 +1443,14 @@ function concludiTappa() {
     velMax: tappaAttuale.velMax || 0,
     traccia: coordinateTracciato.filter((_, i) => i % 3 === 0), // salva 1 punto ogni 3 (più leggero)
 
+
+
+
     fuelStartGal: tappaAttuale.fuelStartGal,
     fuelStartLitri: tappaAttuale.fuelStartLitri,
     fuelAddedLitri: tappaAttuale.fuelAddedLitri || 0,
+
+    // benzina stimata dalla app (quella che già usi nei contatori)
     benzinaStimataLitri: parseFloat((tappaAttuale.benzinaUsata || 0).toFixed(3)),
     
     velMedia: velMedia ? parseFloat(velMedia.toFixed(1)) : null
@@ -1570,70 +1578,108 @@ function salvaFuelFineTappa() {
   const gal = sel ? parseFloat(sel.value) : 0;
   const litri = gal * FAT_GAL;
 
+  // salva stato serbatoio “corrente”
   salva('vt_serbatoioLitri', litri.toFixed(3));
 
+  let tappaAggiornata = null;
+
+  // salva anche dentro la tappa (storico)
   if (pendingFuelTappaId) {
     const tappe = caricaJSON('vt_tappe', []);
     const idx = tappe.findIndex(t => t.id === pendingFuelTappaId);
+
     if (idx !== -1) {
+      // fuel END
       tappe[idx].fuelEndGal = gal;
       tappe[idx].fuelEndLitri = parseFloat(litri.toFixed(3));
 
-      // ==== CALCOLO CONSUMO REALE vs STIMATO ====
-      const startL = tappe[idx].fuelStartLitri;
-      const endL   = tappe[idx].fuelEndLitri;
-      const addedL = tappe[idx].fuelAddedLitri || 0;
+      // calcoli real vs stimato
+      const startL = (tappe[idx].fuelStartLitri != null) ? Number(tappe[idx].fuelStartLitri) : null;
+      const endL   = Number(tappe[idx].fuelEndLitri);
+      const addedL = Number(tappe[idx].fuelAddedLitri || 0);
 
       const stimL  = Number(tappe[idx].benzinaStimataLitri ?? tappe[idx].benzina ?? 0);
 
-      if (startL != null && endL != null) {
-        const consumati = (startL + addedL - endL);
-
-        tappe[idx].benzinaRealeLitri = parseFloat(consumati.toFixed(3));
-        tappe[idx].consumoRealeKmL   = (consumati > 0) ? parseFloat((tappe[idx].km / consumati).toFixed(2)) : null;
-
-        tappe[idx].consumoStimatoKmL = (stimL > 0) ? parseFloat((tappe[idx].km / stimL).toFixed(2)) : null;
+      if (startL != null) {
+        const realL = Math.max(0, (startL + addedL - endL));
+        tappe[idx].benzinaRealeLitri = parseFloat(realL.toFixed(3));
+        tappe[idx].consumoRealeKmL = (realL > 0) ? parseFloat((tappe[idx].km / realL).toFixed(2)) : null;
       } else {
         tappe[idx].benzinaRealeLitri = null;
         tappe[idx].consumoRealeKmL = null;
-        tappe[idx].consumoStimatoKmL = (stimL > 0) ? parseFloat((tappe[idx].km / stimL).toFixed(2)) : null;
       }
 
-      // Prepara finestra confronto
-      const t = tappe[idx];
-      const box = document.getElementById('contenutoConsumo');
-      if (box) {
-        box.innerHTML = `
-          <div class="log-entry-full" style="border-left-color:#00bcd4;">
-            <div style="font-weight:bold;">🏁 ${t.data} ${t.ora} — ${t.paese}</div>
-            <div>📏 KM: <b>${t.km}</b></div>
-            <hr style="border:0;border-top:1px solid #444;margin:10px 0;">
-            <div>⛽ Inizio: <b>${(t.fuelStartLitri ?? 0).toFixed(2)} L</b></div>
-            <div>➕ Aggiunti in tappa: <b>${(t.fuelAddedLitri || 0).toFixed(2)} L</b></div>
-            <div>⛽ Fine: <b>${(t.fuelEndLitri ?? 0).toFixed(2)} L</b></div>
-            <hr style="border:0;border-top:1px solid #444;margin:10px 0;">
-            <div>🧮 Stimato (app): <b>${Number(t.benzinaStimataLitri ?? t.benzina ?? 0).toFixed(2)} L</b>
-              → <b style="color:var(--giallo)">${t.consumoStimatoKmL ?? '--'} km/L</b></div>
-            <div>🔥 Reale (da livello): <b>${(t.benzinaRealeLitri != null ? t.benzinaRealeLitri.toFixed(2) : '--')} L</b>
-              → <b style="color:var(--verde)">${t.consumoRealeKmL ?? '--'} km/L</b></div>
-          </div>
-        `;
-      }
+      tappe[idx].consumoStimatoKmL = (stimL > 0) ? parseFloat((tappe[idx].km / stimL).toFixed(2)) : null;
 
-      
       salva('vt_tappe', tappe);
+      tappaAggiornata = tappe[idx];
     }
   }
 
   pendingFuelTappaId = null;
+
   chiudiModal('modalFuelEnd');
-  
   aggiornaUI();
   showToast('⛽ Livello fine tappa salvato');
 
-apriModal('modalConsumo');
-  
+  // Mostra confronto se ho la tappa
+  if (tappaAggiornata) {
+    mostraConfrontoConsumoTappa(tappaAggiornata);
+    apriModal('modalConsumo');
+  }
 }
+
+function mostraConfrontoConsumoTappa(t) {
+  const box = document.getElementById('contenutoConsumo');
+  if (!box) return;
+
+  const startL = (t.fuelStartLitri != null) ? Number(t.fuelStartLitri) : null;
+  const endL   = (t.fuelEndLitri   != null) ? Number(t.fuelEndLitri)   : null;
+  const addedL = Number(t.fuelAddedLitri || 0);
+
+  const stimL  = Number(t.benzinaStimataLitri ?? t.benzina ?? 0);
+
+  const realL = (startL != null && endL != null)
+    ? Math.max(0, (startL + addedL - endL))
+    : null;
+
+  const consReal = (realL != null && realL > 0) ? (t.km / realL) : null;
+  const consStim = (stimL > 0) ? (t.km / stimL) : null;
+
+  box.innerHTML = `
+    <div class="log-entry-full" style="border-left-color:#00bcd4;">
+      <div style="font-weight:bold;">🏁 ${t.data} ${t.ora} — ${t.paese}</div>
+      <div>📏 KM: <b>${t.km}</b></div>
+      <hr style="border:0;border-top:1px solid #444;margin:10px 0;">
+
+      <div>⛽ Inizio: <b>${startL != null ? startL.toFixed(2) : '--'} L</b></div>
+      <div>➕ Aggiunti in tappa: <b>${addedL.toFixed(2)} L</b></div>
+      <div>⛽ Fine: <b>${endL != null ? endL.toFixed(2) : '--'} L</b></div>
+
+      <hr style="border:0;border-top:1px solid #444;margin:10px 0;">
+
+      <div>🧮 Stimato (app): <b>${stimL.toFixed(2)} L</b>
+        → <b style="color:var(--giallo)">${consStim != null ? consStim.toFixed(2) : '--'} km/L</b></div>
+
+      <div>🔥 Reale (da livello): <b>${realL != null ? realL.toFixed(2) : '--'} L</b>
+        → <b style="color:var(--verde)">${consReal != null ? consReal.toFixed(2) : '--'} km/L</b></div>
+
+      <div style="margin-top:10px; font-size:12px; color:#888;">
+        Se manca “Inizio” o “Fine”, il reale resta “--”.
+      </div>
+    </div>
+  `;
+}
+
+
+
+
+
+
+
+
+
+  
 </script>
 
 
