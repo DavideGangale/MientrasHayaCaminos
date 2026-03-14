@@ -74,17 +74,47 @@
     marker = L.marker([0,0]).addTo(map);
   }
 
-  function setTrace(coords){
-    poly.setLatLngs(coords || []);
-    if (coords && coords.length > 1) {
-      marker.setLatLng(coords[coords.length-1]);
-      map.fitBounds(poly.getBounds().pad(0.15));
-    } else {
-      map.setView([0,0], 2);
-      marker.setLatLng([0,0]);
-    }
-    setTimeout(()=>map.invalidateSize(), 150);
+  function cleanCoords(coords) {
+  if (!Array.isArray(coords)) return [];
+  const out = [];
+
+  for (const p of coords) {
+    if (!Array.isArray(p) || p.length < 2) continue;
+    const lat = Number(p[0]);
+    const lon = Number(p[1]);
+    if (!isFinite(lat) || !isFinite(lon)) continue;
+    if (lat < -90 || lat > 90 || lon < -180 || lon > 180) continue;
+    out.push([lat, lon]);
   }
+
+  return out;
+}
+
+function setTrace(coords){
+  if (!map || !poly || !marker) initMap();
+
+  const cleaned = cleanCoords(coords);
+
+  poly.setLatLngs(cleaned);
+
+  if (cleaned.length > 1) {
+    const last = cleaned[cleaned.length - 1];
+    marker.setLatLng(last);
+
+    const bounds = poly.getBounds();
+
+    // ✅ maxZoom evita di zoomare troppo "largo"
+    map.fitBounds(bounds.pad(0.15), { maxZoom: 14 });
+  } else if (cleaned.length === 1) {
+    marker.setLatLng(cleaned[0]);
+    map.setView(cleaned[0], 13);
+  } else {
+    map.setView([0,0], 2);
+    marker.setLatLng([0,0]);
+  }
+
+  setTimeout(()=>map.invalidateSize(), 150);
+}
 
   async function main(){
     const src = qs('src') || 'public/vespatrek_public.json';
