@@ -570,23 +570,7 @@
       <button class="btn-azione" style="background:#2196F3;" onclick="apriModalPaesi()">🌎 STATISTICHE PER PAESE</button>
 
       <!-- ===== CONDIVIDI MOMENTO (FIX: elementi esistono davvero) ===== -->
-      <div class="dash-card" style="margin-top:15px; border:2px solid #607d8b;">
-        <h3 style="margin-top:0; color:#cfd8dc;">📤 Condividi Momento</h3>
-
-        <textarea id="momento-testo" placeholder="Scrivi una frase per la condivisione (opzionale)..." rows="3"></textarea>
-
-        <input type="file" id="momento-foto-input" accept="image/*" capture="environment" style="display:none;"
-               onchange="anteprima('momento-foto-input','momento-foto-preview')">
-
-        <button class="btn-secondary" style="margin-top:0;" onclick="document.getElementById('momento-foto-input').click()">📷 Aggiungi Foto (opzionale)</button>
-        <div id="momento-foto-preview" style="margin-top:10px; display:none;"></div>
-
-        <button class="btn-secondary" style="margin-top:10px;" onclick="condividiMomentoPreview()">📤 Condividi (menu telefono)</button>
-
-        <div style="font-size:12px; color:#888; margin-top:8px; text-align:left;">
-          Nota: Instagram non sempre accetta foto via “Condividi” da browser. Se non va, condividi solo testo oppure fai uno screenshot.
-        </div>
-      </div>
+      
 
       <!-- DIARIO -->
       <div class="dash-card" style="margin-top:15px;">
@@ -623,10 +607,14 @@
   <!-- ==================== PAGINA 3: BENZINA ==================== -->
   <div id="miscela" class="page">
 
-    <div class="toggle-container">
-      <button id="btn-litri" class="toggle-btn active unita" onclick="cambiaUnita('L')">LITRI</button>
-      <button id="btn-galloni" class="toggle-btn unita" onclick="cambiaUnita('G')">GALLONI</button>
-    </div>
+<div class="dash-card" style="padding:10px; border:1px solid #333; margin-top:0;">
+  <div style="font-size:13px; color:#aaa;">
+    Unità volume: <b id="ui-unita-volume">L</b> (modifica in Settings)
+  </div>
+  <button class="btn-secondary" style="margin-top:10px;" onclick="cambiaPagina('settings', document.querySelectorAll('.nav-btn')[4])">
+    ⚙️ Apri Settings
+  </button>
+</div>
 
     <div style="text-align:center; font-size:13px; color:#aaa; margin-bottom:10px;">
       Dati per: <strong id="lbl-paese-benzina" style="color:var(--giallo);">Colombia</strong>
@@ -931,13 +919,17 @@
         Serbatoio: 2 gal (≈ 7.57 L). Seleziona cosa segna il galleggiante.
       </div>
 
-      <select id="fuel-end-select" class="inp-select">
-        <option value="0">0 (vuoto)</option>
-        <option value="0.5">1/4 (0.5 gal)</option>
-        <option value="1">1/2 (1.0 gal)</option>
-        <option value="1.5">3/4 (1.5 gal)</option>
-        <option value="2" selected>FULL (2.0 gal)</option>
-      </select>
+     <select id="fuel-end-select" class="inp-select"> 
+       <option value="0">0 (vuoto)</option> 
+       <option value="0.25">1/8 (0.25 gal)</option> 
+       <option value="0.5">1/4 (0.5 gal)</option> 
+       <option value="0.75">3/8 (0.75 gal)</option> 
+       <option value="1">1/2 (1.0 gal)</option> 
+       <option value="1.25">5/8 (1.25 gal)</option> 
+       <option value="1.5">3/4 (1.5 gal)</option> 
+       <option value="1.75">7/8 (1.75 gal)</option> 
+       <option value="2" selected>FULL (2.0 gal)</option> 
+     </select>
 
       <button class="btn-azione" style="background:#4caf50;color:black;" onclick="salvaFuelFineTappa()">
         💾 Salva livello
@@ -2027,6 +2019,7 @@ function aggiornaUI() {
   // SCORTA (L o GAL)
   // =========================
   const unitaLabel = unitaAttuale === 'L' ? 'L' : 'gal';
+  setText('ui-unita-volume', unitaLabel);
   const scortaVis = unitaAttuale === 'L' ? scorta : (scorta / FAT_GAL);
 
   setText('ui-scorta-rapida', scortaVis.toFixed(1));
@@ -2492,6 +2485,43 @@ function dataURLToFile(dataUrl, filename = 'foto.jpg') {
   return new File([u8arr], filename, { type: mime });
 }
 
+
+async function condividiEntryDiario(entry) {
+  try {
+    if (!navigator.share) {
+      showToast('⚠️ Condivisione non supportata (usa screenshot)');
+      return;
+    }
+
+    const caption =
+`🛵 VespaTrek PX150
+📍 ${entry.paese} — km ${entry.km}${entry.testo ? '\n' + entry.testo : ''}
+
+#vespa #overland #sudamerica`;
+
+    const shareData = { text: caption };
+
+    if (entry.foto) {
+      const file = dataURLToFile(entry.foto, `diario_${entry.id}.jpg`);
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        shareData.files = [file];
+      } else {
+        showToast('ℹ️ Non posso condividere la foto: invio solo testo');
+      }
+    }
+
+    await navigator.share(shareData);
+    showToast('📤 Menu condivisione aperto');
+  } catch (e) {
+    if (e && e.name !== 'AbortError') {
+      console.warn('share error:', e);
+      showToast('❌ Share: ' + e.name);
+    }
+  }
+}
+
+
+  
 async function condividiMomentoPreview() {
   try {
     if (!navigator.share) {
@@ -2580,6 +2610,14 @@ function salvaDiario() {
   diario.unshift(entry);
   salva('vt_diario', diario);
 
+
+setTimeout(() => {
+  const ok = confirm('Vuoi condividere ora questo momento?');
+  if (ok) condividiEntryDiario(entry);
+}, 50);
+
+  
+  
   if (testoEl) testoEl.value = '';
   if (anteprimaDiv) {
     anteprimaDiv.style.display = 'none';
