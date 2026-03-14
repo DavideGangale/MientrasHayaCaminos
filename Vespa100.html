@@ -2299,28 +2299,43 @@ function registraAcquisto() {
     const now = new Date();
 
     const elTot = document.getElementById('inputTotaleBenz');
-  
-const totaleBenzLocal = elTot ? (parseFloat(elTot.value) || 0) : 0;
-const cur = valutaAttuale || 'USD';
-const totaleBenzUsd = (totaleBenzLocal > 0) ? convertLocalToUsd(totaleBenzLocal, cur) : 0;
+    const totaleBenzLocal = elTot ? (parseFloat(elTot.value) || 0) : 0;
 
-const prezzoUnitario = (totaleBenzLocal > 0 && qtaLitri > 0) ? (totaleBenzLocal / qtaLitri) : null;
+    const cur = valutaAttuale || 'USD';
 
-    
+    // Se l'utente ha inserito un totale locale, serve un cambio valido
+    let fx = 1;
+    let totaleBenzUsd = 0;
+
+    if (totaleBenzLocal > 0) {
+      fx = getFxToUsd(cur);
+      if (fx == null) {
+        showToast(`⚠️ Manca cambio per ${cur}. Vai in Settings.`);
+        return;
+      }
+      totaleBenzUsd = totaleBenzLocal * fx;
+    }
+
+    const prezzoUnitario = (totaleBenzLocal > 0 && qtaLitri > 0) ? (totaleBenzLocal / qtaLitri) : null;
+
     // Dati paese
     const datiPaesi = caricaJSON('vt_datiPaesi', {});
-    if (!datiPaesi[paese]) datiPaesi[paese] = { km:0, benzina:0, spesaBenzina:0, spesaOlio:0 };
-    
-if (totaleBenzLocal > 0) {
-  salva('vt_spesaBenzinaUsd', (parseFloat(carica('vt_spesaBenzinaUsd', '0')) || 0) + totaleBenzUsd);
+    if (!datiPaesi[paese]) datiPaesi[paese] = {};
 
-  // per-paese in USD
-  datiPaesi[paese].spesaBenzinaUsd = (datiPaesi[paese].spesaBenzinaUsd || 0) + totaleBenzUsd;
+    // Spesa benzina (totali sempre in USD)
+    if (totaleBenzLocal > 0) {
+      salva(
+        'vt_spesaBenzinaUsd',
+        (parseFloat(carica('vt_spesaBenzinaUsd', '0')) || 0) + totaleBenzUsd
+      );
 
-  // (opzionale) tieni anche il totale locale per info (solo se ti serve)
-  datiPaesi[paese].spesaBenzinaLocal = (datiPaesi[paese].spesaBenzinaLocal || 0) + totaleBenzLocal;
-  datiPaesi[paese].valuta = cur;
-}
+      datiPaesi[paese].spesaBenzinaUsd = (datiPaesi[paese].spesaBenzinaUsd || 0) + totaleBenzUsd;
+
+      // opzionale: memorizza anche il totale locale
+      datiPaesi[paese].spesaBenzinaLocal = (datiPaesi[paese].spesaBenzinaLocal || 0) + totaleBenzLocal;
+      datiPaesi[paese].valuta = cur;
+    }
+
     let risultatoHTML = '';
     let costoOlioUsatoUsd = null;
 
@@ -2345,9 +2360,9 @@ if (totaleBenzLocal > 0) {
       // scala stock
       setOlioStock(stockMl - olioMl, stockUsd - costoOlioUsatoUsd);
 
-      // spese olio
-salva('vt_spesaOlioUsd', (parseFloat(carica('vt_spesaOlioUsd', '0')) || 0) + costoOlioUsatoUsd);
-datiPaesi[paese].spesaOlioUsd = (datiPaesi[paese].spesaOlioUsd || 0) + costoOlioUsatoUsd;
+      // spese olio (USD)
+      salva('vt_spesaOlioUsd', (parseFloat(carica('vt_spesaOlioUsd', '0')) || 0) + costoOlioUsatoUsd);
+      datiPaesi[paese].spesaOlioUsd = (datiPaesi[paese].spesaOlioUsd || 0) + costoOlioUsatoUsd;
 
       // benzina netta
       const benzPura = qtaLitri - (olioMl / 1000);
@@ -2365,7 +2380,7 @@ datiPaesi[paese].spesaOlioUsd = (datiPaesi[paese].spesaOlioUsd || 0) + costoOlio
       // Dati paese
       datiPaesi[paese].benzina = (datiPaesi[paese].benzina || 0) + benzPura;
 
-      // Tappa: benzina aggiunta (per confronto reale) + benzina stimata usata
+      // Tappa: benzina aggiunta + benzina stimata
       tappaAttuale.fuelAddedLitri = (tappaAttuale.fuelAddedLitri || 0) + qtaLitri;
       tappaAttuale.benzinaUsata   = (tappaAttuale.benzinaUsata || 0) + benzPura;
       salva('vt_tappaAttuale', tappaAttuale);
@@ -2374,9 +2389,11 @@ datiPaesi[paese].spesaOlioUsd = (datiPaesi[paese].spesaOlioUsd || 0) + costoOlio
         `✅ <b>Messo in Vespa:</b> ${qtaLitri.toFixed(2)} L<br>` +
         `🧪 <b>Olio 2T da aggiungere:</b> <span style="font-size:20px; color:var(--giallo); font-weight:bold;">${olioMl} ml</span><br>` +
         `⛽ Benzina netta: ${benzPura.toFixed(2)} L<br>` +
-        (totaleBenz > 0 ? `💰 Totale benzina: <b>
+        (totaleBenzLocal > 0
+          ? `💰 Totale benzina: <b>${totaleBenzLocal.toFixed(2)} ${cur}</b> (≈ <b>
 $$
-{totaleBenz.toFixed(2)}</b><br>` : '') +
+{totaleBenzUsd.toFixed(2)}</b>)<br>`
+          : '') +
         `🧪 Valore olio usato (da stock): <b>
 $$
 {costoOlioUsatoUsd.toFixed(2)}</b>`;
@@ -2390,7 +2407,9 @@ $$
       risultatoHTML =
         `✅ <b>Aggiunto nelle taniche:</b> ${qtaLitri.toFixed(2)} L<br>` +
         `🛢️ <b>Scorta totale:</b> ${nuovaScorta.toFixed(2)} L<br>` +
-        (totaleBenz > 0 ? `💰 Totale benzina: <b>$${totaleBenz.toFixed(2)}</b>` : '');
+        (totaleBenzLocal > 0
+          ? `💰 Totale benzina: <b>${totaleBenzLocal.toFixed(2)} ${cur}</b> (≈ <b>$${totaleBenzUsd.toFixed(2)}</b>)`
+          : '');
     }
 
     salva('vt_datiPaesi', datiPaesi);
@@ -2405,15 +2424,22 @@ $$
       qta: qtaLitri.toFixed(2),
       dest: (dest === 'V') ? 'Vespa' : 'Tanica',
       mix:  (dest === 'V') ? (mixC + '%') : '--',
-      prezzoUnit: prezzoUnitario ? prezzoUnitario.toFixed(3) : null,
-      costoBenz:  (totaleBenz > 0) ? totaleBenz.toFixed(2) : null,
 
-valuta: cur,
-fxToUsd: getFxToUsd(cur),
-costoBenzLocal: (totaleBenzLocal > 0) ? totaleBenzLocal.toFixed(2) : null,
-costoBenzUsd: (totaleBenzLocal > 0) ? totaleBenzUsd.toFixed(2) : null,
-      
-      costoOlio:  (costoOlioUsatoUsd !== null) ? costoOlioUsatoUsd.toFixed(2) : null,
+      // prezzo unitario in valuta locale / L
+      prezzoUnit: prezzoUnitario ? prezzoUnitario.toFixed(3) : null,
+
+      // local + usd
+      valuta: cur,
+      fxToUsd: (totaleBenzLocal > 0) ? fx : getFxToUsd(cur),
+      costoBenzLocal: (totaleBenzLocal > 0) ? totaleBenzLocal.toFixed(2) : null,
+      costoBenzUsd: (totaleBenzLocal > 0) ? totaleBenzUsd.toFixed(2) : null,
+
+      // compatibilità con renderLogCarburanti vecchio (USD)
+      costoBenz: (totaleBenzLocal > 0) ? totaleBenzUsd.toFixed(2) : null,
+
+      // olio da stock (USD)
+      costoOlio: (costoOlioUsatoUsd !== null) ? costoOlioUsatoUsd.toFixed(2) : null,
+
       luogo,
       km: (parseFloat(carica('vt_kmTotali', '0')) || 0).toFixed(1)
     });
@@ -3068,11 +3094,9 @@ async function setValuta(v) {
   aggiornaFxSettingsUI();
   showToast('💱 Valuta: ' + v);
 
-  // ✅ auto-update cambio online (solo se non USD)
+  // auto-update cambio online (solo se non USD)
   if (v !== 'USD') {
-    // se ho già un cambio salvato, continuo a funzionare comunque.
-    // poi provo ad aggiornarlo online in background.
-    aggiornaFxOnline();
+    aggiornaFxOnline(); // non await: UI non si blocca
   }
 
   aggiornaUI();
