@@ -1246,6 +1246,20 @@ function updatePosition(pos) {
         datiPaesi[paese].km = (datiPaesi[paese].km || 0) + dist;
         salva('vt_datiPaesi', datiPaesi);
 
+
+        // ✅ SCALA STIMA SERBATOIO IN BASE AI KM PERCORSI
+        // (così se parti a 1/2 e poi fai benzina, non “sommi” su un valore troppo alto)
+        const consumoDaTappe = (typeof calcolaConsumoDaTappe === 'function') ? calcolaConsumoDaTappe() : null;
+        const consumoUsato   = (consumoDaTappe != null) ? consumoDaTappe : CONSUMO_MEDIO; // km/L
+
+        const litriConsumati = dist / consumoUsato;
+
+        const serbPrima = parseFloat(carica('vt_serbatoioLitri','0')) || 0;
+        const serbDopo  = Math.max(0, serbPrima - litriConsumati);
+
+        salva('vt_serbatoioLitri', serbDopo.toFixed(3));
+
+        
         aggiornaUI();
       }
     }
