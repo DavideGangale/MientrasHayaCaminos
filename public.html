@@ -1,1 +1,165 @@
 
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>VespaTrek — Pagina Pubblica</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    body{margin:0;font-family:system-ui,Segoe UI,Roboto,sans-serif;background:#121212;color:#fff;padding:14px;}
+    .card{background:#2c2c2c;border-radius:14px;padding:14px;margin-bottom:12px;border:1px solid #444;}
+    h1,h2{margin:0 0 10px 0}
+    .muted{color:#aaa;font-size:13px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .box{background:#1e1e1e;border:1px solid #333;border-radius:12px;padding:10px}
+    #mapPub{height:320px;border-radius:12px;border:1px solid #444}
+    .btn{background:#2196F3;color:#fff;border:none;border-radius:10px;padding:10px 12px;font-weight:700;cursor:pointer}
+    select{width:100%;padding:10px;border-radius:10px;background:#111;color:#fff;border:1px solid #444}
+    .entry{background:#1e1e1e;border:1px solid #333;border-radius:12px;padding:10px;margin-top:10px}
+    img{max-width:100%;border-radius:12px;border:1px solid #333}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1 id="tit">VespaTrek — Pubblico</h1>
+    <div class="muted" id="meta">Carico dati…</div>
+  </div>
+
+  <div class="card">
+    <h2>📊 Statistiche</h2>
+    <div class="grid">
+      <div class="box">KM totali<br><b id="st-km">--</b></div>
+      <div class="box">Benzina (L)<br><b id="st-bz">--</b></div>
+      <div class="box">Spesa totale (USD)<br><b id="st-sp">--</b></div>
+      <div class="box">Olio (L)<br><b id="st-ol">--</b></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🗺️ Tappe / Turismo</h2>
+    <div class="muted">Seleziona un percorso per vedere la traccia.</div>
+    <select id="selPerc"></select>
+    <div style="margin-top:10px" id="mapPub"></div>
+    <div class="muted" id="percInfo" style="margin-top:8px"></div>
+  </div>
+
+  <div class="card">
+    <h2>📖 Diario (con foto)</h2>
+    <div id="diario"></div>
+  </div>
+
+  <div class="card">
+    <h2>🔧 Manutenzioni</h2>
+    <div id="man"></div>
+  </div>
+
+<script>
+  function qs(name){
+    const u = new URL(location.href);
+    return u.searchParams.get(name);
+  }
+
+  function moneyUsd(x){ return '$' + Number(x||0).toFixed(2); }
+
+  let map, poly, marker;
+
+  function initMap(){
+    map = L.map('mapPub', { zoomControl:true, attributionControl:false }).setView([0,0], 2);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom:19 }).addTo(map);
+    poly = L.polyline([], { color:'#d32f2f', weight:4, opacity:0.9 }).addTo(map);
+    marker = L.marker([0,0]).addTo(map);
+  }
+
+  function setTrace(coords){
+    poly.setLatLngs(coords || []);
+    if (coords && coords.length > 1) {
+      marker.setLatLng(coords[coords.length-1]);
+      map.fitBounds(poly.getBounds().pad(0.15));
+    } else {
+      map.setView([0,0], 2);
+      marker.setLatLng([0,0]);
+    }
+    setTimeout(()=>map.invalidateSize(), 150);
+  }
+
+  async function main(){
+    const src = qs('src') || 'public/vespatrek_public.json';
+    const res = await fetch(src, { cache:'no-store' });
+    const data = await res.json();
+
+    document.getElementById('tit').innerText = data.titolo || 'VespaTrek';
+    document.getElementById('meta').innerText =
+      `Aggiornato: ${data._exportDate || '--'} · File: ${src}`;
+
+    const st = data.stats || {};
+    const spTot = (st.spesaBenzinaUsd||0) + (st.spesaOlioUsd||0) + (st.spesaRicambiUsd||0) + (st.spesaManodoperaUsd||0);
+
+    document.getElementById('st-km').innerText = (st.kmTotali||0).toFixed(1);
+    document.getElementById('st-bz').innerText = ((st.benzinaUsataLitri||0) + (st.benzinaFuoriTappaLitri||0)).toFixed(1);
+    document.getElementById('st-ol').innerText = (st.olioTotaleLitri||0).toFixed(2);
+    document.getElementById('st-sp').innerText = moneyUsd(spTot);
+
+    // percorsi
+    const lista = []
+      .concat(data.tappe || [])
+      .concat(data.turismo || [])
+      .sort((a,b)=>(b.id||0)-(a.id||0));
+
+    const sel = document.getElementById('selPerc');
+    sel.innerHTML = lista.map(p => {
+      const tipo = (p.tipo || 'Tappa');
+      const label = `${p.data||''} ${p.ora||''} — ${p.paese||''} — ${tipo} — ${Number(p.km||0).toFixed(1)} km`;
+      return `<option value="${p.id}">${label}</option>`;
+    }).join('');
+
+    function showPerc(id){
+      const p = lista.find(x => String(x.id) === String(id));
+      if (!p) return;
+
+      const info =
+        `⛽ stim: ${(p.benzinaStimataLitri??0).toFixed(2)} L · reale: ${(p.benzinaRealeLitri!=null?Number(p.benzinaRealeLitri).toFixed(2):'--')} L · ` +
+        `km/L stim: ${(p.consumoStimatoKmL!=null?Number(p.consumoStimatoKmL).toFixed(2):'--')} · km/L reale: ${(p.consumoRealeKmL!=null?Number(p.consumoRealeKmL).toFixed(2):'--')}`;
+
+      document.getElementById('percInfo').innerText = info;
+
+      const coords = p.traccia || [];
+      setTrace(coords);
+    }
+
+    sel.onchange = () => showPerc(sel.value);
+    if (lista.length) showPerc(lista[0].id);
+
+    // diario
+    const diario = data.diario || [];
+    document.getElementById('diario').innerHTML = diario.map(d => `
+      <div class="entry">
+        <div class="muted">📅 ${d.data||''} ${d.ora||''} — ${d.paese||''} — km ${d.km||''}</div>
+        <div style="margin-top:6px; white-space:pre-wrap;">${(d.testo||'').replace(/</g,'&lt;')}</div>
+        ${d.foto ? `<div style="margin-top:8px;"><img src="${d.foto}" loading="lazy"></div>` : ''}
+      </div>
+    `).join('') || '<div class="muted">Nessuna voce</div>';
+
+    // manutenzioni
+    const man = data.manutenzioni || [];
+    document.getElementById('man').innerHTML = man.map(m => `
+      <div class="entry">
+        <div><b>${(m.nome||'')}</b></div>
+        <div class="muted">${m.data||''} ${m.ora||''} — ${m.paese||''} — km ${m.km||''}</div>
+        ${m.desc ? `<div style="margin-top:6px; white-space:pre-wrap;">${(m.desc||'').replace(/</g,'&lt;')}</div>` : ''}
+        ${(m.costoUsd && Number(m.costoUsd)>0) ? `<div class="muted" style="margin-top:6px;">Costo ≈ ${moneyUsd(m.costoUsd)}</div>` : ''}
+      </div>
+    `).join('') || '<div class="muted">Nessun intervento</div>';
+
+    initMap();
+  }
+
+  main().catch(err => {
+    document.body.innerHTML = '<pre style="white-space:pre-wrap;color:#fff;">Errore: ' + (err && err.stack ? err.stack : err) + '</pre>';
+  });
+</script>
+</body>
+</html>
