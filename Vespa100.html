@@ -2519,17 +2519,16 @@ $$
     // ===================== DESTINAZIONE: TANICHE =====================
     } else {
       const scortaAttualeL = parseFloat(carica('vt_scortaLitri', '0')) || 0;
-      const nuovaScorta = scortaAttualeL + qtaLitri;
+const nuovaScorta = scortaAttualeL + qtaLitri;
 
-      // salva nuova scorta
-      salva('vt_scortaLitri', nuovaScorta);
+const capTan = getTanicheCapLitri();
+if (capTan > 0 && nuovaScorta > capTan + 0.0001) {
+  showToast(`⚠️ Operazione bloccata: scorta ${nuovaScorta.toFixed(2)} L supera capacità taniche (${capTan.toFixed(2)} L)`, 4500);
+  return; // ✅ NON salva, NON logga
+}
 
-      // warning capacità taniche (mostrato dopo, per non essere sovrascritto)
-      const capTan = getTanicheCapLitri();
-      if (capTan > 0 && nuovaScorta > capTan + 0.0001) {
-        warningMsg =
-          `⚠️ Scorta ${nuovaScorta.toFixed(2)} L supera capacità taniche (${capTan.toFixed(2)} L)`;
-      }
+// salva nuova scorta (solo se ok)
+salva('vt_scortaLitri', nuovaScorta);
 
       risultatoHTML =
         `✅ <b>Aggiunto nelle taniche:</b> ${qtaLitri.toFixed(2)} L<br>` +
