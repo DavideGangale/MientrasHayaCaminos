@@ -484,9 +484,17 @@
       <option value="Argentina">🇦🇷 Argentina</option>
     </select>
 
-    <button id="btn-start-stop" class="btn-track start" onclick="toggleTracking()">▶ START GUIDA</button>
-    <button class="btn-track btn-tappa" onclick="concludiTappa()">🏁 CONCLUDI TAPPA</button>
 
+<button id="btn-modalita" class="btn-secondary" style="margin-top:0;" onclick="toggleModalitaGuida()">
+  🌄 MODALITÀ: TAPPA
+</button>
+
+
+    
+    <button id="btn-start-stop" class="btn-track start" onclick="toggleTracking()">▶ START GUIDA</button>
+    //<button class="btn-track btn-tappa" onclick="concludiTappa()">🏁 CONCLUDI TAPPA</button>
+   <button id="btn-concludi" class="btn-track btn-tappa" onclick="concludiPercorso()">🏁 CONCLUDI TAPPA</button>
+    
     <div class="dash-card">
       <div style="font-size:12px; color:#aaa;">VELOCITÀ</div>
       <div class="speed" id="speedometer">0</div>
@@ -1054,7 +1062,13 @@ function initAllData() {
   initDB('vt_paeseAttuale', 'Colombia');
   initDB('vt_datiPaesi', JSON.stringify({}));
 
+initDB('vt_turismo', JSON.stringify([]));
+initDB('vt_modalitaGuida', 'TAPPA');
+
 initDB('vt_benzinaFuoriTappaLitri', '0.0');
+  
+initDB('vt_benzinaFuoriTappaLitri', '0.0');
+initDB('vt_kmFuoriTappa', '0.0');
   
   initDB('vt_tappe', JSON.stringify([]));
   initDB('vt_logbook', JSON.stringify([]));
@@ -1356,6 +1370,52 @@ function salvaFuelInizioTappa() {
   const gal = sel ? parseFloat(sel.value) : 0;
   const litri = gal * FAT_GAL;
 
+    const prevLitri = parseFloat(carica('vt_serbatoioLitri','0')) || 0;
+
+  const soglia = 0.05; // 50 ml
+  if (prevLitri > 0 && (prevLitri - litri) > soglia) {
+    const diff = prevLitri - litri;
+
+    const ok = confirm(
+      `Serbatoio più basso rispetto all'ultima volta.\n` +
+      `Prima: ${prevLitri.toFixed(2)} L\n` +
+      `Ora:   ${litri.toFixed(2)} L\n\n` +
+      `Vuoi registrare ${diff.toFixed(2)} L come benzina "FUORI TAPPA"?`
+    );
+
+    if (ok) {
+      // benzina fuori tappa (globale)
+      const oldB = parseFloat(carica('vt_benzinaFuoriTappaLitri','0')) || 0;
+      salva('vt_benzinaFuoriTappaLitri', (oldB + diff).toFixed(3));
+
+      // (opzionale) km fuori tappa
+      const kmStr = prompt('Quanti km hai fatto FUORI TAPPA? (opzionale)', '');
+      const km = kmStr ? parseFloat(kmStr) : 0;
+
+      if (!isNaN(km) && km > 0) {
+        const oldKmFuori = parseFloat(carica('vt_kmFuoriTappa','0')) || 0;
+        salva('vt_kmFuoriTappa', (oldKmFuori + km).toFixed(3));
+
+        // aggiungi ai km totali
+        const kmTot = parseFloat(carica('vt_kmTotali','0')) || 0;
+        salva('vt_kmTotali', (kmTot + km).toFixed(4));
+
+        // aggiungi ai km del paese attuale
+        const paese = carica('vt_paeseAttuale','Colombia');
+        const datiPaesi = caricaJSON('vt_datiPaesi', {});
+        if (!datiPaesi[paese]) datiPaesi[paese] = { km:0, benzina:0, spesaBenzina:0, spesaOlio:0 };
+        datiPaesi[paese].km = (datiPaesi[paese].km || 0) + km;
+
+        // (se vuoi anche benzina fuori tappa per paese)
+        datiPaesi[paese].benzinaFuori = (datiPaesi[paese].benzinaFuori || 0) + diff;
+
+        salva('vt_datiPaesi', datiPaesi);
+      }
+
+      showToast(`📝 Fuori tappa: +${diff.toFixed(2)} L`);
+    }
+  }
+
   // livello precedente (di solito è quello salvato a fine tappa precedente)
   const prevLitri = parseFloat(carica('vt_serbatoioLitri','0')) || 0;
   
@@ -1438,6 +1498,13 @@ function toggleTracking() {
   startTrackingNow();
 }
 
+
+
+
+
+
+
+  
 /* ============================================================
    CONCLUDI TAPPA
 ============================================================ */
@@ -1486,8 +1553,9 @@ function concludiTappa() {
   salva('vt_tappe', tappe);
 
   // chiedi livello serbatoio fine tappa
-  pendingFuelTappaId = tappa.id;
-  apriModal('modalFuelEnd');
+ pendingFuelKind = 'tappa';
+pendingFuelTappaId = tappa.id;
+apriModal('modalFuelEnd');
 
   // Reset tappa (FIX: mantiene campi)
   tappaAttuale = nuovaTappa(parseFloat(carica('vt_kmTotali','0')) || 0);
@@ -1502,6 +1570,98 @@ function concludiTappa() {
   aggiornaUI();
 }
 
+
+let modalitaGuida = 'TAPPA'; // 'TAPPA' | 'TURISMO'
+let pendingFuelKind = null; // 'tappa' | 'turismo'
+
+function aggiornaModalitaUI() {
+  const b = document.getElementById('btn-modalita');
+  const c = document.getElementById('btn-concludi');
+  if (b) b.innerText = `🌄 MODALITÀ: ${modalitaGuida}`;
+  if (c) c.innerText = (modalitaGuida === 'TURISMO') ? '🌆 SALVA TURISMO' : '🏁 CONCLUDI TAPPA';
+}
+
+function toggleModalitaGuida() {
+  if (inViaggio) { showToast('⚠️ Ferma la guida prima di cambiare modalità'); return; }
+  modalitaGuida = (modalitaGuida === 'TAPPA') ? 'TURISMO' : 'TAPPA';
+  salva('vt_modalitaGuida', modalitaGuida);
+  aggiornaModalitaUI();
+  showToast('Modalità: ' + modalitaGuida);
+}
+
+function concludiPercorso() {
+  if (modalitaGuida === 'TURISMO') concludiTurismo();
+  else concludiTappa();
+}
+
+
+
+function concludiTurismo() {
+  if ((tappaAttuale.kmPercorsi || 0) < 0.1) {
+    showToast('⚠️ Nessun km registrato in questo giro');
+    return;
+  }
+  if (!confirm(`Salvare TURISMO? ${(tappaAttuale.kmPercorsi || 0).toFixed(1)} km`)) return;
+
+  if (inViaggio) toggleTracking();
+
+  const ore = (tappaAttuale.secondiGuida || 0) > 0 ? ((tappaAttuale.secondiGuida || 0) / 3600) : 0;
+  const velMedia = ore > 0 ? ((tappaAttuale.kmPercorsi || 0) / ore) : null;
+
+  const paese = carica('vt_paeseAttuale','Colombia');
+  const now = new Date();
+
+  const giro = {
+    id: Date.now(),
+    tipo: 'Turismo',
+    data: now.toLocaleDateString('it-IT'),
+    ora: now.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'}),
+    paese,
+    km: parseFloat((tappaAttuale.kmPercorsi || 0).toFixed(2)),
+    altMin: tappaAttuale.altMin === 9999 ? 0 : tappaAttuale.altMin,
+    altMax: tappaAttuale.altMax || 0,
+    durata: tappaAttuale.secondiGuida || 0,
+
+    // stimato
+    benzina: parseFloat((tappaAttuale.benzinaUsata || 0).toFixed(2)),
+    benzinaStimataLitri: parseFloat((tappaAttuale.benzinaUsata || 0).toFixed(3)),
+
+    // per “reale”
+    fuelStartGal: tappaAttuale.fuelStartGal,
+    fuelStartLitri: tappaAttuale.fuelStartLitri,
+    fuelAddedLitri: tappaAttuale.fuelAddedLitri || 0,
+
+    velMax: tappaAttuale.velMax || 0,
+    velMedia: velMedia ? parseFloat(velMedia.toFixed(1)) : null,
+
+    traccia: coordinateTracciato.filter((_, i) => i % 3 === 0),
+  };
+
+  const tur = caricaJSON('vt_turismo', []);
+  tur.unshift(giro);
+  salva('vt_turismo', tur);
+
+  // chiedi fuel end e mostra confronto (riuso lo stesso modal)
+  pendingFuelKind = 'turismo';
+  pendingFuelTappaId = giro.id;
+  apriModal('modalFuelEnd');
+
+  // reset
+  tappaAttuale = nuovaTappa(parseFloat(carica('vt_kmTotali','0')) || 0);
+  salva('vt_tappaAttuale', tappaAttuale);
+
+  coordinateTracciato = [];
+  salva('vt_coordinateTracciato', []);
+  polyline.setLatLngs([]);
+
+  showToast(`🌆 Turismo salvato: ${giro.km} km`);
+  aggiornaUI();
+}
+
+
+
+  
+  
 /* ============================================================
    NAVIGAZIONE
 ============================================================ */
@@ -1610,35 +1770,33 @@ function salvaFuelFineTappa() {
 
   // salva anche dentro la tappa (storico)
   if (pendingFuelTappaId) {
-    const tappe = caricaJSON('vt_tappe', []);
-    const idx = tappe.findIndex(t => t.id === pendingFuelTappaId);
+    const key = (pendingFuelKind === 'turismo') ? 'vt_turismo' : 'vt_tappe';
+const lista = caricaJSON(key, []);
+const idx = lista.findIndex(t => t.id === pendingFuelTappaId);
 
-    if (idx !== -1) {
-      // fuel END
-      tappe[idx].fuelEndGal = gal;
-      tappe[idx].fuelEndLitri = parseFloat(litri.toFixed(3));
+if (idx !== -1) {
+  lista[idx].fuelEndGal = gal;
+  lista[idx].fuelEndLitri = parseFloat(litri.toFixed(3));
 
-      // calcoli real vs stimato
-      const startL = (tappe[idx].fuelStartLitri != null) ? Number(tappe[idx].fuelStartLitri) : null;
-      const endL   = Number(tappe[idx].fuelEndLitri);
-      const addedL = Number(tappe[idx].fuelAddedLitri || 0);
+  const startL = (lista[idx].fuelStartLitri != null) ? Number(lista[idx].fuelStartLitri) : null;
+  const endL   = Number(lista[idx].fuelEndLitri);
+  const addedL = Number(lista[idx].fuelAddedLitri || 0);
+  const stimL  = Number(lista[idx].benzinaStimataLitri ?? lista[idx].benzina ?? 0);
 
-      const stimL  = Number(tappe[idx].benzinaStimataLitri ?? tappe[idx].benzina ?? 0);
+  if (startL != null) {
+    const realL = Math.max(0, (startL + addedL - endL));
+    lista[idx].benzinaRealeLitri = parseFloat(realL.toFixed(3));
+    lista[idx].consumoRealeKmL = (realL > 0) ? parseFloat((lista[idx].km / realL).toFixed(2)) : null;
+  } else {
+    lista[idx].benzinaRealeLitri = null;
+    lista[idx].consumoRealeKmL = null;
+  }
 
-      if (startL != null) {
-        const realL = Math.max(0, (startL + addedL - endL));
-        tappe[idx].benzinaRealeLitri = parseFloat(realL.toFixed(3));
-        tappe[idx].consumoRealeKmL = (realL > 0) ? parseFloat((tappe[idx].km / realL).toFixed(2)) : null;
-      } else {
-        tappe[idx].benzinaRealeLitri = null;
-        tappe[idx].consumoRealeKmL = null;
-      }
+  lista[idx].consumoStimatoKmL = (stimL > 0) ? parseFloat((lista[idx].km / stimL).toFixed(2)) : null;
 
-      tappe[idx].consumoStimatoKmL = (stimL > 0) ? parseFloat((tappe[idx].km / stimL).toFixed(2)) : null;
-
-      salva('vt_tappe', tappe);
-      tappaAggiornata = tappe[idx];
-    }
+  salva(key, lista);
+  tappaAggiornata = lista[idx];
+}
   }
 
   pendingFuelTappaId = null;
@@ -1774,6 +1932,11 @@ function aggiornaUI() {
   const kmTot = parseFloat(carica('vt_kmTotali','0')) || 0;
   const scorta = parseFloat(carica('vt_scortaLitri','0')) || 0;
   const benzUsata = parseFloat(carica('vt_benzinaUsata','0')) || 0;
+  
+  const benzFuori = parseFloat(carica('vt_benzinaFuoriTappaLitri','0')) || 0;
+  
+  const benzFuori = parseFloat(carica('vt_benzinaFuoriTappaLitri','0')) || 0;
+  
   const olioMl = parseFloat(carica('vt_olioTotaleMl','0')) || 0;
   const paese = carica('vt_paeseAttuale','Colombia');
 
@@ -1784,19 +1947,24 @@ function aggiornaUI() {
   // scorta rapida (taniche)
   const unitaLabel = unitaAttuale === 'L' ? 'L' : 'gal';
   const scortaVis = unitaAttuale === 'L' ? scorta : (scorta / FAT_GAL);
+  
   setText('ui-scorta-rapida', scortaVis.toFixed(1));
   setText('scorta-ui', scortaVis.toFixed(1));
 
   // stats viaggio
   let kmVis = kmTot;
-  let benzVis = benzUsata;
+  let benzVis = benzUsata + benzFuori; // ✅ globale include anche fuori tappa
   let scortaVis2 = scorta;
 
   if (visualizzazioneStats === 'Paese') {
     const datiPaesi = caricaJSON('vt_datiPaesi', {});
     const dp = datiPaesi[paese] || { km:0, benzina:0 };
     kmVis = dp.km || 0;
-    benzVis = dp.benzina || 0;
+    
+    //benzVis = dp.benzina || 0;
+    const dp = datiPaesi[paese] || { km:0, benzina:0, benzinaFuori:0 };
+    benzVis = (dp.benzina || 0) + (dp.benzinaFuori || 0); // ✅ paese include fuori tappa
+    
     setText('titolo-stat-paese', paese);
   } else {
     setText('titolo-stat-paese', 'Globali');
@@ -2890,6 +3058,10 @@ async function inizializzaApp() {
   await setLoadingProgress(10, '🗄️ Database...');
   initAllData();
 
+modalitaGuida = carica('vt_modalitaGuida', 'TAPPA');
+aggiornaModalitaUI();
+
+  
   await setLoadingProgress(30, '🗺️ Mappa...');
   if (coordinateTracciato.length > 0) {
     polyline.setLatLngs(coordinateTracciato);
