@@ -864,6 +864,55 @@
     <div style="font-size:12px;color:#777; text-align:left; margin-top:10px;">
       Nota: il cambio paese automatico via GPS resta attivo (ti chiede conferma).
     </div>
+
+
+<hr style="border:0;border-top:1px solid #333; margin:15px 0;">
+
+<h3 style="margin:0 0 10px 0; color:#90a4ae;">🧰 Parametri viaggio</h3>
+
+<label class="inp-label">Capacità serbatoio (L)</label>
+<input type="number" id="set-serbatoio-L" step="0.01" min="1" placeholder="Es. 7.57">
+
+<label class="inp-label">Capacità taniche totale (L)</label>
+<input type="number" id="set-taniche-L" step="0.1" min="0" placeholder="Es. 10">
+
+<label class="inp-label">Consumo medio manuale (km/L) (opzionale)</label>
+<input type="number" id="set-consumo-manuale" step="0.1" min="5" max="80" placeholder="Es. 28">
+
+<button class="btn-secondary" onclick="salvaSettingsAvanzati()">
+  💾 Salva parametri viaggio
+</button>
+
+<hr style="border:0;border-top:1px solid #333; margin:15px 0;">
+
+<h3 style="margin:0 0 10px 0; color:#ff9800;">🔧 Intervalli manutenzione (km)</h3>
+
+<label class="inp-label">Candela ogni (km)</label>
+<input type="number" id="set-int-candela" step="100" min="0">
+
+<label class="inp-label">Olio cambio ogni (km) (se applicabile)</label>
+<input type="number" id="set-int-olioCambio" step="100" min="0">
+
+<label class="inp-label">Ganasce freno ant. ogni (km)</label>
+<input type="number" id="set-int-ganasceAnt" step="100" min="0">
+
+<label class="inp-label">Ganasce freno post. ogni (km)</label>
+<input type="number" id="set-int-ganascePost" step="100" min="0">
+
+<label class="inp-label">Dischi frizione ogni (km)</label>
+<input type="number" id="set-int-dischiFrizione" step="100" min="0">
+
+<label class="inp-label">Gomme ogni (km)</label>
+<input type="number" id="set-int-gomme" step="100" min="0">
+
+<label class="inp-label">Cavi (generico) ogni (km)</label>
+<input type="number" id="set-int-cavi" step="100" min="0">
+
+<button class="btn-secondary" onclick="salvaIntervalliManutenzione()">
+  💾 Salva intervalli manutenzione
+</button>
+
+    
   </div>
 </div>
 
@@ -1224,6 +1273,26 @@ initDB('vt_valuta', 'USD');
   initDB('vt_spesaManodoperaUsd', '0');
 
 
+
+  // ===== SETTINGS AVANZATI =====
+  initDB('vt_serbatoioCapLitri', String(SERBATOIO_LITRI.toFixed(3))); // default 7.57 L
+  initDB('vt_tanicheCapLitri', '10.0'); // esempio: 10 L totali max (cambierai tu)
+  initDB('vt_consumoMedioManuale', ''); // vuoto = usa consumo da tappe o CONSUMO_MEDIO
+
+  // intervalli manutenzione (km) — valori di default “placeholder”
+  initDB('vt_manut_intervalli', JSON.stringify({
+    candela: 4000,
+    olioCambio: 5000,
+    ganasceAnt: 7000,
+    ganascePost: 7000,
+    dischiFrizione: 12000,
+    gomme: 10000,
+    cavi: 6000
+  }));
+
+
+
+  
 initDB('vt_turismo', JSON.stringify([]));
 initDB('vt_modalitaGuida', 'TAPPA');
 
@@ -2369,7 +2438,13 @@ function registraAcquisto() {
 
       // Aggiorna stima serbatoio (sale di quanto hai messo dentro, max capacità)
       const serbPrima = parseFloat(carica('vt_serbatoioLitri','0')) || 0;
-      const serbDopo  = Math.min(SERBATOIO_LITRI, serbPrima + qtaLitri);
+
+     const cap = getSerbatoioCapLitri();
+     const serbDopo = Math.min(cap, serbPrima + qtaLitri);
+     //const serbDopo  = Math.min(SERBATOIO_LITRI, serbPrima + qtaLitri);
+
+
+      
       salva('vt_serbatoioLitri', serbDopo.toFixed(3));
 
       // Totali globali
@@ -2402,6 +2477,12 @@ $$
     } else {
       const scortaAttualeL = parseFloat(carica('vt_scortaLitri', '0')) || 0;
       const nuovaScorta = scortaAttualeL + qtaLitri;
+
+const capTan = getTanicheCapLitri();
+if (capTan > 0 && nuovaScorta > capTan + 0.0001) {
+  showToast(`⚠️ Attenzione: scorta ${nuovaScorta.toFixed(2)} L supera capacità taniche (${capTan.toFixed(2)} L)`);
+}
+      
       salva('vt_scortaLitri', nuovaScorta);
 
       risultatoHTML =
@@ -2499,7 +2580,14 @@ function registraTravaso() {
 
   // ✅ AGGIORNA STIMA SERBATOIO (hai versato dentro)
   const serbPrima = parseFloat(carica('vt_serbatoioLitri','0')) || 0;
-  const serbDopo  = Math.min(SERBATOIO_LITRI, serbPrima + qtaLitri);
+
+  
+  //const serbDopo  = Math.min(SERBATOIO_LITRI, serbPrima + qtaLitri);
+  const cap = getSerbatoioCapLitri();
+  const serbDopo = Math.min(cap, serbPrima + qtaLitri);
+
+
+  
   salva('vt_serbatoioLitri', serbDopo.toFixed(3));
   
   tappaAttuale.fuelAddedLitri = (tappaAttuale.fuelAddedLitri || 0) + qtaLitri;
@@ -2599,9 +2687,12 @@ function aggiornaAutonomia() {
     const totL    = scortaL + serbL;
 
     // Consumo interno sempre in km/L
-    const consumoDaTappe = calcolaConsumoDaTappe();
-    const consumoKmPerL  = (consumoDaTappe != null) ? consumoDaTappe : CONSUMO_MEDIO;
-
+   const consumoManuale = getConsumoMedioManuale(); // km/L o null
+const consumoDaTappe = calcolaConsumoDaTappe();
+const consumoKmPerL  = (consumoManuale != null) ? consumoManuale
+                      : (consumoDaTappe != null) ? consumoDaTappe
+                      : CONSUMO_MEDIO;
+    
     // Autonomia interna sempre in km
     const autonomiaKm = totL * consumoKmPerL;
 
@@ -3053,6 +3144,101 @@ function convertLocalToUsd(amountLocal, currency) {
   }
   return a * fx;
 }
+
+
+
+
+
+function getSerbatoioCapLitri() {
+  return parseFloat(carica('vt_serbatoioCapLitri', String(SERBATOIO_LITRI))) || SERBATOIO_LITRI;
+}
+
+function getTanicheCapLitri() {
+  return parseFloat(carica('vt_tanicheCapLitri', '0')) || 0;
+}
+
+// ritorna km/L oppure null
+function getConsumoMedioManuale() {
+  const v = carica('vt_consumoMedioManuale', '');
+  if (v === '' || v == null) return null;
+  const n = parseFloat(v);
+  if (!n || isNaN(n) || n < 5 || n > 80) return null;
+  return n;
+}
+
+function getIntervalliManutenzione() {
+  return caricaJSON('vt_manut_intervalli', {}) || {};
+}
+
+function caricaSettingsAvanzatiUI() {
+  const serb = getSerbatoioCapLitri();
+  const tan  = getTanicheCapLitri();
+  const cons = carica('vt_consumoMedioManuale', '');
+
+  document.getElementById('set-serbatoio-L')?.value = serb.toFixed(2);
+  document.getElementById('set-taniche-L')?.value = tan ? String(tan) : '';
+  document.getElementById('set-consumo-manuale')?.value = cons;
+
+  const ints = getIntervalliManutenzione();
+  document.getElementById('set-int-candela')?.value = ints.candela ?? '';
+  document.getElementById('set-int-olioCambio')?.value = ints.olioCambio ?? '';
+  document.getElementById('set-int-ganasceAnt')?.value = ints.ganasceAnt ?? '';
+  document.getElementById('set-int-ganascePost')?.value = ints.ganascePost ?? '';
+  document.getElementById('set-int-dischiFrizione')?.value = ints.dischiFrizione ?? '';
+  document.getElementById('set-int-gomme')?.value = ints.gomme ?? '';
+  document.getElementById('set-int-cavi')?.value = ints.cavi ?? '';
+}
+
+function salvaSettingsAvanzati() {
+  const serb = parseFloat(document.getElementById('set-serbatoio-L')?.value || '');
+  if (!serb || isNaN(serb) || serb < 1) { showToast('⚠️ Capacità serbatoio non valida'); return; }
+
+  const tan = parseFloat(document.getElementById('set-taniche-L')?.value || '0') || 0;
+  if (tan < 0) { showToast('⚠️ Capacità taniche non valida'); return; }
+
+  const consStr = (document.getElementById('set-consumo-manuale')?.value || '').trim();
+  if (consStr !== '') {
+    const cons = parseFloat(consStr);
+    if (!cons || isNaN(cons) || cons < 5 || cons > 80) { showToast('⚠️ Consumo manuale non valido'); return; }
+    salva('vt_consumoMedioManuale', String(cons));
+  } else {
+    salva('vt_consumoMedioManuale', ''); // reset
+  }
+
+  salva('vt_serbatoioCapLitri', String(serb.toFixed(3)));
+  salva('vt_tanicheCapLitri', String(tan.toFixed(3)));
+
+  showToast('✅ Parametri viaggio salvati');
+  aggiornaUI();
+}
+
+function salvaIntervalliManutenzione() {
+  function readInt(id) {
+    const v = (document.getElementById(id)?.value || '').trim();
+    if (v === '') return null; // null = disattivo
+    const n = parseInt(v, 10);
+    return (!n || isNaN(n) || n < 0) ? null : n;
+  }
+
+  const ints = {
+    candela: readInt('set-int-candela'),
+    olioCambio: readInt('set-int-olioCambio'),
+    ganasceAnt: readInt('set-int-ganasceAnt'),
+    ganascePost: readInt('set-int-ganascePost'),
+    dischiFrizione: readInt('set-int-dischiFrizione'),
+    gomme: readInt('set-int-gomme'),
+    cavi: readInt('set-int-cavi')
+  };
+
+  salva('vt_manut_intervalli', ints);
+  showToast('✅ Intervalli manutenzione salvati');
+}
+
+
+
+
+
+
   
 function aggiornaSettingsUI() {
   // unità volume
@@ -3109,6 +3295,9 @@ function cambiaPaeseDaSettings() {
   aggiornaSettingsUI();
   aggiornaUI();
   showToast('🗺️ Paese: ' + p);
+
+    caricaSettingsAvanzatiUI();
+  
 }
 
 
