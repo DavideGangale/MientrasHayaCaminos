@@ -1725,6 +1725,12 @@ function registraAcquisto() {
       // benzina netta (come nel tuo codice originale)
       const benzPura = qtaLitri - (olioMl / 1000);
 
+      // ✅ AGGIORNA STIMA SERBATOIO (aggiungo quello che hai messo dentro)
+      const serbPrima = parseFloat(carica('vt_serbatoioLitri','0')) || 0;
+      const serbDopo  = Math.min(SERBATOIO_LITRI, serbPrima + qtaLitri);
+      salva('vt_serbatoioLitri', serbDopo.toFixed(3));
+
+      
       salva('vt_benzinaUsata', (parseFloat(carica('vt_benzinaUsata', '0')) || 0) + benzPura);
       salva('vt_olioTotaleMl', (parseFloat(carica('vt_olioTotaleMl', '0')) || 0) + olioMl);
       salva('vt_odoUltimoPieno', carica('vt_kmTotali', '0'));
@@ -1830,6 +1836,12 @@ function registraTravaso() {
   const nuovaScorta = Math.max(0, scorta - qtaLitri);
   salva('vt_scortaLitri', nuovaScorta);
 
+  // ✅ AGGIORNA STIMA SERBATOIO (hai versato dentro)
+  const serbPrima = parseFloat(carica('vt_serbatoioLitri','0')) || 0;
+  const serbDopo  = Math.min(SERBATOIO_LITRI, serbPrima + qtaLitri);
+  salva('vt_serbatoioLitri', serbDopo.toFixed(3));
+
+  
   salva('vt_benzinaUsata', (parseFloat(carica('vt_benzinaUsata','0')) || 0) + benzPura);
   salva('vt_olioTotaleMl', (parseFloat(carica('vt_olioTotaleMl','0')) || 0) + olioMl);
 
