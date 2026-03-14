@@ -1952,27 +1952,26 @@ tappaAttuale.fuelAddedLitri = (tappaAttuale.fuelAddedLitri || 0) + qtaLitri;
       tappaAttuale.benzinaUsata = (tappaAttuale.benzinaUsata || 0) + benzPura;
       salva('vt_tappaAttuale', tappaAttuale);
 
-      risultatoHTML =
-        `✅ <b>Messo in Vespa:</b> ${qtaLitri.toFixed(2)} L<br>` +
-        `🧪 <b>Olio 2T da aggiungere:</b> <span style="font-size:20px; color:var(--giallo); font-weight:bold;">${olioMl} ml</span><br>` +
-        `⛽ Benzina netta: ${benzPura.toFixed(2)} L<br>` +
-     (totaleBenz > 0 ? `💰 Totale benzina: <b>
-$$
-{totaleBenz.toFixed(2)}</b><br>` : '') +
-`🧪 Valore olio usato: <b>
-$$
-{costoOlioUsatoUsd.toFixed(2)}</b>`;
+      risultatoHTML = `✅ <b>Messo in Vespa:</b> ${qtaLitri.toFixed(2)} L<br>` + `🧪 <b>Olio 2T da aggiungere:</b> <span style="font-size:20px; color:var(--giallo); font-weight:bold;">${olioMl} ml</span><br>` + `⛽ Benzina netta: ${benzPura.toFixed(2)} L<br>` + (totaleBenz > 0 ? `💰 Totale benzina: <b>
+{totaleBenz.toFixed(2)}
+text
+: '') +  
+🧪 Valore olio usato:
+
+{costoOlioUsatoUsd.toFixed(2)}</b>`; 
+
+
+      
     } else {
       const scortaAttualeL = parseFloat(carica('vt_scortaLitri', '0')) || 0;
       const nuovaScorta = scortaAttualeL + qtaLitri;
       salva('vt_scortaLitri', nuovaScorta);
 
-      risultatoHTML =
-        `✅ <b>Aggiunto nelle taniche:</b> ${qtaLitri.toFixed(2)} L<br>` +
-        `🛢️ <b>Scorta totale:</b> ${nuovaScorta.toFixed(2)} L<br>` +
-        (totaleBenz > 0 ? `💰 Totale benzina: <b>
-$$
-{totaleBenz.toFixed(2)}</b>` : '');
+       risultatoHTML =
+  `✅ <b>Aggiunto nelle taniche:</b> ${qtaLitri.toFixed(2)} L<br>` +
+  `🛢️ <b>Scorta totale:</b> ${nuovaScorta.toFixed(2)} L<br>` +
+  (totaleBenz > 0 ? `💰 Totale benzina: <b>$${totaleBenz.toFixed(2)}</b>` : '');
+      
     }
 
     salva('vt_datiPaesi', datiPaesi);
