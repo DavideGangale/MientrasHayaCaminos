@@ -1759,7 +1759,7 @@ $$
         prezzoUnit: prezzoUnitario ? prezzoUnitario.toFixed(3) : null, // USD/L
         costoBenz:  totaleBenz > 0 ? totaleBenz.toFixed(2) : null,      // USD
         costoOlio:  (costoOlioUsatoUsd !== null) ? costoOlioUsatoUsd.toFixed(2) : null, // USD
-        luogo:      luogo,
+       // luogo:      luogo,
         km:         parseFloat(carica('vt_kmTotali', '0')).toFixed(1)
     });
     salva('vt_logCarburanti', logCarb);
