@@ -575,6 +575,33 @@
           <div style="font-size:11px; color:#aaa;">OLIO 2T USATO</div>
           <div class="stat-num" id="statOlio">0.00 <span style="font-size:12px;">L</span></div>
         </div>
+
+
+<div class="stat-box">
+  <div style="font-size:11px; color:#aaa;">SPESA BENZINA</div>
+  <div class="stat-num" id="statSpesaBenzina" style="color:var(--giallo);">--</div>
+  <div style="font-size:11px; color:#777;">USD</div>
+</div>
+
+<div class="stat-box">
+  <div style="font-size:11px; color:#aaa;">SPESA OLIO</div>
+  <div class="stat-num" id="statSpesaOlio" style="color:#00bcd4;">--</div>
+  <div style="font-size:11px; color:#777;">USD</div>
+</div>
+
+<div class="stat-box">
+  <div style="font-size:11px; color:#aaa;">SPESA RICAMBI</div>
+  <div class="stat-num" id="statSpesaRicambi" style="color:#ff9800;">--</div>
+  <div style="font-size:11px; color:#777;">USD</div>
+</div>
+
+<div class="stat-box">
+  <div style="font-size:11px; color:#aaa;">SPESA MANODOPERA</div>
+  <div class="stat-num" id="statSpesaManodopera" style="color:var(--verde);">--</div>
+  <div style="font-size:11px; color:#777;">USD</div>
+</div>
+
+        
         <div class="stat-box" style="grid-column:span 2; border-color:var(--giallo);">
           <div style="font-size:12px; color:#aaa;">SCORTA NELLE TANICHE</div>
           <div class="stat-num" id="statScorta" style="color:var(--giallo); font-size:28px;">
@@ -663,9 +690,9 @@
         </div>
       </div>
 
-      <label class="inp-label">Totale pagato benzina (USD) (opzionale)</label>
-      <input type="number" id="inputTotaleBenz" placeholder="Totale pagato benzina (USD) (opzionale)" step="0.01" min="0">
-
+      <label class="inp-label">Totale pagato benzina (valuta locale) (opzionale)</label>
+<input type="number" id="inputTotaleBenz" placeholder="Totale pagato benzina (valuta locale)" step="0.01" min="0">
+      
       <button class="btn-azione" onclick="registraAcquisto()">💾 Salva & Calcola</button>
       <div id="risultatoCompra" class="risultato-box"></div>
     </div>
@@ -682,8 +709,8 @@
       <label class="inp-label">Quantità acquistata (ml)</label>
       <input type="number" id="inputOlioMl" placeholder="Es. 1000" step="10" min="1">
 
-      <label class="inp-label">Totale pagato (USD)</label>
-      <input type="number" id="inputOlioUsd" placeholder="Es. 8.50" step="0.01" min="0">
+    <label class="inp-label">Totale pagato (valuta locale)</label>
+<input type="number" id="inputOlioUsd" placeholder="Es. 30000 (COP) / 25 (PEN)" step="0.01" min="0">
 
       <button class="btn-azione" style="background:#00bcd4; color:black;" onclick="registraAcquistoOlio()">
         💾 Salva acquisto olio
@@ -792,6 +819,34 @@
       <option value="ARS">ARS ($)</option>
     </select>
 
+
+    <div style="text-align:left; font-size:12px; color:#aaa; margin-top:10px;">
+  Cambio verso USD
+</div>
+
+<div style="display:flex; gap:10px; align-items:center;">
+  <div style="min-width:140px; font-size:12px; color:#bbb;">
+    1 <b id="set-fx-cur">COP</b> =
+  </div>
+
+  <input type="number" id="set-fx" class="inp-select"
+         style="margin:0;"
+         placeholder="es. 0.00025"
+         step="0.000001" min="0">
+
+  <div style="min-width:40px; font-size:12px; color:#bbb;">USD</div>
+</div>
+
+<button class="btn-secondary" style="margin-top:10px;" onclick="salvaFxDaSettings()">
+  💾 Salva cambio
+</button>
+
+<div id="set-fx-info" style="font-size:12px; color:#777; text-align:left; margin-top:8px;">
+  Suggerimento: se sei offline, usa l’ultimo cambio salvato.
+</div>
+
+
+    
     <div style="text-align:left; font-size:12px; color:#aaa; margin-top:10px;">Paese (manuale)</div>
     <select id="set-paese" class="inp-select" onchange="cambiaPaeseDaSettings()">
       <option value="Colombia">🇨🇴 Colombia</option>
@@ -1153,7 +1208,17 @@ initDB('vt_unita', 'L');
 initDB('vt_unita', 'L');
 initDB('vt_dist', 'KM');
 initDB('vt_valuta', 'USD');
-  
+
+
+  // cambi valuta -> USD (1 valuta = X USD)
+  initDB('vt_fxRates', JSON.stringify({ USD: 1 }));
+
+  // spese globali (tutte in USD)
+  initDB('vt_spesaBenzinaUsd', localStorage.getItem('vt_spesaBenzina') || '0');
+  initDB('vt_spesaOlioUsd',    localStorage.getItem('vt_spesaOlio')    || '0');
+  initDB('vt_spesaRicambiUsd', '0');
+  initDB('vt_spesaManodoperaUsd', '0');
+
 
 initDB('vt_turismo', JSON.stringify([]));
 initDB('vt_modalitaGuida', 'TAPPA');
@@ -2002,11 +2067,15 @@ function registraAcquistoOlio() {
   const ml = validaInput('inputOlioMl', 1, 50000);
   if (!ml) { showToast('⚠️ Inserisci ml validi'); return; }
 
-  const usd = parseFloat(document.getElementById('inputOlioUsd').value) || 0;
-  if (usd <= 0) { showToast('⚠️ Inserisci totale pagato (USD)'); return; }
+const local = parseFloat(document.getElementById('inputOlioUsd').value) || 0;
+if (local <= 0) { showToast('⚠️ Inserisci totale pagato (valuta locale)'); return; }
 
-  const st = getOlioStock();
-  setOlioStock(st.ml + ml, st.usd + usd);
+const cur = valutaAttuale || 'USD';
+const usd = convertLocalToUsd(local, cur);
+if (usd <= 0) return; // manca cambio
+
+const st = getOlioStock();
+setOlioStock(st.ml + ml, st.usd + usd);
 
   document.getElementById('inputOlioMl').value = '';
   document.getElementById('inputOlioUsd').value = '';
@@ -2096,6 +2165,37 @@ if (paeseScope) {
   if (sel) sel.value = paese;
   setText('lbl-paese-benzina', paese);
 
+
+
+  // ===== SPESE (sempre in USD) =====
+  let spB = 0, spO = 0, spR = 0, spM = 0;
+
+  // determina paeseScope come in stats (Globali = null)
+  let paeseScope = null;
+  if (visualizzazioneStats === 'Paese') paeseScope = paese;
+  if (visualizzazioneStats === 'Scegli') paeseScope = statsPaeseSelezionato || paese;
+
+  if (paeseScope) {
+    const datiPaesi = caricaJSON('vt_datiPaesi', {});
+    const dp = datiPaesi[paeseScope] || {};
+    spB = Number(dp.spesaBenzinaUsd || 0);
+    spO = Number(dp.spesaOlioUsd || 0);
+    spR = Number(dp.spesaRicambiUsd || 0);
+    spM = Number(dp.spesaManodoperaUsd || 0);
+  } else {
+    spB = parseFloat(carica('vt_spesaBenzinaUsd','0')) || 0;
+    spO = parseFloat(carica('vt_spesaOlioUsd','0')) || 0;
+    spR = parseFloat(carica('vt_spesaRicambiUsd','0')) || 0;
+    spM = parseFloat(carica('vt_spesaManodoperaUsd','0')) || 0;
+  }
+
+  setText('statSpesaBenzina', '$' + spB.toFixed(2));
+  setText('statSpesaOlio', '$' + spO.toFixed(2));
+  setText('statSpesaRicambi', '$' + spR.toFixed(2));
+  setText('statSpesaManodopera', '$' + spM.toFixed(2));
+
+
+  
   aggiornaTempoGuidaUI();
   aggiornaAutonomia();
   aggiornaUIOlioStock();
@@ -2195,19 +2295,28 @@ function registraAcquisto() {
     const now = new Date();
 
     const elTot = document.getElementById('inputTotaleBenz');
-    const totaleBenz = elTot ? (parseFloat(elTot.value) || 0) : 0;
+  
+const totaleBenzLocal = elTot ? (parseFloat(elTot.value) || 0) : 0;
+const cur = valutaAttuale || 'USD';
+const totaleBenzUsd = (totaleBenzLocal > 0) ? convertLocalToUsd(totaleBenzLocal, cur) : 0;
 
-    const prezzoUnitario = (totaleBenz > 0 && qtaLitri > 0) ? (totaleBenz / qtaLitri) : null;
+const prezzoUnitario = (totaleBenzLocal > 0 && qtaLitri > 0) ? (totaleBenzLocal / qtaLitri) : null;
 
+    
     // Dati paese
     const datiPaesi = caricaJSON('vt_datiPaesi', {});
     if (!datiPaesi[paese]) datiPaesi[paese] = { km:0, benzina:0, spesaBenzina:0, spesaOlio:0 };
+    
+if (totaleBenzLocal > 0) {
+  salva('vt_spesaBenzinaUsd', (parseFloat(carica('vt_spesaBenzinaUsd', '0')) || 0) + totaleBenzUsd);
 
-    if (totaleBenz > 0) {
-      salva('vt_spesaBenzina', (parseFloat(carica('vt_spesaBenzina', '0')) || 0) + totaleBenz);
-      datiPaesi[paese].spesaBenzina = (datiPaesi[paese].spesaBenzina || 0) + totaleBenz;
-    }
+  // per-paese in USD
+  datiPaesi[paese].spesaBenzinaUsd = (datiPaesi[paese].spesaBenzinaUsd || 0) + totaleBenzUsd;
 
+  // (opzionale) tieni anche il totale locale per info (solo se ti serve)
+  datiPaesi[paese].spesaBenzinaLocal = (datiPaesi[paese].spesaBenzinaLocal || 0) + totaleBenzLocal;
+  datiPaesi[paese].valuta = cur;
+}
     let risultatoHTML = '';
     let costoOlioUsatoUsd = null;
 
@@ -2233,8 +2342,8 @@ function registraAcquisto() {
       setOlioStock(stockMl - olioMl, stockUsd - costoOlioUsatoUsd);
 
       // spese olio
-      salva('vt_spesaOlio', (parseFloat(carica('vt_spesaOlio', '0')) || 0) + costoOlioUsatoUsd);
-      datiPaesi[paese].spesaOlio = (datiPaesi[paese].spesaOlio || 0) + costoOlioUsatoUsd;
+salva('vt_spesaOlioUsd', (parseFloat(carica('vt_spesaOlioUsd', '0')) || 0) + costoOlioUsatoUsd);
+datiPaesi[paese].spesaOlioUsd = (datiPaesi[paese].spesaOlioUsd || 0) + costoOlioUsatoUsd;
 
       // benzina netta
       const benzPura = qtaLitri - (olioMl / 1000);
@@ -2294,6 +2403,12 @@ $$
       mix:  (dest === 'V') ? (mixC + '%') : '--',
       prezzoUnit: prezzoUnitario ? prezzoUnitario.toFixed(3) : null,
       costoBenz:  (totaleBenz > 0) ? totaleBenz.toFixed(2) : null,
+
+valuta: cur,
+fxToUsd: getFxToUsd(cur),
+costoBenzLocal: (totaleBenzLocal > 0) ? totaleBenzLocal.toFixed(2) : null,
+costoBenzUsd: (totaleBenzLocal > 0) ? totaleBenzUsd.toFixed(2) : null,
+      
       costoOlio:  (costoOlioUsatoUsd !== null) ? costoOlioUsatoUsd.toFixed(2) : null,
       luogo,
       km: (parseFloat(carica('vt_kmTotali', '0')) || 0).toFixed(1)
@@ -2364,14 +2479,17 @@ function registraTravaso() {
   salva('vt_benzinaUsata', (parseFloat(carica('vt_benzinaUsata','0')) || 0) + benzPura);
   salva('vt_olioTotaleMl', (parseFloat(carica('vt_olioTotaleMl','0')) || 0) + olioMl);
 
-  salva('vt_spesaOlio', (parseFloat(carica('vt_spesaOlio','0')) || 0) + costoOlioUsato);
+  //salva('vt_spesaOlio', (parseFloat(carica('vt_spesaOlio','0')) || 0) + costoOlioUsato);
+  salva('vt_spesaOlioUsd', (parseFloat(carica('vt_spesaOlioUsd', '0')) || 0) + costoOlioUsatoUsd);
+  datiPaesi[paese].spesaOlioUsd = (datiPaesi[paese].spesaOlioUsd || 0) + costoOlioUsatoUsd;
+
 
   const paese = carica('vt_paeseAttuale','Colombia');
   const datiPaesi = caricaJSON('vt_datiPaesi', {});
   if (!datiPaesi[paese]) datiPaesi[paese] = { km:0, benzina:0, spesaBenzina:0, spesaOlio:0 };
 
   datiPaesi[paese].benzina = (datiPaesi[paese].benzina || 0) + benzPura;
-  datiPaesi[paese].spesaOlio = (datiPaesi[paese].spesaOlio || 0) + costoOlioUsato;
+  //datiPaesi[paese].spesaOlio = (datiPaesi[paese].spesaOlio || 0) + costoOlioUsato;
   salva('vt_datiPaesi', datiPaesi);
 
   tappaAttuale.benzinaUsata = (tappaAttuale.benzinaUsata || 0) + benzPura;
@@ -2826,9 +2944,57 @@ function onStatsPaeseSelect(paese) {
 
 
 
+function getFxRates() {
+  return caricaJSON('vt_fxRates', { USD: 1 }) || { USD: 1 };
+}
 
+function getFxToUsd(currency) {
+  const rates = getFxRates();
+  const v = Number(rates[currency]);
+  if (currency === 'USD') return 1;
+  return (v && v > 0) ? v : null;
+}
 
+function setFxToUsd(currency, fxToUsd) {
+  const rates = getFxRates();
+  rates[currency] = Number(fxToUsd);
+  salva('vt_fxRates', rates);
+}
 
+function aggiornaFxSettingsUI() {
+  const cur = valutaAttuale || 'USD';
+  const curEl = document.getElementById('set-fx-cur');
+  const inp = document.getElementById('set-fx');
+  if (curEl) curEl.innerText = cur;
+
+  if (!inp) return;
+  const fx = getFxToUsd(cur);
+  inp.value = (fx != null) ? fx : '';
+}
+
+function salvaFxDaSettings() {
+  const cur = valutaAttuale || 'USD';
+  const inp = document.getElementById('set-fx');
+  const fx = inp ? parseFloat(inp.value) : NaN;
+
+  if (cur === 'USD') { showToast('USD non richiede cambio'); return; }
+  if (!fx || isNaN(fx) || fx <= 0) { showToast('⚠️ Inserisci un cambio valido'); return; }
+
+  setFxToUsd(cur, fx);
+  showToast(`💱 Salvato: 1 ${cur} = ${fx} USD`);
+}
+
+function convertLocalToUsd(amountLocal, currency) {
+  const a = Number(amountLocal || 0);
+  if (a <= 0) return 0;
+
+  const fx = getFxToUsd(currency);
+  if (fx == null) {
+    showToast(`⚠️ Manca cambio per ${currency}. Vai in Settings.`);
+    return 0;
+  }
+  return a * fx;
+}
   
 function aggiornaSettingsUI() {
   // unità volume
@@ -2869,6 +3035,7 @@ function setValuta(v) {
   showToast('💱 Valuta: ' + v);
   // (facoltativo) aggiornaUI() se vuoi cambiare i simboli ovunque
   aggiornaUI();
+    aggiornaFxSettingsUI();
 }
 
 function cambiaPaeseDaSettings() {
@@ -3029,7 +3196,9 @@ window.salvaDettagliPercorso = function () {
 
   salva('vt_tappe', tappe2);
   salva('vt_turismo', tur2);
-
+    
+  aggiornaFxSettingsUI();
+    
   renderTappe();
   showToast('🗑️ Eliminato');
 }
@@ -3180,11 +3349,43 @@ function aggiungiRicambio() {
   const nome = input ? input.value.trim() : '';
   if (!nome) { showToast('⚠️ Inserisci un nome'); return; }
   const inv = caricaJSON('vt_inventario', []);
-  inv.push({ nome, qta:1, durata:5000, lastKm: (parseFloat(carica('vt_kmTotali','0')) || 0) });
+
+  const cur = valutaAttuale || 'USD';
+  const costoStr = prompt(`Costo ricambio in ${cur} (opzionale)`, '');
+  const costoLocal = costoStr ? parseFloat(costoStr) : 0;
+  const costoUsd = (costoLocal > 0) ? convertLocalToUsd(costoLocal, cur) : 0;
+
+  
+   inv.push({
+    nome,
+    qta: 1,
+    durata: 5000,
+    lastKm: (parseFloat(carica('vt_kmTotali','0')) || 0),
+    costoLocal: costoLocal || 0,
+    costoUsd: costoUsd || 0,
+    valuta: cur,
+    fxToUsd: getFxToUsd(cur)
+  });
+
+  
   salva('vt_inventario', inv);
   if (input) input.value = '';
   renderInventario();
   showToast('✅ Ricambio aggiunto: ' + nome);
+
+
+  if (costoUsd > 0) {
+    salva('vt_spesaRicambiUsd', (parseFloat(carica('vt_spesaRicambiUsd','0')) || 0) + costoUsd);
+
+    const paese = carica('vt_paeseAttuale','Colombia');
+    const datiPaesi = caricaJSON('vt_datiPaesi', {});
+    if (!datiPaesi[paese]) datiPaesi[paese] = {};
+    datiPaesi[paese].spesaRicambiUsd = (datiPaesi[paese].spesaRicambiUsd || 0) + costoUsd;
+    datiPaesi[paese].valuta = cur;
+    salva('vt_datiPaesi', datiPaesi);
+  }
+
+  
 }
 
 /* ============================================================
@@ -3250,7 +3451,9 @@ function salvaIntervento() {
   const descEl = document.getElementById('log-descrizione');
   const desc = descEl ? descEl.value.trim() : '';
 
-  const costo = parseFloat(document.getElementById('log-costo').value) || 0;
+  const costoLocal = parseFloat(document.getElementById('log-costo').value) || 0;
+const cur = valutaAttuale || 'USD';
+const costoUsd = (costoLocal > 0) ? convertLocalToUsd(costoLocal, cur) : 0;
 
   const ante = document.getElementById('anteprima-log-foto');
   const foto = (ante && ante.dataset) ? (ante.dataset.src || null) : null;
@@ -3264,13 +3467,27 @@ function salvaIntervento() {
     km: (parseFloat(carica('vt_kmTotali','0')) || 0).toFixed(1),
     nome,
     desc,
-    costo,
+    valuta: cur,
+fxToUsd: getFxToUsd(cur),
+costoLocal,
+costoUsd,
     foto
   };
 
   const log = caricaJSON('vt_logbook', []);
   log.unshift(entry);
   salva('vt_logbook', log);
+
+  if (costoLocal > 0 && costoUsd > 0) {
+  salva('vt_spesaManodoperaUsd', (parseFloat(carica('vt_spesaManodoperaUsd','0')) || 0) + costoUsd);
+
+  const paese = carica('vt_paeseAttuale','Colombia');
+  const datiPaesi = caricaJSON('vt_datiPaesi', {});
+  if (!datiPaesi[paese]) datiPaesi[paese] = {};
+  datiPaesi[paese].spesaManodoperaUsd = (datiPaesi[paese].spesaManodoperaUsd || 0) + costoUsd;
+  datiPaesi[paese].valuta = cur;
+  salva('vt_datiPaesi', datiPaesi);
+}
 
   if (nomeEl) nomeEl.value = '';
   if (descEl) descEl.value = '';
@@ -3298,7 +3515,7 @@ function renderLogManutenzione() {
       <div style="font-weight:bold; color:#ff9800; font-size:16px;">🔧 ${e.nome}</div>
       <div style="font-size:12px; color:#888;">${e.data} ${e.ora} — ${e.km} km — ${e.paese}</div>
       ${e.desc ? `<div class="log-note">📝 ${e.desc}</div>` : ''}
-      ${e.costo > 0 ? `<div style="color:var(--verde); margin-top:5px;">💰 Costo: ${e.costo}</div>` : ''}
+     ${(e.costoLocal > 0) ? `<div style="color:var(--verde); margin-top:5px;">💰 Costo: ${e.costoLocal} ${e.valuta || ''} (≈ $${Number(e.costoUsd||0).toFixed(2)})</div>` : ''}
       ${e.foto ? `<img src="${e.foto}" class="log-img" loading="lazy">` : ''}
       <button onclick="eliminaIntervento(${e.id})"
         style="background:none; border:none; color:#666; font-size:12px; cursor:pointer; margin-top:5px;">🗑️ Elimina</button>
