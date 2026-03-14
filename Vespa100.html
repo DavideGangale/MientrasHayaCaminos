@@ -1534,7 +1534,7 @@ function concludiTappa() {
     benzina: parseFloat((tappaAttuale.benzinaUsata || 0).toFixed(2)),
     velMax: tappaAttuale.velMax || 0,
     traccia: coordinateTracciato.filter((_, i) => i % 3 === 0), // salva 1 punto ogni 3 (più leggero)
-
+    tipo: 'Tappa',
 
 
 
@@ -2522,47 +2522,84 @@ function eliminaDiario(id) {
 ============================================================ */
 function renderTappe() {
   const tappe = caricaJSON('vt_tappe', []);
+  const turismo = caricaJSON('vt_turismo', []);
+
   const container = document.getElementById('contenutoTappe');
   if (!container) return;
 
-  if (!tappe.length) {
+  const lista = []
+    .concat(Array.isArray(tappe) ? tappe : [])
+    .concat(Array.isArray(turismo) ? turismo : [])
+    .sort((a, b) => (b.id || 0) - (a.id || 0)); // id = timestamp
+
+  if (!lista.length) {
     container.innerHTML = '<div style="color:#888; text-align:center; padding:30px;">Nessuna tappa registrata</div>';
     return;
   }
 
-  container.innerHTML = tappe.map(t => {
+  container.innerHTML = lista.map(t => {
     const h = Math.floor((t.durata || 0) / 3600);
     const m = Math.floor(((t.durata || 0) % 3600) / 60);
+
+    const tipo = t.tipo || 'Tappa';
+    const badgeColor = (tipo === 'Turismo') ? '#2196F3' : '#9c27b0';
+
     const velMediaTxt = (t.velMedia != null) ? `🚀 Vel media: <b>${t.velMedia}</b> km/h<br>` : '';
+
     return `
       <div class="log-entry-full">
-        <div style="font-size:16px; font-weight:bold; color:var(--verde);">🏁 ${t.data} ${t.ora}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+          <div style="font-size:16px; font-weight:bold; color:var(--verde);">🏁 ${t.data} ${t.ora}</div>
+          <div style="background:${badgeColor};color:white;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:bold;">
+            ${tipo.toUpperCase()}
+          </div>
+        </div>
+
         <div style="color:var(--giallo); margin:5px 0;">${t.paese}</div>
         <div>📏 <b>${t.km} km</b> &nbsp;|&nbsp; ⏱️ ${h}h ${m}m</div>
         <div>⛰️ Alt: ${t.altMin}m → ${t.altMax}m</div>
-        <div>⛽ Benzina tappa: ${t.benzina} L</div>
+        <div>⛽ Benzina stimata: ${Number(t.benzinaStimataLitri ?? t.benzina ?? 0).toFixed(2)} L</div>
         <div>🏎️ Vel max: <b>${t.velMax || 0}</b> km/h</div>
         ${velMediaTxt}
-        ${(t.fuelEndGal != null) ? `<div>⛽ Serbatoio fine tappa: <b>${t.fuelEndGal}</b> gal</div>` : ''}
+        ${(t.fuelEndGal != null) ? `<div>⛽ Serbatoio fine: <b>${t.fuelEndGal}</b> gal</div>` : ''}
 
-  <button onclick="apriTracciaTappa(${t.id})"
-  style="background:#2196F3;border:none;color:white;padding:8px 10px;border-radius:8px;font-size:12px;cursor:pointer;margin-top:8px;">
-  🗺️ Vedi traccia
-  </button>
-        
-        <button onclick="eliminaTappa(${t.id})"
-          style="background:none; border:none; color:#666; font-size:12px; cursor:pointer; margin-top:5px;">🗑️ Elimina</button>
+        <button onclick="apriTracciaPercorso(${t.id})"
+          style="background:#2196F3;border:none;color:white;padding:8px 10px;border-radius:8px;font-size:12px;cursor:pointer;margin-top:8px;">
+          🗺️ Vedi traccia
+        </button>
+
+        <button onclick="eliminaPercorso(${t.id})"
+          style="background:none; border:none; color:#666; font-size:12px; cursor:pointer; margin-top:5px;">
+          🗑️ Elimina
+        </button>
       </div>
     `;
   }).join('');
 }
 
 
-function apriTracciaTappa(tappaId) {
+//function apriTracciaTappa(tappaId) {
+//  const tappe = caricaJSON('vt_tappe', []);
+//  const t = tappe.find(x => x.id === tappaId);
+//  if (!t || !t.traccia || t.traccia.length < 2) {
+//    showToast('⚠️ Traccia non disponibile per questa tappa');
+//    return;
+//  }
+//  apriMappaFull(t.traccia);
+//}
+
+  function apriTracciaPercorso(id) {
   const tappe = caricaJSON('vt_tappe', []);
-  const t = tappe.find(x => x.id === tappaId);
+  const tur   = caricaJSON('vt_turismo', []);
+
+  const lista = []
+    .concat(Array.isArray(tappe) ? tappe : [])
+    .concat(Array.isArray(tur) ? tur : []);
+
+  const t = lista.find(x => x.id === id);
+
   if (!t || !t.traccia || t.traccia.length < 2) {
-    showToast('⚠️ Traccia non disponibile per questa tappa');
+    showToast('⚠️ Traccia non disponibile');
     return;
   }
   apriMappaFull(t.traccia);
@@ -2571,11 +2608,28 @@ function apriTracciaTappa(tappaId) {
 
 
   
-function eliminaTappa(id) {
-  if (!confirm('Eliminare questa tappa?')) return;
-  const tappe = caricaJSON('vt_tappe', []).filter(t => t.id !== id);
-  salva('vt_tappe', tappe);
+//function eliminaTappa(id) {
+//  if (!confirm('Eliminare questa tappa?')) return;
+//  const tappe = caricaJSON('vt_tappe', []).filter(t => t.id !== id);
+//  salva('vt_tappe', tappe);
+//  renderTappe();
+//}
+
+
+  function eliminaPercorso(id) {
+  if (!confirm('Eliminare questo elemento?')) return;
+
+  const tappe = caricaJSON('vt_tappe', []);
+  const tur   = caricaJSON('vt_turismo', []);
+
+  const tappe2 = (Array.isArray(tappe) ? tappe : []).filter(t => t.id !== id);
+  const tur2   = (Array.isArray(tur) ? tur : []).filter(t => t.id !== id);
+
+  salva('vt_tappe', tappe2);
+  salva('vt_turismo', tur2);
+
   renderTappe();
+  showToast('🗑️ Eliminato');
 }
 
 /* ============================================================
