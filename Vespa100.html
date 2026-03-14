@@ -1649,139 +1649,135 @@ function validaInput(id, min = 0.01, max = 9999) {
 // ============================================================
 //  REGISTRA ACQUISTO BENZINA (Qtà + Totale pagato) + OLIO da STOCK
 // ============================================================
+
+
 function registraAcquisto() {
+  try {
     const qtaInput = validaInput('inputCompra', 0.01, 999);
     if (!qtaInput) {
-        showToast('⚠️ Inserisci una quantità valida');
-        return;
+      showToast('⚠️ Inserisci una quantità valida');
+      return;
     }
 
-    // Quantità sempre convertita in litri per i calcoli interni
+    // Sempre in litri internamente
     const qtaLitri = (unitaAttuale === 'G') ? (qtaInput * FAT_GAL) : qtaInput;
 
     const paese = carica('vt_paeseAttuale', 'Colombia');
-    //const luogo = document.getElementById('inputLuogo').value.trim() || 'N/D';
-    const now   = new Date();
 
-    // Totale pagato benzina (USD) (opzionale)
-    const totaleBenz = parseFloat(document.getElementById('inputTotaleBenz')?.value || '0') || 0;
+    const elLuogo = document.getElementById('inputLuogo');
+    const luogo = elLuogo ? (elLuogo.value.trim() || 'N/D') : 'N/D';
 
-    // Prezzo unitario calcolato (USD/L) solo per log (opzionale)
+    const now = new Date();
+
+    const elTot = document.getElementById('inputTotaleBenz');
+    const totaleBenz = elTot ? (parseFloat(elTot.value) || 0) : 0;
+
     const prezzoUnitario = (totaleBenz > 0 && qtaLitri > 0) ? (totaleBenz / qtaLitri) : null;
 
-    // Dati paese (schema completo)
+    // Dati paese
     const datiPaesi = caricaJSON('vt_datiPaesi', {});
     if (!datiPaesi[paese]) datiPaesi[paese] = { km:0, benzina:0, spesaBenzina:0, spesaOlio:0 };
 
-    // Salva spese benzina (globali + paese) se inserite
+    // Spese benzina (se inserite)
     if (totaleBenz > 0) {
-        salva('vt_spesaBenzina', parseFloat(carica('vt_spesaBenzina', '0')) + totaleBenz);
-        datiPaesi[paese].spesaBenzina = (datiPaesi[paese].spesaBenzina || 0) + totaleBenz;
+      salva('vt_spesaBenzina', parseFloat(carica('vt_spesaBenzina', '0')) + totaleBenz);
+      datiPaesi[paese].spesaBenzina = (datiPaesi[paese].spesaBenzina || 0) + totaleBenz;
     }
 
     let risultatoHTML = '';
-    let costoOlioUsatoUsd = null; // valorizzato solo se dest === 'V'
+    let costoOlioUsatoUsd = null;
 
     if (dest === 'V') {
-        // Calcolo olio miscela necessario
-        const olioMl = Math.round((qtaLitri * mixC / 100) * 1000);
+      const olioMl = Math.round((qtaLitri * mixC / 100) * 1000);
 
-        // --- OLIO da STOCK (blocca se insufficiente) ---
-        const stOlio = getOlioStock(); // {ml, usd}
-        if (stOlio.ml < olioMl) {
-            showToast(`⚠️ Olio insufficiente: servono ${olioMl} ml, disponibili ${Math.round(stOlio.ml)} ml. Compra olio prima.`);
-            return;
-        }
+      // OLIO da stock: blocca se insufficiente
+      const stOlio = getOlioStock(); // {ml, usd}
+      const stockMl = parseFloat(stOlio.ml || 0);
+      const stockUsd = parseFloat(stOlio.usd || 0);
 
-        // costo medio per ml sullo stock corrente
-        const costoPerMl = stOlio.usd / stOlio.ml; // USD/ml
-        costoOlioUsatoUsd = olioMl * costoPerMl;   // USD
+      if (stockMl < olioMl) {
+        showToast('⚠️ Olio insufficiente: servono ' + olioMl + ' ml, disponibili ' + Math.round(stockMl) + ' ml. Compra olio prima.');
+        return;
+      }
 
-        // scala stock (ml e costo residuo)
-        setOlioStock(stOlio.ml - olioMl, stOlio.usd - costoOlioUsatoUsd);
+      const costoPerMl = stockUsd / stockMl;
+      costoOlioUsatoUsd = olioMl * costoPerMl;
 
-        // spese olio (globali + paese)
-        salva('vt_spesaOlio', parseFloat(carica('vt_spesaOlio', '0')) + costoOlioUsatoUsd);
-        datiPaesi[paese].spesaOlio = (datiPaesi[paese].spesaOlio || 0) + costoOlioUsatoUsd;
+      // Scala stock
+      setOlioStock(stockMl - olioMl, stockUsd - costoOlioUsatoUsd);
 
-        // Benzina netta (tolto olio)
-        const benzPura = qtaLitri - (olioMl / 1000);
+      // Spese olio
+      salva('vt_spesaOlio', parseFloat(carica('vt_spesaOlio', '0')) + costoOlioUsatoUsd);
+      datiPaesi[paese].spesaOlio = (datiPaesi[paese].spesaOlio || 0) + costoOlioUsatoUsd;
 
-        // Totali globali consumo
-        salva('vt_benzinaUsata', parseFloat(carica('vt_benzinaUsata', '0')) + benzPura);
-        salva('vt_olioTotaleMl', parseFloat(carica('vt_olioTotaleMl', '0')) + olioMl);
-        salva('vt_odoUltimoPieno', carica('vt_kmTotali', '0'));
+      // Benzina netta
+      const benzPura = qtaLitri - (olioMl / 1000);
 
-        // Dati paese: benzina netta
-        datiPaesi[paese].benzina = (datiPaesi[paese].benzina || 0) + benzPura;
+      salva('vt_benzinaUsata', parseFloat(carica('vt_benzinaUsata', '0')) + benzPura);
+      salva('vt_olioTotaleMl', parseFloat(carica('vt_olioTotaleMl', '0')) + olioMl);
+      salva('vt_odoUltimoPieno', carica('vt_kmTotali', '0'));
 
-        // Tappa corrente
-        tappaAttuale.benzinaUsata += benzPura;
-        salva('vt_tappaAttuale', tappaAttuale);
+      datiPaesi[paese].benzina = (datiPaesi[paese].benzina || 0) + benzPura;
 
-        risultatoHTML = `
-            ✅ <b>Messo in Vespa:</b> ${qtaLitri.toFixed(2)} L<br>
-            🧪 <b>Olio 2T da aggiungere:</b>
-              <span style="font-size:20px; color:var(--giallo); font-weight:bold;">${olioMl} ml</span><br>
-            ⛽ Benzina netta: ${benzPura.toFixed(2)} L<br>
-            ${totaleBenz > 0 ? `💰 Totale benzina: <b>
-$$
-{totaleBenz.toFixed(2)}</b><br>` : ''}
-            🧪 Valore olio usato: <b>
-$$
-{costoOlioUsatoUsd.toFixed(2)}</b>
-        `;
+      tappaAttuale.benzinaUsata += benzPura;
+      salva('vt_tappaAttuale', tappaAttuale);
+
+      risultatoHTML =
+        '✅ <b>Messo in Vespa:</b> ' + qtaLitri.toFixed(2) + ' L<br>' +
+        '🧪 <b>Olio 2T da aggiungere:</b> <span style="font-size:20px; color:var(--giallo); font-weight:bold;">' + olioMl + ' ml</span><br>' +
+        '⛽ Benzina netta: ' + benzPura.toFixed(2) + ' L<br>' +
+        (totaleBenz > 0 ? ('💰 Totale benzina: <b>$' + totaleBenz.toFixed(2) + '</b><br>') : '') +
+        '🧪 Valore olio usato: <b>$' + costoOlioUsatoUsd.toFixed(2) + '</b>';
+
     } else {
-        // Taniche
-        const scortaAttualeL = parseFloat(carica('vt_scortaLitri', '0'));
-        salva('vt_scortaLitri', scortaAttualeL + qtaLitri);
+      const scortaAttualeL = parseFloat(carica('vt_scortaLitri', '0')) || 0;
+      salva('vt_scortaLitri', scortaAttualeL + qtaLitri);
 
-        risultatoHTML = `
-            ✅ <b>Aggiunto nelle taniche:</b> ${qtaLitri.toFixed(2)} L<br>
-            🛢️ <b>Scorta totale:</b> ${(scortaAttualeL + qtaLitri).toFixed(2)} L<br>
-            ${totaleBenz > 0 ? `💰 Totale benzina: <b>$${totaleBenz.toFixed(2)}</b>` : ''}
-        `;
+      risultatoHTML =
+        '✅ <b>Aggiunto nelle taniche:</b> ' + qtaLitri.toFixed(2) + ' L<br>' +
+        '🛢️ <b>Scorta totale:</b> ' + (scortaAttualeL + qtaLitri).toFixed(2) + ' L<br>' +
+        (totaleBenz > 0 ? ('💰 Totale benzina: <b>$' + totaleBenz.toFixed(2) + '</b>') : '');
     }
 
-    // Persisti dati paese
     salva('vt_datiPaesi', datiPaesi);
 
     // Log carburanti
     const logCarb = caricaJSON('vt_logCarburanti', []);
     logCarb.unshift({
-        id:         Date.now(),
-        data:       now.toLocaleDateString('it-IT'),
-        ora:        now.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' }),
-        paese:      paese,
-        qta:        qtaLitri.toFixed(2),
-        dest:       (dest === 'V') ? 'Vespa' : 'Tanica',
-        mix:        (dest === 'V') ? (mixC + '%') : '--',
-        prezzoUnit: prezzoUnitario ? prezzoUnitario.toFixed(3) : null, // USD/L
-        costoBenz:  totaleBenz > 0 ? totaleBenz.toFixed(2) : null,      // USD
-        costoOlio:  (costoOlioUsatoUsd !== null) ? costoOlioUsatoUsd.toFixed(2) : null, // USD
-       // luogo:      luogo,
-        km:         parseFloat(carica('vt_kmTotali', '0')).toFixed(1)
+      id: Date.now(),
+      data: now.toLocaleDateString('it-IT'),
+      ora: now.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' }),
+      paese: paese,
+      qta: qtaLitri.toFixed(2),
+      dest: (dest === 'V') ? 'Vespa' : 'Tanica',
+      mix: (dest === 'V') ? (mixC + '%') : '--',
+      prezzoUnit: prezzoUnitario ? prezzoUnitario.toFixed(3) : null,
+      costoBenz: (totaleBenz > 0) ? totaleBenz.toFixed(2) : null,
+      costoOlio: (costoOlioUsatoUsd !== null) ? costoOlioUsatoUsd.toFixed(2) : null,
+      luogo: luogo,
+      km: parseFloat(carica('vt_kmTotali', '0')).toFixed(1)
     });
     salva('vt_logCarburanti', logCarb);
 
-    // Pulisci input
+    // Reset input
     document.getElementById('inputCompra').value = '';
-    const elTB = document.getElementById('inputTotaleBenz'); if (elTB) elTB.value = '';
-    document.getElementById('inputLuogo').value = '';
+    if (elTot) elTot.value = '';
+    if (elLuogo) elLuogo.value = '';
+    const elCostoOlio = document.getElementById('inputCostoOlio');
+    if (elCostoOlio) elCostoOlio.value = '';
 
-    // Se hai ancora inputCostoOlio nell’HTML, lo svuotiamo (ma non lo usiamo più)
-    const elCO = document.getElementById('inputCostoOlio'); if (elCO) elCO.value = '';
-
-    // Mostra risultato
+    // Output
     const res = document.getElementById('risultatoCompra');
     res.innerHTML = risultatoHTML;
     res.style.display = 'block';
 
-    aggiornaUI(); // dovrebbe includere aggiornaUIOlioStock() se l’hai messa lì
+    aggiornaUI();
     showToast('⛽ Rifornimento registrato!');
+  } catch (e) {
+    console.error('registraAcquisto error:', e);
+    showToast('❌ Errore in registraAcquisto (vedi console)');
+  }
 }
-
-
 
 
 
