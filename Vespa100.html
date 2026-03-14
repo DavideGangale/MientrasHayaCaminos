@@ -485,14 +485,7 @@
   <!-- ==================== PAGINA 1: GUIDA ==================== -->
   <div id="guida" class="page active">
 
-    <select id="selectPaese" class="country-select" onchange="cambiaPaese()">
-      <option value="Colombia">🇨🇴 Colombia</option>
-      <option value="Ecuador">🇪🇨 Ecuador</option>
-      <option value="Peru">🇵🇪 Perù</option>
-      <option value="Bolivia">🇧🇴 Bolivia</option>
-      <option value="Chile">🇨🇱 Cile</option>
-      <option value="Argentina">🇦🇷 Argentina</option>
-    </select>
+    
 
 
 <button id="btn-modalita" class="btn-secondary" style="margin-top:0;" onclick="toggleModalitaGuida()">
@@ -1252,6 +1245,14 @@ function confermaCambioPaese() {
   if (s) s.value = pendingCountryChange;
   if (l) l.innerText = pendingCountryChange;
 
+
+  const sel = document.getElementById('selectPaese');
+  if (sel) sel.value = pendingCountryChange;
+
+  const setSel = document.getElementById('set-paese'); // settings
+  if (setSel) setSel.value = pendingCountryChange;
+
+  
   const alert = document.getElementById('alert-paese');
   if (alert) alert.style.display = 'none';
   pendingCountryChange = null;
@@ -3441,8 +3442,13 @@ aggiornaModalitaUI();
   startGPS();
 
   await setLoadingProgress(70, '🖥️ Interfaccia...');
+
+  
   const paese = carica('vt_paeseAttuale','Colombia');
-  const s = document.getElementById('selectPaese');
+  const sel = document.getElementById('selectPaese');
+
+  
+  if (sel) sel.value = paese;
   if (s) s.value = paese;
   setText('lbl-paese-benzina', paese);
 
