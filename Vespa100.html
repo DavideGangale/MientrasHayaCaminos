@@ -3443,13 +3443,15 @@ aggiornaModalitaUI();
   await setLoadingProgress(70, '🖥️ Interfaccia...');
 
   
-  const paese = carica('vt_paeseAttuale','Colombia');
-  const sel = document.getElementById('selectPaese');
+const paese = carica('vt_paeseAttuale','Colombia');
 
-  
-  if (sel) sel.value = paese;
-  if (s) s.value = paese;
-  setText('lbl-paese-benzina', paese);
+const selGuida = document.getElementById('selectPaese'); // se esiste ancora
+if (selGuida) selGuida.value = paese;
+
+const selSettings = document.getElementById('set-paese'); // settings
+if (selSettings) selSettings.value = paese;
+
+setText('lbl-paese-benzina', paese);
 
   await setLoadingProgress(85, '⚙️ Componenti...');
   aggiornaUI();
