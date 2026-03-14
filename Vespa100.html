@@ -3419,18 +3419,14 @@ async function inizializzaApp() {
   await setLoadingProgress(10, '🗄️ Database...');
   initAllData();
 
+  // settings
+  unitaAttuale  = carica('vt_unita','L');
+  distAttuale   = carica('vt_dist','KM');
+  valutaAttuale = carica('vt_valuta','USD');
 
-unitaAttuale = carica('vt_unita','L');
-distAttuale  = carica('vt_dist','KM');
-valutaAttuale = carica('vt_valuta','USD');
-aggiornaSettingsUI();
+  // modalità guida
+  modalitaGuida = carica('vt_modalitaGuida', 'TAPPA');
 
-  
-unitaAttuale = carica('vt_unita','L');
-modalitaGuida = carica('vt_modalitaGuida', 'TAPPA');
-aggiornaModalitaUI();
-
-  
   await setLoadingProgress(30, '🗺️ Mappa...');
   if (coordinateTracciato.length > 0) {
     polyline.setLatLngs(coordinateTracciato);
@@ -3442,16 +3438,20 @@ aggiornaModalitaUI();
 
   await setLoadingProgress(70, '🖥️ Interfaccia...');
 
-  
-const paese = carica('vt_paeseAttuale','Colombia');
+  const paese = carica('vt_paeseAttuale','Colombia');
 
-const selGuida = document.getElementById('selectPaese'); // se esiste ancora
-if (selGuida) selGuida.value = paese;
+  // aggiorna select paese se esistono (guida/settings)
+  const selGuida = document.getElementById('selectPaese');
+  if (selGuida) selGuida.value = paese;
 
-const selSettings = document.getElementById('set-paese'); // settings
-if (selSettings) selSettings.value = paese;
+  const selSettings = document.getElementById('set-paese');
+  if (selSettings) selSettings.value = paese;
 
-setText('lbl-paese-benzina', paese);
+  setText('lbl-paese-benzina', paese);
+
+  // aggiorna UI settings e guida
+  aggiornaSettingsUI?.();
+  aggiornaModalitaUI?.();
 
   await setLoadingProgress(85, '⚙️ Componenti...');
   aggiornaUI();
