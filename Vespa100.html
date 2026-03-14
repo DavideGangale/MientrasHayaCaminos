@@ -625,6 +625,32 @@
     </div>
 </div>
 
+
+<div id="modalFuelEnd" class="modal-overlay">
+  <div class="modal-content" style="border-color:#4caf50; max-width:520px;">
+    <button class="close-modal" onclick="chiudiModal('modalFuelEnd')">×</button>
+    <h2 style="color:#4caf50; text-align:center;">⛽ Livello serbatoio (fine tappa)</h2>
+
+    <div style="font-size:13px;color:#aaa;margin-bottom:10px;text-align:center;">
+      Serbatoio: 2 gal (≈ 7.57 L). Seleziona cosa segna il galleggiante.
+    </div>
+
+    <select id="fuel-end-select" class="inp-select">
+      <option value="0">0 (vuoto)</option>
+      <option value="0.5">1/4 (0.5 gal)</option>
+      <option value="1">1/2 (1.0 gal)</option>
+      <option value="1.5">3/4 (1.5 gal)</option>
+      <option value="2" selected>FULL (2.0 gal)</option>
+    </select>
+
+    <button class="btn-azione" style="background:#4caf50;color:black;" onclick="salvaFuelFineTappa()">
+      💾 Salva livello
+    </button>
+  </div>
+</div>
+
+
+    
 <!-- NUOVO INTERVENTO -->
 <div id="modalLogDettaglio" class="modal-overlay">
     <div class="modal-content" style="border-color:#ff9800; max-width:500px;">
@@ -682,6 +708,14 @@ const FAT_GAL        = 3.78541;
 let dest             = 'V';
 let mixC             = 2.0;
 let mixT             = 2.0;
+let pendingFuelTappaId = null;
+
+const SERBATOIO_GAL = 2.0;
+const SERBATOIO_LITRI = SERBATOIO_GAL * FAT_GAL; // ~7.57 L
+
+let fuelModalContext = null; // 'start' | 'end'
+let pendingFuelTappaId = null;
+    
 //let tappaAttuale     = { kmInizio:0, kmPercorsi:0, altMin:9999, altMax:0, secondiGuida:0, benzinaUsata:0 };
 //const CONSUMO_MEDIO  = 28; // km/L stimato PX150
 //const MAX_PUNTI_MAPPA = 500;
@@ -787,6 +821,7 @@ function initAllData() {
     initDB('vt_logCarburanti',   JSON.stringify([]));
     initDB('vt_coordinateTracciato', JSON.stringify([]));
     initDB('vt_carburazione',    JSON.stringify([]));
+    initDB('vt_serbatoioLitri', '0'); // stima litri nel serbatoio
     initDB('vt_checklist', JSON.stringify([
         { id:'c1', nome:'Controllo olio motore',          fatto:false },
         { id:'c2', nome:'Pressione gomme',                fatto:false },
@@ -1122,6 +1157,11 @@ const velMedia = ore > 0 ? (tappaAttuale.kmPercorsi / ore) : null;
     tappe.unshift(tappa);
     salva('vt_tappe', tappe);
 
+
+pendingFuelTappaId = tappa.id;
+apriModal('modalFuelEnd');
+    
+
     // Reset tappa
     tappaAttuale = { kmInizio:parseFloat(carica('vt_kmTotali','0')), kmPercorsi:0, altMin:9999, altMax:0, secondiGuida:0, benzinaUsata:0 };
     salva('vt_tappaAttuale', tappaAttuale);
@@ -1279,6 +1319,33 @@ function apriMappaFull() {
 
 
 
+let pendingFuelTappaId = null;
+
+function salvaFuelFineTappa() {
+  const gal = parseFloat(document.getElementById('fuel-end-select').value);
+  const litri = gal * FAT_GAL;
+
+  salva('vt_serbatoioLitri', litri.toFixed(3));
+
+  if (pendingFuelTappaId) {
+    const tappe = caricaJSON('vt_tappe', []);
+    const idx = tappe.findIndex(t => t.id === pendingFuelTappaId);
+    if (idx !== -1) {
+      tappe[idx].fuelEndGal = gal;
+      tappe[idx].fuelEndLitri = parseFloat(litri.toFixed(3));
+      salva('vt_tappe', tappe);
+    }
+  }
+
+  pendingFuelTappaId = null;
+  chiudiModal('modalFuelEnd');
+  aggiornaUI();
+  showToast('⛽ Livello fine tappa salvato');
+}
+
+
+    
+
 function getOlioStock() {
   return {
     ml:  parseFloat(carica('vt_olioStockMl','0')) || 0,
@@ -1384,6 +1451,36 @@ ${testo ? '\n' + testo : ''}
 
   if (ok) showToast('📤 Condivisione aperta!');
 }
+
+
+function salvaFuelFineTappa() {
+  const gal = parseFloat(document.getElementById('fuel-end-select').value);
+  const litri = gal * FAT_GAL;
+
+  // salva stato serbatoio “corrente”
+  salva('vt_serbatoioLitri', litri.toFixed(3));
+
+  // salva anche dentro la tappa (storico)
+  if (pendingFuelTappaId) {
+    const tappe = caricaJSON('vt_tappe', []);
+    const idx = tappe.findIndex(t => t.id === pendingFuelTappaId);
+    if (idx !== -1) {
+      tappe[idx].fuelEndGal = gal;
+      tappe[idx].fuelEndLitri = parseFloat(litri.toFixed(3));
+      salva('vt_tappe', tappe);
+    }
+  }
+
+  pendingFuelTappaId = null;
+  chiudiModal('modalFuelEnd');
+  aggiornaUI();
+  showToast('⛽ Livello serbatoio salvato');
+}
+
+
+function tappaNuova() {
+  return (tappaAttuale.kmPercorsi || 0) < 0.01 && (tappaAttuale.secondiGuida || 0) === 0;
+}
     
 
 // ============================================================
@@ -1410,6 +1507,13 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
     });
 });
 
+
+
+
+
+
+
+    
 // ============================================================
 //  AGGIORNA UI PRINCIPALE
 // ============================================================
@@ -1778,25 +1882,78 @@ function registraTravaso() {
 //  AUTONOMIA
 // ============================================================
 function aggiornaAutonomia() {
-    const scorta    = parseFloat(carica('vt_scortaLitri','0'));
-    const kmTot     = parseFloat(carica('vt_kmTotali','0'));
-    const benzUsata = parseFloat(carica('vt_benzinaUsata','0'));
+  try {
+    const scortaL = parseFloat(carica('vt_scortaLitri','0')) || 0;
 
-    const consumoReale = benzUsata > 0 && kmTot > 0 ? kmTot / benzUsata : CONSUMO_MEDIO;
-    const autonomiaKm  = scorta * consumoReale;
+    // Consumo: usa tappe se disponibili, altrimenti CONSUMO_MEDIO
+    const consumoDaTappe = calcolaConsumoDaTappe();
+    const consumoUsato = consumoDaTappe ?? CONSUMO_MEDIO;
+    const isStimato = (consumoDaTappe === null);
+    const scortaL = parseFloat(carica('vt_scortaLitri','0')) || 0;
+    const serbL   = parseFloat(carica('vt_serbatoioLitri','0')) || 0;
+    const totL    = scortaL + serbL;
+    //const autonomiaKm = scortaL * consumoUsato;
+    const autonomiaKm = totL * consumoUsato;
+    const unitaLbl  = (unitaAttuale === 'L') ? 'L' : 'gal';
+    const scortaVis = (unitaAttuale === 'L') ? scortaL : (scortaL / FAT_GAL);
 
-    const unitaLabel = unitaAttuale === 'L' ? 'L' : 'gal';
-    const scortaVis  = unitaAttuale === 'L' ? scorta : scorta / FAT_GAL;
-
-    document.getElementById('autonomia-info').innerHTML = `
-        🛢️ Scorta disponibile: <b>${scortaVis.toFixed(2)} ${unitaLabel}</b><br>
-        📊 Consumo medio reale: <b style="color:var(--giallo)">${consumoReale.toFixed(1)} km/L</b><br>
-        📏 Autonomia stimata: <b style="color:var(--verde); font-size:22px;">${Math.round(autonomiaKm)} km</b>
+    const el = document.getElementById('autonomia-info');
+    if (el) el.innerHTML = `
+      //🛢️ Scorta: <b>${scortaVis.toFixed(2)} ${unitaLbl}</b><br>
+     📊 Consumo: <b style="color:var(--giallo)">${consumoUsato.toFixed(1)} km/L</b> ${isStimato ? `<span style="color:#777;font-size:12px;"> (stimato)</span>` : ``}<br>
+     📏 Autonomia stimata: <b style="color:var(--verde);font-size:24px;">${Math.round(autonomiaKm)} km</b>
+     🛢️ Serbatoio: <b>${serbL.toFixed(2)} L</b><br>
+     🛢️ Scorta: <b>${scortaVis.toFixed(2)} ${unitaLbl}</b><br>
+     🧮 Totale carburante: <b>${totL.toFixed(2)} L</b><br>
+      
     `;
+
     const rapida = document.getElementById('ui-autonomia-rapida');
     if (rapida) rapida.innerText = autonomiaKm > 0 ? Math.round(autonomiaKm) + ' km' : '-- km';
+  } catch (e) {
+    console.error('aggiornaAutonomia error:', e);
+  }
 }
 
+
+
+
+    
+function calcolaConsumoDaTappe() {
+  const tappe = caricaJSON('vt_tappe', []);
+  if (!Array.isArray(tappe) || tappe.length === 0) return null;
+
+  // Usa le tappe più recenti finché accumuli almeno 150 km (più stabile)
+  let kmSum = 0;
+  let benzSum = 0;
+
+  for (const t of tappe) {
+    const km = Number(t.km || 0);
+    const bz = Number(t.benzina || 0);
+
+    // ignora tappe troppo corte o senza benzina registrata
+    if (km < 20) continue;
+    if (bz < 0.3) continue;
+
+    kmSum += km;
+    benzSum += bz;
+
+    if (kmSum >= 150) break;
+  }
+
+  if (benzSum <= 0) return null;
+
+  const consumo = kmSum / benzSum; // km/L
+  // range plausibile PX150 (regola di sicurezza)
+  if (consumo < 10 || consumo > 60) return null;
+
+  return consumo;
+}
+
+    
+
+
+    
 // ============================================================
 //  DIARIO DI VIAGGIO
 // ============================================================
