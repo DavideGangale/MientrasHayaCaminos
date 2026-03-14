@@ -1370,9 +1370,9 @@ function salvaFuelInizioTappa() {
   const gal = sel ? parseFloat(sel.value) : 0;
   const litri = gal * FAT_GAL;
 
-    //const prevLitri = parseFloat(carica('vt_serbatoioLitri','0')) || 0;
+    // const prevLitri = parseFloat(carica('vt_serbatoioLitri','0')) || 0;
 
-  const soglia = 0.05; // 50 ml
+    // const soglia = 0.05; // 50 ml
   if (prevLitri > 0 && (prevLitri - litri) > soglia) {
     const diff = prevLitri - litri;
 
