@@ -1452,22 +1452,24 @@ function apriMappaFull(coordsOverride = null) {
       mapFullPolyline = L.polyline([], { color:'#d32f2f', weight:4, opacity:0.9 }).addTo(mapFullInstance);
     }
 
-    mapFullMarker.setLatLng(marker.getLatLng());
-    mapFullPolyline.setLatLngs(polyline.getLatLngs());
-
-    const pts = mapFullPolyline.getLatLngs();
-    if (pts && pts.length > 1) mapFullInstance.fitBounds(mapFullPolyline.getBounds().pad(0.15));
-    else mapFullInstance.setView(mapFullMarker.getLatLng(), 13);
-
-    mapFullInstance.invalidconst coords = coordsOverride || polyline.getLatLngs();
+    const coords = coordsOverride || polyline.getLatLngs();
     mapFullPolyline.setLatLngs(coords);
 
-if (coords && coords.length) {
-  const last = coords[coords.length - 1];
-  mapFullMarker.setLatLng(last);
-} else {
-  mapFullMarker.setLatLng(marker.getLatLng());
-}ateSize();
+    if (coords && coords.length) {
+      const last = coords[coords.length - 1];
+      mapFullMarker.setLatLng(last);
+    } else {
+      mapFullMarker.setLatLng(marker.getLatLng());
+    }
+
+    const pts = mapFullPolyline.getLatLngs();
+    if (pts && pts.length > 1) {
+      mapFullInstance.fitBounds(mapFullPolyline.getBounds().pad(0.15));
+    } else {
+      mapFullInstance.setView(mapFullMarker.getLatLng(), 13);
+    }
+
+    mapFullInstance.invalidateSize();
   }, 120);
 }
 
