@@ -189,6 +189,16 @@
     .toggle-btn.active.dest-v{background:var(--rosso);border-color:var(--rosso);color:white;}
     .toggle-btn.active.dest-t{background:var(--giallo);border-color:var(--giallo);color:white;}
 
+
+
+.toggle-btn.stats { font-size:13px; }
+.toggle-btn.active.stats{
+  background:var(--giallo);
+  border-color:var(--giallo);
+  color:#000;
+}
+
+    
     /* MISCELA % */
     .pct-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin:10px 0;}
     .pct-btn{
@@ -534,12 +544,19 @@
   <!-- ==================== PAGINA 2: VIAGGIO ==================== -->
   <div id="viaggio" class="page">
     <div class="dash-card">
-      <h2 style="margin-top:0;">Statistiche: <span id="titolo-stat-paese" style="color:var(--giallo);">Globali</span></h2>
+     <div style="margin-top:0; text-align:center; font-weight:bold; color:#bbb; margin-bottom:10px;">
+  Statistiche: <span id="titolo-stat-paese" style="color:var(--giallo);">Globali</span>
+</div>
 
-      <div style="display:flex; gap:10px; margin-bottom:10px;">
-        <button class="btn-secondary" style="margin-top:0;" onclick="mostraStats('Globali')">🌍 Globali</button>
-        <button class="btn-secondary" style="margin-top:0; background:var(--giallo); color:black;" onclick="mostraStats('Paese')">📍 Paese Attuale</button>
-      </div>
+<div class="toggle-container" style="margin-bottom:10px;">
+  <button id="btn-stats-global" class="toggle-btn stats" onclick="setStatsMode('Globali')">🌍 Globali</button>
+  <button id="btn-stats-paese" class="toggle-btn stats" onclick="setStatsMode('Paese')">📍 Paese attuale</button>
+  <button id="btn-stats-scegli" class="toggle-btn stats" onclick="setStatsMode('Scegli')">🧭 Scegli paese</button>
+</div>
+
+<select id="stats-paese-select" class="inp-select" style="display:none;" onchange="onStatsPaeseSelect(this.value)">
+  <!-- opzioni generate via JS -->
+</select>
 
       <div class="stats-grid">
         <div class="stat-box">
@@ -994,7 +1011,11 @@ let ultimoAggiornamentoMappa = 0;
 let puntiDaSalvare = 0;
 
 let visualizzazioneStats = 'Globali';
+
+let statsPaeseSelezionato = null;  // usato quando mode = 'Scegli'
+  
 let unitaAttuale = 'L';
+  
 
 let distAttuale = 'KM';   // 'KM' | 'MI'
 let valutaAttuale = 'USD';
@@ -2032,17 +2053,21 @@ function aggiornaUI() {
   let benzVis = benzUsata + benzFuori; // sempre in L internamente
   let scortaVis2 = scorta;           // in L internamente
 
-  if (visualizzazioneStats === 'Paese') {
-    const datiPaesi = caricaJSON('vt_datiPaesi', {});
-    const dp = datiPaesi[paese] || { km:0, benzina:0, benzinaFuori:0 };
+  let paeseScope = null;
+if (visualizzazioneStats === 'Paese') paeseScope = paese;
+if (visualizzazioneStats === 'Scegli') paeseScope = statsPaeseSelezionato || paese;
 
-    kmVis = dp.km || 0;
-    benzVis = (dp.benzina || 0) + (dp.benzinaFuori || 0);
+if (paeseScope) {
+  const datiPaesi = caricaJSON('vt_datiPaesi', {});
+  const dp = datiPaesi[paeseScope] || { km:0, benzina:0, benzinaFuori:0 };
 
-    setText('titolo-stat-paese', paese);
-  } else {
-    setText('titolo-stat-paese', 'Globali');
-  }
+  kmVis = dp.km || 0;
+  benzVis = (dp.benzina || 0) + (dp.benzinaFuori || 0);
+
+  setText('titolo-stat-paese', paeseScope);
+} else {
+  setText('titolo-stat-paese', 'Globali');
+}
 
   // conversione carburante visualizzato (L -> gal)
   if (unitaAttuale === 'G') {
@@ -2743,6 +2768,66 @@ function simboloValuta(code) {
   const sym = simboloValuta(valutaAttuale);
   return sym + Number(x || 0).toFixed(2);
 }
+
+
+
+
+
+function getPaesiVisitati() {
+  const datiPaesi = caricaJSON('vt_datiPaesi', {});
+  return Object.keys(datiPaesi || {}).sort();
+}
+
+function refreshStatsPaeseDropdown() {
+  const sel = document.getElementById('stats-paese-select');
+  if (!sel) return;
+
+  const paesi = getPaesiVisitati();
+  if (!paesi.length) {
+    sel.innerHTML = `<option value="">(nessun paese salvato)</option>`;
+    return;
+  }
+
+  sel.innerHTML = paesi.map(p => `<option value="${p}">${p}</option>`).join('');
+
+  // default se non scelto
+  const current = carica('vt_paeseAttuale','Colombia');
+  if (!statsPaeseSelezionato) statsPaeseSelezionato = current;
+
+  // se il paese selezionato non esiste più, fallback
+  if (!paesi.includes(statsPaeseSelezionato)) statsPaeseSelezionato = paesi[0];
+
+  sel.value = statsPaeseSelezionato;
+}
+
+function setStatsMode(mode) {
+  visualizzazioneStats = mode;
+
+  // bottoni attivi
+  document.getElementById('btn-stats-global')?.classList.toggle('active', mode === 'Globali');
+  document.getElementById('btn-stats-paese')?.classList.toggle('active', mode === 'Paese');
+  document.getElementById('btn-stats-scegli')?.classList.toggle('active', mode === 'Scegli');
+
+  // dropdown
+  const sel = document.getElementById('stats-paese-select');
+  if (sel) {
+    sel.style.display = (mode === 'Scegli') ? 'block' : 'none';
+  }
+
+  if (mode === 'Scegli') refreshStatsPaeseDropdown();
+
+  aggiornaUI();
+}
+
+function onStatsPaeseSelect(paese) {
+  statsPaeseSelezionato = paese;
+  aggiornaUI();
+}
+
+
+
+
+
 
   
 function aggiornaSettingsUI() {
@@ -3492,6 +3577,12 @@ async function inizializzaApp() {
   aggiornaModalitaUI?.();
 
   await setLoadingProgress(85, '⚙️ Componenti...');
+
+
+  setStatsMode(visualizzazioneStats || 'Globali');
+refreshStatsPaeseDropdown();
+
+  
   aggiornaUI();
   aggiornaUIOlioStock();
   aggiornaTempoGuidaUI();
