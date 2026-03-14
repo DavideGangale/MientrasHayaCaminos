@@ -1355,6 +1355,7 @@ function concludiTappa() {
     durata: tappaAttuale.secondiGuida || 0,
     benzina: parseFloat((tappaAttuale.benzinaUsata || 0).toFixed(2)),
     velMax: tappaAttuale.velMax || 0,
+    traccia: coordinateTracciato.filter((_, i) => i % 3 === 0), // salva 1 punto ogni 3 (più leggero)
     velMedia: velMedia ? parseFloat(velMedia.toFixed(1)) : null
   };
 
@@ -1433,7 +1434,7 @@ let mapFullInstance = null;
 let mapFullMarker = null;
 let mapFullPolyline = null;
 
-function apriMappaFull() {
+function apriMappaFull(coordsOverride = null) {
   apriModal('modalMapFull');
 
   setTimeout(() => {
@@ -1458,7 +1459,15 @@ function apriMappaFull() {
     if (pts && pts.length > 1) mapFullInstance.fitBounds(mapFullPolyline.getBounds().pad(0.15));
     else mapFullInstance.setView(mapFullMarker.getLatLng(), 13);
 
-    mapFullInstance.invalidateSize();
+    mapFullInstance.invalidconst coords = coordsOverride || polyline.getLatLngs();
+    mapFullPolyline.setLatLngs(coords);
+
+if (coords && coords.length) {
+  const last = coords[coords.length - 1];
+  mapFullMarker.setLatLng(last);
+} else {
+  mapFullMarker.setLatLng(marker.getLatLng());
+}ateSize();
   }, 120);
 }
 
@@ -2147,13 +2156,31 @@ function renderTappe() {
         <div>🏎️ Vel max: <b>${t.velMax || 0}</b> km/h</div>
         ${velMediaTxt}
         ${(t.fuelEndGal != null) ? `<div>⛽ Serbatoio fine tappa: <b>${t.fuelEndGal}</b> gal</div>` : ''}
+
+  <button onclick="apriTracciaTappa(${t.id})"
+  style="background:#2196F3;border:none;color:white;padding:8px 10px;border-radius:8px;font-size:12px;cursor:pointer;margin-top:8px;">
+  🗺️ Vedi traccia
+  </button>
+        
         <button onclick="eliminaTappa(${t.id})"
           style="background:none; border:none; color:#666; font-size:12px; cursor:pointer; margin-top:5px;">🗑️ Elimina</button>
       </div>
     `;
   }).join('');
 }
+  
+function apriTracciaTappa(tappaId) {
+  const tappe = caricaJSON('vt_tappe', []);
+  const t = tappe.find(x => x.id === tappaId);
+  if (!t || !t.traccia || t.traccia.length < 2) {
+    showToast('⚠️ Traccia non disponibile per questa tappa');
+    return;
+  }
+  // riuso la mappa full: disegno la traccia della tappa
+  apriMappaFull(t.traccia);
+}
 
+  
 function eliminaTappa(id) {
   if (!confirm('Eliminare questa tappa?')) return;
   const tappe = caricaJSON('vt_tappe', []).filter(t => t.id !== id);
