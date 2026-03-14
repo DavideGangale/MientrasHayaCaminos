@@ -873,8 +873,15 @@
 <label class="inp-label">Capacità serbatoio (L)</label>
 <input type="number" id="set-serbatoio-L" step="0.01" min="1" placeholder="Es. 7.57">
 
-<label class="inp-label">Capacità taniche totale (L)</label>
-<input type="number" id="set-taniche-L" step="0.1" min="0" placeholder="Es. 10">
+<label class="inp-label">Capacità Tanica 1 (L)</label>
+<input type="number" id="set-tanica1-L" step="0.01" min="0" placeholder="Es. 5.68">
+
+<label class="inp-label">Capacità Tanica 2 (L)</label>
+<input type="number" id="set-tanica2-L" step="0.01" min="0" placeholder="Es. 5.68">
+
+<div style="font-size:12px;color:#777;text-align:left;margin-top:6px;">
+  Totale taniche: <b id="ui-taniche-tot">--</b> L
+</div>
 
 <label class="inp-label">Consumo medio manuale (km/L) (opzionale)</label>
 <input type="number" id="set-consumo-manuale" step="0.1" min="5" max="80" placeholder="Es. 28">
@@ -1275,9 +1282,37 @@ initDB('vt_valuta', 'USD');
 
 
   // ===== SETTINGS AVANZATI =====
-  initDB('vt_serbatoioCapLitri', String(SERBATOIO_LITRI.toFixed(3))); // default 7.57 L
-  initDB('vt_tanicheCapLitri', '10.0'); // esempio: 10 L totali max (cambierai tu)
-  initDB('vt_consumoMedioManuale', ''); // vuoto = usa consumo da tappe o CONSUMO_MEDIO
+ // initDB('vt_serbatoioCapLitri', String(SERBATOIO_LITRI.toFixed(3))); // default 7.57 L
+ // initDB('vt_tanicheCapLitri', '10.0'); // esempio: 10 L totali max (cambierai tu)
+ // initDB('vt_consumoMedioManuale', ''); // vuoto = usa consumo da tappe o CONSUMO_MEDIO
+
+// ===== SETTINGS AVANZATI =====
+initDB('vt_serbatoioCapLitri', String(SERBATOIO_LITRI.toFixed(3))); // default 7.57 L
+
+// 2 taniche: default 1.5 gal ciascuna
+initDB('vt_tanica1CapLitri', String((1.5 * FAT_GAL).toFixed(3))); // ~5.678 L
+initDB('vt_tanica2CapLitri', String((1.5 * FAT_GAL).toFixed(3))); // ~5.678 L
+
+initDB('vt_consumoMedioManuale', '');
+initDB('vt_manut_intervalli', JSON.stringify({
+  candela: 4000,
+  olioCambio: 5000,
+  ganasceAnt: 7000,
+  ganascePost: 7000,
+  dischiFrizione: 12000,
+  gomme: 10000,
+  cavi: 6000
+}));
+
+const oldTan = localStorage.getItem('vt_tanicheCapLitri');
+if (oldTan != null && localStorage.getItem('vt_tanica1CapLitri') == null) {
+  // metto tutto nella tanica1 e 0 nella tanica2
+  salva('vt_tanica1CapLitri', oldTan);
+  salva('vt_tanica2CapLitri', '0');
+}
+
+  
+  
 
   // intervalli manutenzione (km) — valori di default “placeholder”
   initDB('vt_manut_intervalli', JSON.stringify({
@@ -2485,6 +2520,13 @@ if (capTan > 0 && nuovaScorta > capTan + 0.0001) {
       
       salva('vt_scortaLitri', nuovaScorta);
 
+
+      const capTan = getTanicheCapLitri();
+if (capTan > 0 && nuovaScorta > capTan + 0.0001) {
+  showToast(`⚠️ Scorta ${nuovaScorta.toFixed(2)} L supera capacità taniche (${capTan.toFixed(2)} L)`);
+}
+      
+
       risultatoHTML =
         `✅ <b>Aggiunto nelle taniche:</b> ${qtaLitri.toFixed(2)} L<br>` +
         `🛢️ <b>Scorta totale:</b> ${nuovaScorta.toFixed(2)} L<br>` +
@@ -3153,9 +3195,17 @@ function getSerbatoioCapLitri() {
   return parseFloat(carica('vt_serbatoioCapLitri', String(SERBATOIO_LITRI))) || SERBATOIO_LITRI;
 }
 
+//function getTanicheCapLitri() {
+//  return parseFloat(carica('vt_tanicheCapLitri', '0')) || 0;
+//}
 function getTanicheCapLitri() {
-  return parseFloat(carica('vt_tanicheCapLitri', '0')) || 0;
+  const t1 = parseFloat(carica('vt_tanica1CapLitri', '0')) || 0;
+  const t2 = parseFloat(carica('vt_tanica2CapLitri', '0')) || 0;
+  return Math.max(0, t1) + Math.max(0, t2);
 }
+
+
+  
 
 // ritorna km/L oppure null
 function getConsumoMedioManuale() {
@@ -3170,31 +3220,80 @@ function getIntervalliManutenzione() {
   return caricaJSON('vt_manut_intervalli', {}) || {};
 }
 
+
+  
+
 function caricaSettingsAvanzatiUI() {
   const serb = getSerbatoioCapLitri();
-  const tan  = getTanicheCapLitri();
   const cons = carica('vt_consumoMedioManuale', '');
 
-  document.getElementById('set-serbatoio-L')?.value = serb.toFixed(2);
-  document.getElementById('set-taniche-L')?.value = tan ? String(tan) : '';
-  document.getElementById('set-consumo-manuale')?.value = cons;
+  const elSerb = document.getElementById('set-serbatoio-L');
+  if (elSerb) elSerb.value = serb.toFixed(2);
 
+  // 2 taniche
+  //const t1 = parseFloat(carica('vt_tanica1CapLitri', '0')) || 0;
+  //const t2 = parseFloat(carica('vt_tanica2CapLitri', '0')) || 0;
+
+const t1 = parseFloat(carica('vt_tanica1CapLitri', '0')) || 0;
+const t2 = parseFloat(carica('vt_tanica2CapLitri', '0')) || 0;
+
+document.getElementById('set-tanica1-L')?.value = t1 ? t1.toFixed(2) : '';
+document.getElementById('set-tanica2-L')?.value = t2 ? t2.toFixed(2) : '';
+
+
+
+  
+
+ // const elT1 = document.getElementById('set-tanica1-L');
+ // if (elT1) elT1.value = t1 ? t1.toFixed(2) : '';
+
+// const elT2 = document.getElementById('set-tanica2-L');
+//  if (elT2) elT2.value = t2 ? t2.toFixed(2) : '';
+
+  aggiornaTotTanicheUI();
+
+  const elCons = document.getElementById('set-consumo-manuale');
+  if (elCons) elCons.value = cons;
+
+  // intervalli manutenzione
   const ints = getIntervalliManutenzione();
-  document.getElementById('set-int-candela')?.value = ints.candela ?? '';
-  document.getElementById('set-int-olioCambio')?.value = ints.olioCambio ?? '';
-  document.getElementById('set-int-ganasceAnt')?.value = ints.ganasceAnt ?? '';
-  document.getElementById('set-int-ganascePost')?.value = ints.ganascePost ?? '';
-  document.getElementById('set-int-dischiFrizione')?.value = ints.dischiFrizione ?? '';
-  document.getElementById('set-int-gomme')?.value = ints.gomme ?? '';
-  document.getElementById('set-int-cavi')?.value = ints.cavi ?? '';
+  const map = [
+    ['set-int-candela', 'candela'],
+    ['set-int-olioCambio', 'olioCambio'],
+    ['set-int-ganasceAnt', 'ganasceAnt'],
+    ['set-int-ganascePost', 'ganascePost'],
+    ['set-int-dischiFrizione', 'dischiFrizione'],
+    ['set-int-gomme', 'gomme'],
+    ['set-int-cavi', 'cavi']
+  ];
+
+  for (const [id, key] of map) {
+    const el = document.getElementById(id);
+    if (el) el.value = (ints[key] ?? '');
+  }
 }
 
+
+
+  
 function salvaSettingsAvanzati() {
   const serb = parseFloat(document.getElementById('set-serbatoio-L')?.value || '');
   if (!serb || isNaN(serb) || serb < 1) { showToast('⚠️ Capacità serbatoio non valida'); return; }
 
-  const tan = parseFloat(document.getElementById('set-taniche-L')?.value || '0') || 0;
-  if (tan < 0) { showToast('⚠️ Capacità taniche non valida'); return; }
+  //const tan = parseFloat(document.getElementById('set-taniche-L')?.value || '0') || 0;
+ // if (tan < 0) { showToast('⚠️ Capacità taniche non valida'); return; }
+
+const t1 = parseFloat(document.getElementById('set-tanica1-L')?.value || '0') || 0;
+const t2 = parseFloat(document.getElementById('set-tanica2-L')?.value || '0') || 0;
+
+if (t1 < 0 || t2 < 0) { showToast('⚠️ Capacità taniche non valida'); return; }
+
+salva('vt_tanica1CapLitri', String(t1.toFixed(3)));
+salva('vt_tanica2CapLitri', String(t2.toFixed(3)));
+
+aggiornaTotTanicheUI();
+
+  
 
   const consStr = (document.getElementById('set-consumo-manuale')?.value || '').trim();
   if (consStr !== '') {
@@ -3235,9 +3334,23 @@ function salvaIntervalliManutenzione() {
 }
 
 
+function getTanicheCapLitri() {
+  const t1 = parseFloat(carica('vt_tanica1CapLitri', '0')) || 0;
+  const t2 = parseFloat(carica('vt_tanica2CapLitri', '0')) || 0;
+  return Math.max(0, t1) + Math.max(0, t2);
+}
+
+function aggiornaTotTanicheUI() {
+  const tot = getTanicheCapLitri();
+  const el = document.getElementById('ui-taniche-tot');
+  if (el) el.innerText = tot.toFixed(2);
+}
 
 
 
+
+
+  
 
   
 function aggiornaSettingsUI() {
@@ -3296,7 +3409,7 @@ function cambiaPaeseDaSettings() {
   aggiornaUI();
   showToast('🗺️ Paese: ' + p);
 
-    caricaSettingsAvanzatiUI();
+    ;
   
 }
 
