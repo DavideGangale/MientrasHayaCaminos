@@ -1,11 +1,10 @@
-
 {
   "_version": "public-1.0",
-  "_exportDate": "2026-03-14T23:28:40.799Z",
+  "_exportDate": "2026-03-14T23:50:25.943Z",
   "titolo": "VespaTrek PX150",
   "paeseAttuale": "Colombia",
   "stats": {
-    "kmTotali": 3,
+    "kmTotali": 30,
     "benzinaUsataLitri": 0,
     "benzinaFuoriTappaLitri": 0,
     "olioTotaleLitri": 0,
@@ -18,10 +17,30 @@
     "Colombia": {
       "spesaRicambiUsd": 213.57634380639783,
       "valuta": "COP",
-      "km": 3
+      "km": 30
     }
   },
   "tappe": [
+    {
+      "id": 1773532127086,
+      "tipo": "Tappa",
+      "data": "14/03/2026",
+      "ora": "18:48",
+      "paese": "Colombia",
+      "km": 11,
+      "durata": 1991,
+      "altMin": 0,
+      "altMax": 0,
+      "velMax": 0,
+      "velMedia": 19.9,
+      "benzinaStimataLitri": 0,
+      "benzinaRealeLitri": 0,
+      "consumoStimatoKmL": null,
+      "consumoRealeKmL": null,
+      "titolo": "Prova percorso",
+      "note": "cuuuu cuuuuu",
+      "fuelEndLitri": 7.571
+    },
     {
       "id": 1773529372983,
       "tipo": "Tappa",
@@ -43,7 +62,44 @@
       "fuelEndLitri": 6.624
     }
   ],
-  "turismo": [],
-  "diario": [],
+  "turismo": [
+    {
+      "id": 1773532171384,
+      "tipo": "Turismo",
+      "data": "14/03/2026",
+      "ora": "18:49",
+      "paese": "Colombia",
+      "km": 16,
+      "durata": 2896,
+      "altMin": 0,
+      "altMax": 0,
+      "velMax": 0,
+      "velMedia": 19.9,
+      "benzinaStimataLitri": 0,
+      "benzinaRealeLitri": 0,
+      "consumoStimatoKmL": null,
+      "consumoRealeKmL": null,
+      "titolo": "prova páseo",
+      "note": "guuuuuguuuuuguuuu"
+    }
+  ],
+  "diario": [
+    {
+      "id": 1773532220060,
+      "data": "14/03/2026",
+      "ora": "18:50",
+      "paese": "Colombia",
+      "km": "30.0",
+      "testo": "Prova diario 2"
+    },
+    {
+      "id": 1773532202970,
+      "data": "14/03/2026",
+      "ora": "18:50",
+      "paese": "Colombia",
+      "km": "30.0",
+      "testo": "Prova diario"
+    }
+  ],
   "manutenzioni": []
 }
