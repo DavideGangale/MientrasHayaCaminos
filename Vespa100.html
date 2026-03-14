@@ -289,9 +289,11 @@
 
 /* Z-INDEX MODALI (ordine sopra/sotto) */
 #modalTappe    { z-index: 6000; }
-#modalConsumo  { z-index: 6500; }
 #modalDettagli { z-index: 6600; }
+#modalConsumo  { z-index: 6500; }
 #modalMapFull  { z-index: 7000; }
+
+
 
     
     /* DIARIO */
@@ -1809,9 +1811,18 @@ if (idx !== -1) {
 
   // Mostra confronto se ho la tappa
   if (tappaAggiornata) {
-    mostraConfrontoConsumoTappa(tappaAggiornata);
-    apriModal('modalConsumo');
-  }
+  mostraConfrontoConsumoTappa(tappaAggiornata);
+  apriModal('modalConsumo');
+
+  // ✅ apri automaticamente la scheda dettagli subito dopo il fuel end
+  setTimeout(() => {
+    try {
+      apriDettagliPercorso(tappaAggiornata.id);
+    } catch (e) {
+      console.warn('apriDettagliPercorso error:', e);
+    }
+  }, 250);
+}
 }
 
 function mostraConfrontoConsumoTappa(t) {
@@ -2590,9 +2601,54 @@ ${t.note ? `<div style="margin-top:6px;color:#bbb;">${t.note}</div>` : ''}
 }
 
 
+//let detPercorsoId = null;
+
+//function trovaPercorsoById(id) {
+//  const tappe = caricaJSON('vt_tappe', []);
+//  const tur   = caricaJSON('vt_turismo', []);
+
+//  let idx = Array.isArray(tappe) ? tappe.findIndex(x => x.id === id) : -1;
+ // if (idx !== -1) return { key:'vt_tappe', list:tappe, idx, item:tappe[idx] };
+
+//  idx = Array.isArray(tur) ? tur.findIndex(x => x.id === id) : -1;
+//  if (idx !== -1) return { key:'vt_turismo', list:tur, idx, item:tur[idx] };
+
+ // return null;
+//}
+
+//function apriDettagliPercorso(id) {
+//  const found = trovaPercorsoById(id);
+//  if (!found) { showToast('⚠️ Elemento non trovato'); return; }
+
+//  detPercorsoId = id;
+//  document.getElementById('det-titolo').value = found.item.titolo || '';
+//  document.getElementById('det-note').value   = found.item.note || '';
+
+//  apriModal('modalDettagli');
+//}
+
+//function salvaDettagliPercorso() {
+//  if (!detPercorsoId) return;
+
+//  const found = trovaPercorsoById(detPercorsoId);
+//  if (!found) { showToast('⚠️ Elemento non trovato'); return; }
+
+//  const titolo = document.getElementById('det-titolo').value.trim();
+//  const note   = document.getElementById('det-note').value.trim();
+
+//  found.list[found.idx].titolo = titolo;
+//  found.list[found.idx].note   = note;
+
+//  salva(found.key, found.list);
+
+//  chiudiModal('modalDettagli');
+//  renderTappe();
+//  showToast('✅ Dettagli salvati');
+//}
+
 let detPercorsoId = null;
 
-function trovaPercorsoById(id) {
+window.trovaPercorsoById = function (id) {
   const tappe = caricaJSON('vt_tappe', []);
   const tur   = caricaJSON('vt_turismo', []);
 
@@ -2603,27 +2659,35 @@ function trovaPercorsoById(id) {
   if (idx !== -1) return { key:'vt_turismo', list:tur, idx, item:tur[idx] };
 
   return null;
-}
+};
 
-function apriDettagliPercorso(id) {
-  const found = trovaPercorsoById(id);
+window.apriDettagliPercorso = function (id) {
+  const found = window.trovaPercorsoById(id);
   if (!found) { showToast('⚠️ Elemento non trovato'); return; }
 
   detPercorsoId = id;
-  document.getElementById('det-titolo').value = found.item.titolo || '';
-  document.getElementById('det-note').value   = found.item.note || '';
+
+  const titoloEl = document.getElementById('det-titolo');
+  const noteEl   = document.getElementById('det-note');
+  if (!titoloEl || !noteEl) {
+    showToast('⚠️ Modal dettagli non presente (det-titolo/det-note)');
+    return;
+  }
+
+  titoloEl.value = found.item.titolo || '';
+  noteEl.value   = found.item.note || '';
 
   apriModal('modalDettagli');
-}
+};
 
-function salvaDettagliPercorso() {
+window.salvaDettagliPercorso = function () {
   if (!detPercorsoId) return;
 
-  const found = trovaPercorsoById(detPercorsoId);
+  const found = window.trovaPercorsoById(detPercorsoId);
   if (!found) { showToast('⚠️ Elemento non trovato'); return; }
 
-  const titolo = document.getElementById('det-titolo').value.trim();
-  const note   = document.getElementById('det-note').value.trim();
+  const titolo = (document.getElementById('det-titolo')?.value || '').trim();
+  const note   = (document.getElementById('det-note')?.value || '').trim();
 
   found.list[found.idx].titolo = titolo;
   found.list[found.idx].note   = note;
@@ -2633,9 +2697,7 @@ function salvaDettagliPercorso() {
   chiudiModal('modalDettagli');
   renderTappe();
   showToast('✅ Dettagli salvati');
-}
-
-
+};
   
 //function apriTracciaTappa(tappaId) {
 //  const tappe = caricaJSON('vt_tappe', []);
