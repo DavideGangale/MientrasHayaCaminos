@@ -1054,6 +1054,8 @@ function initAllData() {
   initDB('vt_paeseAttuale', 'Colombia');
   initDB('vt_datiPaesi', JSON.stringify({}));
 
+initDB('vt_benzinaFuoriTappaLitri', '0.0');
+  
   initDB('vt_tappe', JSON.stringify([]));
   initDB('vt_logbook', JSON.stringify([]));
   initDB('vt_diario', JSON.stringify([]));
@@ -1354,6 +1356,9 @@ function salvaFuelInizioTappa() {
   const gal = sel ? parseFloat(sel.value) : 0;
   const litri = gal * FAT_GAL;
 
+  // livello precedente (di solito è quello salvato a fine tappa precedente)
+  const prevLitri = parseFloat(carica('vt_serbatoioLitri','0')) || 0;
+  
   // Imposta serbatoio “corrente”
   salva('vt_serbatoioLitri', litri.toFixed(3));
 
@@ -1366,6 +1371,26 @@ function salvaFuelInizioTappa() {
   chiudiModal('modalFuelStart');
   aggiornaUI();
 
+  // Se il livello è sceso rispetto a quello precedente, probabilmente hai usato benzina "fuori tappa"
+  const soglia = 0.05; // 50 ml per evitare micro-differenze
+  if (prevLitri > 0 && (prevLitri - litri) > soglia) {
+    const diff = prevLitri - litri; // litri "spariti"
+
+    const ok = confirm(
+      `Ho notato che il serbatoio è sceso rispetto all'ultima volta:\n` +
+      `Prima: ${prevLitri.toFixed(2)} L\n` +
+      `Ora:   ${litri.toFixed(2)} L\n\n` +
+      `Vuoi registrare ${diff.toFixed(2)} L come consumo "FUORI TAPPA"?`
+    );
+
+    if (ok) {
+      const old = parseFloat(carica('vt_benzinaFuoriTappaLitri','0')) || 0;
+      salva('vt_benzinaFuoriTappaLitri', (old + diff).toFixed(3));
+      showToast(`📝 Fuori tappa: +${diff.toFixed(2)} L`);
+    }
+  }
+
+  
   if (pendingStartTracking) {
     pendingStartTracking = false;
     startTrackingNow();
@@ -1403,11 +1428,11 @@ function toggleTracking() {
 
   // SE NON STO VIAGGIANDO -> DEVO PARTIRE
   // Se tappa nuova e non ho fuelStart, chiedi prima
-  if (tappaNuova() && (tappaAttuale.fuelStartGal == null)) {
-    pendingStartTracking = true;
-    apriModal('modalFuelStart');
-    return;
-  }
+ if (tappaNuova()) {
+  pendingStartTracking = true;
+  apriModal('modalFuelStart');
+  return;
+}
 
   // altrimenti parti subito
   startTrackingNow();
