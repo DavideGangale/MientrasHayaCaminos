@@ -1237,24 +1237,23 @@ function checkCountryChange(lat, lon) {
 
 function confermaCambioPaese() {
   if (!pendingCountryChange) return;
+
   salva('vt_paeseAttuale', pendingCountryChange);
   lastCountry = pendingCountryChange;
 
-  const s = document.getElementById('selectPaese');
-  const l = document.getElementById('lbl-paese-benzina');
-  if (s) s.value = pendingCountryChange;
-  if (l) l.innerText = pendingCountryChange;
+  // aggiorna eventuali elementi UI ancora presenti
+  const selGuida = document.getElementById('selectPaese'); // se esiste ancora in guida
+  if (selGuida) selGuida.value = pendingCountryChange;
 
+  const lblBenz = document.getElementById('lbl-paese-benzina');
+  if (lblBenz) lblBenz.innerText = pendingCountryChange;
 
-  const sel = document.getElementById('selectPaese');
-  if (sel) sel.value = pendingCountryChange;
+  const selSettings = document.getElementById('set-paese'); // settings
+  if (selSettings) selSettings.value = pendingCountryChange;
 
-  const setSel = document.getElementById('set-paese'); // settings
-  if (setSel) setSel.value = pendingCountryChange;
-
-  
   const alert = document.getElementById('alert-paese');
   if (alert) alert.style.display = 'none';
+
   pendingCountryChange = null;
 
   aggiornaUI();
