@@ -1,1 +1,49 @@
 
+{
+  "_version": "public-1.0",
+  "_exportDate": "2026-03-14T23:28:40.799Z",
+  "titolo": "VespaTrek PX150",
+  "paeseAttuale": "Colombia",
+  "stats": {
+    "kmTotali": 3,
+    "benzinaUsataLitri": 0,
+    "benzinaFuoriTappaLitri": 0,
+    "olioTotaleLitri": 0,
+    "spesaBenzinaUsd": 0,
+    "spesaOlioUsd": 0,
+    "spesaRicambiUsd": 213.57634380639783,
+    "spesaManodoperaUsd": 0
+  },
+  "datiPaesi": {
+    "Colombia": {
+      "spesaRicambiUsd": 213.57634380639783,
+      "valuta": "COP",
+      "km": 3
+    }
+  },
+  "tappe": [
+    {
+      "id": 1773529372983,
+      "tipo": "Tappa",
+      "data": "14/03/2026",
+      "ora": "18:02",
+      "paese": "Colombia",
+      "km": 3,
+      "durata": 553,
+      "altMin": 0,
+      "altMax": 0,
+      "velMax": 0,
+      "velMedia": 19.5,
+      "benzinaStimataLitri": 0,
+      "benzinaRealeLitri": 0.947,
+      "consumoStimatoKmL": null,
+      "consumoRealeKmL": 3.17,
+      "titolo": "tappetta provola",
+      "note": "cuuuuuuuuu cuuuuuuu",
+      "fuelEndLitri": 6.624
+    }
+  ],
+  "turismo": [],
+  "diario": [],
+  "manutenzioni": []
+}
