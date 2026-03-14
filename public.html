@@ -122,6 +122,13 @@ const data = JSON.parse(txt);
       return `<option value="${p.id}">${label}</option>`;
     }).join('');
 
+
+    
+if (!lista.length) {
+  sel.innerHTML = `<option value="">(nessun percorso pubblicato)</option>`;
+}
+
+    
     function showPerc(id){
       const p = lista.find(x => String(x.id) === String(id));
       if (!p) return;
@@ -162,7 +169,7 @@ else setTrace([]); // pulisce la mappa se non ci sono percorsi
       </div>
     `).join('') || '<div class="muted">Nessun intervento</div>';
 
-    initMap();
+  
   }
 
   main().catch(err => {
