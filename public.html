@@ -88,8 +88,14 @@
 
   async function main(){
     const src = qs('src') || 'public/vespatrek_public.json';
-    const res = await fetch(src, { cache:'no-store' });
-    const data = await res.json();
+   const res = await fetch(src, { cache:'no-store' });
+if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText} per ${src}`);
+
+const txt = await res.text();
+if (!txt || txt.trim().length < 5) throw new Error(`File JSON vuoto: ${src}`);
+if (!txt.trim().endsWith('}')) throw new Error(`JSON incompleto/troncato (size=${txt.length} chars): ${src}`);
+
+const data = JSON.parse(txt);
 
     document.getElementById('tit').innerText = data.titolo || 'VespaTrek';
     document.getElementById('meta').innerText =
