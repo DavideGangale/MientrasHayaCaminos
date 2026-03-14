@@ -1898,8 +1898,7 @@ const serbLitri   = parseFloat(carica('vt_serbatoioLitri','0')) || 0;   // serba
 const totLitri    = scortaLitri + serbLitri;
 const autonomiaKm = totLitri * consumoUsato;    
 
-const unitaLbl  = (unitaAttuale === 'L') ? 'L' : 'gal';
-const scortaVis = (unitaAttuale === 'L') ? scortaLitri : (scortaLitri / FAT_GAL);
+
 
       
     const el = document.getElementById('autonomia-info');
