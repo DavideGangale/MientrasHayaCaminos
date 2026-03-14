@@ -3060,14 +3060,22 @@ function setDistanza(d) {
   aggiornaUI();
 }
 
-function setValuta(v) {
+async function setValuta(v) {
   valutaAttuale = v;
   salva('vt_valuta', v);
+
   aggiornaSettingsUI();
+  aggiornaFxSettingsUI();
   showToast('💱 Valuta: ' + v);
-  // (facoltativo) aggiornaUI() se vuoi cambiare i simboli ovunque
+
+  // ✅ auto-update cambio online (solo se non USD)
+  if (v !== 'USD') {
+    // se ho già un cambio salvato, continuo a funzionare comunque.
+    // poi provo ad aggiornarlo online in background.
+    aggiornaFxOnline();
+  }
+
   aggiornaUI();
-    aggiornaFxSettingsUI();
 }
 
 function cambiaPaeseDaSettings() {
