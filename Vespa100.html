@@ -619,8 +619,11 @@
         <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importaDati(this)">
         <button class="btn-secondary" onclick="document.getElementById('import-file').click()">⬆️ IMPORTA BACKUP</button>
       </div>
-
+       
       <button class="btn-secondary" style="background:#8b0000; margin-top:20px;" onclick="resetTutto()">⚠️ RESET COMPLETO APP</button>
+
+      <button class="btn-secondary" style="background:#263238; margin-top:10px;" onclick="testAddKm()">🧪 TEST: +1 km (finto)</button>
+      
     </div>
   </div>
 
@@ -3229,6 +3232,34 @@ async function setLoadingProgress(pct, label) {
   await new Promise(r => setTimeout(r, 180));
 }
 
+
+
+  function testAddKm() {
+  const aggiungi = 1; // km finti
+
+  // aggiungi alla tappa
+  tappaAttuale.kmPercorsi = (tappaAttuale.kmPercorsi || 0) + aggiungi;
+  tappaAttuale.secondiGuida = (tappaAttuale.secondiGuida || 0) + 180; // +3 min finti
+  salva('vt_tappaAttuale', tappaAttuale);
+
+  // aggiungi ai km totali
+  const kmTot = parseFloat(carica('vt_kmTotali','0')) || 0;
+  salva('vt_kmTotali', (kmTot + aggiungi).toFixed(4));
+
+  // aggiungi ai km del paese attuale
+  const paese = carica('vt_paeseAttuale','Colombia');
+  const datiPaesi = caricaJSON('vt_datiPaesi', {});
+  if (!datiPaesi[paese]) datiPaesi[paese] = { km:0, benzina:0, spesaBenzina:0, spesaOlio:0, benzinaFuori:0 };
+
+  datiPaesi[paese].km = (datiPaesi[paese].km || 0) + aggiungi;
+  salva('vt_datiPaesi', datiPaesi);
+
+  aggiornaUI();
+  showToast('🧪 Test: aggiunto +1 km');
+}
+
+
+  
 async function inizializzaApp() {
   await setLoadingProgress(10, '🗄️ Database...');
   initAllData();
