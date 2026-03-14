@@ -286,6 +286,10 @@
       border-radius:10px;
     }
 
+
+
+
+    
     /* DIARIO */
     .diario-entry{
       background:linear-gradient(135deg,#1a1a1a,#2a2a2a);
@@ -851,7 +855,20 @@
 </div>
 
 
+<div id="modalDettagli" class="modal-overlay">
+  <div class="modal-content" style="border-color:#ff9800; max-width:560px;">
+    <button class="close-modal" onclick="chiudiModal('modalDettagli')">×</button>
+    <h2 style="color:#ff9800; text-align:center; margin-top:0;">✏️ Dettagli percorso</h2>
 
+    <input id="det-titolo" type="text" placeholder="Titolo (es. Bogotá → Medellín / Centro storico)">
+
+    <textarea id="det-note" rows="4" placeholder="Note: cosa hai visto, com’è andata, problemi, incontri..."></textarea>
+
+    <button class="btn-azione" style="background:#ff9800;color:black;" onclick="salvaDettagliPercorso()">
+      💾 Salva dettagli
+    </button>
+  </div>
+</div>
 
 
   
@@ -1050,7 +1067,7 @@ function initDB(key, def) {
 function initAllData() {
   initDB('vt_olioStockMl', '0');            // ml di olio disponibili
   initDB('vt_olioCostoStockUsd', '0');      // USD “contenuti” nello stock
-
+initDB('vt_unita', 'L');
   initDB('vt_kmTotali', '0.0');
   initDB('vt_odoUltimoPieno', '0.0');
   initDB('vt_litriVespa', '0.0');
@@ -1687,6 +1704,10 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
   });
 });
 
+
+#modalMapFull { z-index: 7000; }
+#modalTappe   { z-index: 6000; }
+  
 /* ============================================================
    MAPPA FULL (modal)
 ============================================================ */
@@ -1997,6 +2018,7 @@ function cambiaPaese() {
 ============================================================ */
 function cambiaUnita(u) {
   unitaAttuale = u;
+  salva('vt_unita', u);
   const bl = document.getElementById('btn-litri');
   const bg = document.getElementById('btn-galloni');
   if (bl) bl.classList.toggle('active', u === 'L');
@@ -2546,6 +2568,15 @@ function renderTappe() {
           🗺️ Vedi traccia
         </button>
 
+${t.titolo ? `<div style="margin-top:6px;"><b>📍 ${t.titolo}</b></div>` : ''}
+${t.note ? `<div style="margin-top:6px;color:#bbb;">${t.note}</div>` : ''}
+
+<button onclick="apriDettagliPercorso(${t.id})"
+  style="background:#ff9800;border:none;color:black;padding:8px 10px;border-radius:8px;font-size:12px;cursor:pointer;margin-top:8px;">
+  ✏️ Dettagli
+</button>
+
+
         <button onclick="eliminaPercorso(${t.id})"
           style="background:none; border:none; color:#666; font-size:12px; cursor:pointer; margin-top:5px;">
           🗑️ Elimina
@@ -2556,6 +2587,53 @@ function renderTappe() {
 }
 
 
+let detPercorsoId = null;
+
+function trovaPercorsoById(id) {
+  const tappe = caricaJSON('vt_tappe', []);
+  const tur   = caricaJSON('vt_turismo', []);
+
+  let idx = Array.isArray(tappe) ? tappe.findIndex(x => x.id === id) : -1;
+  if (idx !== -1) return { key:'vt_tappe', list:tappe, idx, item:tappe[idx] };
+
+  idx = Array.isArray(tur) ? tur.findIndex(x => x.id === id) : -1;
+  if (idx !== -1) return { key:'vt_turismo', list:tur, idx, item:tur[idx] };
+
+  return null;
+}
+
+function apriDettagliPercorso(id) {
+  const found = trovaPercorsoById(id);
+  if (!found) { showToast('⚠️ Elemento non trovato'); return; }
+
+  detPercorsoId = id;
+  document.getElementById('det-titolo').value = found.item.titolo || '';
+  document.getElementById('det-note').value   = found.item.note || '';
+
+  apriModal('modalDettagli');
+}
+
+function salvaDettagliPercorso() {
+  if (!detPercorsoId) return;
+
+  const found = trovaPercorsoById(detPercorsoId);
+  if (!found) { showToast('⚠️ Elemento non trovato'); return; }
+
+  const titolo = document.getElementById('det-titolo').value.trim();
+  const note   = document.getElementById('det-note').value.trim();
+
+  found.list[found.idx].titolo = titolo;
+  found.list[found.idx].note   = note;
+
+  salva(found.key, found.list);
+
+  chiudiModal('modalDettagli');
+  renderTappe();
+  showToast('✅ Dettagli salvati');
+}
+
+
+  
 //function apriTracciaTappa(tappaId) {
 //  const tappe = caricaJSON('vt_tappe', []);
 //  const t = tappe.find(x => x.id === tappaId);
@@ -3089,7 +3167,8 @@ async function setLoadingProgress(pct, label) {
 async function inizializzaApp() {
   await setLoadingProgress(10, '🗄️ Database...');
   initAllData();
-
+  
+unitaAttuale = carica('vt_unita','L');
 modalitaGuida = carica('vt_modalitaGuida', 'TAPPA');
 aggiornaModalitaUI();
 
