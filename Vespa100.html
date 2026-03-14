@@ -3237,8 +3237,11 @@ function caricaSettingsAvanzatiUI() {
 const t1 = parseFloat(carica('vt_tanica1CapLitri', '0')) || 0;
 const t2 = parseFloat(carica('vt_tanica2CapLitri', '0')) || 0;
 
-document.getElementById('set-tanica1-L')?.value = t1 ? t1.toFixed(2) : '';
-document.getElementById('set-tanica2-L')?.value = t2 ? t2.toFixed(2) : '';
+const elT1 = document.getElementById('set-tanica1-L');
+if (elT1) elT1.value = t1 ? t1.toFixed(2) : '';
+
+const elT2 = document.getElementById('set-tanica2-L');
+if (elT2) elT2.value = t2 ? t2.toFixed(2) : '';
 
 
 
