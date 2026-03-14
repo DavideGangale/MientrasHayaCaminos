@@ -799,6 +799,51 @@
     </div>
   </div>
 
+
+
+  <div id="modalConsumo" class="modal-overlay">
+  <div class="modal-content" style="border-color:#00bcd4; max-width:520px;">
+    <button class="close-modal" onclick="chiudiModal('modalConsumo')">×</button>
+    <h2 style="color:#00bcd4; text-align:center; margin-top:0;">📊 Consumo tappa</h2>
+    <div id="contenutoConsumo"></div>
+  </div>
+</div>
+
+
+
+
+
+  
+<div id="modalFuelStart" class="modal-overlay">
+  <div class="modal-content" style="border-color:#4caf50; max-width:520px;">
+    <button class="close-modal" onclick="annullaFuelInizioTappa()">×</button>
+    <h2 style="color:#4caf50; text-align:center;">⛽ Livello serbatoio (inizio tappa)</h2>
+
+    <div style="font-size:13px;color:#aaa;margin-bottom:10px;text-align:center;">
+      Serbatoio: 2 gal (≈ 7.57 L). Seleziona cosa segna il galleggiante.
+    </div>
+
+    <select id="fuel-start-select" class="inp-select">
+      <option value="0">0 (vuoto)</option>
+      <option value="0.25">1/8 (0.25 gal)</option>
+      <option value="0.5">1/4 (0.5 gal)</option>
+      <option value="0.75">3/8 (0.75 gal)</option>
+      <option value="1">1/2 (1.0 gal)</option>
+      <option value="1.25">5/8 (1.25 gal)</option>
+      <option value="1.5">3/4 (1.5 gal)</option>
+      <option value="1.75">7/8 (1.75 gal)</option>
+      <option value="2" selected>FULL (2.0 gal)</option>
+    </select>
+
+    <button class="btn-azione" style="background:#4caf50;color:black;" onclick="salvaFuelInizioTappa()">
+      ✅ Conferma & Start
+    </button>
+  </div>
+</div>
+
+
+
+  
   <!-- FUEL FINE TAPPA -->
   <div id="modalFuelEnd" class="modal-overlay">
     <div class="modal-content" style="border-color:#4caf50; max-width:520px;">
@@ -901,7 +946,10 @@ function nuovaTappa(kmInizio) {
     secondiGuida: 0,
     benzinaUsata: 0,
     waypoints: [],
-    velMax: 0
+    velMax: 0,
+    fuelStartGal: null,
+    fuelStartLitri: null,
+    fuelAddedLitri: 0,
   };
 }
 
@@ -1270,61 +1318,96 @@ function updatePosition(pos) {
   }
 }
 
+
+
+
+let pendingStartTracking = false;
+
+function tappaNuova() {
+  return (tappaAttuale.kmPercorsi || 0) < 0.01 && (tappaAttuale.secondiGuida || 0) === 0;
+}
+
+function startTrackingNow() {
+  const btn = document.getElementById('btn-start-stop');
+
+  inViaggio = true;
+  if (btn) { btn.className = 'btn-track stop'; btn.innerText = '⏹ PAUSA GUIDA'; }
+
+  lastLat = null; lastLon = null; lastTimestamp = null;
+
+  if (timerGuida) clearInterval(timerGuida);
+  timerGuida = setInterval(() => {
+    tappaAttuale.secondiGuida++;
+    salva('vt_tappaAttuale', tappaAttuale);
+    aggiornaTempoGuidaUI();
+  }, 1000);
+
+  showToast('▶ Tracking avviato');
+  syncWakeLock();
+}
+
+function salvaFuelInizioTappa() {
+  const sel = document.getElementById('fuel-start-select');
+  const gal = sel ? parseFloat(sel.value) : 0;
+  const litri = gal * FAT_GAL;
+
+  // Imposta serbatoio “corrente”
+  salva('vt_serbatoioLitri', litri.toFixed(3));
+
+  // Salva anche dentro la tappa (per calcolo consumo reale)
+  tappaAttuale.fuelStartGal = gal;
+  tappaAttuale.fuelStartLitri = parseFloat(litri.toFixed(3));
+  tappaAttuale.fuelAddedLitri = 0;
+  salva('vt_tappaAttuale', tappaAttuale);
+
+  chiudiModal('modalFuelStart');
+  aggiornaUI();
+
+  if (pendingStartTracking) {
+    pendingStartTracking = false;
+    startTrackingNow();
+  }
+}
+
+function annullaFuelInizioTappa() {
+  pendingStartTracking = false;
+  chiudiModal('modalFuelStart');
+}
+
+
+
+  
 /* ============================================================
    TRACKING START / STOP
 ============================================================ */
 function toggleTracking() {
-  const btn = document.getElementById('btn-start-stop');
-
+  // SE STO VIAGGIANDO -> PAUSA
   if (inViaggio) {
+    const btn = document.getElementById('btn-start-stop');
+
     inViaggio = false;
     if (btn) { btn.className = 'btn-track start'; btn.innerText = '▶ START GUIDA'; }
+
     clearInterval(timerGuida);
     timerGuida = null;
+
     salva('vt_coordinateTracciato', coordinateTracciato);
     showToast('⏸ Tracking in pausa');
-  } else {
-    inViaggio = true;
-    if (btn) { btn.className = 'btn-track stop'; btn.innerText = '⏹ PAUSA GUIDA'; }
-    lastLat = null; lastLon = null; lastTimestamp = null;
 
-    if (timerGuida) clearInterval(timerGuida);
-    timerGuida = setInterval(() => {
-      tappaAttuale.secondiGuida++;
-      salva('vt_tappaAttuale', tappaAttuale);
-      aggiornaTempoGuidaUI();
-    }, 1000);
-
-    showToast('▶ Tracking avviato');
+    syncWakeLock();
+    return;
   }
 
-  syncWakeLock();
-}
-
-// Pausa timer quando app va in background (ma NON spegne tracking)
-document.addEventListener('visibilitychange', () => {
-  syncWakeLock();
-
-  if (document.hidden && inViaggio) {
-    clearInterval(timerGuida);
-    timerGuida = null;
-  } else if (!document.hidden && inViaggio) {
-    if (timerGuida) clearInterval(timerGuida);
-    timerGuida = setInterval(() => {
-      tappaAttuale.secondiGuida++;
-      salva('vt_tappaAttuale', tappaAttuale);
-      aggiornaTempoGuidaUI();
-    }, 1000);
+  // SE NON STO VIAGGIANDO -> DEVO PARTIRE
+  // Se tappa nuova e non ho fuelStart, chiedi prima
+  if (tappaNuova() && (tappaAttuale.fuelStartGal == null)) {
+    pendingStartTracking = true;
+    apriModal('modalFuelStart');
+    return;
   }
-});
 
-function aggiornaTempoGuidaUI() {
-  const el = document.getElementById('ui-tempo-guida');
-  if (!el) return;
-  const h = Math.floor((tappaAttuale.secondiGuida || 0) / 3600);
-  const m = Math.floor(((tappaAttuale.secondiGuida || 0) % 3600) / 60);
-  const s = (tappaAttuale.secondiGuida || 0) % 60;
-  el.innerText = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  // altrimenti parti subito
+  startTrackingNow();
 }
 
 /* ============================================================
@@ -1356,6 +1439,12 @@ function concludiTappa() {
     benzina: parseFloat((tappaAttuale.benzinaUsata || 0).toFixed(2)),
     velMax: tappaAttuale.velMax || 0,
     traccia: coordinateTracciato.filter((_, i) => i % 3 === 0), // salva 1 punto ogni 3 (più leggero)
+
+    fuelStartGal: tappaAttuale.fuelStartGal,
+    fuelStartLitri: tappaAttuale.fuelStartLitri,
+    fuelAddedLitri: tappaAttuale.fuelAddedLitri || 0,
+    benzinaStimataLitri: parseFloat((tappaAttuale.benzinaUsata || 0).toFixed(3)),
+    
     velMedia: velMedia ? parseFloat(velMedia.toFixed(1)) : null
   };
 
@@ -1489,14 +1578,61 @@ function salvaFuelFineTappa() {
     if (idx !== -1) {
       tappe[idx].fuelEndGal = gal;
       tappe[idx].fuelEndLitri = parseFloat(litri.toFixed(3));
+
+      // ==== CALCOLO CONSUMO REALE vs STIMATO ====
+      const startL = tappe[idx].fuelStartLitri;
+      const endL   = tappe[idx].fuelEndLitri;
+      const addedL = tappe[idx].fuelAddedLitri || 0;
+
+      const stimL  = Number(tappe[idx].benzinaStimataLitri ?? tappe[idx].benzina ?? 0);
+
+      if (startL != null && endL != null) {
+        const consumati = (startL + addedL - endL);
+
+        tappe[idx].benzinaRealeLitri = parseFloat(consumati.toFixed(3));
+        tappe[idx].consumoRealeKmL   = (consumati > 0) ? parseFloat((tappe[idx].km / consumati).toFixed(2)) : null;
+
+        tappe[idx].consumoStimatoKmL = (stimL > 0) ? parseFloat((tappe[idx].km / stimL).toFixed(2)) : null;
+      } else {
+        tappe[idx].benzinaRealeLitri = null;
+        tappe[idx].consumoRealeKmL = null;
+        tappe[idx].consumoStimatoKmL = (stimL > 0) ? parseFloat((tappe[idx].km / stimL).toFixed(2)) : null;
+      }
+
+      // Prepara finestra confronto
+      const t = tappe[idx];
+      const box = document.getElementById('contenutoConsumo');
+      if (box) {
+        box.innerHTML = `
+          <div class="log-entry-full" style="border-left-color:#00bcd4;">
+            <div style="font-weight:bold;">🏁 ${t.data} ${t.ora} — ${t.paese}</div>
+            <div>📏 KM: <b>${t.km}</b></div>
+            <hr style="border:0;border-top:1px solid #444;margin:10px 0;">
+            <div>⛽ Inizio: <b>${(t.fuelStartLitri ?? 0).toFixed(2)} L</b></div>
+            <div>➕ Aggiunti in tappa: <b>${(t.fuelAddedLitri || 0).toFixed(2)} L</b></div>
+            <div>⛽ Fine: <b>${(t.fuelEndLitri ?? 0).toFixed(2)} L</b></div>
+            <hr style="border:0;border-top:1px solid #444;margin:10px 0;">
+            <div>🧮 Stimato (app): <b>${Number(t.benzinaStimataLitri ?? t.benzina ?? 0).toFixed(2)} L</b>
+              → <b style="color:var(--giallo)">${t.consumoStimatoKmL ?? '--'} km/L</b></div>
+            <div>🔥 Reale (da livello): <b>${(t.benzinaRealeLitri != null ? t.benzinaRealeLitri.toFixed(2) : '--')} L</b>
+              → <b style="color:var(--verde)">${t.consumoRealeKmL ?? '--'} km/L</b></div>
+          </div>
+        `;
+      }
+
+      
       salva('vt_tappe', tappe);
     }
   }
 
   pendingFuelTappaId = null;
   chiudiModal('modalFuelEnd');
+  
   aggiornaUI();
   showToast('⛽ Livello fine tappa salvato');
+
+apriModal('modalConsumo');
+  
 }
 </script>
 
@@ -1762,6 +1898,11 @@ function registraAcquisto() {
 
       datiPaesi[paese].benzina = (datiPaesi[paese].benzina || 0) + benzPura;
 
+      
+// ✅ BENZINA AGGIUNTA IN TAPPA (per calcolo consumo reale)
+tappaAttuale.fuelAddedLitri = (tappaAttuale.fuelAddedLitri || 0) + qtaLitri;
+
+      
       tappaAttuale.benzinaUsata = (tappaAttuale.benzinaUsata || 0) + benzPura;
       salva('vt_tappaAttuale', tappaAttuale);
 
@@ -1769,13 +1910,12 @@ function registraAcquisto() {
         `✅ <b>Messo in Vespa:</b> ${qtaLitri.toFixed(2)} L<br>` +
         `🧪 <b>Olio 2T da aggiungere:</b> <span style="font-size:20px; color:var(--giallo); font-weight:bold;">${olioMl} ml</span><br>` +
         `⛽ Benzina netta: ${benzPura.toFixed(2)} L<br>` +
-        (totaleBenz > 0 ? `💰 Totale benzina: <b>
+     (totaleBenz > 0 ? `💰 Totale benzina: <b>
 $$
 {totaleBenz.toFixed(2)}</b><br>` : '') +
-        `🧪 Valore olio usato: <b>
+`🧪 Valore olio usato: <b>
 $$
 {costoOlioUsatoUsd.toFixed(2)}</b>`;
-
     } else {
       const scortaAttualeL = parseFloat(carica('vt_scortaLitri', '0')) || 0;
       const nuovaScorta = scortaAttualeL + qtaLitri;
@@ -1865,6 +2005,9 @@ function registraTravaso() {
   const serbPrima = parseFloat(carica('vt_serbatoioLitri','0')) || 0;
   const serbDopo  = Math.min(SERBATOIO_LITRI, serbPrima + qtaLitri);
   salva('vt_serbatoioLitri', serbDopo.toFixed(3));
+  
+  tappaAttuale.fuelAddedLitri = (tappaAttuale.fuelAddedLitri || 0) + qtaLitri;
+  salva('vt_tappaAttuale', tappaAttuale);
 
   
   salva('vt_benzinaUsata', (parseFloat(carica('vt_benzinaUsata','0')) || 0) + benzPura);
@@ -2170,7 +2313,8 @@ function renderTappe() {
     `;
   }).join('');
 }
-  
+
+
 function apriTracciaTappa(tappaId) {
   const tappe = caricaJSON('vt_tappe', []);
   const t = tappe.find(x => x.id === tappaId);
@@ -2178,9 +2322,10 @@ function apriTracciaTappa(tappaId) {
     showToast('⚠️ Traccia non disponibile per questa tappa');
     return;
   }
-  // riuso la mappa full: disegno la traccia della tappa
   apriMappaFull(t.traccia);
 }
+  
+
 
   
 function eliminaTappa(id) {
