@@ -3270,7 +3270,10 @@ window.salvaDettagliPercorso = function () {
 /* ============================================================
    LOG RIFORNIMENTI — RENDER MODAL (FIX template)
 ============================================================ */
-/* ============================================================
+
+
+
+  /* ============================================================
    LOG RIFORNIMENTI — RENDER MODAL
 ============================================================ */
 function renderLogCarburanti() {
@@ -3283,39 +3286,47 @@ function renderLogCarburanti() {
     return;
   }
 
-  container.innerHTML = log.map(l => {
-    const costoO = (l.costoOlio != null) ? Number(l.costoOlio) : null;
+  // Formattazione semplice:
+  // - COP/CLP/ARS senza decimali
+  // - USD sempre con 2 decimali
+  function fmtLocal(n, cur) {
+    const x = Number(n || 0);
+    const zeroDec = ['COP', 'CLP', 'ARS'].includes(cur);
+    return x.toFixed(zeroDec ? 0 : 2);
+  }
+  function fmtUsd(n) {
+    return '$' + Number(n || 0).toFixed(2);
+  }
 
-    // Benzina: preferisci i campi nuovi (local + usd)
+  container.innerHTML = log.map(l => {
     const cur = l.valuta || '';
+
+    const qta = (l.qta != null) ? Number(l.qta) : null;
+
     const costoLocal = (l.costoBenzLocal != null) ? Number(l.costoBenzLocal) : null;
     const costoUsdNew = (l.costoBenzUsd != null) ? Number(l.costoBenzUsd) : null;
 
-    // fallback vecchio (in passato era "USD")
+    // fallback vecchio (alcuni record vecchi hanno solo costoBenz in USD)
     const costoUsdOld = (l.costoBenz != null) ? Number(l.costoBenz) : null;
 
+    // riga costo benzina
     let rigaCostoBenz = '';
     if (costoLocal != null && costoLocal > 0 && costoUsdNew != null && costoUsdNew > 0) {
-      rigaCostoBenz = `💵 Totale benzina: <b style="color:var(--giallo);">${costoLocal.toFixed(2)} ${cur}</b> (≈ <b style="color:var(--giallo);">
-$$
-{costoUsdNew.toFixed(2)}</b>)`;
+      rigaCostoBenz =
+        `💵 Totale benzina: <b style="color:var(--giallo);">${fmtLocal(costoLocal, cur)} ${cur}</b>` +
+        ` (≈ <b style="color:var(--giallo);">${fmtUsd(costoUsdNew)}</b>)`;
     } else if (costoUsdOld != null && costoUsdOld > 0) {
-      rigaCostoBenz = `💵 Totale benzina: <b style="color:var(--giallo);">
-$$
-{costoUsdOld.toFixed(2)}</b>`;
+      rigaCostoBenz = `💵 Totale benzina: <b style="color:var(--giallo);">${fmtUsd(costoUsdOld)}</b>`;
     }
 
-    // Prezzo unitario (di solito in valuta locale / L)
+    // prezzo unitario (di solito in valuta locale / L)
     const prezzoUnit = (l.prezzoUnit != null) ? Number(l.prezzoUnit) : null;
     const rigaPrezzoUnit = (prezzoUnit != null && prezzoUnit > 0)
-      ? `💰 Prezzo unitario: <b>${prezzoUnit.toFixed(3)} ${cur || ''}</b> / L`
+      ? `💰 Prezzo unitario: <b>${prezzoUnit.toFixed(3)} ${cur}</b> / L`
       : '';
 
-    // Quantità: salva sempre in L internamente
-    const qta = (l.qta != null) ? Number(l.qta) : null;
-    const rigaQta = (qta != null)
-      ? `📦 ${qta.toFixed(2)} L → <b>${l.dest || ''}</b>`
-      : `📦 -- L → <b>${l.dest || ''}</b>`;
+    // olio da stock (USD)
+    const costoOlioUsd = (l.costoOlio != null) ? Number(l.costoOlio) : null;
 
     return `
       <div class="log-entry-full" style="border-color:#795548;">
@@ -3326,19 +3337,27 @@ $$
           ${l.km ? `&nbsp;|&nbsp; 📏 ${l.km} km` : ''}
         </div>
 
-        <div>${rigaQta}</div>
+        <div>📦 ${(qta != null) ? qta.toFixed(2) : '--'} L → <b>${l.dest || ''}</b></div>
         ${l.mix && l.mix !== '--' ? `<div>🧪 Miscela: ${l.mix}</div>` : ''}
 
         ${rigaPrezzoUnit ? `<div>${rigaPrezzoUnit}</div>` : ''}
         ${rigaCostoBenz ? `<div>${rigaCostoBenz}</div>` : ''}
 
-        ${(costoO != null && costoO > 0)
-          ? `<div>🧪 Costo olio 2T (da stock): <b style="color:#00bcd4;">$${costoO.toFixed(2)}</b></div>`
+        ${(costoOlioUsd != null && costoOlioUsd > 0)
+          ? `<div>🧪 Costo olio 2T (da stock): <b style="color:#00bcd4;">${fmtUsd(costoOlioUsd)}</b></div>`
           : ''}
       </div>
     `;
   }).join('');
 }
+
+
+
+
+
+
+
+  
 /* ============================================================
    STATS PER PAESE — RENDER MODAL
 ============================================================ */
