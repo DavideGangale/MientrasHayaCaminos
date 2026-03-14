@@ -464,7 +464,8 @@
             </div>
         </div>
 
-        <input type="number" id="inputPrezzo" placeholder="Prezzo per litro (opzionale)" step="0.01" min="0">
+        <input type="number" id="inputTotaleBenz" placeholder="Totale pagato benzina (USD) (opzionale)" step="0.01" min="0">
+        <input type="number" id="inputCostoOlio" placeholder="Costo olio 2T (USD) (opzionale)" step="0.01" min="0">
         <input type="text"   id="inputLuogo"  placeholder="Luogo rifornimento (opzionale)">
 
         <button class="btn-azione" onclick="registraAcquisto()">💾 Salva & Calcola</button>
@@ -545,6 +546,16 @@
 
 <!-- ==================== MODALI ==================== -->
 
+
+<div id="modalMapFull" class="modal-overlay">
+  <div class="modal-content" style="border-color:#2196F3; max-width:900px;">
+    <button class="close-modal" onclick="chiudiModal('modalMapFull')">×</button>
+    <h2 style="color:#2196F3; text-align:center; margin-top:0;">🗺️ Mappa (Full)</h2>
+    <div id="mapFull" style="height:70vh; border-radius:10px; border:2px solid #444;"></div>
+  </div>
+</div>
+
+    
 <!-- TAPPE -->
 <div id="modalTappe" class="modal-overlay">
     <div class="modal-content" style="border-color:#9c27b0;">
@@ -652,13 +663,9 @@ let mixT             = 2.0;
 //const MAX_PUNTI_MAPPA = 500;
 
 let tappaAttuale = {
-  kmInizio: 0,
-  kmPercorsi: 0,
-  altMin: 9999,
-  altMax: 0,
-  secondiGuida: 0,
-  benzinaUsata: 0,
-  waypoints: []
+  kmInizio:0, kmPercorsi:0, altMin:9999, altMax:0,
+  secondiGuida:0, benzinaUsata:0, waypoints:[],
+  velMax: 0
 };
 
 const CONSUMO_MEDIO   = 28; // km/L stimato PX150
@@ -773,6 +780,9 @@ function initAllData() {
     const st = localStorage.getItem('vt_tappaAttuale');
     if (st) tappaAttuale = JSON.parse(st);
 
+    if (tappaAttuale.velMax == null) tappaAttuale.velMax = 0;
+    if (!tappaAttuale.waypoints) tappaAttuale.waypoints = [];
+
     // Carica coordinate
     coordinateTracciato = caricaJSON('vt_coordinateTracciato', []);
 
@@ -840,6 +850,9 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
 const marker   = L.marker([4.7, -74.1]).addTo(map);
 const polyline = L.polyline([], { color:'#d32f2f', weight:4, opacity:0.8 }).addTo(map);
 
+document.getElementById('map').addEventListener('click', () => apriMappaFull());
+
+    
 // Disegna tracciato salvato
 if (coordinateTracciato.length > 0) {
     polyline.setLatLngs(coordinateTracciato);
@@ -908,6 +921,14 @@ function updatePosition(pos) {
     }
 
     if (inViaggio && pos.coords.accuracy < 50 && speed > 2) {
+
+
+    if (speed > (tappaAttuale.velMax || 0)) {
+        tappaAttuale.velMax = speed;
+        salva('vt_tappaAttuale', tappaAttuale);
+    }
+
+        
         // Altitudine min/max tappa
         if (altitudineAttuale < tappaAttuale.altMin) tappaAttuale.altMin = altitudineAttuale;
         if (altitudineAttuale > tappaAttuale.altMax) tappaAttuale.altMax = altitudineAttuale;
@@ -1050,6 +1071,11 @@ function concludiTappa() {
 
     if (inViaggio) toggleTracking();
 
+
+const ore = tappaAttuale.secondiGuida > 0 ? (tappaAttuale.secondiGuida / 3600) : 0;
+const velMedia = ore > 0 ? (tappaAttuale.kmPercorsi / ore) : null;
+
+    
     const paese = carica('vt_paeseAttuale','Colombia');
     const now   = new Date();
     const tappa = {
@@ -1062,6 +1088,8 @@ function concludiTappa() {
         altMax:   tappaAttuale.altMax,
         durata:   tappaAttuale.secondiGuida,
         benzina:  parseFloat(tappaAttuale.benzinaUsata.toFixed(2))
+        velMax:   tappaAttuale.velMax || 0,
+        velMedia: velMedia ? parseFloat(velMedia.toFixed(1)) : null,
     };
 
     const tappe = caricaJSON('vt_tappe', []);
@@ -1167,7 +1195,42 @@ ${testo ? '\n' + testo : ''}
 };
     
 
+let mapFullInstance = null;
+let mapFullMarker = null;
+let mapFullPolyline = null;
 
+function apriMappaFull() {
+  apriModal('modalMapFull');
+
+  setTimeout(() => {
+    const el = document.getElementById('mapFull');
+    if (!el) return;
+
+    if (!mapFullInstance) {
+      mapFullInstance = L.map(el, { zoomControl:true, attributionControl:false });
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+        crossOrigin: true
+      }).addTo(mapFullInstance);
+
+      mapFullMarker = L.marker([4.7, -74.1]).addTo(mapFullInstance);
+      mapFullPolyline = L.polyline([], { color:'#d32f2f', weight:4, opacity:0.9 }).addTo(mapFullInstance);
+    }
+
+    // sincronizza dati dalla mappa piccola
+    mapFullMarker.setLatLng(marker.getLatLng());
+    mapFullPolyline.setLatLngs(polyline.getLatLngs());
+
+    const pts = mapFullPolyline.getLatLngs();
+    if (pts && pts.length > 1) {
+      mapFullInstance.fitBounds(mapFullPolyline.getBounds().pad(0.15));
+    } else {
+      mapFullInstance.setView(mapFullMarker.getLatLng(), 13);
+    }
+
+    mapFullInstance.invalidateSize();
+  }, 80);
+}
     
     
 //window.testShareClick = function () {
@@ -1403,46 +1466,68 @@ function validaInput(id, min = 0.01, max = 9999) {
 }
 
 // ============================================================
-//  REGISTRA ACQUISTO BENZINA
+//  REGISTRA ACQUISTO BENZINA (Qtà + Totale pagato)
 // ============================================================
 function registraAcquisto() {
-    let qtaInput = validaInput('inputCompra', 0.01, 999);
+    const qtaInput = validaInput('inputCompra', 0.01, 999);
     if (!qtaInput) { showToast('⚠️ Inserisci una quantità valida'); return; }
 
     // Converti in litri se in galloni
     const qtaLitri = unitaAttuale === 'G' ? qtaInput * FAT_GAL : qtaInput;
-    const paese    = carica('vt_paeseAttuale','Colombia');
-    const prezzo   = parseFloat(document.getElementById('inputPrezzo').value) || 0;
-    const luogo    = document.getElementById('inputLuogo').value.trim() || 'N/D';
-    const now      = new Date();
+
+    const paese = carica('vt_paeseAttuale', 'Colombia');
+
+    const totaleBenz = parseFloat(document.getElementById('inputTotaleBenz')?.value || '0') || 0; // USD
+    const costoOlio  = parseFloat(document.getElementById('inputCostoOlio')?.value  || '0') || 0; // USD
+    const prezzoUnitario = (totaleBenz > 0 && qtaLitri > 0) ? (totaleBenz / qtaLitri) : null;     // USD/L
+
+    const luogo = document.getElementById('inputLuogo').value.trim() || 'N/D';
+    const now   = new Date();
 
     let risultatoHTML = '';
 
+    // Dati paese (schema completo)
+    const datiPaesi = caricaJSON('vt_datiPaesi', {});
+    if (!datiPaesi[paese]) datiPaesi[paese] = { km:0, benzina:0, spesaBenzina:0, spesaOlio:0 };
+
+    // Spese globali (se inserite)
+    if (totaleBenz > 0) {
+        salva('vt_spesaBenzina', parseFloat(carica('vt_spesaBenzina','0')) + totaleBenz);
+        datiPaesi[paese].spesaBenzina = (datiPaesi[paese].spesaBenzina || 0) + totaleBenz;
+    }
+    if (costoOlio > 0) {
+        salva('vt_spesaOlio', parseFloat(carica('vt_spesaOlio','0')) + costoOlio);
+        datiPaesi[paese].spesaOlio = (datiPaesi[paese].spesaOlio || 0) + costoOlio;
+    }
+
     if (dest === 'V') {
-        // Vai in vespa — calcola olio
-        const olioMl  = Math.round((qtaLitri * mixC / 100) * 1000);
+        // Vai in vespa — calcola olio miscela
+        const olioMl   = Math.round((qtaLitri * mixC / 100) * 1000);
         const benzPura = qtaLitri - (olioMl / 1000);
 
-        // Aggiorna totali
-        const benzTot  = parseFloat(carica('vt_benzinaUsata','0')) + benzPura;
-        const olioTot  = parseFloat(carica('vt_olioTotaleMl','0')) + olioMl;
-        salva('vt_benzinaUsata',  benzTot);
-        salva('vt_olioTotaleMl',  olioTot);
+        salva('vt_benzinaUsata', parseFloat(carica('vt_benzinaUsata','0')) + benzPura);
+        salva('vt_olioTotaleMl', parseFloat(carica('vt_olioTotaleMl','0')) + olioMl);
         salva('vt_odoUltimoPieno', carica('vt_kmTotali','0'));
 
-        // Dati paese
-        const datiPaesi = caricaJSON('vt_datiPaesi', {});
-        if (!datiPaesi[paese]) datiPaesi[paese] = { km:0, benzina:0 };
-        datiPaesi[paese].benzina += benzPura;
-        salva('vt_datiPaesi', datiPaesi);
+        // Dati paese: benzina netta
+        datiPaesi[paese].benzina = (datiPaesi[paese].benzina || 0) + benzPura;
 
+        // Tappa
         tappaAttuale.benzinaUsata += benzPura;
         salva('vt_tappaAttuale', tappaAttuale);
 
         risultatoHTML = `
             ✅ <b>Messo in Vespa:</b> ${qtaLitri.toFixed(2)} L<br>
-            🧪 <b>Olio 2T da aggiungere:</b> <span style="font-size:20px; color:var(--giallo);">${olioMl} ml</span><br>
-            ⛽ Benzina netta: ${benzPura.toFixed(2)} L`;
+            🧪 <b>Olio 2T da aggiungere:</b>
+              <span style="font-size:20px; color:var(--giallo); font-weight:bold;">${olioMl} ml</span><br>
+            ⛽ Benzina netta: ${benzPura.toFixed(2)} L<br>
+            ${totaleBenz > 0 ? `💰 Totale benzina: <b>
+$$
+{totaleBenz.toFixed(2)}</b><br>` : ''}
+            ${costoOlio  > 0 ? `🧪 Costo olio: <b>
+$$
+{costoOlio.toFixed(2)}</b>` : ''}
+        `;
     } else {
         // Vai nelle taniche
         const scortaAttualeL = parseFloat(carica('vt_scortaLitri','0'));
@@ -1450,28 +1535,36 @@ function registraAcquisto() {
 
         risultatoHTML = `
             ✅ <b>Aggiunto nelle taniche:</b> ${qtaLitri.toFixed(2)} L<br>
-            🛢️ <b>Scorta totale:</b> ${(scortaAttualeL + qtaLitri).toFixed(2)} L`;
+            🛢️ <b>Scorta totale:</b> ${(scortaAttualeL + qtaLitri).toFixed(2)} L<br>
+            ${totaleBenz > 0 ? `💰 Totale benzina: <b>$${totaleBenz.toFixed(2)}</b>` : ''}
+        `;
     }
+
+    salva('vt_datiPaesi', datiPaesi);
 
     // Log carburanti
     const logCarb = caricaJSON('vt_logCarburanti', []);
     logCarb.unshift({
-        id:      Date.now(),
-        data:    now.toLocaleDateString('it-IT'),
-        ora:     now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
-        paese:   paese,
-        qta:     qtaLitri.toFixed(2),
-        dest:    dest === 'V' ? 'Vespa' : 'Tanica',
-        mix:     dest === 'V' ? mixC + '%' : '--',
-        prezzo:  prezzo > 0 ? prezzo : null,
-        luogo:   luogo
+        id:          Date.now(),
+        data:        now.toLocaleDateString('it-IT'),
+        ora:         now.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' }),
+        paese:       paese,
+        qta:         qtaLitri.toFixed(2),
+        dest:        dest === 'V' ? 'Vespa' : 'Tanica',
+        mix:         dest === 'V' ? mixC + '%' : '--',
+        prezzoUnit:  prezzoUnitario ? prezzoUnitario.toFixed(3) : null, // USD/L
+        costoBenz:   totaleBenz > 0 ? totaleBenz.toFixed(2) : null,      // USD
+        costoOlio:   costoOlio  > 0 ? costoOlio.toFixed(2)  : null,      // USD
+        luogo:       luogo,
+        km:          parseFloat(carica('vt_kmTotali','0')).toFixed(1)
     });
     salva('vt_logCarburanti', logCarb);
 
     // Pulisci input
     document.getElementById('inputCompra').value = '';
-    document.getElementById('inputPrezzo').value = '';
-    document.getElementById('inputLuogo').value  = '';
+    const elTB = document.getElementById('inputTotaleBenz'); if (elTB) elTB.value = '';
+    const elCO = document.getElementById('inputCostoOlio');  if (elCO) elCO.value = '';
+    document.getElementById('inputLuogo').value = '';
 
     // Mostra risultato
     const res = document.getElementById('risultatoCompra');
@@ -1482,6 +1575,8 @@ function registraAcquisto() {
     showToast('⛽ Rifornimento registrato!');
 }
 
+
+    
 // ============================================================
 //  REGISTRA TRAVASO DA TANICA
 // ============================================================
@@ -1685,15 +1780,30 @@ function renderLogCarburanti() {
         container.innerHTML = '<div style="color:#888; text-align:center; padding:30px;">Nessun rifornimento registrato</div>';
         return;
     }
-    container.innerHTML = log.map(l => `
+
+    container.innerHTML = log.map(l => {
+        const costoB = l.costoBenz ? parseFloat(l.costoBenz) : null;
+        const costoO = l.costoOlio ? parseFloat(l.costoOlio) : null;
+
+        return `
         <div class="log-entry-full" style="border-color:#795548;">
             <div style="font-weight:bold; color:#ff9800;">⛽ ${l.data} ${l.ora}</div>
-            <div style="color:#aaa; font-size:13px;">${l.paese} — ${l.luogo}</div>
+            <div style="color:#aaa; font-size:13px;">
+              ${l.paese} — ${l.luogo || 'N/D'} ${l.km ? `&nbsp;|&nbsp; 📏 ${l.km} km` : ''}
+            </div>
             <div>📦 ${l.qta} L → <b>${l.dest}</b></div>
-            ${l.mix !== '--' ? `<div>🧪 Miscela: ${l.mix}</div>` : ''}
-            ${l.prezzo ? `<div>💰 Prezzo/L: ${l.prezzo}</div>` : ''}
-        </div>
-    `).join('');
+            ${l.mix && l.mix !== '--' ? `<div>🧪 Miscela: ${l.mix}</div>` : ''}
+
+            ${l.prezzoUnit ? `<div>💰 Prezzo unitario: <b>
+$$
+{l.prezzoUnit}</b> / L</div>` : ''}
+
+            ${(costoB !== null && costoB > 0) ? `<div>💵 Totale benzina: <b style="color:var(--giallo);">
+$$
+{costoB.toFixed(2)}</b></div>` : ''}
+            ${(costoO !== null && costoO > 0) ? `<div>🧪 Costo olio 2T: <b style="color:#00bcd4;">$${costoO.toFixed(2)}</b></div>` : ''}
+        </div>`;
+    }).join('');
 }
 
 // ============================================================
