@@ -287,7 +287,11 @@
     }
 
 
-
+/* Z-INDEX MODALI (ordine sopra/sotto) */
+#modalTappe    { z-index: 6000; }
+#modalConsumo  { z-index: 6500; }
+#modalDettagli { z-index: 6600; }
+#modalMapFull  { z-index: 7000; }
 
     
     /* DIARIO */
@@ -1705,8 +1709,7 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
 });
 
 
-#modalMapFull { z-index: 7000; }
-#modalTappe   { z-index: 6000; }
+
   
 /* ============================================================
    MAPPA FULL (modal)
