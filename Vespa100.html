@@ -1087,7 +1087,7 @@ const velMedia = ore > 0 ? (tappaAttuale.kmPercorsi / ore) : null;
         altMin:   tappaAttuale.altMin === 9999 ? 0 : tappaAttuale.altMin,
         altMax:   tappaAttuale.altMax,
         durata:   tappaAttuale.secondiGuida,
-        benzina:  parseFloat(tappaAttuale.benzinaUsata.toFixed(2))
+        benzina:  parseFloat(tappaAttuale.benzinaUsata.toFixed(2)),
         velMax:   tappaAttuale.velMax || 0,
         velMedia: velMedia ? parseFloat(velMedia.toFixed(1)) : null,
     };
