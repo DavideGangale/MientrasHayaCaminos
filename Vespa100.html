@@ -841,6 +841,10 @@
   💾 Salva cambio
 </button>
 
+<button class="btn-secondary" style="margin-top:10px;" onclick="aggiornaFxOnline()">
+  🌐 Aggiorna cambio online
+</button>
+
 <div id="set-fx-info" style="font-size:12px; color:#777; text-align:left; margin-top:8px;">
   Suggerimento: se sei offline, usa l’ultimo cambio salvato.
 </div>
@@ -2942,7 +2946,35 @@ function onStatsPaeseSelect(paese) {
   aggiornaUI();
 }
 
+async function aggiornaFxOnline() {
+  const cur = valutaAttuale || 'USD';
+  if (cur === 'USD') { showToast('USD non richiede cambio'); return; }
 
+  try {
+    showToast('🌐 Aggiorno cambio...');
+
+    // API gratuita senza chiave (di solito funziona bene, ma può avere limiti)
+    // Risposta: { result:'success', rates:{ COP:..., PEN:... } }
+    const res = await fetch('https://open.er-api.com/v6/latest/USD', { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+
+    const data = await res.json();
+    if (!data || data.result !== 'success' || !data.rates) throw new Error('Risposta API non valida');
+
+    const usdToCur = Number(data.rates[cur]); // 1 USD = X CUR
+    if (!usdToCur || usdToCur <= 0) throw new Error('Cambio non disponibile per ' + cur);
+
+    // Noi salviamo: 1 CUR = X USD  => fxToUsd = 1 / (USD->CUR)
+    const fxToUsd = 1 / usdToCur;
+
+    setFxToUsd(cur, fxToUsd);
+    aggiornaFxSettingsUI();
+    showToast(`✅ Cambio aggiornato: 1 ${cur} = ${fxToUsd.toFixed(6)} USD`);
+  } catch (e) {
+    console.warn('aggiornaFxOnline error:', e);
+    showToast('❌ Cambio online non disponibile (usa valore manuale / offline)');
+  }
+}
 
 function getFxRates() {
   return caricaJSON('vt_fxRates', { USD: 1 }) || { USD: 1 };
