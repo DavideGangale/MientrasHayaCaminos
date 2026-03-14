@@ -637,6 +637,10 @@
         <button class="btn-azione" style="background:#607d8b;" onclick="esportaDati()">⬇️ ESPORTA BACKUP JSON</button>
         <button class="btn-secondary" onclick="esportaDatiLight()">⬇️ ESPORTA BACKUP (LIGHT)</button>
 
+        <button class="btn-azione" style="background:#009688;" onclick="esportaDatiPubblici()">
+        📤 ESPORTA JSON PUBBLICO (foto + tracce)
+        </button>
+
         <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importaDati(this)">
         <button class="btn-secondary" onclick="document.getElementById('import-file').click()">⬆️ IMPORTA BACKUP</button>
       </div>
@@ -4060,6 +4064,176 @@ function esportaDatiLight() {
   showToast('💾 Backup LIGHT esportato!');
 }
 
+
+
+
+
+
+  async function sanitizeImageDataUrl(dataUrl, maxW = 1280, quality = 0.78) {
+  // Ricodifica in JPEG via canvas: riduce peso e rimuove EXIF
+  return new Promise((resolve) => {
+    try {
+      if (!dataUrl) return resolve(null);
+      const img = new Image();
+      img.onload = () => {
+        const ratio = Math.min(1, maxW / img.width);
+        const w = Math.max(1, Math.round(img.width * ratio));
+        const h = Math.max(1, Math.round(img.height * ratio));
+
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = () => resolve(null);
+      img.src = dataUrl;
+    } catch {
+      resolve(null);
+    }
+  });
+}
+
+function simplifyTrace(trace, step = 3) {
+  if (!Array.isArray(trace)) return null;
+  if (trace.length < 2) return null;
+  // tieni 1 punto ogni "step"
+  const simple = trace.filter((_, i) => i % step === 0);
+  return simple.length >= 2 ? simple : trace;
+}
+
+async function esportaDatiPubblici() {
+  try {
+    // opzionale: evita “quasi realtime”
+    const oreNascondi = 0; // metti 24 se vuoi nascondere ultime 24 ore
+    const minId = Date.now() - oreNascondi * 3600 * 1000;
+
+    const tappe = (caricaJSON('vt_tappe', []) || []).filter(t => (t.id || 0) >= 0);
+    const turismo = (caricaJSON('vt_turismo', []) || []).filter(t => (t.id || 0) >= 0);
+    const diario = caricaJSON('vt_diario', []) || [];
+    const logbook = caricaJSON('vt_logbook', []) || [];
+    const datiPaesi = caricaJSON('vt_datiPaesi', {}) || {};
+
+    // === TAPPE PUB: includo traccia ma semplificata ===
+    const tappePub = tappe
+      .filter(t => (oreNascondi > 0 ? (t.id || 0) < minId : true))
+      .map(t => ({
+        id: t.id,
+        tipo: t.tipo || 'Tappa',
+        data: t.data, ora: t.ora,
+        paese: t.paese,
+        km: t.km,
+        durata: t.durata,
+        altMin: t.altMin, altMax: t.altMax,
+        velMax: t.velMax, velMedia: t.velMedia,
+
+        // consumi
+        benzinaStimataLitri: t.benzinaStimataLitri ?? t.benzina ?? null,
+        benzinaRealeLitri: t.benzinaRealeLitri ?? null,
+        consumoStimatoKmL: t.consumoStimatoKmL ?? null,
+        consumoRealeKmL: t.consumoRealeKmL ?? null,
+
+        titolo: t.titolo || '',
+        note: t.note || '',
+
+        // ✅ traccia (semplificata)
+        traccia: simplifyTrace(t.traccia, 3)
+      }));
+
+    const turismoPub = turismo
+      .filter(t => (oreNascondi > 0 ? (t.id || 0) < minId : true))
+      .map(t => ({
+        id: t.id,
+        tipo: t.tipo || 'Turismo',
+        data: t.data, ora: t.ora,
+        paese: t.paese,
+        km: t.km,
+        durata: t.durata,
+        altMin: t.altMin, altMax: t.altMax,
+        velMax: t.velMax, velMedia: t.velMedia,
+        benzinaStimataLitri: t.benzinaStimataLitri ?? t.benzina ?? null,
+        benzinaRealeLitri: t.benzinaRealeLitri ?? null,
+        consumoStimatoKmL: t.consumoStimatoKmL ?? null,
+        consumoRealeKmL: t.consumoRealeKmL ?? null,
+        titolo: t.titolo || '',
+        note: t.note || '',
+        traccia: simplifyTrace(t.traccia, 3)
+      }));
+
+    // === DIARIO PUB con foto (compresse + no EXIF) ===
+    const diarioPub = await Promise.all(diario.map(async d => ({
+      id: d.id,
+      data: d.data, ora: d.ora,
+      paese: d.paese,
+      km: d.km,
+      testo: d.testo,
+      foto: d.foto ? await sanitizeImageDataUrl(d.foto, 1280, 0.78) : null
+    })));
+
+    // === MANUTENZIONI PUB (foto escluse, per ora) ===
+    const logbookPub = logbook.map(e => ({
+      id: e.id,
+      data: e.data, ora: e.ora,
+      paese: e.paese,
+      km: e.km,
+      nome: e.nome,
+      desc: e.desc,
+      costoLocal: e.costoLocal ?? e.costo ?? 0,
+      valuta: e.valuta ?? carica('vt_valuta','USD'),
+      costoUsd: e.costoUsd ?? 0
+    }));
+
+    const payload = {
+      _version: 'public-1.0',
+      _exportDate: new Date().toISOString(),
+      titolo: 'VespaTrek PX150',
+
+      stats: {
+        kmTotali: parseFloat(carica('vt_kmTotali','0')) || 0,
+        benzinaUsataLitri: parseFloat(carica('vt_benzinaUsata','0')) || 0,
+        benzinaFuoriTappaLitri: parseFloat(carica('vt_benzinaFuoriTappaLitri','0')) || 0,
+        olioTotaleLitri: (parseFloat(carica('vt_olioTotaleMl','0')) || 0) / 1000,
+
+        spesaBenzinaUsd: parseFloat(carica('vt_spesaBenzinaUsd','0')) || 0,
+        spesaOlioUsd: parseFloat(carica('vt_spesaOlioUsd','0')) || 0,
+        spesaRicambiUsd: parseFloat(carica('vt_spesaRicambiUsd','0')) || 0,
+        spesaManodoperaUsd: parseFloat(carica('vt_spesaManodoperaUsd','0')) || 0
+      },
+
+      datiPaesi,
+      tappe: tappePub,
+      turismo: turismoPub,
+      diario: diarioPub,
+      manutenzioni: logbookPub
+    };
+
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
+    const url  = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `vespatrek_public.json`; // nome fisso: ti facilita l’upload
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    URL.revokeObjectURL(url);
+    showToast('📤 Esportato: vespatrek_public.json');
+  } catch (e) {
+    console.warn('esportaDatiPubblici error:', e);
+    showToast('❌ Errore export pubblico (vedi console)');
+  }
+}
+
+
+
+
+
+
+
+  
 /* ============================================================
    EXPORT / IMPORT BACKUP (FULL)
 ============================================================ */
@@ -4086,6 +4260,124 @@ function esportaDati() {
   showToast('💾 Backup esportato!');
 }
 
+
+
+function esportaDatiPubblici() {
+  const paeseAttuale = carica('vt_paeseAttuale', 'N/D');
+
+  const tappe = caricaJSON('vt_tappe', []);
+  const turismo = caricaJSON('vt_turismo', []);
+  const diario = caricaJSON('vt_diario', []);
+  const logbook = caricaJSON('vt_logbook', []);
+  const datiPaesi = caricaJSON('vt_datiPaesi', {});
+
+  // ===== SANITIZZAZIONE PRIVACY =====
+  // - niente tracce/coordinate
+  // - niente foto (sono pesanti e spesso contengono metadata)
+  const tappePub = (tappe || []).map(t => ({
+    id: t.id,
+    tipo: t.tipo || 'Tappa',
+    data: t.data, ora: t.ora,
+    paese: t.paese,
+    km: t.km,
+    durata: t.durata,
+    altMin: t.altMin, altMax: t.altMax,
+    velMax: t.velMax, velMedia: t.velMedia,
+
+    // consumi
+    benzinaStimataLitri: t.benzinaStimataLitri ?? t.benzina ?? null,
+    benzinaRealeLitri: t.benzinaRealeLitri ?? null,
+    consumoStimatoKmL: t.consumoStimatoKmL ?? null,
+    consumoRealeKmL: t.consumoRealeKmL ?? null,
+
+    // note “racconto”
+    titolo: t.titolo || '',
+    note: t.note || '',
+
+    // fuel end per contesto (non è posizione)
+    fuelEndLitri: t.fuelEndLitri ?? null
+  }));
+
+  const turismoPub = (turismo || []).map(t => ({
+    id: t.id,
+    tipo: t.tipo || 'Turismo',
+    data: t.data, ora: t.ora,
+    paese: t.paese,
+    km: t.km,
+    durata: t.durata,
+    altMin: t.altMin, altMax: t.altMax,
+    velMax: t.velMax, velMedia: t.velMedia,
+    benzinaStimataLitri: t.benzinaStimataLitri ?? t.benzina ?? null,
+    benzinaRealeLitri: t.benzinaRealeLitri ?? null,
+    consumoStimatoKmL: t.consumoStimatoKmL ?? null,
+    consumoRealeKmL: t.consumoRealeKmL ?? null,
+    titolo: t.titolo || '',
+    note: t.note || ''
+  }));
+
+  const diarioPub = (diario || []).map(d => ({
+    id: d.id,
+    data: d.data, ora: d.ora,
+    paese: d.paese,
+    km: d.km,
+    testo: d.testo
+    // foto: ESCLUSA (privacy + peso)
+  }));
+
+  const logbookPub = (logbook || []).map(e => ({
+    id: e.id,
+    data: e.data, ora: e.ora,
+    paese: e.paese,
+    km: e.km,
+    nome: e.nome,
+    desc: e.desc,
+    costoLocal: e.costoLocal ?? e.costo ?? 0,
+    valuta: e.valuta ?? carica('vt_valuta','USD'),
+    costoUsd: e.costoUsd ?? 0
+    // foto: ESCLUSA
+  }));
+
+  const payload = {
+    _version: 'public-1.0',
+    _exportDate: new Date().toISOString(),
+    titolo: 'VespaTrek PX150',
+    paeseAttuale, // non è posizione, solo paese
+
+    stats: {
+      kmTotali: parseFloat(carica('vt_kmTotali','0')) || 0,
+      benzinaUsataLitri: parseFloat(carica('vt_benzinaUsata','0')) || 0,
+      benzinaFuoriTappaLitri: parseFloat(carica('vt_benzinaFuoriTappaLitri','0')) || 0,
+      olioTotaleLitri: (parseFloat(carica('vt_olioTotaleMl','0')) || 0) / 1000,
+
+      spesaBenzinaUsd: parseFloat(carica('vt_spesaBenzinaUsd','0')) || 0,
+      spesaOlioUsd: parseFloat(carica('vt_spesaOlioUsd','0')) || 0,
+      spesaRicambiUsd: parseFloat(carica('vt_spesaRicambiUsd','0')) || 0,
+      spesaManodoperaUsd: parseFloat(carica('vt_spesaManodoperaUsd','0')) || 0
+    },
+
+    datiPaesi,
+    tappe: tappePub,
+    turismo: turismoPub,
+    diario: diarioPub,
+    manutenzioni: logbookPub
+  };
+
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
+  const url  = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `vespatrek_public_${new Date().toLocaleDateString('it-IT').replace(/\//g,'-')}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  URL.revokeObjectURL(url);
+  showToast('📤 JSON pubblico esportato (senza posizione)');
+}
+
+
+  
 function importaDati(input) {
   const file = input.files && input.files[0];
   if (!file) return;
