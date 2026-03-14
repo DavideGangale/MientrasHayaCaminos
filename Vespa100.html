@@ -328,7 +328,7 @@
       border:none;
       color:#666;
       font-size:11px;
-      width:25%;
+      width:20%;
       font-weight:bold;
       display:flex;
       flex-direction:column;
@@ -765,6 +765,53 @@
     </div>
   </div>
 
+  <!-- ==================== PAGINA 5: SETTINGS==================== -->
+
+  <div id="settings" class="page">
+  <div class="dash-card">
+    <h2 style="margin-top:0; color:#cfd8dc;">⚙️ Impostazioni</h2>
+
+    <div style="text-align:left; font-size:12px; color:#aaa;">Unità volume</div>
+    <div class="toggle-container">
+      <button id="set-litri" class="toggle-btn unita" onclick="setUnita('L')">LITRI</button>
+      <button id="set-galloni" class="toggle-btn unita" onclick="setUnita('G')">GALLONI</button>
+    </div>
+
+    <div style="text-align:left; font-size:12px; color:#aaa; margin-top:10px;">Unità distanza</div>
+    <div class="toggle-container">
+      <button id="set-km" class="toggle-btn unita" onclick="setDistanza('KM')">KM</button>
+      <button id="set-mi" class="toggle-btn unita" onclick="setDistanza('MI')">MIGLIA</button>
+    </div>
+
+    <div style="text-align:left; font-size:12px; color:#aaa; margin-top:10px;">Moneta</div>
+    <select id="set-valuta" class="inp-select" onchange="setValuta(this.value)">
+      <option value="USD">USD ($)</option>
+      <option value="EUR">EUR (€)</option>
+      <option value="COP">COP ($)</option>
+      <option value="PEN">PEN (S/)</option>
+      <option value="BOB">BOB (Bs)</option>
+      <option value="CLP">CLP ($)</option>
+      <option value="ARS">ARS ($)</option>
+    </select>
+
+    <div style="text-align:left; font-size:12px; color:#aaa; margin-top:10px;">Paese (manuale)</div>
+    <select id="set-paese" class="inp-select" onchange="cambiaPaeseDaSettings()">
+      <option value="Colombia">🇨🇴 Colombia</option>
+      <option value="Ecuador">🇪🇨 Ecuador</option>
+      <option value="Peru">🇵🇪 Perù</option>
+      <option value="Bolivia">🇧🇴 Bolivia</option>
+      <option value="Chile">🇨🇱 Cile</option>
+      <option value="Argentina">🇦🇷 Argentina</option>
+    </select>
+
+    <div style="font-size:12px;color:#777; text-align:left; margin-top:10px;">
+      Nota: il cambio paese automatico via GPS resta attivo (ti chiede conferma).
+    </div>
+  </div>
+</div>
+
+
+  
   <!-- ==================== MODALI ==================== -->
 
   <div id="modalMapFull" class="modal-overlay">
@@ -934,6 +981,9 @@
     <button class="nav-btn" onclick="cambiaPagina('officina',this)">
       <span class="nav-icon">🔧</span>OFFICINA
     </button>
+    <button class="nav-btn" onclick="cambiaPagina('settings',this)">
+  <span class="nav-icon">⚙️</span>SETTINGS
+</button>
   </div>
 
 
@@ -960,6 +1010,12 @@ let puntiDaSalvare = 0;
 
 let visualizzazioneStats = 'Globali';
 let unitaAttuale = 'L';
+
+let distAttuale = 'KM';   // 'KM' | 'MI'
+let valutaAttuale = 'USD';
+const KM_PER_MI = 1.60934;
+const MI_PER_KM = 1 / KM_PER_MI;
+  
 const FAT_GAL = 3.78541;
 
 let dest = 'V';
@@ -1087,6 +1143,11 @@ initDB('vt_unita', 'L');
 
   initDB('vt_paeseAttuale', 'Colombia');
   initDB('vt_datiPaesi', JSON.stringify({}));
+
+initDB('vt_unita', 'L');
+initDB('vt_dist', 'KM');
+initDB('vt_valuta', 'USD');
+  
 
 initDB('vt_turismo', JSON.stringify([]));
 initDB('vt_modalitaGuida', 'TAPPA');
@@ -1948,61 +2009,71 @@ function aggiornaUI() {
   const kmTot = parseFloat(carica('vt_kmTotali','0')) || 0;
   const scorta = parseFloat(carica('vt_scortaLitri','0')) || 0;
   const benzUsata = parseFloat(carica('vt_benzinaUsata','0')) || 0;
-  
-  //const benzFuori = parseFloat(carica('vt_benzinaFuoriTappaLitri','0')) || 0;
-  
   const benzFuori = parseFloat(carica('vt_benzinaFuoriTappaLitri','0')) || 0;
-  
   const olioMl = parseFloat(carica('vt_olioTotaleMl','0')) || 0;
   const paese = carica('vt_paeseAttuale','Colombia');
 
-  // odometri
-  setText('ui-odo-tot', kmTot.toFixed(1));
-  setText('ui-odo-trip', (tappaAttuale.kmPercorsi || 0).toFixed(1));
+  // =========================
+  // ODOMETRI (KM o MIGLIA)
+  // =========================
+  const kmTotShow = (distAttuale === 'MI') ? (kmTot * MI_PER_KM) : kmTot;
+  const tripKm = (tappaAttuale.kmPercorsi || 0);
+  const tripShow = (distAttuale === 'MI') ? (tripKm * MI_PER_KM) : tripKm;
 
-  // scorta rapida (taniche)
+  setText('ui-odo-tot', kmTotShow.toFixed(1));
+  setText('ui-odo-trip', tripShow.toFixed(1));
+
+  // =========================
+  // SCORTA (L o GAL)
+  // =========================
   const unitaLabel = unitaAttuale === 'L' ? 'L' : 'gal';
   const scortaVis = unitaAttuale === 'L' ? scorta : (scorta / FAT_GAL);
-  
+
   setText('ui-scorta-rapida', scortaVis.toFixed(1));
   setText('scorta-ui', scortaVis.toFixed(1));
 
-  // stats viaggio
-  let kmVis = kmTot;
-  let benzVis = benzUsata + benzFuori; // ✅ globale include anche fuori tappa
-  let scortaVis2 = scorta;
+  // =========================
+  // STATS (Globali / Paese)
+  // =========================
+  let kmVis = kmTot;                 // sempre in KM internamente
+  let benzVis = benzUsata + benzFuori; // sempre in L internamente
+  let scortaVis2 = scorta;           // in L internamente
 
   if (visualizzazioneStats === 'Paese') {
     const datiPaesi = caricaJSON('vt_datiPaesi', {});
-    //const dp = datiPaesi[paese] || { km:0, benzina:0 };
-    kmVis = dp.km || 0;
-    
-    //benzVis = dp.benzina || 0;
     const dp = datiPaesi[paese] || { km:0, benzina:0, benzinaFuori:0 };
-    benzVis = (dp.benzina || 0) + (dp.benzinaFuori || 0); // ✅ paese include fuori tappa
-    
+
+    kmVis = dp.km || 0;
+    benzVis = (dp.benzina || 0) + (dp.benzinaFuori || 0);
+
     setText('titolo-stat-paese', paese);
   } else {
     setText('titolo-stat-paese', 'Globali');
   }
 
+  // conversione carburante visualizzato (L -> gal)
   if (unitaAttuale === 'G') {
     benzVis = benzVis / FAT_GAL;
     scortaVis2 = scortaVis2 / FAT_GAL;
   }
 
-  const consumo = benzVis > 0 ? (kmVis / benzVis).toFixed(1) : '--';
+  // conversione km visualizzati (km -> mi)
+  const kmVisShow = (distAttuale === 'MI') ? (kmVis * MI_PER_KM) : kmVis;
+  const distLabel = (distAttuale === 'MI') ? 'mi' : 'km';
 
-  setText('statKm', kmVis.toFixed(1));
-  setHTML('statConsumo', `${consumo} <span style="font-size:12px;">km/${unitaAttuale==='L'?'L':'gal'}</span>`);
+  // Consumo: (km o mi) / (L o gal)
+  const consumo = benzVis > 0 ? (kmVisShow / benzVis).toFixed(1) : '--';
+
+  setText('statKm', kmVisShow.toFixed(1));
+  setHTML('statConsumo', `${consumo} <span style="font-size:12px;">${distLabel}/${unitaLabel}</span>`);
   setHTML('statBenzina', `${benzVis.toFixed(1)} <span class="txt-unita" style="font-size:12px;">${unitaLabel}</span>`);
   setHTML('statOlio', `${(olioMl/1000).toFixed(2)} <span style="font-size:12px;">L</span>`);
   setHTML('statScorta', `${scortaVis2.toFixed(1)} <span class="txt-unita" style="font-size:14px;">${unitaLabel}</span>`);
 
-  // unit labels
+  // Aggiorna tutte le label unità volume (L/gal)
   document.querySelectorAll('.txt-unita').forEach(el => el.innerText = unitaLabel);
 
-  // paese
+  // Paese (se la select esiste ancora in guida)
   const sel = document.getElementById('selectPaese');
   if (sel) sel.value = paese;
   setText('lbl-paese-benzina', paese);
@@ -2010,11 +2081,6 @@ function aggiornaUI() {
   aggiornaTempoGuidaUI();
   aggiornaAutonomia();
   aggiornaUIOlioStock();
-}
-
-function mostraStats(tipo) {
-  visualizzazioneStats = tipo;
-  aggiornaUI();
 }
 
 /* ============================================================
@@ -2069,6 +2135,7 @@ function selMix(val, btn, tipo) {
   btn.classList.add('active');
 }
 
+  
 /* ============================================================
    VALIDAZIONE INPUT
 ============================================================ */
@@ -2085,6 +2152,12 @@ function validaInput(id, min = 0.01, max = 9999) {
   return val;
 }
 
+
+
+
+
+
+  
 /* ============================================================
    REGISTRA ACQUISTO BENZINA (con olio da stock se in Vespa)
 ============================================================ */
@@ -2355,32 +2428,51 @@ function calcolaConsumoDaTappe() {
 
 function aggiornaAutonomia() {
   try {
-    const scortaLitri = parseFloat(carica('vt_scortaLitri','0')) || 0;      // taniche
-    const serbLitri   = parseFloat(carica('vt_serbatoioLitri','0')) || 0;   // serbatoio (da galleggiante)
-    const totLitri    = scortaLitri + serbLitri;
+    const scortaL = parseFloat(carica('vt_scortaLitri','0')) || 0;      // taniche (L)
+    const serbL   = parseFloat(carica('vt_serbatoioLitri','0')) || 0;   // serbatoio (L)
+    const totL    = scortaL + serbL;
 
+    // Consumo interno sempre in km/L
     const consumoDaTappe = calcolaConsumoDaTappe();
-    const consumoUsato = (consumoDaTappe != null) ? consumoDaTappe : CONSUMO_MEDIO;
+    const consumoKmPerL  = (consumoDaTappe != null) ? consumoDaTappe : CONSUMO_MEDIO;
 
-    const autonomiaKm = totLitri * consumoUsato;
+    // Autonomia interna sempre in km
+    const autonomiaKm = totL * consumoKmPerL;
 
-    const unitaLbl = (unitaAttuale === 'L') ? 'L' : 'gal';
-    const scortaVis = (unitaAttuale === 'L') ? scortaLitri : (scortaLitri / FAT_GAL);
+    // ===== etichette e conversioni per visualizzazione =====
+    const distLabel = (distAttuale === 'MI') ? 'mi' : 'km';
+    const volLabel  = (unitaAttuale === 'G') ? 'gal' : 'L';
 
+    // consumo visualizzato: (km o mi) / (L o gal)
+    let consumoVis = consumoKmPerL;                 // km/L
+    if (distAttuale === 'MI') consumoVis *= MI_PER_KM; // mi/L
+    if (unitaAttuale === 'G') consumoVis *= FAT_GAL;   // (km o mi)/gal
+
+    // autonomia visualizzata: km -> mi se serve
+    const autonomiaVis = (distAttuale === 'MI') ? (autonomiaKm * MI_PER_KM) : autonomiaKm;
+
+    // serbatoio e scorta in unità scelte
+    const serbVis = (unitaAttuale === 'G') ? (serbL / FAT_GAL) : serbL;
+    const scortaVis = (unitaAttuale === 'G') ? (scortaL / FAT_GAL) : scortaL;
+    const totVis = (unitaAttuale === 'G') ? (totL / FAT_GAL) : totL;
+
+    // ===== UI =====
     const el = document.getElementById('autonomia-info');
     if (el) {
       el.innerHTML = `
-        🛢️ Serbatoio: <b>${serbLitri.toFixed(2)} L</b><br>
-        🛢️ Scorta: <b>${scortaVis.toFixed(2)} ${unitaLbl}</b><br>
-        🧮 Totale carburante: <b>${totLitri.toFixed(2)} L</b><br>
-        📊 Consumo: <b style="color:var(--giallo)">${consumoUsato.toFixed(1)} km/L</b><br>
-        📏 Autonomia stimata: <b style="color:var(--verde);font-size:24px;">${Math.round(autonomiaKm)} km</b><br>
+        🛢️ Serbatoio: <b>${serbVis.toFixed(2)} ${volLabel}</b><br>
+        🛢️ Scorta: <b>${scortaVis.toFixed(2)} ${volLabel}</b><br>
+        🧮 Totale carburante: <b>${totVis.toFixed(2)} ${volLabel}</b><br>
+        📊 Consumo: <b style="color:var(--giallo)">${consumoVis.toFixed(2)} ${distLabel}/${volLabel}</b><br>
+        📏 Autonomia stimata: <b style="color:var(--verde);font-size:24px;">${Math.round(autonomiaVis)} ${distLabel}</b><br>
       `;
     }
 
+    // autonomia rapida in pagina guida
     const rapida = document.getElementById('ui-autonomia-rapida');
-    if (rapida) rapida.innerText = autonomiaKm > 0 ? Math.round(autonomiaKm) + ' km' : '-- km';
-
+    if (rapida) {
+      rapida.innerText = autonomiaVis > 0 ? `${Math.round(autonomiaVis)} ${distLabel}` : `-- ${distLabel}`;
+    }
   } catch (e) {
     console.error('aggiornaAutonomia error:', e);
   }
@@ -2603,7 +2695,70 @@ ${t.note ? `<div style="margin-top:6px;color:#bbb;">${t.note}</div>` : ''}
   }).join('');
 }
 
+function simboloValuta(code) {
+  const map = { USD:'$', EUR:'€', COP:'$', PEN:'S/', BOB:'Bs', CLP:'$', ARS:'$' };
+  return map[code] || code;
+}
 
+
+  function money(x) {
+  const sym = simboloValuta(valutaAttuale);
+  return sym + Number(x || 0).toFixed(2);
+}
+
+  
+function aggiornaSettingsUI() {
+  // unità volume
+  document.getElementById('set-litri')?.classList.toggle('active', unitaAttuale === 'L');
+  document.getElementById('set-galloni')?.classList.toggle('active', unitaAttuale === 'G');
+
+  // unità distanza
+  document.getElementById('set-km')?.classList.toggle('active', distAttuale === 'KM');
+  document.getElementById('set-mi')?.classList.toggle('active', distAttuale === 'MI');
+
+  // valuta
+  const v = document.getElementById('set-valuta');
+  if (v) v.value = valutaAttuale;
+
+  // paese
+  const p = document.getElementById('set-paese');
+  if (p) p.value = carica('vt_paeseAttuale','Colombia');
+}
+
+function setUnita(u) {
+  unitaAttuale = u;
+  salva('vt_unita', u);
+  aggiornaSettingsUI();
+  aggiornaUI();
+}
+
+function setDistanza(d) {
+  distAttuale = d;
+  salva('vt_dist', d);
+  aggiornaSettingsUI();
+  aggiornaUI();
+}
+
+function setValuta(v) {
+  valutaAttuale = v;
+  salva('vt_valuta', v);
+  aggiornaSettingsUI();
+  showToast('💱 Valuta: ' + v);
+  // (facoltativo) aggiornaUI() se vuoi cambiare i simboli ovunque
+  aggiornaUI();
+}
+
+function cambiaPaeseDaSettings() {
+  const p = document.getElementById('set-paese')?.value || 'Colombia';
+  salva('vt_paeseAttuale', p);
+  lastCountry = p;
+  aggiornaSettingsUI();
+  aggiornaUI();
+  showToast('🗺️ Paese: ' + p);
+}
+
+
+  
 //let detPercorsoId = null;
 
 //function trovaPercorsoById(id) {
@@ -3263,6 +3418,13 @@ async function setLoadingProgress(pct, label) {
 async function inizializzaApp() {
   await setLoadingProgress(10, '🗄️ Database...');
   initAllData();
+
+
+unitaAttuale = carica('vt_unita','L');
+distAttuale  = carica('vt_dist','KM');
+valutaAttuale = carica('vt_valuta','USD');
+aggiornaSettingsUI();
+
   
 unitaAttuale = carica('vt_unita','L');
 modalitaGuida = carica('vt_modalitaGuida', 'TAPPA');
