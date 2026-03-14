@@ -3270,6 +3270,9 @@ window.salvaDettagliPercorso = function () {
 /* ============================================================
    LOG RIFORNIMENTI — RENDER MODAL (FIX template)
 ============================================================ */
+/* ============================================================
+   LOG RIFORNIMENTI — RENDER MODAL
+============================================================ */
 function renderLogCarburanti() {
   const log = caricaJSON('vt_logCarburanti', []);
   const container = document.getElementById('contenutoLogCarburanti');
@@ -3281,31 +3284,61 @@ function renderLogCarburanti() {
   }
 
   container.innerHTML = log.map(l => {
-    const costoB = l.costoBenz ? parseFloat(l.costoBenz) : null;
-    const costoO = l.costoOlio ? parseFloat(l.costoOlio) : null;
+    const costoO = (l.costoOlio != null) ? Number(l.costoOlio) : null;
+
+    // Benzina: preferisci i campi nuovi (local + usd)
+    const cur = l.valuta || '';
+    const costoLocal = (l.costoBenzLocal != null) ? Number(l.costoBenzLocal) : null;
+    const costoUsdNew = (l.costoBenzUsd != null) ? Number(l.costoBenzUsd) : null;
+
+    // fallback vecchio (in passato era "USD")
+    const costoUsdOld = (l.costoBenz != null) ? Number(l.costoBenz) : null;
+
+    let rigaCostoBenz = '';
+    if (costoLocal != null && costoLocal > 0 && costoUsdNew != null && costoUsdNew > 0) {
+      rigaCostoBenz = `💵 Totale benzina: <b style="color:var(--giallo);">${costoLocal.toFixed(2)} ${cur}</b> (≈ <b style="color:var(--giallo);">
+$$
+{costoUsdNew.toFixed(2)}</b>)`;
+    } else if (costoUsdOld != null && costoUsdOld > 0) {
+      rigaCostoBenz = `💵 Totale benzina: <b style="color:var(--giallo);">
+$$
+{costoUsdOld.toFixed(2)}</b>`;
+    }
+
+    // Prezzo unitario (di solito in valuta locale / L)
+    const prezzoUnit = (l.prezzoUnit != null) ? Number(l.prezzoUnit) : null;
+    const rigaPrezzoUnit = (prezzoUnit != null && prezzoUnit > 0)
+      ? `💰 Prezzo unitario: <b>${prezzoUnit.toFixed(3)} ${cur || ''}</b> / L`
+      : '';
+
+    // Quantità: salva sempre in L internamente
+    const qta = (l.qta != null) ? Number(l.qta) : null;
+    const rigaQta = (qta != null)
+      ? `📦 ${qta.toFixed(2)} L → <b>${l.dest || ''}</b>`
+      : `📦 -- L → <b>${l.dest || ''}</b>`;
 
     return `
       <div class="log-entry-full" style="border-color:#795548;">
-        <div style="font-weight:bold; color:#ff9800;">⛽ ${l.data} ${l.ora}</div>
+        <div style="font-weight:bold; color:#ff9800;">⛽ ${l.data || ''} ${l.ora || ''}</div>
+
         <div style="color:#aaa; font-size:13px;">
-          ${l.paese} — ${l.luogo || 'N/D'} ${l.km ? `&nbsp;|&nbsp; 📏 ${l.km} km` : ''}
+          ${(l.paese || '')} — ${(l.luogo || 'N/D')}
+          ${l.km ? `&nbsp;|&nbsp; 📏 ${l.km} km` : ''}
         </div>
-        <div>📦 ${l.qta} L → <b>${l.dest}</b></div>
+
+        <div>${rigaQta}</div>
         ${l.mix && l.mix !== '--' ? `<div>🧪 Miscela: ${l.mix}</div>` : ''}
 
-        ${l.prezzoUnit ? `<div>💰 Prezzo unitario: <b>
-$$
-{l.prezzoUnit}</b> / L</div>` : ''}
+        ${rigaPrezzoUnit ? `<div>${rigaPrezzoUnit}</div>` : ''}
+        ${rigaCostoBenz ? `<div>${rigaCostoBenz}</div>` : ''}
 
-        ${(costoB !== null && costoB > 0) ? `<div>💵 Totale benzina: <b style="color:var(--giallo);">
-$$
-{costoB.toFixed(2)}</b></div>` : ''}
-        ${(costoO !== null && costoO > 0) ? `<div>🧪 Costo olio 2T (da stock): <b style="color:#00bcd4;">$${costoO.toFixed(2)}</b></div>` : ''}
+        ${(costoO != null && costoO > 0)
+          ? `<div>🧪 Costo olio 2T (da stock): <b style="color:#00bcd4;">$${costoO.toFixed(2)}</b></div>`
+          : ''}
       </div>
     `;
   }).join('');
 }
-
 /* ============================================================
    STATS PER PAESE — RENDER MODAL
 ============================================================ */
