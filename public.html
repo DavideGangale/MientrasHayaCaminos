@@ -135,9 +135,11 @@ const data = JSON.parse(txt);
       const coords = p.traccia || [];
       setTrace(coords);
     }
+initMap();
 
-    sel.onchange = () => showPerc(sel.value);
-    if (lista.length) showPerc(lista[0].id);
+sel.onchange = () => showPerc(sel.value);
+if (lista.length) showPerc(lista[0].id);
+else setTrace([]); // pulisce la mappa se non ci sono percorsi
 
     // diario
     const diario = data.diario || [];
