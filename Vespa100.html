@@ -1888,18 +1888,28 @@ function aggiornaAutonomia() {
     const serbL   = parseFloat(carica('vt_serbatoioLitri','0')) || 0;
     const totL    = scortaL + serbL;
     //const autonomiaKm = scortaL * consumoUsato;
-    const autonomiaKm = totL * consumoUsato;
+    //const autonomiaKm = totL * consumoUsato;
     const unitaLbl  = (unitaAttuale === 'L') ? 'L' : 'gal';
     const scortaVis = (unitaAttuale === 'L') ? scortaL : (scortaL / FAT_GAL);
 
+
+const scortaLitri = parseFloat(carica('vt_scortaLitri','0')) || 0;      // taniche
+const serbLitri   = parseFloat(carica('vt_serbatoioLitri','0')) || 0;   // serbatoio (da galleggiante)
+const totLitri    = scortaLitri + serbLitri;
+const autonomiaKm = totLitri * consumoUsato;    
+
+const unitaLbl  = (unitaAttuale === 'L') ? 'L' : 'gal';
+const scortaVis = (unitaAttuale === 'L') ? scortaLitri : (scortaLitri / FAT_GAL);
+
+      
     const el = document.getElementById('autonomia-info');
     if (el) el.innerHTML = `
       
-     📊 Consumo: <b style="color:var(--giallo)">${consumoUsato.toFixed(1)} km/L</b> ${isStimato ? `<span style="color:#777;font-size:12px;"> (stimato)</span>` : ``}<br>
-     📏 Autonomia stimata: <b style="color:var(--verde);font-size:24px;">${Math.round(autonomiaKm)} km<br>
-     🛢️ Serbatoio: <b>${serbL.toFixed(2)} L</b><br>
-     🛢️ Scorta: <b>${scortaVis.toFixed(2)} ${unitaLbl}</b><br>
-     🧮 Totale carburante: <b>${totL.toFixed(2)} L</b><br>
+  🛢️ Serbatoio: <b>${serbLitri.toFixed(2)} L</b><br>
+  🛢️ Scorta: <b>${scortaVis.toFixed(2)} ${unitaLbl}</b><br>
+  🧮 Totale carburante: <b>${totLitri.toFixed(2)} L</b><br>
+  📊 Consumo: <b style="color:var(--giallo)">${consumoUsato.toFixed(1)} km/L</b><br>
+  📏 Autonomia stimata: <b style="color:var(--verde);font-size:24px;">${Math.round(autonomiaKm)} km</b>toFixed(2)} L</b><br>
       
     `;
 
