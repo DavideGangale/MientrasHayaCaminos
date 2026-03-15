@@ -141,7 +141,10 @@
 
     <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
   <button class="btn" id="btnGpx" type="button" style="background:#4caf50; color:#000;">⬇️ GPX</button>
-  <button class="btn" id="btnKml" type="button" style="background:#00bcd4; color:#000;">⬇️ KML</button>
+  <button class="btn" id="btnKml" type="button" style="background:#00bcd4; color:#000;">⬇️ KML (Google Earth)</button>
+      <div class="muted" style="margin-top:6px;">
+  GPX: Google Maps/Komoot · KML: Google Earth / My Maps
+</div>
 </div>
 
     
@@ -261,12 +264,13 @@ function coordsToKML(traccia, nome = 'VespaTrek') {
 
   const coordStr = norm.map(p => `${p[0].toFixed(6)},${p[1].toFixed(6)},0`).join(' ');
 
-  return `<?xml version="1.0" encoding="UTF-8"?>
+const nomeSafe = String(nome || 'VespaTrek').replace(/[<>&"]/g, '');
+return `<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2">
   <Document>
-    <name>${nome}</name>
+    <name>${nomeSafe}</name>
     <Placemark>
-      <name>${nome}</name>
+      <name>${nomeSafe}</name>.
       <Style>
         <LineStyle><color>ff2f32d3</color><width>4</width></LineStyle>
       </Style>
@@ -553,9 +557,16 @@ if (btnKml) {
       
 selectedPercorso = p;
       
-      const info =
-        `⛽ stim: ${(p.benzinaStimataLitri??0).toFixed(2)} L · reale: ${(p.benzinaRealeLitri!=null?Number(p.benzinaRealeLitri).toFixed(2):'--')} L · ` +
-        `km/L stim: ${(p.consumoStimatoKmL!=null?Number(p.consumoStimatoKmL).toFixed(2):'--')} · km/L reale: ${(p.consumoRealeKmL!=null?Number(p.consumoRealeKmL).toFixed(2):'--')}`;
+const altMin = (p.altMin != null) ? Number(p.altMin) : null;
+const altMax = (p.altMax != null) ? Number(p.altMax) : null;
+const disl = (isFinite(altMin) && isFinite(altMax)) ? Math.max(0, altMax - altMin) : null;
+
+const info =
+  `📏 ${Number(p.km||0).toFixed(1)} km · ` +
+  `⛰️ alt: ${isFinite(altMin) ? Math.round(altMin) : '--'} → ${isFinite(altMax) ? Math.round(altMax) : '--'} m` +
+  ` · Δ ${disl != null ? Math.round(disl) : '--'} m` +
+  `\n⛽ stim: ${(p.benzinaStimataLitri??0).toFixed(2)} L · reale: ${(p.benzinaRealeLitri!=null?Number(p.benzinaRealeLitri).toFixed(2):'--')} L · ` +
+  `km/L stim: ${(p.consumoStimatoKmL!=null?Number(p.consumoStimatoKmL).toFixed(2):'--')} · km/L reale: ${(p.consumoRealeKmL!=null?Number(p.consumoRealeKmL).toFixed(2):'--')}`;
 
       document.getElementById('percInfo').innerText = info;
 
