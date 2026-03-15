@@ -21,6 +21,48 @@
     select{width:100%;padding:10px;border-radius:10px;background:#111;color:#fff;border:1px solid #444}
     .entry{background:#1e1e1e;border:1px solid #333;border-radius:12px;padding:10px;margin-top:10px}
     img{max-width:100%;border-radius:12px;border:1px solid #333}
+
+.diario-thumb{
+  width:100%;
+  max-height:220px;
+  object-fit:cover;
+  border-radius:12px;
+  border:1px solid #333;
+  cursor:pointer;
+}
+#lightbox{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.92);
+  z-index:9999;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+#lightbox.open{display:flex;}
+#lightbox img{
+  max-width:96vw;
+  max-height:90vh;
+  border-radius:12px;
+  border:1px solid #333;
+}
+#lightboxClose{
+  position:fixed;
+  top:14px;
+  right:14px;
+  background:#f44336;
+  color:#fff;
+  border:none;
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  font-size:22px;
+  cursor:pointer;
+}
+
+
+    
   </style>
 </head>
 <body>
@@ -184,7 +226,9 @@ else setTrace([]); // pulisce la mappa se non ci sono percorsi
       <div class="entry">
         <div class="muted">📅 ${d.data||''} ${d.ora||''} — ${d.paese||''} — km ${d.km||''}</div>
         <div style="margin-top:6px; white-space:pre-wrap;">${(d.testo||'').replace(/</g,'&lt;')}</div>
-        ${d.foto ? `<div style="margin-top:8px;"><img src="${d.foto}" loading="lazy"></div>` : ''}
+        ${d.foto ? `<div style="margin-top:8px;">
+  <img class="diario-thumb" src="${d.foto}" loading="lazy" onclick="openLightbox(this.src)">
+</div>` : ''}
       </div>
     `).join('') || '<div class="muted">Nessuna voce</div>';
 
@@ -205,6 +249,31 @@ else setTrace([]); // pulisce la mappa se non ci sono percorsi
   main().catch(err => {
     document.body.innerHTML = '<pre style="white-space:pre-wrap;color:#fff;">Errore: ' + (err && err.stack ? err.stack : err) + '</pre>';
   });
+
+
+function openLightbox(src){
+  const box = document.getElementById('lightbox');
+  const img = document.getElementById('lightboxImg');
+  if (!box || !img) return;
+  img.src = src;
+  box.classList.add('open');
+}
+function closeLightbox(){
+  const box = document.getElementById('lightbox');
+  const img = document.getElementById('lightboxImg');
+  if (img) img.src = '';
+  if (box) box.classList.remove('open');
+}
+
+
+  
 </script>
+
+  <div id="lightbox" onclick="closeLightbox()">
+  <button id="lightboxClose" onclick="event.stopPropagation(); closeLightbox()">×</button>
+  <img id="lightboxImg" alt="Foto diario">
+</div>
+
+  
 </body>
 </html>
