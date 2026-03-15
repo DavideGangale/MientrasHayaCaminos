@@ -5011,7 +5011,7 @@ function aggiungiRicambio() {
     costoLocal: costoLocal || 0,
     costoUsd: costoUsd || 0,
     valuta: cur,
-    fxToUsd: getFxToUsd(cur)
+    fxToUsd: (typeof getFxToUsd === 'function') ? getFxToUsd(cur) : null
   });
 
   salva('vt_inventario', inv);
@@ -5037,47 +5037,6 @@ function aggiungiRicambio() {
 }
 
   
-
-  const inv = caricaJSON('vt_inventario', []);
-
-  const cur = valutaAttuale || 'USD';
-  const costoStr = prompt(`Costo ricambio in ${cur} (opzionale)`, '');
-  const costoLocal = costoStr ? parseFloat(costoStr) : 0;
-  const costoUsd = (costoLocal > 0) ? convertLocalToUsd(costoLocal, cur) : 0;
-
-  inv.push({
-    id: String(Date.now()) + '_' + Math.random().toString(16).slice(2),
-    nome,
-    qta: 1,
-    durata: 5000,
-    lastKm: (parseFloat(carica('vt_kmTotali','0')) || 0),
-    costoLocal: costoLocal || 0,
-    costoUsd: costoUsd || 0,
-    valuta: cur,
-    fxToUsd: getFxToUsd(cur)
-  });
-
-  salva('vt_inventario', inv);
-
-  if (input) input.value = '';
-  renderInventario();
-  renderChecklist();
-  showToast('✅ Ricambio aggiunto: ' + nome);
-
-  // Somma alle spese (solo se ho costo valido)
-  if (costoUsd > 0) {
-    salva('vt_spesaRicambiUsd', (parseFloat(carica('vt_spesaRicambiUsd','0')) || 0) + costoUsd);
-
-    const paese = carica('vt_paeseAttuale','Colombia');
-    const datiPaesi = caricaJSON('vt_datiPaesi', {});
-    if (!datiPaesi[paese]) datiPaesi[paese] = {};
-    datiPaesi[paese].spesaRicambiUsd = (datiPaesi[paese].spesaRicambiUsd || 0) + costoUsd;
-    datiPaesi[paese].valuta = cur;
-    salva('vt_datiPaesi', datiPaesi);
-
-    aggiornaUI();
-  }
-}
 
 /* ============================================================
    CARBURAZIONE
