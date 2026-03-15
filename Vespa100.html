@@ -485,7 +485,40 @@
   color:#000;
 }
 
+/* ===== MARKER FOTO (mappa) ===== */
+.photo-marker {
+  background: rgba(255,152,0,0.95);
+  border: 2px solid #000;
+  border-radius: 999px;
+  width: 30px;
+  height: 30px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+}
 
+/* ===== LIGHTBOX FOTO ===== */
+#photoLightbox.modal-overlay { z-index: 9000; }
+#photoLightbox .modal-content{
+  border-color:#ff9800;
+  max-width: 980px;
+  padding: 10px;
+}
+#lightbox-img{
+  width:100%;
+  height:auto;
+  border-radius:12px;
+  display:block;
+}
+#lightbox-caption{
+  font-size:12px;
+  color:#bbb;
+  margin-top:8px;
+  text-align:left;
+  line-height:1.4;
+}
     
   </style>
 </head>
@@ -1162,6 +1195,17 @@
     </div>
   </div>
 
+
+<!-- ===== LIGHTBOX FOTO (popup) ===== -->
+<div id="photoLightbox" class="modal-overlay">
+  <div class="modal-content">
+    <button class="close-modal" onclick="chiudiModal('photoLightbox')">×</button>
+    <img id="lightbox-img" src="" alt="Foto">
+    <div id="lightbox-caption"></div>
+  </div>
+</div>
+
+  
   <!-- ==================== NAV ==================== -->
   <div class="nav">
     <button class="nav-btn active" onclick="cambiaPagina('guida',this)">
@@ -2197,7 +2241,98 @@ let mapFullInstance = null;
 let mapFullMarker = null;
 let mapFullPolyline = null;
 
-function apriMappaFull(coordsOverride = null) {
+// ===== FOTO MARKERS su mappa FULL =====
+let mapFullPhotoLayer = null;
+
+const cameraIcon = L.divIcon({
+  className: 'photo-marker',
+  html: '📷',
+  iconSize: [30, 30],
+  iconAnchor: [15, 30]
+});
+
+function openPhotoLightbox(src, caption = '') {
+  const img = document.getElementById('lightbox-img');
+  const cap = document.getElementById('lightbox-caption');
+  if (img) img.src = src || '';
+  if (cap) cap.innerHTML = caption || '';
+  apriModal('photoLightbox');
+}
+
+function getDiarioFotoEntriesByRange(startTs, endTs) {
+  const diario = caricaJSON('vt_diario', []);
+  if (!Array.isArray(diario) || !startTs || !endTs) return [];
+
+  // piccolo margine per includere foto scattate “un attimo prima/dopo”
+  const margin = 15 * 60 * 1000; // 15 min
+  const a = Number(startTs) - margin;
+  const b = Number(endTs) + margin;
+
+  return diario.filter(e => {
+    const ts = Number(e.ts || 0);
+    if (!(ts >= a && ts <= b)) return false;
+
+    const hasPhoto = !!(e.fotoUrl || e.foto);
+    if (!hasPhoto) return false;
+
+    const g = e.geo;
+    if (!g || !isFinite(g.lat) || !isFinite(g.lon)) return false;
+
+    return true;
+  });
+}
+
+function clearMapFullPhotoMarkers() {
+  if (mapFullPhotoLayer) {
+    mapFullPhotoLayer.clearLayers();
+  }
+}
+
+function renderMapFullPhotoMarkersForContext(ctx) {
+  // ctx può essere una tappa/turismo o null
+  if (!mapFullInstance) return;
+
+  if (!mapFullPhotoLayer) {
+    mapFullPhotoLayer = L.layerGroup().addTo(mapFullInstance);
+  }
+  clearMapFullPhotoMarkers();
+
+  if (!ctx || !ctx.startTs || !ctx.endTs) return;
+
+  const fotos = getDiarioFotoEntriesByRange(ctx.startTs, ctx.endTs);
+
+  for (const e of fotos) {
+    const src = e.fotoUrl || e.foto;
+    const caption = `
+      <div style="font-weight:700;color:#ff9800;">📍 ${e.paese || ''}</div>
+      <div style="color:#bbb;">${e.data || ''} ${e.ora || ''} — km ${e.km || '--'}</div>
+      <div style="margin-top:6px;color:#ddd;">${(e.testo || '').slice(0, 140)}${(e.testo||'').length > 140 ? '…' : ''}</div>
+    `;
+
+    const m = L.marker([e.geo.lat, e.geo.lon], { icon: cameraIcon });
+
+    // click marker => lightbox diretto
+    m.on('click', () => openPhotoLightbox(src, caption));
+
+    // popup “mini preview” (opzionale ma comodo)
+    const popupHtml = `
+      <div style="width:180px;">
+        <div style="font-size:12px;color:#aaa;margin-bottom:6px;">📷 Foto</div>
+        <img src="${src}" style="width:100%;border-radius:10px;max-height:120px;object-fit:cover;display:block;">
+        <button class="btn-secondary" style="margin-top:8px;width:100%;"
+                onclick="openPhotoLightbox('${src}', ${JSON.stringify(caption)})">
+          Apri
+        </button>
+      </div>
+    `;
+    m.bindPopup(popupHtml);
+
+    m.addTo(mapFullPhotoLayer);
+  }
+}
+
+  
+function apriMappaFull(coordsOverride = null, ctx = null) {
   apriModal('modalMapFull');
 
   setTimeout(() => {
@@ -2213,6 +2348,9 @@ function apriMappaFull(coordsOverride = null) {
 
       mapFullMarker = L.marker([4.7, -74.1]).addTo(mapFullInstance);
       mapFullPolyline = L.polyline([], { color:'#d32f2f', weight:4, opacity:0.9 }).addTo(mapFullInstance);
+
+      // layer foto
+      mapFullPhotoLayer = L.layerGroup().addTo(mapFullInstance);
     }
 
     const coords = coordsOverride || polyline.getLatLngs();
@@ -2231,6 +2369,9 @@ function apriMappaFull(coordsOverride = null) {
     } else {
       mapFullInstance.setView(mapFullMarker.getLatLng(), 13);
     }
+
+    // ✅ aggiungi marker foto per quel contesto (tappa/turismo)
+    renderMapFullPhotoMarkersForContext(ctx);
 
     mapFullInstance.invalidateSize();
   }, 120);
