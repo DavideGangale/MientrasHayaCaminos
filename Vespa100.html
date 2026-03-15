@@ -3134,22 +3134,70 @@ function dataURLToFile(dataUrl, filename = 'foto.jpg') {
   return new File([u8arr], filename, { type: mime });
 }
 
+let driveUploadPending = null;
+
+window.addEventListener('message', (ev) => {
+  const msg = ev && ev.data;
+  if (!msg || msg.type !== 'VESPA_UPLOAD_RESULT') return;
+
+  if (driveUploadPending) {
+    driveUploadPending.resolve(msg.data);
+    driveUploadPending = null;
+  }
+});
+
 async function uploadFotoToDrive(dataUrl, filenameBase='foto') {
   const endpoint = (carica('vt_driveUploadUrl','') || '').trim();
-  if (!endpoint) return null; // Drive non configurato
+  if (!endpoint) return null;
 
   const folderId = (carica('vt_driveFolderId','') || '').trim();
   const filename = `${filenameBase}_${Date.now()}.jpg`;
 
-  const res = await fetch(endpoint, {
-    method: 'POST',
-    headers: { 'Content-Type':'application/json' },
-    body: JSON.stringify({ dataUrl, filename, folderId })
-  });
+  // una richiesta alla volta (semplice)
+  if (driveUploadPending) throw new Error('Upload already running');
 
-  const out = await res.json().catch(()=>null);
-  if (!out || !out.ok || !out.url) throw new Error(out?.error || 'Upload failed');
-  return out.url;
+  return new Promise((resolve, reject) => {
+    driveUploadPending = { resolve, reject };
+
+    // crea un form temporaneo
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = endpoint;
+    form.target = 'driveUploadFrame';
+    form.style.display = 'none';
+
+    const inp1 = document.createElement('input');
+    inp1.name = 'dataUrl';
+    inp1.value = dataUrl;
+
+    const inp2 = document.createElement('input');
+    inp2.name = 'filename';
+    inp2.value = filename;
+
+    const inp3 = document.createElement('input');
+    inp3.name = 'folderId';
+    inp3.value = folderId;
+
+    form.appendChild(inp1);
+    form.appendChild(inp2);
+    form.appendChild(inp3);
+
+    document.body.appendChild(form);
+    form.submit();
+
+    // timeout di sicurezza
+    setTimeout(() => {
+      if (driveUploadPending) {
+        driveUploadPending = null;
+        reject(new Error('Upload timeout'));
+      }
+    }, 45000);
+
+    setTimeout(() => form.remove(), 1000);
+  }).then((out) => {
+    if (!out || !out.ok || !out.url) throw new Error(out?.error || 'Upload failed');
+    return out.url;
+  });
 }
 
 
@@ -5347,5 +5395,8 @@ window.addEventListener('online', () => {
   
 </script>
 
+<iframe id="driveUploadFrame" name="driveUploadFrame" style="display:none;"></iframe>
+
+  
 </body>
 </html>
