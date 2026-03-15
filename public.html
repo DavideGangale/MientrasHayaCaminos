@@ -110,10 +110,10 @@
   let map, poly, marker;
 
   function initMap(){
-    map = L.map('mapPub', { zoomControl:true, attributionControl:false }).setView([0,0], 2);
+    map = L.map('mapPub', { zoomControl:true, attributionControl:false }).setView([-15, -60], 3);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom:19 }).addTo(map);
     poly = L.polyline([], { color:'#d32f2f', weight:4, opacity:0.9 }).addTo(map);
-    marker = L.marker([0,0]).addTo(map);
+    marker = L.marker([-15, -60]).addTo(map);
   }
 
   function cleanCoords(coords) {
@@ -150,9 +150,11 @@ function setTrace(coords){
   } else if (cleaned.length === 1) {
     marker.setLatLng(cleaned[0]);
     map.setView(cleaned[0], 13);
-  } else {
-    map.setView([0,0], 2);
-    marker.setLatLng([0,0]);
+} else {
+  // nessuna traccia: resta su Sud America (default)
+  map.setView([-15, -60], 3);
+  marker.setLatLng([-15, -60]);
+}
   }
 
   setTimeout(()=>map.invalidateSize(), 150);
