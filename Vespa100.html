@@ -423,9 +423,10 @@
     .gps-off{background:rgba(211,47,47,0.3);color:#f44336;}
 
     /* CHECKLIST */
-   .checklist-item{
+  .checklist-item{
+  width:100%;
   display:grid;
-  grid-template-columns: 36px 1fr auto; /* checkbox | testo | bottoni */
+  grid-template-columns: 44px minmax(0, 1fr) 120px; /* checkbox | testo largo | bottoni */
   align-items:center;
   column-gap:10px;
 
@@ -457,26 +458,25 @@
 }
 
 .checklist-actions{
-  justify-self:end;        /* bottoni sempre “attaccati” a destra */
+  justify-self:end;      /* bottoni sempre a destra */
   display:flex;
   gap:6px;
   align-items:center;
 }
 
-
     
 .checklist-item input[type="checkbox"]{
+  justify-self:center;
   margin:0;
-  flex:0 0 auto;
+  transform:scale(1.3);
 }
 
 .checklist-text{
-  flex:1;                 /* prende tutto lo spazio centrale */
+  min-width:0;           /* IMPORTANTISSIMO per non schiacciare il testo */
   text-align:left;
   line-height:1.2;
-  word-break:break-word;  /* se è lungo, va a capo bene */
+  word-break:break-word;
 }
-
 .checklist-actions{
   flex:0 0 auto;          /* bottoni sempre compatti a destra */
 }
