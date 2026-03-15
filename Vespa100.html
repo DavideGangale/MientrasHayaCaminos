@@ -1332,6 +1332,27 @@ function initDB(key, def) {
   if (localStorage.getItem(key) === null) salva(key, def);
 }
 
+
+
+function ricostruisciSpeseGlobaliDaPaesi() {
+  const datiPaesi = caricaJSON('vt_datiPaesi', {});
+  let b=0, o=0, r=0, m=0;
+
+  for (const dp of Object.values(datiPaesi || {})) {
+    b += Number(dp.spesaBenzinaUsd || 0);
+    o += Number(dp.spesaOlioUsd || 0);
+    r += Number(dp.spesaRicambiUsd || 0);
+    m += Number(dp.spesaManodoperaUsd || 0);
+  }
+
+  salva('vt_spesaBenzinaUsd', b.toFixed(3));
+  salva('vt_spesaOlioUsd', o.toFixed(3));
+  salva('vt_spesaRicambiUsd', r.toFixed(3));
+  salva('vt_spesaManodoperaUsd', m.toFixed(3));
+}
+
+
+  
 function initAllData() {
   initDB('vt_olioStockMl', '0');            // ml di olio disponibili
   initDB('vt_olioCostoStockUsd', '0');      // USD “contenuti” nello stock
@@ -4810,7 +4831,7 @@ function esportaDatiLight() {
     'vt_datiPaesi','vt_tappe','vt_logbook','vt_diario',
     'vt_logCarburanti','vt_coordinateTracciato',
     'vt_carburazione','vt_checklist','vt_inventario','vt_tappaAttuale',
-    'vt_serbatoioLitri','vt_olioStockMl','vt_olioCostoStockUsd'
+    'vt_serbatoioLitri','vt_olioStockMl','vt_olioCostoStockUsd','vt_spesaBenzinaUsd','vt_spesaOlioUsd','vt_spesaRicambiUsd','vt_spesaManodoperaUsd'
   ];
 
   const backup = { _version:'1.2-light', _exportDate: new Date().toISOString() };
@@ -5033,7 +5054,7 @@ function esportaDati() {
     'vt_tappe','vt_logbook','vt_diario','vt_logCarburanti',
     'vt_coordinateTracciato','vt_carburazione','vt_checklist','vt_inventario',
     'vt_tappaAttuale','vt_serbatoioLitri','vt_olioStockMl','vt_olioCostoStockUsd',
-    'vt_spesaBenzina','vt_spesaOlio'
+    'vt_spesaBenzina','vt_spesaOlio','vt_spesaBenzinaUsd','vt_spesaOlioUsd','vt_spesaRicambiUsd','vt_spesaManodoperaUsd'
   ];
 
   const backup = { _version:'1.2', _exportDate: new Date().toISOString() };
@@ -5265,7 +5286,10 @@ async function setLoadingProgress(pct, label) {
 async function inizializzaApp() {
   await setLoadingProgress(10, '🗄️ Database...');
   initAllData();
-
+  
+const g = parseFloat(carica('vt_spesaBenzinaUsd','0')) || 0;
+if (g <= 0.0001) ricostruisciSpeseGlobaliDaPaesi();
+  
   // settings
   unitaAttuale  = carica('vt_unita','L');
   distAttuale   = carica('vt_dist','KM');
