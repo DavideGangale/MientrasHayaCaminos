@@ -363,6 +363,9 @@
   let lbPhotos = [];
   let lbIndex = -1;
 
+  let routePhotos = [];      // foto del percorso selezionato (per lightbox “contestuale”)
+let routePhotoIndex = new Map(); // url -> index dentro routePhotos
+
   function initMap(){
     map = L.map('mapPub', { zoomControl:true, attributionControl:false }).setView([-15, -60], 3);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom:19 }).addTo(map);
@@ -495,34 +498,86 @@
 
       setTrace(p.traccia || []);
 
-      // markers foto (diario) dentro start/end del percorso selezionato
-      if (photoLayer) photoLayer.clearLayers();
+     // markers foto (diario) dentro start/end del percorso selezionato
+if (photoLayer) photoLayer.clearLayers();
 
-      const startTs = Number(p.startTs || 0);
-      const endTs = Number(p.endTs || 0);
+const startTs = Number(p.startTs || 0);
+const endTs = Number(p.endTs || 0);
 
-      const pics = (Array.isArray(data.diario) ? data.diario : [])
-        .filter(d => d && d.geo && isFinite(d.geo.lat) && isFinite(d.geo.lon))
-        .filter(d => {
-          const ts = Number(d.ts || d.id || 0);
-          if (startTs && endTs) return ts >= startTs && ts <= endTs;
-          return true;
-        });
+// margine per includere foto scattate poco prima/dopo
+const MARGIN = 15 * 60 * 1000;
 
-      pics.forEach(d => {
-        const lat = Number(d.geo.lat), lon = Number(d.geo.lon);
-        const foto = fotoOf(d);
-        const html = `
-          <div style="min-width:180px">
-            <div style="font-weight:700; margin-bottom:6px;">${escapeHtml(d.paese||'')}</div>
-            ${foto ? `<img src="${foto}" style="width:100%;border-radius:10px;border:1px solid #333;">` : ''}
-            <div style="margin-top:6px; white-space:pre-wrap; color:#ddd;">${escapeHtml((d.testo||'').slice(0,140))}</div>
-          </div>
-        `;
-        L.circleMarker([lat, lon], { radius:7, color:'#ff9800', fillColor:'#ff9800', fillOpacity:0.9 })
-          .addTo(photoLayer)
-          .bindPopup(html);
-      });
+const pics = (Array.isArray(data.diario) ? data.diario : [])
+  .filter(d => d && d.geo && isFinite(d.geo.lat) && isFinite(d.geo.lon))
+  .filter(d => !!fotoOf(d))
+  .filter(d => {
+    const ts = Number(d.ts || d.id || 0);
+    if (startTs && endTs) return ts >= (startTs - MARGIN) && ts <= (endTs + MARGIN);
+    return true; // fallback se mancano start/end
+  });
+
+// ✅ Prepara la “playlist” foto del percorso per lightbox
+routePhotos = pics.map(fotoOf).filter(Boolean);
+routePhotoIndex = new Map();
+routePhotos.forEach((url, i) => routePhotoIndex.set(url, i));
+
+// (se vuoi: se il percorso non ha foto, non tocca lbPhotos globale del diario)
+//function openRouteLightboxByUrl(url){
+//  if (!url) return;
+//
+  // se ho foto del percorso, uso quelle (frecce = solo foto di questa tappa)
+//  if (routePhotos && routePhotos.length) {
+//    lbPhotos = routePhotos;
+//    const idx = routePhotoIndex.get(url);
+//    openLightboxIndex(isFinite(idx) ? idx : 0);
+//    return;
+//  }
+
+  // fallback: usa lightbox “globale”
+  openLightboxDirect(url);
+}
+
+pics.forEach(d => {
+  const lat = Number(d.geo.lat), lon = Number(d.geo.lon);
+  const foto = fotoOf(d);
+
+  const html = `
+    <div style="min-width:180px">
+      <div style="font-weight:700; margin-bottom:6px;">${escapeHtml(d.paese||'')}</div>
+
+      ${foto ? `
+        <img src="${foto}"
+             class="diario-thumb"
+             style="max-height:140px"
+             onclick="openRouteLightboxByUrl('${String(foto).replaceAll("'", "\\'")}')">
+      ` : ''}
+
+      <div class="muted" style="margin-top:6px;">${escapeHtml(d.data||'')} ${escapeHtml(d.ora||'')} — km ${escapeHtml(d.km||'')}</div>
+      <div style="margin-top:6px; white-space:pre-wrap; color:#ddd;">${escapeHtml((d.testo||'').slice(0,140))}</div>
+
+      ${foto ? `
+        <button class="btn" type="button" style="margin-top:10px; width:100%; background:#ff9800; color:#000;"
+                onclick="openRouteLightboxByUrl('${String(foto).replaceAll("'", "\\'")}')">
+          Apri foto
+        </button>
+      ` : ''}
+    </div>
+  `;
+
+  // ✅ Marker cliccabile: click = lightbox
+  const m = L.circleMarker([lat, lon], {
+    radius: 7,
+    color: '#ff9800',
+    fillColor: '#ff9800',
+    fillOpacity: 0.9
+  }).addTo(photoLayer);
+
+  m.bindPopup(html);
+
+  m.on('click', () => {
+    if (foto) openRouteLightboxByUrl(foto);
+  });
+});
     }
 
     initMap();
@@ -680,6 +735,23 @@
     }
   }
 
+
+function openRouteLightboxByUrl(url){
+  if (!url) return;
+
+  // se ho foto del percorso, uso quelle (frecce = solo foto di questa tappa)
+  if (routePhotos && routePhotos.length) {
+    lbPhotos = routePhotos;
+    const idx = routePhotoIndex.get(url);
+    openLightboxIndex(isFinite(idx) ? idx : 0);
+    return;
+  }
+
+  // fallback: usa lightbox “globale”
+  openLightboxDirect(url);
+}
+
+  
   function openLightboxDirect(url){
     if (!url) return;
     lbPhotos = [url];
