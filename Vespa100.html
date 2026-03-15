@@ -4976,7 +4976,21 @@ function inferManutKeyFromNome(nome) {
 
 
 
+function getDurataEffettivaKmPerItem(item) {
+  // 1) prova da Settings (vt_manut_intervalli)
+  const key = inferManutKeyFromNome(item?.nome);
+  if (key) {
+    const intervalli = caricaJSON('vt_manut_intervalli', {});
+    const v = Number(intervalli?.[key] || 0);
+    if (isFinite(v) && v > 0) return v;
+  }
 
+  // 2) fallback: durata salvata nel ricambio
+  const d = Number(item?.durata || 0);
+  return (isFinite(d) && d > 0) ? d : 0;
+}
+
+  
   
 function renderInventario() {
   const inv = caricaJSON('vt_inventario', []);
@@ -4994,7 +5008,9 @@ function renderInventario() {
     const pctUsura = item.durata > 0 ? Math.min(100, Math.round(kmDaUltimo / item.durata * 100)) : 0;
     const coloreUsura = pctUsura >= 80 ? '#f44336' : pctUsura >= 60 ? '#ff9800' : '#4caf50';
     const warn = pctUsura >= 80 ? ' ⚠️' : '';
+    (${Math.round(kmDaUltimo)}/${durataEff} km)
 
+    
     return `
       <div class="inv-item">
         <div style="flex-grow:1;">
@@ -5376,7 +5392,7 @@ function getUsuraWarningsInventario() {
   for (const item of inv) {
     if (!item) continue;
 
-    const durata = Number(item.durata || 0);
+   const durata = getDurataEffettivaKmPerItem(item);
     if (!isFinite(durata) || durata <= 0) continue;
 
     const lastKm = Number(item.lastKm || 0);
