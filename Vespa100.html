@@ -926,6 +926,18 @@
 <input type="text" id="set-drive-folder" placeholder="ID cartella Drive (opzionale)">
 <button class="btn-secondary" onclick="salvaDriveSettings()">💾 Salva impostazioni Drive</button>
 
+    <label class="checklist-item" style="margin-top:10px;">
+  <input type="checkbox" id="set-drive-autosync" onchange="setDriveAutoSync(this.checked)">
+  <span>Auto-sync foto quando torna internet</span>
+</label>
+
+<button class="btn-secondary" style="margin-top:10px;" onclick="syncFotoDriveNow()">
+  ☁️ Sync foto su Drive (ora)
+</button>
+
+<div id="set-drive-sync-info" style="font-size:12px;color:#777;text-align:left;margin-top:8px;">
+  --
+</div>
     
 <h3 style="margin:0 0 10px 0; color:#90a4ae;">🧰 Parametri viaggio</h3>
 
@@ -1327,6 +1339,9 @@ initDB('vt_unita', 'L');
   initDB('vt_odoUltimoPieno', '0.0');
   initDB('vt_litriVespa', '0.0');
 
+initDB('vt_uploadQueue', JSON.stringify([]));   // coda foto da caricare su Drive
+initDB('vt_driveAutoSync', '1');               // 1 = auto sync quando torna online
+  
   initDB('vt_scortaLitri', '0.0');
   initDB('vt_olioTotaleMl', '0');
   initDB('vt_benzinaUsata', '0.0');
@@ -2079,8 +2094,11 @@ function cambiaPagina(id, btn) {
  if (id === 'miscela') aggiornaAutonomia();
 if (id === 'officina') { renderInventario(); renderChecklist(); }
 if (id === 'viaggio') aggiornaUI();
-if (id === 'settings') { caricaSettingsAvanzatiUI(); aggiornaFxSettingsUI(); }
-
+if (id === 'settings') { 
+  caricaSettingsAvanzatiUI(); 
+  aggiornaFxSettingsUI(); }
+caricaDriveAutoSyncUI();
+updateDriveSyncInfo();
   caricaDriveSettingsUI();
 }
 
@@ -3111,6 +3129,112 @@ async function uploadFotoToDrive(dataUrl, filenameBase='foto') {
   if (!out || !out.ok || !out.url) throw new Error(out?.error || 'Upload failed');
   return out.url;
 }
+
+
+
+
+function enqueueFoto(kind, id) {
+  const q = getUploadQueue();
+  // evita duplicati
+  if (q.some(x => x.kind === kind && x.id === id)) return;
+  q.push({ kind, id, addedAt: Date.now() });
+  setUploadQueue(q);
+  updateDriveSyncInfo();
+}
+
+
+
+
+
+  function getDriveConfigured() {
+  const endpoint = (carica('vt_driveUploadUrl','') || '').trim();
+  return !!endpoint;
+}
+
+// carica la foto base64 dall'entry e la carica su Drive
+async function processUploadQueue(maxItems = 4) {
+  if (!navigator.onLine) { showToast('📴 Offline: sync rimandato'); return; }
+  if (!getDriveConfigured()) { showToast('⚠️ Configura Drive in Settings'); return; }
+
+  let q = getUploadQueue();
+  if (!q.length) { showToast('✅ Nessuna foto in coda'); updateDriveSyncInfo(); return; }
+
+  showToast(`☁️ Sync in corso... (${q.length} in coda)`, 2500);
+
+  let done = 0;
+  const keep = [];
+
+  for (const job of q) {
+    try {
+      if (done >= maxItems) { keep.push(job); continue; }
+
+      if (job.kind === 'diario') {
+        const diario = caricaJSON('vt_diario', []);
+        const idx = diario.findIndex(x => x.id === job.id);
+        if (idx === -1) continue; // entry sparita
+        const entry = diario[idx];
+
+        // se già caricata, ok
+        if (entry.fotoUrl) continue;
+        if (!entry.foto) { continue; } // non ho base64: impossibile caricare
+
+        const url = await uploadFotoToDrive(entry.foto, 'diario');
+        if (url) {
+          entry.fotoUrl = url;
+          entry.foto = null; // ✅ alleggerisce
+          diario[idx] = entry;
+          salva('vt_diario', diario);
+          done++;
+        } else {
+          keep.push(job);
+        }
+      }
+
+      if (job.kind === 'logbook') {
+        const log = caricaJSON('vt_logbook', []);
+        const idx = log.findIndex(x => x.id === job.id);
+        if (idx === -1) continue;
+        const entry = log[idx];
+
+        if (entry.fotoUrl) continue;
+        if (!entry.foto) { continue; }
+
+        const url = await uploadFotoToDrive(entry.foto, 'logbook');
+        if (url) {
+          entry.fotoUrl = url;
+          entry.foto = null;
+          log[idx] = entry;
+          salva('vt_logbook', log);
+          done++;
+        } else {
+          keep.push(job);
+        }
+      }
+    } catch (e) {
+      console.warn('processUploadQueue job error', e);
+      keep.push(job);
+    }
+  }
+
+  setUploadQueue(keep);
+  updateDriveSyncInfo();
+
+  if (done > 0) {
+    renderDiario?.();
+    renderLogManutenzione?.();
+    showToast(`✅ Sync completato: ${done} foto caricate`);
+  } else {
+    showToast('ℹ️ Nessuna foto caricata (controlla Drive/permessi)');
+  }
+}
+
+function syncFotoDriveNow() {
+  processUploadQueue(999); // prova a caricarle tutte
+}
+
+
+  
+
   
 async function condividiEntryDiario(entry) {
   try {
@@ -3338,7 +3462,10 @@ try {
   const diario = caricaJSON('vt_diario', []);
   diario.unshift(entry);
   salva('vt_diario', diario);
-
+if (entry.foto && !entry.fotoUrl) {
+  enqueueFoto('diario', entry.id);
+}
+updateDriveSyncInfo();
 
   d// Se c'è foto e Drive configurato: prova upload e sostituisci con URL
 (async () => {
@@ -3670,7 +3797,29 @@ function caricaDriveSettingsUI(){
   if (b) b.value = folder;
 }
 
+function getUploadQueue() {
+  return caricaJSON('vt_uploadQueue', []) || [];
+}
+function setUploadQueue(q) {
+  salva('vt_uploadQueue', q);
+}
 
+function updateDriveSyncInfo() {
+  const q = getUploadQueue();
+  const el = document.getElementById('set-drive-sync-info');
+  if (el) el.innerText = `In coda: ${q.length} foto`;
+}
+
+function setDriveAutoSync(on) {
+  salva('vt_driveAutoSync', on ? '1' : '0');
+  showToast(on ? '✅ Auto-sync attivo' : '⏸️ Auto-sync disattivo');
+}
+
+function caricaDriveAutoSyncUI() {
+  const el = document.getElementById('set-drive-autosync');
+  if (!el) return;
+  el.checked = carica('vt_driveAutoSync','1') === '1';
+}
   
 function convertLocalToUsd(amountLocal, currency) {
   const a = Number(amountLocal || 0);
@@ -4516,6 +4665,11 @@ costoUsd,
   log.unshift(entry);
   salva('vt_logbook', log);
 
+if (entry.foto && !entry.fotoUrl) {
+  enqueueFoto('logbook', entry.id);
+}
+updateDriveSyncInfo();
+  
   if (costoLocal > 0 && costoUsd > 0) {
   salva('vt_spesaManodoperaUsd', (parseFloat(carica('vt_spesaManodoperaUsd','0')) || 0) + costoUsd);
 
@@ -5131,8 +5285,15 @@ refreshStatsPaeseDropdown();
   aggiornaUIOlioStock();
   aggiornaTempoGuidaUI();
   renderDiario();
+  renderDiarioTagsPreset();
 
-    renderDiarioTagsPreset();
+
+caricaDriveAutoSyncUI?.();
+updateDriveSyncInfo?.();
+if (navigator.onLine && carica('vt_driveAutoSync','1') === '1') {
+  processUploadQueue(2);
+}
+  
 
   await setLoadingProgress(100, '✅ Pronto!');
   await new Promise(r => setTimeout(r, 400));
@@ -5142,6 +5303,8 @@ refreshStatsPaeseDropdown();
     loading.style.opacity = '0';
     loading.style.transition = 'opacity 0.5s';
     setTimeout(() => { loading.style.display = 'none'; }, 500);
+
+    
   }
 }
 
@@ -5149,6 +5312,13 @@ refreshStatsPaeseDropdown();
    AVVIO
 ============================================================ */
 window.addEventListener('load', inizializzaApp);
+
+window.addEventListener('online', () => {
+  const auto = carica('vt_driveAutoSync','1') === '1';
+  if (auto) processUploadQueue(4); // carica poche alla volta
+});
+
+  
 </script>
 
 </body>
