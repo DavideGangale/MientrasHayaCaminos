@@ -436,6 +436,103 @@
     .checklist-item input[type="checkbox"]{transform:scale(1.3);}
     .checklist-item.done{opacity:0.6;text-decoration:line-through;color:#aaa;}
 
+
+    /* ===== CHECKLIST TODO (swipe + reorder) ===== */
+.todo-list{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+
+.todo-item{
+  position:relative;
+  overflow:hidden;
+  border-radius:12px;
+  border:1px solid #333;
+  background:#1e1e1e;
+  touch-action: pan-y; /* importante per swipe */
+}
+
+.todo-actions{
+  position:absolute;
+  right:0; top:0; bottom:0;
+  width:92px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#f44336;
+}
+
+.todo-del{
+  background:transparent;
+  border:none;
+  color:#fff;
+  font-weight:900;
+  font-size:14px;
+  width:100%;
+  height:100%;
+  cursor:pointer;
+}
+
+.todo-content{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  padding:12px;
+  transform:translateX(0px);
+  transition:transform .18s ease;
+  will-change: transform;
+}
+
+.todo-item.open .todo-content{ transform: translateX(-92px); }
+
+.todo-handle{
+  width:28px;
+  height:28px;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#111;
+  border:1px solid #333;
+  color:#aaa;
+  font-weight:900;
+  cursor:grab;
+  user-select:none;
+}
+
+.todo-check{
+  transform:scale(1.25);
+}
+
+.todo-text{
+  flex:1;
+  font-size:15px;
+  color:#eee;
+  line-height:1.2;
+}
+
+.todo-item.done .todo-text{
+  color:#888;
+  text-decoration: line-through;
+  opacity:0.75;
+}
+
+.todo-meta{
+  font-size:11px;
+  color:#777;
+  margin-top:3px;
+}
+
+/* drag state */
+.todo-item.dragging{
+  opacity:0.85;
+  border-color:#ff9800;
+  box-shadow:0 10px 25px rgba(0,0,0,0.6);
+}
+.todo-placeholder{
+  height:52px;
+  border:1px dashed #555;
+  border-radius:12px;
+  background:rgba(255,152,0,0.08);
+}
+
     /* PAESE STATS */
     .paese-stat{background:#2a2a2a;padding:10px;margin-bottom:10px;border-radius:10px;border-left:4px solid var(--giallo);}
     .paese-name{font-size:18px;font-weight:bold;color:var(--giallo);}
@@ -5297,68 +5394,76 @@ function eliminaIntervento(id) {
 }
 
 
-  
+  let checklistUIInited = false;
+
+function ensureChecklistIds(lista){
+  let changed = false;
+  for (const it of lista) {
+    if (!it.id) { it.id = Date.now() + '_' + Math.random().toString(16).slice(2); changed = true; }
+  }
+  return changed;
+}
+
 function renderChecklist() {
-  const lista = caricaJSON('vt_checklist', []);
   const container = document.getElementById('checklist-container');
   if (!container) return;
 
-  const warns = getInventarioWarnings();
-
-  let html = '';
-
-  // ===== SEZIONE AVVISI MANUTENZIONE =====
-  if (warns.length) {
-    html += `<div style="color:#ff9800; font-weight:900; margin:6px 0 10px 0;">🔧 Avvisi manutenzione</div>`;
-
-    html += warns.map(w => {
-      const urgent = (w.remaining <= 0);
-      const color = urgent ? '#f44336' : (w.remaining <= 100 ? '#f44336' : (w.remaining <= 250 ? '#ff9800' : '#4caf50'));
-      const msg = urgent
-        ? `SCADUTO di ${Math.abs(Math.round(w.remaining))} km`
-        : `mancano ~${Math.round(w.remaining)} km`;
-
-      return `
-        <div class="checklist-item" style="border-left:5px solid ${color}; cursor:default;">
-          <input type="checkbox" disabled>
-          <span><b>${w.nome}</b> — <span style="color:${color}; font-weight:900;">${msg}</span></span>
-        </div>
-      `;
-    }).join('');
-
-    html += `<hr style="border:0;border-top:1px solid #333; margin:12px 0;">`;
-  }
-
-  // ===== SEZIONE CHECKLIST UTENTE =====
+  const lista = caricaJSON('vt_checklist', []);
   if (!Array.isArray(lista) || !lista.length) {
-    html += '<div style="color:#888; text-align:center; padding:20px;">Checklist vuota</div>';
-    container.innerHTML = html;
+    container.innerHTML = '<div style="color:#888; text-align:center; padding:20px;">Checklist vuota</div>';
     return;
   }
 
-  html += lista.map((item, i) => `
-    <div class="checklist-item ${item.fatto ? 'done' : ''}" onclick="toggleCheck(${i})">
-      <input type="checkbox" ${item.fatto ? 'checked' : ''} onclick="event.stopPropagation(); toggleCheck(${i})">
-      <span>${item.nome}</span>
-      <button onclick="event.stopPropagation(); eliminaCheck(${i})"
-        style="background:none; border:none; color:#666; margin-left:auto; cursor:pointer; font-size:16px;">🗑️</button>
-    </div>
-  `).join('');
+  if (ensureChecklistIds(lista)) salva('vt_checklist', lista);
 
-  container.innerHTML = html;
+  container.innerHTML = `
+    <div class="todo-list">
+      ${lista.map(item => `
+        <div class="todo-item ${item.fatto ? 'done' : ''}" data-id="${item.id}">
+          <div class="todo-actions">
+            <button class="todo-del" data-act="delete">ELIMINA</button>
+          </div>
+
+          <div class="todo-content">
+            <div class="todo-handle" data-act="drag">☰</div>
+
+            <input class="todo-check" type="checkbox" ${item.fatto ? 'checked' : ''} data-act="toggle">
+
+            <div class="todo-text">
+              <div>${escapeHtmlChecklist(item.nome)}</div>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  initChecklistTodoEvents();
 }
 
-function toggleCheck(i) {
+function escapeHtmlChecklist(s){
+  return String(s ?? '')
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&#39;");
+}
+
+function toggleCheckById(id) {
   const lista = caricaJSON('vt_checklist', []);
-  if (!lista[i]) return;
-  lista[i].fatto = !lista[i].fatto;
+  const idx = lista.findIndex(x => String(x.id) === String(id));
+  if (idx === -1) return;
+
+  lista[idx].fatto = !lista[idx].fatto;
   salva('vt_checklist', lista);
   renderChecklist();
 }
 
-function eliminaCheck(i) {
-  const lista = caricaJSON('vt_checklist', []).filter((_, idx) => idx !== i);
-  salva('vt_checklist', lista);
+function eliminaCheckById(id) {
+  const lista = caricaJSON('vt_checklist', []);
+  const out = lista.filter(x => String(x.id) !== String(id));
+  salva('vt_checklist', out);
   renderChecklist();
 }
 
@@ -5368,7 +5473,7 @@ function aggiungiCheckItem() {
   if (!nome) { showToast('⚠️ Inserisci un testo'); return; }
 
   const lista = caricaJSON('vt_checklist', []);
-  lista.push({ id: Date.now(), nome, fatto:false });
+  lista.push({ id: Date.now() + '_' + Math.random().toString(16).slice(2), nome, fatto:false });
 
   salva('vt_checklist', lista);
   if (input) input.value = '';
@@ -5376,6 +5481,148 @@ function aggiungiCheckItem() {
   showToast('✅ Elemento aggiunto');
 }
 
+function initChecklistTodoEvents(){
+  if (checklistUIInited) return;
+  checklistUIInited = true;
+
+  const root = document.getElementById('checklist-container');
+  if (!root) return;
+
+  // ===== CLICK actions (toggle / delete)
+  root.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-act]');
+    const itemEl = e.target.closest('.todo-item');
+    if (!itemEl) return;
+
+    const id = itemEl.dataset.id;
+    const act = btn ? btn.dataset.act : null;
+
+    if (act === 'toggle') {
+      e.stopPropagation();
+      toggleCheckById(id);
+      return;
+    }
+    if (act === 'delete') {
+      e.stopPropagation();
+      const ok = confirm('Eliminare questo elemento?');
+      if (ok) eliminaCheckById(id);
+      return;
+    }
+
+    // tap sulla riga: toggle (comodo)
+    if (!act) {
+      toggleCheckById(id);
+    }
+  }, { passive:false });
+
+  // ===== SWIPE (apri/chiudi)
+  let swipe = null; // {el, startX, startY, moved}
+  root.addEventListener('pointerdown', (e) => {
+    const content = e.target.closest('.todo-content');
+    const itemEl = e.target.closest('.todo-item');
+    if (!content || !itemEl) return;
+
+    // non swipare se sto prendendo la maniglia drag
+    if (e.target.closest('[data-act="drag"]')) return;
+
+    swipe = { el: itemEl, startX: e.clientX, startY: e.clientY, moved:false };
+  });
+
+  root.addEventListener('pointermove', (e) => {
+    if (!swipe) return;
+
+    const dx = e.clientX - swipe.startX;
+    const dy = e.clientY - swipe.startY;
+
+    // ignora se sto scrollando in verticale
+    if (!swipe.moved && Math.abs(dy) > 14) { swipe = null; return; }
+
+    // solo swipe a sinistra
+    if (dx < -18) {
+      swipe.moved = true;
+      e.preventDefault();
+      swipe.el.classList.add('open');
+    }
+    // swipe a destra richiude
+    if (dx > 18 && swipe.moved) {
+      e.preventDefault();
+      swipe.el.classList.remove('open');
+    }
+  }, { passive:false });
+
+  root.addEventListener('pointerup', () => { swipe = null; });
+  root.addEventListener('pointercancel', () => { swipe = null; });
+
+  // ===== DRAG & DROP (reorder) con maniglia
+  let drag = null; // {id, el, placeholder}
+  root.addEventListener('pointerdown', (e) => {
+    const handle = e.target.closest('[data-act="drag"]');
+    if (!handle) return;
+
+    const itemEl = e.target.closest('.todo-item');
+    if (!itemEl) return;
+
+    e.preventDefault();
+
+    itemEl.classList.remove('open');
+
+    const ph = document.createElement('div');
+    ph.className = 'todo-placeholder';
+    itemEl.parentNode.insertBefore(ph, itemEl.nextSibling);
+
+    drag = { id: itemEl.dataset.id, el: itemEl, placeholder: ph };
+    itemEl.classList.add('dragging');
+    itemEl.setPointerCapture(e.pointerId);
+  }, { passive:false });
+
+  root.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+
+    e.preventDefault();
+    const y = e.clientY;
+
+    // trova elemento “sotto” (tra i todo-item, escludendo quello che sto trascinando)
+    const items = Array.from(root.querySelectorAll('.todo-item')).filter(x => x !== drag.el);
+    let before = null;
+
+    for (const it of items) {
+      const r = it.getBoundingClientRect();
+      if (y < r.top + r.height/2) { before = it; break; }
+    }
+
+    const list = root.querySelector('.todo-list');
+    if (!list) return;
+
+    if (before) list.insertBefore(drag.placeholder, before);
+    else list.appendChild(drag.placeholder);
+  }, { passive:false });
+
+  root.addEventListener('pointerup', () => {
+    if (!drag) return;
+
+    const list = root.querySelector('.todo-list');
+    if (!list) { drag = null; return; }
+
+    // posiziona l’elemento dove sta il placeholder
+    list.insertBefore(drag.el, drag.placeholder);
+    drag.placeholder.remove();
+
+    drag.el.classList.remove('dragging');
+
+    // salva ordine nuovo in storage
+    const orderIds = Array.from(list.querySelectorAll('.todo-item')).map(x => x.dataset.id);
+    const lista = caricaJSON('vt_checklist', []);
+    const map = new Map(lista.map(x => [String(x.id), x]));
+    const reordered = orderIds.map(id => map.get(String(id))).filter(Boolean);
+
+    salva('vt_checklist', reordered);
+
+    drag = null;
+    renderChecklist();
+  }, { passive:false });
+} 
+
+  
 /* ============================================================
    BACKUP LIGHT
 ============================================================ */
