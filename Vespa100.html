@@ -2523,18 +2523,8 @@ function registraAcquisto() {
 
       risultatoHTML =
         `✅ <b>Messo in Vespa:</b> ${qtaLitri.toFixed(2)} L<br>` +
-        `🧪 <b>Olio 2T da aggiungere:</b> ` +
-        `<span style="font-size:20px; color:var(--giallo); font-weight:bold;">${olioMl} ml</span><br>` +
-        `⛽ Benzina netta: ${benzPura.toFixed(2)} L<br>` +
-        (totaleBenzLocal > 0
-          ? `💰 Totale benzina: <b>${totaleBenzLocal.toFixed(2)} ${cur}</b> ` +
-            `(≈ <b>
-$$
-{totaleBenzUsd.toFixed(2)}</b>)<br>`
-          : '') +
-        `🧪 Valore olio usato (da stock): <b>
-$$
-{costoOlioUsatoUsd.toFixed(2)}</b>`;
+        `🧪 <b>Olio 2T da aggiungere:</b> ` + `<span style="font-size:20px; color:var(--giallo); font-weight:bold;">${olioMl} ml</span><br>` +
+        `⛽ Benzina netta: ${benzPura.toFixed(2)} L<br>` + (totaleBenzLocal > 0 ? `💰 Totale benzina: <b>${totaleBenzLocal.toFixed(2)} ${cur}</b> ` + `(≈ <b> $${totaleBenzUsd.toFixed(2)}</b>)<br>`: '') + `🧪 Valore olio usato (da stock): <b> $${costoOlioUsatoUsd.toFixed(2)}</b>`;
 
     // ===================== DESTINAZIONE: TANICHE =====================
     } else {
@@ -2669,14 +2659,14 @@ function registraTravaso() {
   salva('vt_benzinaUsata', (parseFloat(carica('vt_benzinaUsata','0')) || 0) + benzPura);
   salva('vt_olioTotaleMl', (parseFloat(carica('vt_olioTotaleMl','0')) || 0) + olioMl);
 
-  //salva('vt_spesaOlio', (parseFloat(carica('vt_spesaOlio','0')) || 0) + costoOlioUsato);
-  salva('vt_spesaOlioUsd', (parseFloat(carica('vt_spesaOlioUsd', '0')) || 0) + costoOlioUsatoUsd);
-  datiPaesi[paese].spesaOlioUsd = (datiPaesi[paese].spesaOlioUsd || 0) + costoOlioUsatoUsd;
+const paese = carica('vt_paeseAttuale','Colombia');
+const datiPaesi = caricaJSON('vt_datiPaesi', {});
+if (!datiPaesi[paese]) datiPaesi[paese] = { km:0, benzina:0, benzinaFuori:0, spesaBenzinaUsd:0, spesaOlioUsd:0, spesaRicambiUsd:0, spesaManodoperaUsd:0 };
 
-
-  const paese = carica('vt_paeseAttuale','Colombia');
-  const datiPaesi = caricaJSON('vt_datiPaesi', {});
-  if (!datiPaesi[paese]) datiPaesi[paese] = { km:0, benzina:0, spesaBenzina:0, spesaOlio:0 };
+// spesa olio (USD): qui il costo lo hai in "costoOlioUsato"
+salva('vt_spesaOlioUsd', (parseFloat(carica('vt_spesaOlioUsd', '0')) || 0) + costoOlioUsato);
+datiPaesi[paese].spesaOlioUsd = (datiPaesi[paese].spesaOlioUsd || 0) + costoOlioUsato;
+salva('vt_datiPaesi', datiPaesi);
 
   datiPaesi[paese].benzina = (datiPaesi[paese].benzina || 0) + benzPura;
   //datiPaesi[paese].spesaOlio = (datiPaesi[paese].spesaOlio || 0) + costoOlioUsato;
@@ -2709,9 +2699,9 @@ function registraTravaso() {
       ✅ <b>Versati:</b> ${qtaLitri.toFixed(2)} L<br>
       🧪 <b>Olio 2T da aggiungere:</b>
         <span style="font-size:20px; color:var(--giallo); font-weight:bold;">${olioMl} ml</span><br>
-      💵 <b>Valore olio usato:</b> <b>
-$$
-{costoOlioUsato.toFixed(2)}</b><br>
+              
+      💵 <b>Valore olio usato:</b> <b>$${costoOlioUsato.toFixed(2)}</b><br>
+    
       🛢️ <b>Scorta rimasta:</b> ${nuovaScorta.toFixed(2)} L
     `;
     res.style.display = 'block';
@@ -3379,7 +3369,7 @@ aggiornaTotTanicheUI();
   }
 
   salva('vt_serbatoioCapLitri', String(serb.toFixed(3)));
-  salva('vt_tanicheCapLitri', String(tan.toFixed(3)));
+  //salva('vt_tanicheCapLitri', String(tan.toFixed(3)));
 
   showToast('✅ Parametri viaggio salvati');
   aggiornaUI();
