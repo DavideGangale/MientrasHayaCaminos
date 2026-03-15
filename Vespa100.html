@@ -1777,6 +1777,16 @@ function concludiTappa() {
 
   const paese = carica('vt_paeseAttuale','Colombia');
   const now = new Date();
+
+  // ✅ Traccia: se vuota, salva almeno l'ultima posizione del marker
+  let traceRaw = Array.isArray(coordinateTracciato) ? coordinateTracciato : [];
+  if (traceRaw.length === 0) {
+    try {
+      const ll = marker.getLatLng();
+      if (ll && isFinite(ll.lat) && isFinite(ll.lng)) traceRaw = [[ll.lat, ll.lng]];
+    } catch {}
+  }
+
   const tappa = {
     id: Date.now(),
     data: now.toLocaleDateString('it-IT'),
@@ -1788,32 +1798,17 @@ function concludiTappa() {
     durata: tappaAttuale.secondiGuida || 0,
     benzina: parseFloat((tappaAttuale.benzinaUsata || 0).toFixed(2)),
     velMax: tappaAttuale.velMax || 0,
-   
-// traccia: se vuota, salva almeno l'ultima posizione del marker
-let traceRaw = coordinateTracciato;
-if (!Array.isArray(traceRaw) || traceRaw.length === 0) {
-  try {
-    const ll = marker.getLatLng();
-    traceRaw = (ll && ll.lat && ll.lng) ? [[ll.lat, ll.lng]] : [];
-  } catch {
-    traceRaw = [];
-  }
-}
 
-traccia: traceRaw.filter((_, i) => i % 3 === 0),
+    // ✅ qui usiamo traceRaw (anche se 1 solo punto)
+    traccia: traceRaw.filter((_, i) => i % 3 === 0),
 
-    
     tipo: 'Tappa',
-
-
 
     fuelStartGal: tappaAttuale.fuelStartGal,
     fuelStartLitri: tappaAttuale.fuelStartLitri,
     fuelAddedLitri: tappaAttuale.fuelAddedLitri || 0,
 
-    // benzina stimata dalla app (quella che già usi nei contatori)
     benzinaStimataLitri: parseFloat((tappaAttuale.benzinaUsata || 0).toFixed(3)),
-    
     velMedia: velMedia ? parseFloat(velMedia.toFixed(1)) : null
   };
 
@@ -1822,11 +1817,11 @@ traccia: traceRaw.filter((_, i) => i % 3 === 0),
   salva('vt_tappe', tappe);
 
   // chiedi livello serbatoio fine tappa
- pendingFuelKind = 'tappa';
-pendingFuelTappaId = tappa.id;
-apriModal('modalFuelEnd');
+  pendingFuelKind = 'tappa';
+  pendingFuelTappaId = tappa.id;
+  apriModal('modalFuelEnd');
 
-  // Reset tappa (FIX: mantiene campi)
+  // Reset tappa
   tappaAttuale = nuovaTappa(parseFloat(carica('vt_kmTotali','0')) || 0);
   salva('vt_tappaAttuale', tappaAttuale);
 
@@ -1838,7 +1833,6 @@ apriModal('modalFuelEnd');
   showToast(`🏁 Tappa salvata: ${tappa.km} km`);
   aggiornaUI();
 }
-
 
 let modalitaGuida = 'TAPPA'; // 'TAPPA' | 'TURISMO'
 let pendingFuelKind = null; // 'tappa' | 'turismo'
@@ -1880,6 +1874,15 @@ function concludiTurismo() {
   const paese = carica('vt_paeseAttuale','Colombia');
   const now = new Date();
 
+  // ✅ Traccia: se vuota, salva almeno l'ultima posizione del marker
+  let traceRaw = Array.isArray(coordinateTracciato) ? coordinateTracciato : [];
+  if (traceRaw.length === 0) {
+    try {
+      const ll = marker.getLatLng();
+      if (ll && isFinite(ll.lat) && isFinite(ll.lng)) traceRaw = [[ll.lat, ll.lng]];
+    } catch {}
+  }
+
   const giro = {
     id: Date.now(),
     tipo: 'Turismo',
@@ -1891,11 +1894,9 @@ function concludiTurismo() {
     altMax: tappaAttuale.altMax || 0,
     durata: tappaAttuale.secondiGuida || 0,
 
-    // stimato
     benzina: parseFloat((tappaAttuale.benzinaUsata || 0).toFixed(2)),
     benzinaStimataLitri: parseFloat((tappaAttuale.benzinaUsata || 0).toFixed(3)),
 
-    // per “reale”
     fuelStartGal: tappaAttuale.fuelStartGal,
     fuelStartLitri: tappaAttuale.fuelStartLitri,
     fuelAddedLitri: tappaAttuale.fuelAddedLitri || 0,
@@ -1903,25 +1904,15 @@ function concludiTurismo() {
     velMax: tappaAttuale.velMax || 0,
     velMedia: velMedia ? parseFloat(velMedia.toFixed(1)) : null,
 
-   // traccia: se vuota, salva almeno l'ultima posizione del marker
-let traceRaw = coordinateTracciato;
-if (!Array.isArray(traceRaw) || traceRaw.length === 0) {
-  try {
-    const ll = marker.getLatLng();
-    traceRaw = (ll && ll.lat && ll.lng) ? [[ll.lat, ll.lng]] : [];
-  } catch {
-    traceRaw = [];
-  }
-}
-
-traccia: traceRaw.filter((_, i) => i % 3 === 0),
+    // ✅ qui usiamo traceRaw
+    traccia: traceRaw.filter((_, i) => i % 3 === 0)
   };
 
   const tur = caricaJSON('vt_turismo', []);
   tur.unshift(giro);
   salva('vt_turismo', tur);
 
-  // chiedi fuel end e mostra confronto (riuso lo stesso modal)
+  // chiedi fuel end
   pendingFuelKind = 'turismo';
   pendingFuelTappaId = giro.id;
   apriModal('modalFuelEnd');
