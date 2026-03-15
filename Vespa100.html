@@ -1130,6 +1130,11 @@
    VARIABILI GLOBALI
 ============================================================ */
 let inViaggio = false;
+
+let lastLowFuelWarnAt = 0; // timestamp ultimo avviso
+const LOW_FUEL_PCT = 0.20; // 20%
+
+  
 let timerGuida = null;
 let altitudineAttuale = 0;
 
@@ -1620,7 +1625,8 @@ function updatePosition(pos) {
         const serbDopo  = Math.max(0, serbPrima - litriConsumati);
 
         salva('vt_serbatoioLitri', serbDopo.toFixed(3));
-
+        
+        checkLowFuelWarning(false);
         
         aggiornaUI();
       }
@@ -1981,7 +1987,13 @@ function apriModal(id) {
   const m = document.getElementById(id);
   if (!m) return;
   m.classList.add('open');
-
+// ✅ popola sempre i select fuel quando apro i modali
+if (id === 'modalFuelStart') {
+  popolaSelectLivelloSerbatoio('fuel-start-select', true);
+}
+if (id === 'modalFuelEnd') {
+  popolaSelectLivelloSerbatoio('fuel-end-select', true);
+}
   if (id === 'modalTappe') renderTappe();
   if (id === 'modalRegistro') renderLogManutenzione();
   if (id === 'modalCarb') renderStoricoCarbur();
@@ -2860,7 +2872,24 @@ function getConsumoUsatoKmPerL() {
   return CONSUMO_MEDIO; // fallback
 }
 
-  
+  function checkLowFuelWarning(force = false) {
+  const cap = getSerbatoioCapLitri();
+  if (!cap || cap <= 0) return;
+
+  const serb = parseFloat(carica('vt_serbatoioLitri','0')) || 0;
+  const pct = serb / cap;
+
+  // per non rompere le scatole ogni secondo: max 1 avviso ogni 3 minuti
+  const now = Date.now();
+  const cooldownMs = 3 * 60 * 1000;
+
+  if (pct <= LOW_FUEL_PCT) {
+    if (force || (now - lastLowFuelWarnAt > cooldownMs)) {
+      lastLowFuelWarnAt = now;
+      showToast(`⛽ Benzina bassa: ${Math.round(pct * 100)}% (${serb.toFixed(2)} L)`);
+    }
+  }
+}
 
 function aggiornaAutonomia() {
   try {
@@ -2910,6 +2939,8 @@ function aggiornaAutonomia() {
   } catch (e) {
     console.error('aggiornaAutonomia error:', e);
   }
+
+  checkLowFuelWarning(false);
 }
 
 /* ============================================================
