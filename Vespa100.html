@@ -5032,19 +5032,26 @@ async function esportaDatiPubblici() {
     const keepFotoIds = new Set(idsConFoto.slice(0, MAX_FOTO_DIARIO));
 
     const diarioPub = await Promise.all(diarioSorted.map(async d => {
-      const keepFoto = d.foto && keepFotoIds.has(d.id);
-      return {
+ //     const keepFoto = d.foto && keepFotoIds.has(d.id);
+      const keepFoto = !!d.foto && keepFotoIds.has(d.id);
+
+// Se ho già fotoUrl (Drive) => non includo base64 nel JSON
+const fotoUrl = d.fotoUrl || null;
+
+return {
   id: d.id,
-         ts: d.ts || d.id,
+  ts: d.ts || d.id,
   data: d.data, ora: d.ora,
   paese: d.paese,
   km: d.km,
   testo: d.testo,
-  tags: Array.isArray(d.tags) ? d.tags : [],   // <-- NUOVO
-         geo: d.geo || null,
-         fotoUrl: d.fotoUrl || null,
-  //foto: keepFoto ? await sanitizeImageDataUrl(d.foto, FOTO_MAX_W, FOTO_QUALITY) : null
-  foto: (d.fotoUrl ? null : (keepFoto ? await sanitizeImageDataUrl(d.foto, FOTO_MAX_W, FOTO_QUALITY) : null))
+  tags: Array.isArray(d.tags) ? d.tags : [],
+  geo: d.geo || null,
+
+  fotoUrl: fotoUrl,
+
+  // fallback: include base64 solo se NON ho fotoUrl e se rientra nel limite keepFoto
+  foto: (!fotoUrl && keepFoto) ? await sanitizeImageDataUrl(d.foto, FOTO_MAX_W, FOTO_QUALITY) : null
 };
     }));
 
@@ -5058,7 +5065,8 @@ async function esportaDatiPubblici() {
       desc: e.desc,
       costoLocal: e.costoLocal ?? e.costo ?? 0,
       valuta: e.valuta ?? carica('vt_valuta','USD'),
-      costoUsd: e.costoUsd ?? 0
+      costoUsd: e.costoUsd ?? 0,
+      fotoUrl: e.fotoUrl || null
     }));
 
     const payload = {
