@@ -140,7 +140,7 @@
     <select id="selPerc"></select>
 
     <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
-  <button class="btn" id="btnGpx" type="button" style="background:#4caf50; color:#000;">⬇️ GPX</button>
+  //<button class="btn" id="btnGpx" type="button" style="background:#4caf50; color:#000;">⬇️ GPX</button>
   <button class="btn" id="btnKml" type="button" style="background:#00bcd4; color:#000;">⬇️ KML (Google Earth)</button>
       <div class="muted" style="margin-top:6px;">
   GPX: Google Maps/Komoot · KML: Google Earth / My Maps
@@ -530,7 +530,7 @@ if (!lista.length) {
 
 
 
-const btnGpx = document.getElementById('btnGpx');
+//const btnGpx = document.getElementById('btnGpx');
 const btnKml = document.getElementById('btnKml');
 
 function buildFileName(p) {
@@ -544,22 +544,22 @@ function buildFileName(p) {
 
 function updateExportButtons() {
   const ok = selectedPercorso && Array.isArray(selectedPercorso.traccia) && selectedPercorso.traccia.length >= 2;
-  if (btnGpx) btnGpx.disabled = !ok;
+  //if (btnGpx) btnGpx.disabled = !ok;
   if (btnKml) btnKml.disabled = !ok;
 
-  if (btnGpx) btnGpx.style.opacity = ok ? '1' : '0.5';
+  //if (btnGpx) btnGpx.style.opacity = ok ? '1' : '0.5';
   if (btnKml) btnKml.style.opacity = ok ? '1' : '0.5';
 }
 
-if (btnGpx) {
-  btnGpx.addEventListener('click', () => {
-    if (!selectedPercorso) return;
-    const gpx = coordsToGPX(selectedPercorso.traccia, buildFileName(selectedPercorso));
-    if (!gpx) return alert('Traccia insufficiente per GPX');
+//if (btnGpx) {
+//  btnGpx.addEventListener('click', () => {
+    //if (!selectedPercorso) return;
+//    const gpx = coordsToGPX(selectedPercorso.traccia, buildFileName(selectedPercorso));
+  //  if (!gpx) return alert('Traccia insufficiente per GPX');
     //downloadTextFile(buildFileName(selectedPercorso) + '.gpx', gpx, 'application/gpx+xml');
-    shareOrDownloadFile(buildFileName(selectedPercorso) + '.gpx', gpx, 'application/gpx+xml');
-  });
-}
+//    shareOrDownloadFile(buildFileName(selectedPercorso) + '.gpx', gpx, 'application/gpx+xml');
+//  });
+//}
 
 if (btnKml) {
   btnKml.addEventListener('click', () => {
