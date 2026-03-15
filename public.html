@@ -90,7 +90,7 @@
 }
 @media (min-width: 700px){
   .diario-tools{
-    grid-template-columns: 1fr 200px 180px 160px;
+    grid-template-columns: 1fr 200px 200px 180px 160px;
   }
   .diario-tools .chk{
     grid-column:auto;
@@ -134,10 +134,18 @@
 
   <div class="diario-tools">
     <input id="diario-q" type="search" placeholder="Cerca nel diario (testo/paese/km)..." />
+    
     <select id="diario-paese">
       <option value="">Tutti i paesi</option>
     </select>
 
+
+   <select id="diario-tag">
+  <option value="">Tutti i tag</option>
+</select> 
+
+
+    
     <label class="chk">
       <input id="diario-solo-foto" type="checkbox">
       Solo con foto
@@ -327,6 +335,20 @@ if (selPaese) {
   selPaese.innerHTML = `<option value="">Tutti i paesi</option>` + paesi.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
 }
 
+
+// popola dropdown TAG
+const selTag = document.getElementById('diario-tag');
+if (selTag) {
+  const preset = Array.isArray(data.diarioTagsPreset) ? data.diarioTagsPreset : [];
+  const fromData = [...new Set(diarioAll.flatMap(d => Array.isArray(d.tags) ? d.tags : []))].sort();
+  const tags = preset.length ? preset : fromData;
+
+  selTag.innerHTML = `<option value="">Tutti i tag</option>` +
+    tags.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+}
+
+
+    
 // prepara lista foto per lightbox (solo voci con foto)
 lbPhotos = diarioAll.filter(d => !!d.foto).map(d => d.foto);
 
@@ -339,7 +361,9 @@ const rerender = () => renderDiarioPub();
 if (qEl) qEl.addEventListener('input', debounce(() => { diarioLimit = 12; rerender(); }, 250));
 if (selPaese) selPaese.addEventListener('change', () => { diarioLimit = 12; rerender(); });
 if (fotoOnlyEl) fotoOnlyEl.addEventListener('change', () => { diarioLimit = 12; rerender(); });
+if (selTag) selTag.addEventListener('change', () => { diarioLimit = 12; rerender(); });
 
+  
 if (moreBtn) {
   moreBtn.addEventListener('click', () => {
     diarioLimit += 12;
@@ -375,13 +399,22 @@ renderDiarioPub();
   const q = (document.getElementById('diario-q')?.value || '').trim().toLowerCase();
   const paeseSel = document.getElementById('diario-paese')?.value || '';
   const soloFoto = !!document.getElementById('diario-solo-foto')?.checked;
+  const tagSel = document.getElementById('diario-tag')?.value || '';
 
+    
   let list = [...diarioAll];
 
   // filtri
   if (paeseSel) list = list.filter(d => String(d.paese||'') === String(paeseSel));
+
+    if (tagSel) list = list.filter(d => Array.isArray(d.tags) && d.tags.includes(tagSel));
+
+    
   if (soloFoto) list = list.filter(d => !!d.foto);
 
+
+
+    
   if (q) {
     list = list.filter(d => {
       const hay =
