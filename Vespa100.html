@@ -1045,17 +1045,8 @@
       Serbatoio: 2 gal (≈ 7.57 L). Seleziona cosa segna il galleggiante.
     </div>
 
-    <select id="fuel-start-select" class="inp-select">
-      <option value="0">0 (vuoto)</option>
-      <option value="0.25">1/8 (0.25 gal)</option>
-      <option value="0.5">1/4 (0.5 gal)</option>
-      <option value="0.75">3/8 (0.75 gal)</option>
-      <option value="1">1/2 (1.0 gal)</option>
-      <option value="1.25">5/8 (1.25 gal)</option>
-      <option value="1.5">3/4 (1.5 gal)</option>
-      <option value="1.75">7/8 (1.75 gal)</option>
-      <option value="2" selected>FULL (2.0 gal)</option>
-    </select>
+    
+<select id="fuel-start-select" class="inp-select"></select>
 
     <button class="btn-azione" style="background:#4caf50;color:black;" onclick="salvaFuelInizioTappa()">
       ✅ Conferma & Start
@@ -1091,17 +1082,7 @@
         Serbatoio: 2 gal (≈ 7.57 L). Seleziona cosa segna il galleggiante.
       </div>
 
-     <select id="fuel-end-select" class="inp-select"> 
-       <option value="0">0 (vuoto)</option> 
-       <option value="0.25">1/8 (0.25 gal)</option> 
-       <option value="0.5">1/4 (0.5 gal)</option> 
-       <option value="0.75">3/8 (0.75 gal)</option> 
-       <option value="1">1/2 (1.0 gal)</option> 
-       <option value="1.25">5/8 (1.25 gal)</option> 
-       <option value="1.5">3/4 (1.5 gal)</option> 
-       <option value="1.75">7/8 (1.75 gal)</option> 
-       <option value="2" selected>FULL (2.0 gal)</option> 
-     </select>
+<select id="fuel-end-select" class="inp-select"></select></select>
 
       <button class="btn-azione" style="background:#4caf50;color:black;" onclick="salvaFuelFineTappa()">
         💾 Salva livello
@@ -1629,8 +1610,9 @@ function updatePosition(pos) {
 
         // ✅ SCALA STIMA SERBATOIO IN BASE AI KM PERCORSI
         // (così se parti a 1/2 e poi fai benzina, non “sommi” su un valore troppo alto)
-        const consumoDaTappe = (typeof calcolaConsumoDaTappe === 'function') ? calcolaConsumoDaTappe() : null;
-        const consumoUsato   = (consumoDaTappe != null) ? consumoDaTappe : CONSUMO_MEDIO; // km/L
+        const consumoUsato = (typeof getConsumoUsatoKmPerL === 'function')
+  ? getConsumoUsatoKmPerL()
+  : CONSUMO_MEDIO;
 
         const litriConsumati = dist / consumoUsato;
 
@@ -1781,6 +1763,9 @@ function toggleTracking() {
   // Se tappa nuova e non ho fuelStart, chiedi prima
  if (tappaNuova()) {
   pendingStartTracking = true;
+   popolaSelectLivelloSerbatoio('fuel-start-select', true);
+   aggiornaTestoModaliSerbatoio();
+ 
   apriModal('modalFuelStart');
   return;
 }
@@ -1855,6 +1840,8 @@ function concludiTappa() {
   // chiedi livello serbatoio fine tappa
   pendingFuelKind = 'tappa';
   pendingFuelTappaId = tappa.id;
+  popolaSelectLivelloSerbatoio('fuel-end-select', true);
+aggiornaTestoModaliSerbatoio();
   apriModal('modalFuelEnd');
 
   // Reset tappa
@@ -1951,6 +1938,8 @@ function concludiTurismo() {
   // chiedi fuel end
   pendingFuelKind = 'turismo';
   pendingFuelTappaId = giro.id;
+  popolaSelectLivelloSerbatoio('fuel-end-select', true);
+aggiornaTestoModaliSerbatoio();
   apriModal('modalFuelEnd');
 
   // reset
@@ -2068,6 +2057,53 @@ function apriMappaFull(coordsOverride = null) {
 /* ============================================================
    FUEL FINE TAPPA
 ============================================================ */
+
+
+function popolaSelectLivelloSerbatoio(selectId, defaultFull = true) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+
+  const capL = getSerbatoioCapLitri();      // capacità reale da settings
+  const capGal = capL / FAT_GAL;
+
+  // step a 1/8 (come il galleggiante tipico)
+  const steps = [0, 1/8, 2/8, 3/8, 4/8, 5/8, 6/8, 7/8, 1];
+
+  sel.innerHTML = steps.map(fr => {
+    const gal = capGal * fr;
+    const litri = gal * FAT_GAL;
+
+    const label =
+      (fr === 0) ? `0 (vuoto)` :
+      (fr === 1) ? `FULL (${litri.toFixed(2)} L)` :
+      `${fr === 0.125 ? '1/8' :
+        fr === 0.25  ? '1/4' :
+        fr === 0.375 ? '3/8' :
+        fr === 0.5   ? '1/2' :
+        fr === 0.625 ? '5/8' :
+        fr === 0.75  ? '3/4' :
+        fr === 0.875 ? '7/8' : fr} (${litri.toFixed(2)} L)`;
+
+    const selected = (defaultFull && fr === 1) ? 'selected' : '';
+    return `<option value="${gal.toFixed(4)}" ${selected}>${label}</option>`;
+  }).join('');
+}
+
+function aggiornaTestoModaliSerbatoio() {
+  const capL = getSerbatoioCapLitri();
+  const capGal = capL / FAT_GAL;
+
+  // aggiorna i testi “Serbatoio: ...”
+  document.querySelectorAll('#modalFuelStart div, #modalFuelEnd div').forEach(el => {
+    if (el && el.innerText && el.innerText.includes('Serbatoio:')) {
+      el.innerText = `Serbatoio: ${capGal.toFixed(2)} gal (≈ ${capL.toFixed(2)} L). Seleziona cosa segna il galleggiante.`;
+    }
+  });
+}
+
+
+
+  
 function salvaFuelFineTappa() {
   const sel = document.getElementById('fuel-end-select');
   const gal = sel ? parseFloat(sel.value) : 0;
@@ -2778,18 +2814,61 @@ function calcolaConsumoDaTappe() {
   return consumo;
 }
 
+
+
+function calcolaConsumoRealeDaTappe() {
+  const tappe = caricaJSON('vt_tappe', []);
+  if (!Array.isArray(tappe) || tappe.length === 0) return null;
+
+  let kmSum = 0;
+  let benzSum = 0;
+
+  for (const t of tappe) {
+    const km = Number(t.km || 0);
+    const realL = Number(t.benzinaRealeLitri);
+
+    // consideriamo solo tappe "buone"
+    if (km < 20) continue;
+    if (!isFinite(realL) || realL <= 0.3) continue;
+
+    kmSum += km;
+    benzSum += realL;
+
+    // bastano ~150km reali per fare una buona media
+    if (kmSum >= 150) break;
+  }
+
+  if (benzSum <= 0) return null;
+
+  const consumo = kmSum / benzSum; // km/L
+  if (consumo < 10 || consumo > 60) return null;
+
+  return consumo;
+}
+
+
+function getConsumoUsatoKmPerL() {
+  const manuale = getConsumoMedioManuale(); // km/L o null
+  if (manuale != null) return manuale;
+
+  const reale = calcolaConsumoRealeDaTappe();
+  if (reale != null) return reale;
+
+  const stim = calcolaConsumoDaTappe();
+  if (stim != null) return stim;
+
+  return CONSUMO_MEDIO; // fallback
+}
+
+  
+
 function aggiornaAutonomia() {
   try {
     const scortaL = parseFloat(carica('vt_scortaLitri','0')) || 0;      // taniche (L)
     const serbL   = parseFloat(carica('vt_serbatoioLitri','0')) || 0;   // serbatoio (L)
     const totL    = scortaL + serbL;
 
-    // Consumo interno sempre in km/L
-   const consumoManuale = getConsumoMedioManuale(); // km/L o null
-const consumoDaTappe = calcolaConsumoDaTappe();
-const consumoKmPerL  = (consumoManuale != null) ? consumoManuale
-                      : (consumoDaTappe != null) ? consumoDaTappe
-                      : CONSUMO_MEDIO;
+    const consumoKmPerL = getConsumoUsatoKmPerL(); // ✅ manuale > reale > stimato > default
     
     // Autonomia interna sempre in km
     const autonomiaKm = totL * consumoKmPerL;
