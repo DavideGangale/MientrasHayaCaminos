@@ -671,8 +671,8 @@
 
         <button class="btn-secondary" style="margin-top:0;" onclick="document.getElementById('foto-input').click()">📷 Aggiungi Foto</button>
         <div id="anteprima-foto" style="margin-top:10px; display:none;"></div>
-
-        <button class="btn-azione" style="background:#e91e63;" onclick="salvaDiario()">💾 Salva nel Diario</button>
+  
+        <button id="btn-salva-diario" class="btn-azione" style="background:#e91e63;" onclick="salvaDiario()">💾 Salva nel Diario</button>
         <div id="lista-diario" style="margin-top:20px;"></div>
       </div>
 
@@ -3422,76 +3422,100 @@ function clearDiarioTags() {
   renderDiarioTagsPreset();
 }
 
-
+let diarioSaving = false;
+ 
   
 function salvaDiario() {
-  const testoEl = document.getElementById('diario-testo');
-  const testo = testoEl ? testoEl.value.trim() : '';
-  if (!testo) { showToast('⚠️ Scrivi qualcosa prima di salvare'); return; }
+  if (diarioSaving) { showToast('⏳ Salvataggio in corso...'); return; }
+  diarioSaving = true;
 
-  const anteprimaDiv = document.getElementById('anteprima-foto');
-  const fotoSrc = (anteprimaDiv && anteprimaDiv.dataset) ? (anteprimaDiv.dataset.src || null) : null;
+  const btn = document.getElementById('btn-salva-diario');
+  if (btn) btn.disabled = true;
 
-  const paese = carica('vt_paeseAttuale','Colombia');
-  const now = new Date();
-
-
-  // geo: uso ultima posizione GPS valida (o marker)
-let geo = null;
-try {
-  if (lastLat != null && lastLon != null) geo = { lat: lastLat, lon: lastLon };
-  else {
-    const ll = marker?.getLatLng?.();
-    if (ll && isFinite(ll.lat) && isFinite(ll.lng)) geo = { lat: ll.lat, lon: ll.lng };
-  }
-} catch {}
-
-  
- const entry = {
-  id: Date.now(),
-  ts: Date.now(),
-  geo,
-  data: now.toLocaleDateString('it-IT'),
-  ora: now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
-  paese,
-  km: (parseFloat(carica('vt_kmTotali','0')) || 0).toFixed(1),
-  testo,
-  foto: fotoSrc,      // fallback locale
-  fotoUrl: null,      // url drive (se disponibile)
-  tags: Array.from(diarioTagsSelezionati) // <-- NUOVO
-};
-  const diario = caricaJSON('vt_diario', []);
-  diario.unshift(entry);
-  salva('vt_diario', diario);
-if (entry.foto && !entry.fotoUrl) {
-  enqueueFoto('diario', entry.id);
-}
-updateDriveSyncInfo();
-
-  d// Se c'è foto e Drive configurato: prova upload e sostituisci con URL
-(async () => {
   try {
-    if (!fotoSrc) return;
-    if (!navigator.onLine) return;
+    const testoEl = document.getElementById('diario-testo');
+    const testo = testoEl ? testoEl.value.trim() : '';
+    if (!testo) { showToast('⚠️ Scrivi qualcosa prima di salvare'); return; }
 
-    const url = await uploadFotoToDrive(fotoSrc, 'diario');
-    if (!url) return;
+    const anteprimaDiv = document.getElementById('anteprima-foto');
+    const fotoSrc = (anteprimaDiv && anteprimaDiv.dataset) ? (anteprimaDiv.dataset.src || null) : null;
 
-    // aggiorno l'entry appena salvata (in testa)
-    const diario2 = caricaJSON('vt_diario', []);
-    const idx = diario2.findIndex(x => x.id === entry.id);
-    if (idx !== -1) {
-      diario2[idx].fotoUrl = url;
-      diario2[idx].foto = null; // ✅ svuota base64 per non pesare
-      salva('vt_diario', diario2);
-      renderDiario();
-      showToast('☁️ Foto caricata su Drive');
+    const paese = carica('vt_paeseAttuale','Colombia');
+    const now = new Date();
+
+    // geo: ultima posizione (se disponibile)
+    let geo = null;
+    try {
+      if (lastLat != null && lastLon != null) geo = { lat: lastLat, lon: lastLon };
+      else {
+        const ll = marker?.getLatLng?.();
+        if (ll && isFinite(ll.lat) && isFinite(ll.lng)) geo = { lat: ll.lat, lon: ll.lng };
+      }
+    } catch {}
+
+    const entry = {
+      id: Date.now(),
+      ts: Date.now(),
+      geo,
+      data: now.toLocaleDateString('it-IT'),
+      ora: now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
+      paese,
+      km: (parseFloat(carica('vt_kmTotali','0')) || 0).toFixed(1),
+      testo,
+      tags: Array.from(diarioTagsSelezionati || []),
+      foto: fotoSrc,     // fallback locale
+      fotoUrl: null      // verrà popolato dalla sync Drive
+    };
+
+    // salva subito
+    const diario = caricaJSON('vt_diario', []);
+    diario.unshift(entry);
+    salva('vt_diario', diario);
+
+    // ✅ reset UI immediato (così non clicchi 10 volte)
+    if (testoEl) testoEl.value = '';
+
+    if (anteprimaDiv) {
+      anteprimaDiv.style.display = 'none';
+      anteprimaDiv.dataset.src = '';
+      anteprimaDiv.innerHTML = '';
     }
+
+    const fi = document.getElementById('foto-input');
+    if (fi) fi.value = '';
+
+    if (typeof clearDiarioTags === 'function') clearDiarioTags();
+
+    renderDiario();
+    showToast('📖 Salvato nel diario!');
+
+    // coda upload Drive (se c'è foto)
+    if (entry.foto && typeof enqueueFoto === 'function') {
+      enqueueFoto('diario', entry.id);
+      if (typeof updateDriveSyncInfo === 'function') updateDriveSyncInfo();
+
+      // se online e auto-sync attivo, prova subito (1 foto)
+      if (navigator.onLine && carica('vt_driveAutoSync','1') === '1' && typeof processUploadQueue === 'function') {
+        processUploadQueue(1);
+      }
+    }
+
+    // condivisione: dopo (non blocca UI)
+    setTimeout(() => {
+      try {
+        const ok = confirm('Vuoi condividere ora questo momento?');
+        if (ok) condividiEntryDiario(entry);
+      } catch {}
+    }, 80);
+
   } catch (e) {
-    console.warn('upload drive fail', e);
-    showToast('⚠️ Upload Drive non riuscito (foto resta locale)');
+    console.error('salvaDiario error:', e);
+    showToast('❌ Errore salvataggio diario (vedi console)');
+  } finally {
+    diarioSaving = false;
+    if (btn) btn.disabled = false;
   }
-})();
+}
 
   
 setTimeout(() => {
