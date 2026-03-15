@@ -111,26 +111,39 @@
     <div class="muted" id="meta">Carico dati…</div>
   </div>
 
+
+<div class="card">
+  <div class="muted" style="margin-bottom:6px;">Language / Idioma / Lingua</div>
+  <select id="lang">
+    <option value="it">Italiano</option>
+    <option value="en">English</option>
+    <option value="es">Español</option>
+  </select>
+</div>
+
+
+
+  
   <div class="card">
-    <h2>📊 Statistiche</h2>
+    <h2 data-i18n="stats">📊 Statistiche</h2>
     <div class="grid">
-      <div class="box">KM totali<br><b id="st-km">--</b></div>
-      <div class="box">Benzina (L)<br><b id="st-bz">--</b></div>
-      <div class="box">Spesa totale (USD)<br><b id="st-sp">--</b></div>
-      <div class="box">Olio (L)<br><b id="st-ol">--</b></div>
+      <div class="box"><span data-i18n="km_tot">KM totali</span><br><b id="st-km">--</b></div>
+      <div class="box"><span data-i18n="benzina_l">Benzina (L)</span><br><b id="st-bz">--</b></div>
+      <div class="box"><span data-i18n="spesa_tot">Spesa totale (USD)</span><br><b id="st-sp">--</b></div>
+      <div class="box"><span data-i18n="olio_l">Olio (L)</span><br><b id="st-ol">--</b></div>
     </div>
   </div>
 
   <div class="card">
-    <h2>🗺️ Tappe / Turismo</h2>
-    <div class="muted">Seleziona un percorso per vedere la traccia.</div>
+    <h2 data-i18n="routes">🗺️ Tappe / Turismo</h2>
+    <div class="muted"><span data-i18n="pick_route">Seleziona un percorso per vedere la traccia.</span></div>
     <select id="selPerc"></select>
     <div style="margin-top:10px" id="mapPub"></div>
     <div class="muted" id="percInfo" style="margin-top:8px"></div>
   </div>
 
 <div class="card">
-  <h2>📖 Diario (con foto)</h2>
+  <h2 data-i18n="diary">📖 Diario (con foto)</h2>
 
   <div class="diario-tools">
     <input id="diario-q" type="search" placeholder="Cerca nel diario (testo/paese/km)..." />
@@ -158,7 +171,7 @@
 </div>
 
   <div class="card">
-    <h2>🔧 Manutenzioni</h2>
+   <h2 data-i18n="maint">🔧 Manutenzioni</h2>
     <div id="man"></div>
   </div>
 
@@ -168,8 +181,98 @@
     return u.searchParams.get(name);
   }
 
-  function moneyUsd(x){ return '$' + Number(x||0).toFixed(2); }
 
+  
+function moneyUsd(x){ return '$' + Number(x||0).toFixed(2); }
+
+
+
+const I18N = {
+  it: {
+    stats: '📊 Statistiche',
+    routes: '🗺️ Tappe / Turismo',
+    diary: '📖 Diario (con foto)',
+    maint: '🔧 Manutenzioni',
+    pick_route: 'Seleziona un percorso per vedere la traccia.',
+    km_tot: 'KM totali',
+    benzina_l: 'Benzina (L)',
+    spesa_tot: 'Spesa totale (USD)',
+    olio_l: 'Olio (L)',
+    all_countries: 'Tutti i paesi',
+    all_tags: 'Tutti i tag',
+    only_photos: 'Solo con foto',
+    load_more: 'Carica altre',
+    search_ph: 'Cerca nel diario (testo/paese/km)...'
+  },
+  en: {
+    stats: '📊 Stats',
+    routes: '🗺️ Routes / Sightseeing',
+    diary: '📖 Diary (with photos)',
+    maint: '🔧 Maintenance',
+    pick_route: 'Select a route to view the track.',
+    km_tot: 'Total km',
+    benzina_l: 'Fuel (L)',
+    spesa_tot: 'Total cost (USD)',
+    olio_l: '2T Oil (L)',
+    all_countries: 'All countries',
+    all_tags: 'All tags',
+    only_photos: 'Photos only',
+    load_more: 'Load more',
+    search_ph: 'Search diary (text/country/km)...'
+  },
+  es: {
+    stats: '📊 Estadísticas',
+    routes: '🗺️ Rutas / Turismo',
+    diary: '📖 Diario (con fotos)',
+    maint: '🔧 Mantenimiento',
+    pick_route: 'Selecciona una ruta para ver el recorrido.',
+    km_tot: 'Km totales',
+    benzina_l: 'Combustible (L)',
+    spesa_tot: 'Gasto total (USD)',
+    olio_l: 'Aceite 2T (L)',
+    all_countries: 'Todos los países',
+    all_tags: 'Todas las etiquetas',
+    only_photos: 'Solo fotos',
+    load_more: 'Cargar más',
+    search_ph: 'Buscar en diario (texto/país/km)...'
+  }
+};
+
+let LANG = localStorage.getItem('vt_pub_lang') || 'it';
+
+function t(key){
+  return (I18N[LANG] && I18N[LANG][key]) ? I18N[LANG][key] : key;
+}
+
+function applyLang(){
+  document.documentElement.lang = LANG;
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    el.textContent = t(key);
+  });
+
+  // placeholder ricerca
+  const q = document.getElementById('diario-q');
+  if (q) q.placeholder = t('search_ph');
+
+  // label checkbox (se usi la toolbar)
+  const chk = document.querySelector('.diario-tools .chk');
+  if (chk) {
+    // mantiene l'input e cambia solo il testo dopo
+    const input = chk.querySelector('input');
+    chk.innerHTML = '';
+    chk.appendChild(input);
+    chk.append(' ' + t('only_photos'));
+  }
+
+  // bottone load more testo base (poi renderDiarioPub lo sovrascrive con conteggio)
+  const more = document.getElementById('diario-more');
+  if (more) more.textContent = t('load_more');
+}
+
+
+  
 function escapeHtml(s){
   return String(s ?? '')
     .replaceAll('&','&amp;')
@@ -188,13 +291,6 @@ function debounce(fn, ms=250){
 }
 
   
-function debounce(fn, ms=250){
-  let t=null;
-  return (...args) => {
-    clearTimeout(t);
-    t = setTimeout(() => fn(...args), ms);
-  };
-}
   
   let map, poly, marker;
 
@@ -272,6 +368,10 @@ if (!txt.trim().endsWith('}')) throw new Error(`JSON incompleto/troncato (size=$
 
 const data = JSON.parse(txt);
 
+const langSel = document.getElementById('lang');
+if (langSel) langSel.value = LANG;
+applyLang();
+    
     document.getElementById('tit').innerText = data.titolo || 'VespaTrek';
     document.getElementById('meta').innerText =
       `Aggiornato: ${data._exportDate || '--'} · File: ${src}`;
@@ -515,6 +615,15 @@ function closeLightbox(){
   if (e.key === 'ArrowLeft') lightboxPrev();
 });
 
+
+document.getElementById('lang')?.addEventListener('change', (e) => {
+  LANG = e.target.value;
+  localStorage.setItem('vt_pub_lang', LANG);
+  applyLang();
+  // se hai renderDiarioPub() con testi "Tutti i paesi/tag", richiamalo:
+  try { renderDiarioPub(); } catch {}
+});
+  
   
 </script>
 
