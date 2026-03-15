@@ -5361,28 +5361,113 @@ function eliminaIntervento(id) {
   return out;
 }
 
+
+
+  const USURA_WARN_THRESHOLDS = [500, 250, 10]; // km prima (modifica qui se vuoi 100 invece di 10)
+
+function getUsuraWarningsInventario() {
+  const inv = caricaJSON('vt_inventario', []);
+  const kmTot = parseFloat(carica('vt_kmTotali','0')) || 0;
+
+  if (!Array.isArray(inv) || inv.length === 0) return [];
+
+  const out = [];
+
+  for (const item of inv) {
+    if (!item) continue;
+
+    const durata = Number(item.durata || 0);
+    if (!isFinite(durata) || durata <= 0) continue;
+
+    const lastKm = Number(item.lastKm || 0);
+    const kmDaUltimo = kmTot - lastKm;
+    const remaining = durata - kmDaUltimo; // km che mancano al cambio
+
+    // mostra avviso solo se entro la soglia più grande (500) oppure scaduto
+    if (remaining > USURA_WARN_THRESHOLDS[0]) continue;
+
+    // scegli livello: 10 > 250 > 500
+    let level = 500;
+    if (remaining <= 10) level = 10;
+    else if (remaining <= 250) level = 250;
+    else level = 500;
+
+    out.push({
+      nome: item.nome || 'Ricambio',
+      remaining,
+      level
+    });
+  }
+
+  // ordina: prima scaduti, poi quelli con meno km rimanenti
+  out.sort((a, b) => (a.remaining - b.remaining));
+  return out;
+}
+
+function colorForRemaining(remaining) {
+  if (remaining <= 0) return '#f44336';
+  if (remaining <= 10) return '#f44336';
+  if (remaining <= 250) return '#ff9800';
+  return '#4caf50';
+}
+
+
+  
 function renderChecklist() {
   const lista = caricaJSON('vt_checklist', []);
   const container = document.getElementById('checklist-container');
   if (!container) return;
 
-  if (!lista.length) {
-    container.innerHTML = '<div style="color:#888; text-align:center; padding:20px;">Checklist vuota</div>';
+  const warns = getUsuraWarningsInventario();
+
+  let html = '';
+
+  // ===== AVVISI USURA (AUTO) =====
+  if (warns.length) {
+    html += `<div style="color:#ff9800;font-weight:900;margin:6px 0 10px 0;">🔧 Avvisi usura (automatici)</div>`;
+
+    html += warns.map(w => {
+      const col = colorForRemaining(w.remaining);
+
+      const msg = (w.remaining <= 0)
+        ? `SCADUTO di ${Math.abs(Math.round(w.remaining))} km`
+        : `mancano ~${Math.round(w.remaining)} km (soglia ${w.level})`;
+
+      return `
+        <div class="checklist-item" style="border-left:5px solid ${col}; cursor:default;" onclick="event.stopPropagation();">
+          <input type="checkbox" disabled>
+          <span class="checklist-text">
+            <b>${w.nome}</b> — <span style="color:${col};font-weight:900;">${msg}</span>
+          </span>
+          <div class="checklist-actions"></div>
+        </div>
+      `;
+    }).join('');
+
+    html += `<hr style="border:0;border-top:1px solid #333; margin:12px 0;">`;
+  }
+
+  // ===== CHECKLIST NORMALE =====
+  if (!Array.isArray(lista) || !lista.length) {
+    html += '<div style="color:#888; text-align:center; padding:20px;">Checklist vuota</div>';
+    container.innerHTML = html;
     return;
   }
 
-  container.innerHTML = lista.map((item, i) => `
+  html += lista.map((item, i) => `
     <div class="checklist-item ${item.fatto ? 'done' : ''}" onclick="toggleCheck(${i})">
       <input type="checkbox" ${item.fatto ? 'checked' : ''} onclick="event.stopPropagation(); toggleCheck(${i})">
-     <span class="checklist-text">${item.nome}</span>
+      <span class="checklist-text">${item.nome}</span>
 
-<div class="checklist-actions" onclick="event.stopPropagation();">
-  <button class="chk-btn" onclick="moveCheck(${i}, -1)" title="Su">▲</button>
-  <button class="chk-btn" onclick="moveCheck(${i}, +1)" title="Giù">▼</button>
-  <button class="chk-btn danger" onclick="eliminaCheck(${i})" title="Elimina">🗑️</button>
-</div>
+      <div class="checklist-actions" onclick="event.stopPropagation();">
+        <button class="chk-btn" onclick="moveCheck(${i}, -1)" title="Su">▲</button>
+        <button class="chk-btn" onclick="moveCheck(${i}, +1)" title="Giù">▼</button>
+        <button class="chk-btn danger" onclick="eliminaCheck(${i})" title="Elimina">🗑️</button>
+      </div>
     </div>
   `).join('');
+
+  container.innerHTML = html;
 }
 
 function toggleCheck(i) {
