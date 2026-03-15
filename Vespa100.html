@@ -2312,20 +2312,38 @@ function renderMapFullPhotoMarkersForContext(ctx) {
     const m = L.marker([e.geo.lat, e.geo.lon], { icon: cameraIcon });
 
     // click marker => lightbox diretto
-    m.on('click', () => openPhotoLightbox(src, caption));
+   m.on('click', (ev) => {
+  // prova a bloccare l’apertura automatica del popup Leaflet
+  try { L.DomEvent.stop(ev); } catch {}
+  openPhotoLightbox(src, caption);
+});
 
     // popup “mini preview” (opzionale ma comodo)
     const popupHtml = `
-      <div style="width:180px;">
-        <div style="font-size:12px;color:#aaa;margin-bottom:6px;">📷 Foto</div>
-        <img src="${src}" style="width:100%;border-radius:10px;max-height:120px;object-fit:cover;display:block;">
-        <button class="btn-secondary" style="margin-top:8px;width:100%;"
-                onclick="openPhotoLightbox('${src}', ${JSON.stringify(caption)})">
-          Apri
-        </button>
-      </div>
-    `;
-    m.bindPopup(popupHtml);
+  <div style="width:180px;">
+    <div style="font-size:12px;color:#aaa;margin-bottom:6px;">📷 Foto</div>
+    <img src="${src}" style="width:100%;border-radius:10px;max-height:120px;object-fit:cover;display:block;cursor:pointer;">
+    <button class="btn-secondary" style="margin-top:8px;width:100%;">
+      Apri
+    </button>
+  </div>
+`;
+
+m.bindPopup(popupHtml);
+
+// quando apro il popup, aggancio i click in modo sicuro
+m.on('popupopen', (ev) => {
+  const node = ev && ev.popup ? ev.popup.getElement() : null;
+  if (!node) return;
+
+  const img = node.querySelector('img');
+  const btn = node.querySelector('button');
+
+  const open = () => openPhotoLightbox(src, caption);
+
+  if (img) img.onclick = open;
+  if (btn) btn.onclick = open;
+});
 
     m.addTo(mapFullPhotoLayer);
   }
