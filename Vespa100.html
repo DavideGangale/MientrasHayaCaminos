@@ -1788,7 +1788,21 @@ function concludiTappa() {
     durata: tappaAttuale.secondiGuida || 0,
     benzina: parseFloat((tappaAttuale.benzinaUsata || 0).toFixed(2)),
     velMax: tappaAttuale.velMax || 0,
-    traccia: coordinateTracciato.filter((_, i) => i % 3 === 0), // salva 1 punto ogni 3 (più leggero)
+   
+// traccia: se vuota, salva almeno l'ultima posizione del marker
+let traceRaw = coordinateTracciato;
+if (!Array.isArray(traceRaw) || traceRaw.length === 0) {
+  try {
+    const ll = marker.getLatLng();
+    traceRaw = (ll && ll.lat && ll.lng) ? [[ll.lat, ll.lng]] : [];
+  } catch {
+    traceRaw = [];
+  }
+}
+
+traccia: traceRaw.filter((_, i) => i % 3 === 0),
+
+    
     tipo: 'Tappa',
 
 
@@ -1889,7 +1903,18 @@ function concludiTurismo() {
     velMax: tappaAttuale.velMax || 0,
     velMedia: velMedia ? parseFloat(velMedia.toFixed(1)) : null,
 
-    traccia: coordinateTracciato.filter((_, i) => i % 3 === 0),
+   // traccia: se vuota, salva almeno l'ultima posizione del marker
+let traceRaw = coordinateTracciato;
+if (!Array.isArray(traceRaw) || traceRaw.length === 0) {
+  try {
+    const ll = marker.getLatLng();
+    traceRaw = (ll && ll.lat && ll.lng) ? [[ll.lat, ll.lng]] : [];
+  } catch {
+    traceRaw = [];
+  }
+}
+
+traccia: traceRaw.filter((_, i) => i % 3 === 0),
   };
 
   const tur = caricaJSON('vt_turismo', []);
@@ -4135,9 +4160,9 @@ async function sanitizeImageDataUrl(dataUrl, maxW = 900, quality = 0.60) {
 }
 
 function simplifyTrace(trace, step = 3) {
-  if (!Array.isArray(trace) || trace.length < 2) return null;
+  if (!Array.isArray(trace) || trace.length === 0) return [];
   const simple = trace.filter((_, i) => i % step === 0);
-  return (simple.length >= 2) ? simple : trace;
+  return (simple.length > 0) ? simple : trace;
 }
 
 async function esportaDatiPubblici() {
