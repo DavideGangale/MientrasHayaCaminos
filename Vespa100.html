@@ -4977,7 +4977,6 @@ function inferManutKeyFromNome(nome) {
 
 
 function getDurataEffettivaKmPerItem(item) {
-  // 1) prova da Settings (vt_manut_intervalli)
   const key = inferManutKeyFromNome(item?.nome);
   if (key) {
     const intervalli = caricaJSON('vt_manut_intervalli', {});
@@ -4985,7 +4984,6 @@ function getDurataEffettivaKmPerItem(item) {
     if (isFinite(v) && v > 0) return v;
   }
 
-  // 2) fallback: durata salvata nel ricambio
   const d = Number(item?.durata || 0);
   return (isFinite(d) && d > 0) ? d : 0;
 }
@@ -5004,11 +5002,16 @@ function renderInventario() {
   }
 
   container.innerHTML = inv.map((item, i) => {
-    const kmDaUltimo = kmTot - (item.lastKm || 0);
-    const pctUsura = item.durata > 0 ? Math.min(100, Math.round(kmDaUltimo / item.durata * 100)) : 0;
-    const coloreUsura = pctUsura >= 80 ? '#f44336' : pctUsura >= 60 ? '#ff9800' : '#4caf50';
-    const warn = pctUsura >= 80 ? ' ⚠️' : '';
-    (${Math.round(kmDaUltimo)}/${durataEff} km)
+   const kmDaUltimo = kmTot - (item.lastKm || 0);
+
+const durataEff = getDurataEffettivaKmPerItem(item); // <-- prende da Settings se possibile
+const pctUsura = durataEff > 0
+  ? Math.min(100, Math.round(kmDaUltimo / durataEff * 100))
+  : 0;
+
+const coloreUsura = pctUsura >= 80 ? '#f44336' : pctUsura >= 60 ? '#ff9800' : '#4caf50';
+const warn = pctUsura >= 80 ? ' ⚠️' : '';
+ 
 
     
     return `
@@ -5017,7 +5020,7 @@ function renderInventario() {
           <div class="inv-nome">${item.nome}${warn}</div>
           <div class="inv-durabilita">
             Usura: <span style="color:${coloreUsura}; font-weight:bold;">${pctUsura}%</span>
-            (${Math.round(kmDaUltimo)}/${item.durata} km)
+          (${Math.round(kmDaUltimo)}/${durataEff} km)
           </div>
         </div>
         <button class="inv-btn minus" onclick="cambiaQta(${i},-1)">−</button>
