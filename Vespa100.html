@@ -4966,6 +4966,7 @@ function aggiungiRicambio() {
   const input = document.getElementById('nuovoRicambioNome');
   const nome = input ? input.value.trim() : '';
   if (!nome) { showToast('⚠️ Inserisci un nome'); return; }
+
   const inv = caricaJSON('vt_inventario', []);
 
   const cur = valutaAttuale || 'USD';
@@ -4973,37 +4974,8 @@ function aggiungiRicambio() {
   const costoLocal = costoStr ? parseFloat(costoStr) : 0;
   const costoUsd = (costoLocal > 0) ? convertLocalToUsd(costoLocal, cur) : 0;
 
-
-
-
-// ✅ chiedi costo ricambio e somma alle spese (USD)
-const costoLocalStr = prompt('Quanto hai pagato questo ricambio? (valuta locale, opzionale)', '');
-let costoLocal = costoLocalStr ? Number(costoLocalStr) : 0;
-
-if (isFinite(costoLocal) && costoLocal > 0) {
-  const cur = valutaAttuale || 'USD';
-  const usd = convertLocalToUsd(costoLocal, cur);
-  if (usd <= 0) {
-    showToast(`⚠️ Manca cambio per ${cur}. Vai in Settings.`);
-  } else {
-    // globale
-    const old = parseFloat(carica('vt_spesaRicambiUsd','0')) || 0;
-    salva('vt_spesaRicambiUsd', (old + usd).toFixed(3));
-
-    // per paese
-    const paese = carica('vt_paeseAttuale','Colombia');
-    const datiPaesi = caricaJSON('vt_datiPaesi', {});
-    if (!datiPaesi[paese]) datiPaesi[paese] = {};
-    datiPaesi[paese].spesaRicambiUsd = (datiPaesi[paese].spesaRicambiUsd || 0) + usd;
-    salva('vt_datiPaesi', datiPaesi);
-
-    showToast(`🧾 Ricambio: +$${usd.toFixed(2)} (≈ ${costoLocal.toFixed(2)} ${cur})`);
-  }
-}
-
-  
-  
-   inv.push({
+  inv.push({
+    id: String(Date.now()) + '_' + Math.random().toString(16).slice(2),
     nome,
     qta: 1,
     durata: 5000,
@@ -5014,13 +4986,14 @@ if (isFinite(costoLocal) && costoLocal > 0) {
     fxToUsd: getFxToUsd(cur)
   });
 
-  
   salva('vt_inventario', inv);
+
   if (input) input.value = '';
   renderInventario();
+  renderChecklist();
   showToast('✅ Ricambio aggiunto: ' + nome);
 
-
+  // Somma alle spese (solo se ho costo valido)
   if (costoUsd > 0) {
     salva('vt_spesaRicambiUsd', (parseFloat(carica('vt_spesaRicambiUsd','0')) || 0) + costoUsd);
 
@@ -5030,9 +5003,9 @@ if (isFinite(costoLocal) && costoLocal > 0) {
     datiPaesi[paese].spesaRicambiUsd = (datiPaesi[paese].spesaRicambiUsd || 0) + costoUsd;
     datiPaesi[paese].valuta = cur;
     salva('vt_datiPaesi', datiPaesi);
-  }
 
-  
+    aggiornaUI();
+  }
 }
 
 /* ============================================================
