@@ -3539,31 +3539,6 @@ function salvaDiario() {
 }
 
   
-setTimeout(() => {
-  const ok = confirm('Vuoi condividere ora questo momento?');
-  if (ok) condividiEntryDiario(entry);
-}, 50);
-
-  
-  
-  if (testoEl) testoEl.value = '';
-  if (anteprimaDiv) {
-    anteprimaDiv.style.display = 'none';
-    anteprimaDiv.dataset.src = '';
-  }
-
-clearDiarioTags();
-  
-  const fi = document.getElementById('foto-input');
-  if (fi) fi.value = '';
-
-  renderDiario();
-  showToast('📖 Salvato nel diario!');
-
-
-
-
-  
 
 function renderDiario() {
   const diario = caricaJSON('vt_diario', []);
