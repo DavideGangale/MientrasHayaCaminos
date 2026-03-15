@@ -138,6 +138,13 @@
     <h2 data-i18n="routes">🗺️ Tappe / Turismo</h2>
     <div class="muted"><span data-i18n="pick_route">Seleziona un percorso per vedere la traccia.</span></div>
     <select id="selPerc"></select>
+
+    <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+  <button class="btn" id="btnGpx" type="button" style="background:#4caf50; color:#000;">⬇️ GPX</button>
+  <button class="btn" id="btnKml" type="button" style="background:#00bcd4; color:#000;">⬇️ KML</button>
+</div>
+
+    
     <div style="margin-top:10px" id="mapPub"></div>
     <div class="muted" id="percInfo" style="margin-top:8px"></div>
   </div>
@@ -185,7 +192,92 @@
   
 function moneyUsd(x){ return '$' + Number(x||0).toFixed(2); }
 
+function safeName(s) {
+  return String(s || '')
+    .trim()
+    .replace(/[\/\\?%*:|"<>]/g, '-')   // caratteri non validi per filename
+    .replace(/\s+/g, ' ')
+    .slice(0, 90);
+}
 
+function isoNow() {
+  return new Date().toISOString();
+}
+
+function downloadTextFile(filename, content, mime) {
+  const blob = new Blob([content], { type: mime || 'application/octet-stream' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function coordsToGPX(traccia, nome = 'VespaTrek') {
+  const pts = Array.isArray(traccia) ? traccia : [];
+  const norm = pts.map(p => {
+    if (Array.isArray(p)) return { lat: Number(p[0]), lon: Number(p[1]) };
+    if (p && typeof p === 'object') return { lat: Number(p.lat), lon: Number(p.lng ?? p.lon) };
+    return null;
+  }).filter(p => p && isFinite(p.lat) && isFinite(p.lon));
+
+  if (norm.length < 2) return null;
+
+  const header =
+`<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="VespaTrek" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata>
+    <name>${nome}</name>
+    <time>${isoNow()}</time>
+  </metadata>
+  <trk>
+    <name>${nome}</name>
+    <trkseg>
+`;
+
+  const seg = norm.map(p => `      <trkpt lat="${p.lat.toFixed(6)}" lon="${p.lon.toFixed(6)}"></trkpt>`).join('\n');
+
+  const footer =
+`
+    </trkseg>
+  </trk>
+</gpx>`;
+
+  return header + seg + footer;
+}
+
+function coordsToKML(traccia, nome = 'VespaTrek') {
+  const pts = Array.isArray(traccia) ? traccia : [];
+  const norm = pts.map(p => {
+    if (Array.isArray(p)) return [Number(p[1]), Number(p[0])]; // KML: lon,lat
+    if (p && typeof p === 'object') return [Number(p.lng ?? p.lon), Number(p.lat)];
+    return null;
+  }).filter(p => p && isFinite(p[0]) && isFinite(p[1]));
+
+  if (norm.length < 2) return null;
+
+  const coordStr = norm.map(p => `${p[0].toFixed(6)},${p[1].toFixed(6)},0`).join(' ');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>${nome}</name>
+    <Placemark>
+      <name>${nome}</name>
+      <Style>
+        <LineStyle><color>ff2f32d3</color><width>4</width></LineStyle>
+      </Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>${coordStr}</coordinates>
+      </LineString>
+    </Placemark>
+  </Document>
+</kml>`;
+}
 
 const I18N = {
   it: {
@@ -294,7 +386,9 @@ function debounce(fn, ms=250){
   
   let map, poly, marker;
 
+let selectedPercorso = null;
 
+  
   // ===== DIARIO: stato filtri/paginazione
 let diarioAll = [];
 let diarioLimit = 12; // quante voci mostrare inizialmente
@@ -403,11 +497,62 @@ if (!lista.length) {
   sel.innerHTML = `<option value="">(nessun percorso pubblicato)</option>`;
 }
 
+
+
+
+
+const btnGpx = document.getElementById('btnGpx');
+const btnKml = document.getElementById('btnKml');
+
+function buildFileName(p) {
+  const tipo = p.tipo || 'Percorso';
+  const paese = p.paese || '';
+  const dataStr = (p.data || '').replaceAll('/','-');
+  const km = Number(p.km || 0).toFixed(1);
+  const titolo = p.titolo || '';
+  return safeName(`VespaTrek_${tipo}_${dataStr}_${paese}_${km}km_${titolo}`) || 'VespaTrek';
+}
+
+function updateExportButtons() {
+  const ok = selectedPercorso && Array.isArray(selectedPercorso.traccia) && selectedPercorso.traccia.length >= 2;
+  if (btnGpx) btnGpx.disabled = !ok;
+  if (btnKml) btnKml.disabled = !ok;
+
+  if (btnGpx) btnGpx.style.opacity = ok ? '1' : '0.5';
+  if (btnKml) btnKml.style.opacity = ok ? '1' : '0.5';
+}
+
+if (btnGpx) {
+  btnGpx.addEventListener('click', () => {
+    if (!selectedPercorso) return;
+    const gpx = coordsToGPX(selectedPercorso.traccia, buildFileName(selectedPercorso));
+    if (!gpx) return alert('Traccia insufficiente per GPX');
+    downloadTextFile(buildFileName(selectedPercorso) + '.gpx', gpx, 'application/gpx+xml');
+  });
+}
+
+if (btnKml) {
+  btnKml.addEventListener('click', () => {
+    if (!selectedPercorso) return;
+    const kml = coordsToKML(selectedPercorso.traccia, buildFileName(selectedPercorso));
+    if (!kml) return alert('Traccia insufficiente per KML');
+    downloadTextFile(buildFileName(selectedPercorso) + '.kml', kml, 'application/vnd.google-earth.kml+xml');
+  });
+}
+
+
+
+
+
+
+    
     
     function showPerc(id){
       const p = lista.find(x => String(x.id) === String(id));
       if (!p) return;
-
+      
+selectedPercorso = p;
+      
       const info =
         `⛽ stim: ${(p.benzinaStimataLitri??0).toFixed(2)} L · reale: ${(p.benzinaRealeLitri!=null?Number(p.benzinaRealeLitri).toFixed(2):'--')} L · ` +
         `km/L stim: ${(p.consumoStimatoKmL!=null?Number(p.consumoStimatoKmL).toFixed(2):'--')} · km/L reale: ${(p.consumoRealeKmL!=null?Number(p.consumoRealeKmL).toFixed(2):'--')}`;
@@ -419,9 +564,20 @@ if (!lista.length) {
     }
 initMap();
 
-sel.onchange = () => showPerc(sel.value);
-if (lista.length) showPerc(lista[0].id);
-else setTrace([]); // pulisce la mappa se non ci sono percorsi
+sel.onchange = () => {
+  showPerc(sel.value);
+  updateExportButtons();
+};
+
+    
+if (lista.length) {
+  showPerc(lista[0].id);
+  updateExportButtons();
+} else {
+  selectedPercorso = null;
+  setTrace([]);
+  updateExportButtons();
+}
 
     // diario
 // ===== DIARIO (con filtri + paginazione + TAG) =====
