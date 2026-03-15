@@ -4106,6 +4106,11 @@ function simplifyTrace(trace, step = 3) {
 
 async function esportaDatiPubblici() {
   try {
+
+const MAX_FOTO_DIARIO = 30;   // quante foto massimo nel JSON pubblico
+const FOTO_MAX_W = 900;       // ridimensionamento (px)
+const FOTO_QUALITY = 0.60;    // qualità JPEG (0.0 - 1.0)
+    
     // opzionale: evita “quasi realtime”
     const oreNascondi = 0; // metti 24 se vuoi nascondere ultime 24 ore
     const minId = Date.now() - oreNascondi * 3600 * 1000;
@@ -4162,15 +4167,27 @@ async function esportaDatiPubblici() {
         traccia: simplifyTrace(t.traccia, 3)
       }));
 
-    // === DIARIO PUB con foto (compresse + no EXIF) ===
-    const diarioPub = await Promise.all(diario.map(async d => ({
-      id: d.id,
-      data: d.data, ora: d.ora,
-      paese: d.paese,
-      km: d.km,
-      testo: d.testo,
-      foto: d.foto ? await sanitizeImageDataUrl(d.foto, 1280, 0.78) : null
-    })));
+    
+  // === DIARIO PUB con foto (compresse + no EXIF) ===
+// Tiene TUTTE le voci di testo, ma le FOTO solo per le ultime MAX_FOTO_DIARIO voci che hanno una foto.
+const idsConFoto = (diario || [])
+  .filter(d => !!d.foto)
+  .map(d => d.id);
+
+// prendo gli ultimi N id (più recenti) che hanno foto
+const keepFotoIds = new Set(idsConFoto.slice(0, MAX_FOTO_DIARIO));
+
+const diarioPub = await Promise.all((diario || []).map(async d => {
+  const keepFoto = d.foto && keepFotoIds.has(d.id);
+  return {
+    id: d.id,
+    data: d.data, ora: d.ora,
+    paese: d.paese,
+    km: d.km,
+    testo: d.testo,
+    foto: keepFoto ? await sanitizeImageDataUrl(d.foto, FOTO_MAX_W, FOTO_QUALITY) : null
+  };
+}));
 
     // === MANUTENZIONI PUB (foto escluse, per ora) ===
     const logbookPub = logbook.map(e => ({
@@ -4221,6 +4238,9 @@ async function esportaDatiPubblici() {
 
     URL.revokeObjectURL(url);
     showToast('📤 Esportato: vespatrek_public.json');
+
+    showToast(`📸 Foto incluse: max ${MAX_FOTO_DIARIO} (compresse)`, 3500);
+    
   } catch (e) {
     console.warn('esportaDatiPubblici error:', e);
     showToast('❌ Errore export pubblico (vedi console)');
