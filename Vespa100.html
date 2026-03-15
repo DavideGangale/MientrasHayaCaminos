@@ -302,6 +302,7 @@
 #modalDettagli { z-index: 6600; }
 #modalConsumo  { z-index: 6500; }
 #modalMapFull  { z-index: 7000; }
+    #modalGrafico  { z-index: 6800; }
 
 
 
@@ -3609,10 +3610,7 @@ function renderTappe() {
           🗺️ Vedi traccia
         </button>
 
-<button onclick="scaricaGPX(${t.id})"
-  style="background:#4caf50;border:none;color:black;padding:8px 10px;border-radius:8px;font-size:12px;cursor:pointer;margin-top:8px;">
-  ⬇️ GPX
-</button>
+
 
 <button onclick="scaricaKML(${t.id})"
   style="background:#00bcd4;border:none;color:black;padding:8px 10px;border-radius:8px;font-size:12px;cursor:pointer;margin-top:8px;">
