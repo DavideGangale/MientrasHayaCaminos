@@ -2377,6 +2377,23 @@ function apriMappaFull(coordsOverride = null, ctx = null) {
   }, 120);
 }
 
+
+function apriMappaFullDaPercorso(tipo, id) {
+  // tipo: 'tappa' | 'turismo'
+  const key = (tipo === 'turismo') ? 'vt_turismo' : 'vt_tappe';
+  const lista = caricaJSON(key, []);
+  const p = lista.find(x => String(x.id) === String(id));
+
+  if (!p) {
+    showToast('⚠️ Percorso non trovato');
+    return;
+  }
+
+  // traccia + contesto (serve per mostrare i marker foto)
+  apriMappaFull(p.traccia || [], p);
+}
+
+  
 /* ============================================================
    FUEL FINE TAPPA
 ============================================================ */
@@ -4429,23 +4446,33 @@ window.salvaDettagliPercorso = function () {
 //  apriMappaFull(t.traccia);
 //}
 
-  function apriTracciaPercorso(id) {
+function apriTracciaPercorso(id) {
   const tappe = caricaJSON('vt_tappe', []);
-  const tur   = caricaJSON('vt_turismo', []);
+  const turismo = caricaJSON('vt_turismo', []);
 
   const lista = []
     .concat(Array.isArray(tappe) ? tappe : [])
-    .concat(Array.isArray(tur) ? tur : []);
+    .concat(Array.isArray(turismo) ? turismo : []);
 
-  const t = lista.find(x => x.id === id);
+  const p = lista.find(x => String(x.id) === String(id));
 
-  if (!t || !t.traccia || t.traccia.length < 2) {
-    showToast('⚠️ Traccia non disponibile');
+  if (!p) {
+    showToast('⚠️ Percorso non trovato');
     return;
   }
-  apriMappaFull(t.traccia);
+
+  const coords = Array.isArray(p.traccia) ? p.traccia : [];
+
+  // ✅ passa anche l’oggetto percorso come “ctx”
+  apriMappaFull(coords, p);
 }
-  
+
+  const coords = Array.isArray(p.traccia) ? p.traccia : [];
+
+  // ✅ IMPORTANTISSIMO: passa anche il contesto "p"
+  // così apriMappaFull può chiamare renderMapFullPhotoMarkersForContext(p)
+  apriMappaFull(coords, p);
+}
 
 function isoNow() {
   return new Date().toISOString();
