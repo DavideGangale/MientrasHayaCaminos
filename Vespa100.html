@@ -1049,9 +1049,10 @@
     <button class="close-modal" onclick="annullaFuelInizioTappa()">×</button>
     <h2 style="color:#4caf50; text-align:center;">⛽ Livello serbatoio (inizio tappa)</h2>
 
-    <div style="font-size:13px;color:#aaa;margin-bottom:10px;text-align:center;">
-      Serbatoio: 2 gal (≈ 7.57 L). Seleziona cosa segna il galleggiante.
-    </div>
+
+
+    <div id="fuel-start-info" style="font-size:13px;color:#aaa;margin-bottom:10px;text-align:center;">Serbatoio: --</div>
+  
 
     
 <select id="fuel-start-select" class="inp-select" style="position:relative; z-index:5;"></select>
@@ -1086,9 +1087,7 @@
       <button class="close-modal" onclick="chiudiModal('modalFuelEnd')">×</button>
       <h2 style="color:#4caf50; text-align:center;">⛽ Livello serbatoio (fine tappa)</h2>
 
-      <div style="font-size:13px;color:#aaa;margin-bottom:10px;text-align:center;">
-        Serbatoio: 2 gal (≈ 7.57 L). Seleziona cosa segna il galleggiante.
-      </div>
+     <div id="fuel-end-info" style="font-size:13px;color:#aaa;margin-bottom:10px;text-align:center;">Serbatoio: --</div>
 
     
       <select id="fuel-end-select" class="inp-select" style="position:relative; z-index:5;"></select>
@@ -1656,6 +1655,13 @@ function tappaNuova() {
   return (tappaAttuale.kmPercorsi || 0) < 0.01 && (tappaAttuale.secondiGuida || 0) === 0;
 }
 
+
+function serveFuelStart() {
+  // chiede fuel start se non è stato ancora impostato per questa tappa/giro
+  return (tappaAttuale.fuelStartLitri == null);
+}
+
+  
 function startTrackingNow() {
   const btn = document.getElementById('btn-start-stop');
 
@@ -1776,7 +1782,7 @@ function toggleTracking() {
 
   // SE NON STO VIAGGIANDO -> DEVO PARTIRE
   // Se tappa nuova e non ho fuelStart, chiedi prima
- if (tappaNuova()) {
+ if (serveFuelStart()) {
   pendingStartTracking = true;
    popolaSelectLivelloSerbatoio('fuel-start-select', true);
    aggiornaTestoModaliSerbatoio();
@@ -1997,6 +2003,19 @@ function apriModal(id) {
   if (!m) return;
   m.classList.add('open');
 
+
+
+// ✅ Fuel modals: popola sempre select + testo (così il select non sarà mai vuoto)
+if (id === 'modalFuelStart') {
+  aggiornaTestoModaliSerbatoio();
+  popolaSelectLivelloSerbatoio('fuel-start-select', true);
+}
+if (id === 'modalFuelEnd') {
+  aggiornaTestoModaliSerbatoio();
+  popolaSelectLivelloSerbatoio('fuel-end-select', true);
+}
+  
+
 // ✅ popola sempre i select fuel quando apro i modali
 if (id === 'modalFuelStart') {
   popolaSelectLivelloSerbatoio('fuel-start-select', true);
@@ -2123,12 +2142,12 @@ function aggiornaTestoModaliSerbatoio() {
   const capL = getSerbatoioCapLitri();
   const capGal = capL / FAT_GAL;
 
-  // aggiorna i testi “Serbatoio: ...”
-  document.querySelectorAll('#modalFuelStart div, #modalFuelEnd div').forEach(el => {
-    if (el && el.innerText && el.innerText.includes('Serbatoio:')) {
-      el.innerText = `Serbatoio: ${capGal.toFixed(2)} gal (≈ ${capL.toFixed(2)} L). Seleziona cosa segna il galleggiante.`;
-    }
-  });
+  const txt = `Serbatoio: ${capGal.toFixed(2)} gal (≈ ${capL.toFixed(2)} L). Seleziona cosa segna il galleggiante.`;
+
+  const a = document.getElementById('fuel-start-info');
+  const b = document.getElementById('fuel-end-info');
+  if (a) a.innerText = txt;
+  if (b) b.innerText = txt;
 }
 
 
@@ -4557,6 +4576,11 @@ function importaDati(input) {
   reader.onload = (e) => {
     try {
       const data = JSON.parse(e.target.result);
+
+const langSel = document.getElementById('lang');
+if (langSel) langSel.value = LANG;
+applyLang();
+      
       if (!data._version) throw new Error('File non valido');
       if (!confirm('⚠️ Questo sovrascriverà TUTTI i dati attuali.\nContinuare?')) return;
 
