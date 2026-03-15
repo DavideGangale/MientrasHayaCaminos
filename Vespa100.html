@@ -1298,6 +1298,7 @@ function nuovaTappa(kmInizio) {
 }
 
 let tappaAttuale = nuovaTappa(0);
+  let pendingMount = null; // { invId, nome }
 
 /* ============================================================
    WAKE LOCK (tieni schermo acceso durante tracking)
@@ -4939,10 +4940,37 @@ function renderInventario() {
 function cambiaQta(i, delta) {
   const inv = caricaJSON('vt_inventario', []);
   if (!inv[i]) return;
-  inv[i].qta = Math.max(0, (inv[i].qta || 0) + delta);
+
+  // assicura ID stabile (serve per ritrovare il pezzo)
+  if (!inv[i].id) inv[i].id = String(Date.now()) + '_' + Math.random().toString(16).slice(2);
+
+  const oldQ = Number(inv[i].qta || 0);
+  const newQ = Math.max(0, oldQ + Number(delta || 0));
+  if (newQ === oldQ) return;
+
+  inv[i].qta = newQ;
   salva('vt_inventario', inv);
+
   renderInventario();
-  showToast(delta > 0 ? '➕ Aggiunto' : '➖ Rimosso');
+  renderChecklist();
+
+  // ✅ Se sto scalando (uso 1 pezzo), chiedi se lo sto montando
+  if (delta < 0) {
+    const ok = confirm(`Stai montando adesso 1 pezzo: "${inv[i].nome}"?`);
+    if (!ok) return;
+
+    pendingMount = { invId: inv[i].id, nome: inv[i].nome };
+
+    // precompila modal "Nuovo intervento"
+    const n = document.getElementById('log-nome');
+    const d = document.getElementById('log-descrizione');
+    const c = document.getElementById('log-costo');
+    if (n) n.value = `Montaggio ${inv[i].nome}`;
+    if (d) d.value = '';
+    if (c) c.value = '';
+
+    apriModal('modalLogDettaglio');
+  }
 }
 
 function resetUsura(i) {
@@ -4966,6 +4994,49 @@ function aggiungiRicambio() {
   const input = document.getElementById('nuovoRicambioNome');
   const nome = input ? input.value.trim() : '';
   if (!nome) { showToast('⚠️ Inserisci un nome'); return; }
+
+  const inv = caricaJSON('vt_inventario', []);
+
+  const cur = valutaAttuale || 'USD';
+  const costoStr = prompt(`Costo ricambio in ${cur} (opzionale)`, '');
+  const costoLocal = costoStr ? parseFloat(costoStr) : 0;
+  const costoUsd = (costoLocal > 0) ? convertLocalToUsd(costoLocal, cur) : 0;
+
+  inv.push({
+    id: String(Date.now()) + '_' + Math.random().toString(16).slice(2),
+    nome,
+    qta: 1,
+    durata: 5000,
+    lastKm: (parseFloat(carica('vt_kmTotali','0')) || 0),
+    costoLocal: costoLocal || 0,
+    costoUsd: costoUsd || 0,
+    valuta: cur,
+    fxToUsd: getFxToUsd(cur)
+  });
+
+  salva('vt_inventario', inv);
+
+  if (input) input.value = '';
+  renderInventario();
+  renderChecklist();
+  showToast('✅ Ricambio aggiunto: ' + nome);
+
+  // Somma alle spese (solo se ho costo valido)
+  if (costoUsd > 0) {
+    salva('vt_spesaRicambiUsd', (parseFloat(carica('vt_spesaRicambiUsd','0')) || 0) + costoUsd);
+
+    const paese = carica('vt_paeseAttuale','Colombia');
+    const datiPaesi = caricaJSON('vt_datiPaesi', {});
+    if (!datiPaesi[paese]) datiPaesi[paese] = {};
+    datiPaesi[paese].spesaRicambiUsd = (datiPaesi[paese].spesaRicambiUsd || 0) + costoUsd;
+    datiPaesi[paese].valuta = cur;
+    salva('vt_datiPaesi', datiPaesi);
+
+    aggiornaUI();
+  }
+}
+
+  
 
   const inv = caricaJSON('vt_inventario', []);
 
@@ -5121,10 +5192,32 @@ updateDriveSyncInfo();
   const f = document.getElementById('log-foto-input');
   if (f) f.value = '';
 
+
+  // ✅ Se stavo montando un pezzo dall’inventario, reset usura a km attuali
+if (pendingMount && pendingMount.invId) {
+  const inv = caricaJSON('vt_inventario', []);
+  const kmTot = parseFloat(carica('vt_kmTotali','0')) || 0;
+
+  const idx = inv.findIndex(x => x && x.id === pendingMount.invId);
+  if (idx !== -1) {
+    inv[idx].lastKm = kmTot; // riparte usura da qui
+    salva('vt_inventario', inv);
+  }
+
+  pendingMount = null;
+  renderInventario();
+  renderChecklist();
+}
+  
   chiudiModal('modalLogDettaglio');
   showToast('🔧 Intervento salvato!');
 }
 
+
+
+
+
+  
 function renderLogManutenzione() {
   const log = caricaJSON('vt_logbook', []);
   const container = document.getElementById('contenutoRegistro');
@@ -5158,17 +5251,79 @@ function eliminaIntervento(id) {
 /* ============================================================
    CHECKLIST
 ============================================================ */
+
+
+  function getInventarioWarnings() {
+  const inv = caricaJSON('vt_inventario', []);
+  const kmTot = parseFloat(carica('vt_kmTotali','0')) || 0;
+
+  const out = [];
+
+  for (const item of (Array.isArray(inv) ? inv : [])) {
+    const durata = Number(item.durata || 0);
+    if (!isFinite(durata) || durata <= 0) continue;
+
+    const lastKm = Number(item.lastKm || 0);
+    const kmDaUltimo = kmTot - lastKm;
+    const remaining = durata - kmDaUltimo;
+
+    // mostra in checklist solo se entro 500km o già scaduto
+    if (remaining <= 500) {
+      out.push({
+        nome: item.nome || 'Ricambio',
+        remaining,
+        durata,
+        kmDaUltimo
+      });
+    }
+  }
+
+  // urgenti prima, poi quelli più vicini
+  out.sort((a,b) => (a.remaining - b.remaining));
+  return out;
+}
+
+
+  
 function renderChecklist() {
   const lista = caricaJSON('vt_checklist', []);
   const container = document.getElementById('checklist-container');
   if (!container) return;
 
-  if (!lista.length) {
-    container.innerHTML = '<div style="color:#888; text-align:center; padding:20px;">Checklist vuota</div>';
+  const warns = getInventarioWarnings();
+
+  let html = '';
+
+  // ===== SEZIONE AVVISI MANUTENZIONE =====
+  if (warns.length) {
+    html += `<div style="color:#ff9800; font-weight:900; margin:6px 0 10px 0;">🔧 Avvisi manutenzione</div>`;
+
+    html += warns.map(w => {
+      const urgent = (w.remaining <= 0);
+      const color = urgent ? '#f44336' : (w.remaining <= 100 ? '#f44336' : (w.remaining <= 250 ? '#ff9800' : '#4caf50'));
+      const msg = urgent
+        ? `SCADUTO di ${Math.abs(Math.round(w.remaining))} km`
+        : `mancano ~${Math.round(w.remaining)} km`;
+
+      return `
+        <div class="checklist-item" style="border-left:5px solid ${color}; cursor:default;">
+          <input type="checkbox" disabled>
+          <span><b>${w.nome}</b> — <span style="color:${color}; font-weight:900;">${msg}</span></span>
+        </div>
+      `;
+    }).join('');
+
+    html += `<hr style="border:0;border-top:1px solid #333; margin:12px 0;">`;
+  }
+
+  // ===== SEZIONE CHECKLIST UTENTE =====
+  if (!Array.isArray(lista) || !lista.length) {
+    html += '<div style="color:#888; text-align:center; padding:20px;">Checklist vuota</div>';
+    container.innerHTML = html;
     return;
   }
 
-  container.innerHTML = lista.map((item, i) => `
+  html += lista.map((item, i) => `
     <div class="checklist-item ${item.fatto ? 'done' : ''}" onclick="toggleCheck(${i})">
       <input type="checkbox" ${item.fatto ? 'checked' : ''} onclick="event.stopPropagation(); toggleCheck(${i})">
       <span>${item.nome}</span>
@@ -5176,6 +5331,8 @@ function renderChecklist() {
         style="background:none; border:none; color:#666; margin-left:auto; cursor:pointer; font-size:16px;">🗑️</button>
     </div>
   `).join('');
+
+  container.innerHTML = html;
 }
 
 function toggleCheck(i) {
