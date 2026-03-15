@@ -564,7 +564,15 @@
     <div id="map"></div>
 
     <div class="dash-card" style="padding:10px; border:1px solid #333;">
-      <div style="font-size:11px; color:#aaa;">AUTONOMIA STIMATA</div>
+              
+        <div style="font-size:11px; color:#aaa; display:flex; align-items:center; justify-content:space-between;">
+          <span>AUTONOMIA STIMATA</span>
+          <span id="ui-fuel-badge" style="display:none; background:#f44336; color:white; padding:3px 8px; border-radius:999px; font-weight:bold; font-size:11px;">
+            ⛽ BENZINA BASSA
+          </span>
+        </div>
+
+      
       <div id="ui-autonomia-rapida" style="font-size:22px; font-weight:bold; color:var(--verde);">-- km</div>
       <div style="font-size:11px; color:#888;">Scorta: <span id="ui-scorta-rapida">0.0</span> <span class="txt-unita">L</span></div>
     </div>
@@ -1046,7 +1054,7 @@
     </div>
 
     
-<select id="fuel-start-select" class="inp-select"></select>
+<select id="fuel-start-select" class="inp-select" style="position:relative; z-index:5;"></select>
 
     <button class="btn-azione" style="background:#4caf50;color:black;" onclick="salvaFuelInizioTappa()">
       ✅ Conferma & Start
@@ -1082,7 +1090,8 @@
         Serbatoio: 2 gal (≈ 7.57 L). Seleziona cosa segna il galleggiante.
       </div>
 
-<select id="fuel-end-select" class="inp-select"></select></select>
+    
+      <select id="fuel-end-select" class="inp-select" style="position:relative; z-index:5;"></select>
 
       <button class="btn-azione" style="background:#4caf50;color:black;" onclick="salvaFuelFineTappa()">
         💾 Salva livello
@@ -1987,6 +1996,15 @@ function apriModal(id) {
   const m = document.getElementById(id);
   if (!m) return;
   m.classList.add('open');
+
+// ✅ popola sempre i select fuel quando apro i modali
+if (id === 'modalFuelStart') {
+  popolaSelectLivelloSerbatoio('fuel-start-select', true);
+}
+if (id === 'modalFuelEnd') {
+  popolaSelectLivelloSerbatoio('fuel-end-select', true);
+}
+  
 // ✅ popola sempre i select fuel quando apro i modali
 if (id === 'modalFuelStart') {
   popolaSelectLivelloSerbatoio('fuel-start-select', true);
@@ -2878,6 +2896,17 @@ function getConsumoUsatoKmPerL() {
 
   const serb = parseFloat(carica('vt_serbatoioLitri','0')) || 0;
   const pct = serb / cap;
+
+    // badge fisso in GUIDA
+const badge = document.getElementById('ui-fuel-badge');
+if (badge) {
+  if (pct <= LOW_FUEL_PCT) {
+    badge.style.display = 'inline-block';
+    badge.innerText = `⛽ ${Math.round(pct*100)}%`;
+  } else {
+    badge.style.display = 'none';
+  }
+}
 
   // per non rompere le scatole ogni secondo: max 1 avviso ogni 3 minuti
   const now = Date.now();
