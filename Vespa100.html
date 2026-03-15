@@ -4884,7 +4884,7 @@ function importaDati(input) {
 
 const langSel = document.getElementById('lang');
 if (langSel) langSel.value = LANG;
-applyLang();
+if (typeof applyLang === 'function') applyLang();
       
       if (!data._version) throw new Error('File non valido');
       if (!confirm('⚠️ Questo sovrascriverà TUTTI i dati attuali.\nContinuare?')) return;
