@@ -4895,6 +4895,24 @@ function renderStatsPaesi() {
 /* ============================================================
    INVENTARIO RICAMBI
 ============================================================ */
+function inferManutKeyFromNome(nome) {
+  const s = String(nome || '').toLowerCase();
+
+  if (s.includes('candela')) return 'candela';
+  if (s.includes('olio') && s.includes('cambio')) return 'olioCambio';
+  if (s.includes('ganasce') && (s.includes('ant') || s.includes('anter'))) return 'ganasceAnt';
+  if (s.includes('ganasce') && (s.includes('post'))) return 'ganascePost';
+  if (s.includes('frizione') || s.includes('dischi frizione')) return 'dischiFrizione';
+  if (s.includes('gomme') || s.includes('gomma') || s.includes('pne')) return 'gomme';
+  if (s.includes('cavo')) return 'cavi';
+
+  return null;
+}
+
+
+
+
+  
 function renderInventario() {
   const inv = caricaJSON('vt_inventario', []);
   const kmTot = parseFloat(carica('vt_kmTotali','0')) || 0;
@@ -4941,7 +4959,7 @@ function cambiaQta(i, delta) {
   const inv = caricaJSON('vt_inventario', []);
   if (!inv[i]) return;
 
-  // assicura ID stabile (serve per ritrovare il pezzo)
+  // ID stabile per ritrovare l’oggetto
   if (!inv[i].id) inv[i].id = String(Date.now()) + '_' + Math.random().toString(16).slice(2);
 
   const oldQ = Number(inv[i].qta || 0);
@@ -4954,17 +4972,22 @@ function cambiaQta(i, delta) {
   renderInventario();
   renderChecklist();
 
-  // ✅ Se sto scalando (uso 1 pezzo), chiedi se lo sto montando
+  // ✅ Se sto scalando (uso un pezzo), chiedi se lo stai montando ORA
   if (delta < 0) {
-    const ok = confirm(`Stai montando adesso 1 pezzo: "${inv[i].nome}"?`);
+    const ok = confirm(`Stai montando adesso 1 pezzo: "${inv[i].nome}" ?`);
     if (!ok) return;
 
-    pendingMount = { invId: inv[i].id, nome: inv[i].nome };
+    pendingMount = {
+      invId: inv[i].id,
+      nome: inv[i].nome,
+      manutKey: inferManutKeyFromNome(inv[i].nome)
+    };
 
     // precompila modal "Nuovo intervento"
     const n = document.getElementById('log-nome');
     const d = document.getElementById('log-descrizione');
     const c = document.getElementById('log-costo');
+
     if (n) n.value = `Montaggio ${inv[i].nome}`;
     if (d) d.value = '';
     if (c) c.value = '';
@@ -4996,18 +5019,30 @@ function aggiungiRicambio() {
   if (!nome) { showToast('⚠️ Inserisci un nome'); return; }
 
   const inv = caricaJSON('vt_inventario', []);
+  const kmTot = parseFloat(carica('vt_kmTotali','0')) || 0;
 
+  // ✅ chiedi costo (valuta locale corrente)
   const cur = valutaAttuale || 'USD';
-  const costoStr = prompt(`Costo ricambio in ${cur} (opzionale)`, '');
+  const costoStr = prompt(`Quanto hai pagato "${nome}"? (in ${cur}) (opzionale)`, '');
   const costoLocal = costoStr ? parseFloat(costoStr) : 0;
-  const costoUsd = (costoLocal > 0) ? convertLocalToUsd(costoLocal, cur) : 0;
 
+  // converto in USD se c’è costo
+  let costoUsd = 0;
+  if (isFinite(costoLocal) && costoLocal > 0) {
+    costoUsd = convertLocalToUsd(costoLocal, cur);
+    if (!isFinite(costoUsd) || costoUsd <= 0) {
+      showToast(`⚠️ Manca cambio per ${cur}. Vai in Settings.`);
+      costoUsd = 0;
+    }
+  }
+
+  // aggiungo ricambio in inventario
   inv.push({
     id: String(Date.now()) + '_' + Math.random().toString(16).slice(2),
     nome,
     qta: 1,
-    durata: 5000,
-    lastKm: (parseFloat(carica('vt_kmTotali','0')) || 0),
+    durata: 5000,     // puoi cambiarlo dopo
+    lastKm: kmTot,    // “inizio usura” (di solito = ora)
     costoLocal: costoLocal || 0,
     costoUsd: costoUsd || 0,
     valuta: cur,
@@ -5016,12 +5051,7 @@ function aggiungiRicambio() {
 
   salva('vt_inventario', inv);
 
-  if (input) input.value = '';
-  renderInventario();
-  renderChecklist();
-  showToast('✅ Ricambio aggiunto: ' + nome);
-
-  // Somma alle spese (solo se ho costo valido)
+  // ✅ somma a spesa ricambi (globale + paese)
   if (costoUsd > 0) {
     salva('vt_spesaRicambiUsd', (parseFloat(carica('vt_spesaRicambiUsd','0')) || 0) + costoUsd);
 
@@ -5033,7 +5063,14 @@ function aggiungiRicambio() {
     salva('vt_datiPaesi', datiPaesi);
 
     aggiornaUI();
+    showToast(`🧾 Ricambio aggiunto: +$${costoUsd.toFixed(2)}`);
+  } else {
+    showToast('✅ Ricambio aggiunto: ' + nome);
   }
+
+  if (input) input.value = '';
+  renderInventario();
+  renderChecklist();
 }
 
   
@@ -5153,6 +5190,7 @@ updateDriveSyncInfo();
 
 
   // ✅ Se stavo montando un pezzo dall’inventario, reset usura a km attuali
+// ✅ Se stavo montando un pezzo dall’inventario, reset usura a km attuali
 if (pendingMount && pendingMount.invId) {
   const inv = caricaJSON('vt_inventario', []);
   const kmTot = parseFloat(carica('vt_kmTotali','0')) || 0;
@@ -5163,10 +5201,26 @@ if (pendingMount && pendingMount.invId) {
     salva('vt_inventario', inv);
   }
 
+  // ✅ aggiorna “ultimo cambio” per gli avvisi (se riconosciuto)
+  if (pendingMount.manutKey) {
+    const last = caricaJSON('vt_manut_lastKm', {});
+    last[pendingMount.manutKey] = kmTot;
+    salva('vt_manut_lastKm', last);
+
+    // reset stato avvisi per quella voce
+    const ws = caricaJSON('vt_manut_warnState', {});
+    ws[pendingMount.manutKey] = {};
+    salva('vt_manut_warnState', ws);
+  }
+
   pendingMount = null;
   renderInventario();
   renderChecklist();
 }
+
+
+
+
   
   chiudiModal('modalLogDettaglio');
   showToast('🔧 Intervento salvato!');
