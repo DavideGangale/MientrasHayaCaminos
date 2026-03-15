@@ -3335,6 +3335,19 @@ function renderTappe() {
           🗺️ Vedi traccia
         </button>
 
+<button onclick="scaricaGPX(${t.id})"
+  style="background:#4caf50;border:none;color:black;padding:8px 10px;border-radius:8px;font-size:12px;cursor:pointer;margin-top:8px;">
+  ⬇️ GPX
+</button>
+
+<button onclick="scaricaKML(${t.id})"
+  style="background:#00bcd4;border:none;color:black;padding:8px 10px;border-radius:8px;font-size:12px;cursor:pointer;margin-top:8px;">
+  ⬇️ KML
+</button>
+
+
+
+
 ${t.titolo ? `<div style="margin-top:6px;"><b>📍 ${t.titolo}</b></div>` : ''}
 ${t.note ? `<div style="margin-top:6px;color:#bbb;">${t.note}</div>` : ''}
 
@@ -3858,7 +3871,121 @@ window.salvaDettagliPercorso = function () {
 }
   
 
+function isoNow() {
+  return new Date().toISOString();
+}
 
+function safeName(s) {
+  return String(s || '')
+    .trim()
+    .replace(/[\/\\?%*:|"<>]/g, '-')   // caratteri non validi per filename
+    .replace(/\s+/g, ' ')
+    .slice(0, 80);
+}
+
+function coordsToGPX(traccia, nome = 'VespaTrek') {
+  const pts = Array.isArray(traccia) ? traccia : [];
+  // accetta sia [lat,lon] che oggetti Leaflet {lat,lng}
+  const norm = pts.map(p => {
+    if (Array.isArray(p)) return { lat: Number(p[0]), lon: Number(p[1]) };
+    if (p && typeof p === 'object') return { lat: Number(p.lat), lon: Number(p.lng ?? p.lon) };
+    return null;
+  }).filter(p => p && isFinite(p.lat) && isFinite(p.lon));
+
+  if (norm.length < 2) return null;
+
+  const header =
+`<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="VespaTrek" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata>
+    <name>${nome}</name>
+    <time>${isoNow()}</time>
+  </metadata>
+  <trk>
+    <name>${nome}</name>
+    <trkseg>
+`;
+
+  const seg = norm.map(p => `      <trkpt lat="${p.lat.toFixed(6)}" lon="${p.lon.toFixed(6)}"></trkpt>`).join('\n');
+
+  const footer =
+`
+    </trkseg>
+  </trk>
+</gpx>`;
+
+  return header + seg + footer;
+}
+
+function coordsToKML(traccia, nome = 'VespaTrek') {
+  const pts = Array.isArray(traccia) ? traccia : [];
+  const norm = pts.map(p => {
+    if (Array.isArray(p)) return [Number(p[1]), Number(p[0])]; // KML = lon,lat
+    if (p && typeof p === 'object') return [Number(p.lng ?? p.lon), Number(p.lat)];
+    return null;
+  }).filter(p => p && isFinite(p[0]) && isFinite(p[1]));
+
+  if (norm.length < 2) return null;
+
+  const coordStr = norm.map(p => `${p[0].toFixed(6)},${p[1].toFixed(6)},0`).join(' ');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>${nome}</name>
+    <Placemark>
+      <name>${nome}</name>
+      <Style>
+        <LineStyle><color>ff2f32d3</color><width>4</width></LineStyle>
+      </Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>${coordStr}</coordinates>
+      </LineString>
+    </Placemark>
+  </Document>
+</kml>`;
+}
+
+function downloadTextFile(filename, content, mime = 'application/octet-stream') {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function scaricaGPX(id) {
+  const found = window.trovaPercorsoById(id);
+  if (!found || !found.item) { showToast('⚠️ Percorso non trovato'); return; }
+
+  const t = found.item;
+  const nome = safeName(`${t.tipo || 'Percorso'}_${t.data || ''}_${t.paese || ''}_${t.km || ''}km_${t.titolo || ''}`) || 'vespatrek';
+
+  const gpx = coordsToGPX(t.traccia, nome);
+  if (!gpx) { showToast('⚠️ Traccia insufficiente per GPX'); return; }
+
+  downloadTextFile(`${nome}.gpx`, gpx, 'application/gpx+xml');
+  showToast('⬇️ GPX scaricato');
+}
+
+function scaricaKML(id) {
+  const found = window.trovaPercorsoById(id);
+  if (!found || !found.item) { showToast('⚠️ Percorso non trovato'); return; }
+
+  const t = found.item;
+  const nome = safeName(`${t.tipo || 'Percorso'}_${t.data || ''}_${t.paese || ''}_${t.km || ''}km_${t.titolo || ''}`) || 'vespatrek';
+
+  const kml = coordsToKML(t.traccia, nome);
+  if (!kml) { showToast('⚠️ Traccia insufficiente per KML'); return; }
+
+  downloadTextFile(`${nome}.kml`, kml, 'application/vnd.google-earth.kml+xml');
+  showToast('⬇️ KML scaricato');
+}
   
 //function eliminaTappa(id) {
 //  if (!confirm('Eliminare questa tappa?')) return;
