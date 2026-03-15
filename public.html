@@ -61,7 +61,47 @@
   cursor:pointer;
 }
 
-
+.diario-tools{
+  display:grid;
+  grid-template-columns: 1fr 160px;
+  gap:10px;
+  align-items:center;
+  margin-bottom:10px;
+}
+.diario-tools input[type="search"]{
+  width:100%;
+  padding:10px;
+  border-radius:10px;
+  background:#111;
+  color:#fff;
+  border:1px solid #444;
+}
+.diario-tools .chk{
+  grid-column:1 / -1;
+  display:flex;
+  gap:10px;
+  align-items:center;
+  color:#aaa;
+  font-size:13px;
+}
+.diario-tools #diario-more{
+  grid-column:1 / -1;
+  width:100%;
+}
+@media (min-width: 700px){
+  .diario-tools{
+    grid-template-columns: 1fr 200px 180px 160px;
+  }
+  .diario-tools .chk{
+    grid-column:auto;
+    justify-content:flex-start;
+  }
+  .diario-tools #diario-more{
+    grid-column:auto;
+    width:auto;
+    justify-self:end;
+  }
+}
     
   </style>
 </head>
@@ -89,10 +129,25 @@
     <div class="muted" id="percInfo" style="margin-top:8px"></div>
   </div>
 
-  <div class="card">
-    <h2>📖 Diario (con foto)</h2>
-    <div id="diario"></div>
+<div class="card">
+  <h2>📖 Diario (con foto)</h2>
+
+  <div class="diario-tools">
+    <input id="diario-q" type="search" placeholder="Cerca nel diario (testo/paese/km)..." />
+    <select id="diario-paese">
+      <option value="">Tutti i paesi</option>
+    </select>
+
+    <label class="chk">
+      <input id="diario-solo-foto" type="checkbox">
+      Solo con foto
+    </label>
+
+    <button class="btn" id="diario-more" type="button">Carica altre</button>
   </div>
+
+  <div id="diario"></div>
+</div>
 
   <div class="card">
     <h2>🔧 Manutenzioni</h2>
@@ -107,8 +162,44 @@
 
   function moneyUsd(x){ return '$' + Number(x||0).toFixed(2); }
 
+function escapeHtml(s){
+  return String(s ?? '')
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&#39;");
+}
+
+function debounce(fn, ms=250){
+  let t=null;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), ms);
+  };
+}
+
+  
+function debounce(fn, ms=250){
+  let t=null;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), ms);
+  };
+}
+  
   let map, poly, marker;
 
+
+  // ===== DIARIO: stato filtri/paginazione
+let diarioAll = [];
+let diarioLimit = 12; // quante voci mostrare inizialmente
+
+// ===== LIGHTBOX: lista foto diario
+let lbPhotos = [];
+let lbIndex = -1;
+
+  
   function initMap(){
     map = L.map('mapPub', { zoomControl:true, attributionControl:false }).setView([-15, -60], 3);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom:19 }).addTo(map);
@@ -157,7 +248,9 @@ function setTrace(coords){
 }
   }
 
-  setTimeout(()=>map.invalidateSize(), 150);
+  setTimeout(() => {
+  if (map) map.invalidateSize();
+}, 150);
 
 
   async function main(){
@@ -223,16 +316,38 @@ if (lista.length) showPerc(lista[0].id);
 else setTrace([]); // pulisce la mappa se non ci sono percorsi
 
     // diario
-    const diario = data.diario || [];
-    document.getElementById('diario').innerHTML = diario.map(d => `
-      <div class="entry">
-        <div class="muted">📅 ${d.data||''} ${d.ora||''} — ${d.paese||''} — km ${d.km||''}</div>
-        <div style="margin-top:6px; white-space:pre-wrap;">${(d.testo||'').replace(/</g,'&lt;')}</div>
-        ${d.foto ? `<div style="margin-top:8px;">
-  <img class="diario-thumb" src="${d.foto}" loading="lazy" onclick="openLightbox(this.src)">
-</div>` : ''}
-      </div>
-    `).join('') || '<div class="muted">Nessuna voce</div>';
+// ===== DIARIO (con filtri + paginazione)
+diarioAll = Array.isArray(data.diario) ? data.diario : [];
+diarioLimit = 12;
+
+// popola dropdown paesi
+const selPaese = document.getElementById('diario-paese');
+if (selPaese) {
+  const paesi = [...new Set(diarioAll.map(d => d.paese).filter(Boolean))].sort();
+  selPaese.innerHTML = `<option value="">Tutti i paesi</option>` + paesi.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
+}
+
+// prepara lista foto per lightbox (solo voci con foto)
+lbPhotos = diarioAll.filter(d => !!d.foto).map(d => d.foto);
+
+// listeners filtri
+const qEl = document.getElementById('diario-q');
+const fotoOnlyEl = document.getElementById('diario-solo-foto');
+const moreBtn = document.getElementById('diario-more');
+
+const rerender = () => renderDiarioPub();
+if (qEl) qEl.addEventListener('input', debounce(() => { diarioLimit = 12; rerender(); }, 250));
+if (selPaese) selPaese.addEventListener('change', () => { diarioLimit = 12; rerender(); });
+if (fotoOnlyEl) fotoOnlyEl.addEventListener('change', () => { diarioLimit = 12; rerender(); });
+
+if (moreBtn) {
+  moreBtn.addEventListener('click', () => {
+    diarioLimit += 12;
+    rerender();
+  });
+}
+
+renderDiarioPub();
 
     // manutenzioni
     const man = data.manutenzioni || [];
@@ -253,13 +368,104 @@ else setTrace([]); // pulisce la mappa se non ci sono percorsi
   });
 
 
-function openLightbox(src){
+  function renderDiarioPub(){
+  const container = document.getElementById('diario');
+  if (!container) return;
+
+  const q = (document.getElementById('diario-q')?.value || '').trim().toLowerCase();
+  const paeseSel = document.getElementById('diario-paese')?.value || '';
+  const soloFoto = !!document.getElementById('diario-solo-foto')?.checked;
+
+  let list = [...diarioAll];
+
+  // filtri
+  if (paeseSel) list = list.filter(d => String(d.paese||'') === String(paeseSel));
+  if (soloFoto) list = list.filter(d => !!d.foto);
+
+  if (q) {
+    list = list.filter(d => {
+      const hay =
+        `${d.data||''} ${d.ora||''} ${d.paese||''} ${d.km||''} ${d.testo||''}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }
+
+  // più recente prima (di solito già così, ma teniamolo robusto)
+  list.sort((a,b) => (b.id||0) - (a.id||0));
+
+  const shown = list.slice(0, diarioLimit);
+
+  if (!shown.length) {
+    container.innerHTML = '<div class="muted">Nessuna voce (con questi filtri)</div>';
+  } else {
+    container.innerHTML = shown.map(d => {
+      const testoSafe = escapeHtml(d.testo || '');
+      const metaSafe = `📅 ${escapeHtml(d.data||'')} ${escapeHtml(d.ora||'')} — ${escapeHtml(d.paese||'')} — km ${escapeHtml(d.km||'')}`;
+
+      // se c’è foto, apriamo lightbox con indice corretto nella lista foto
+      let fotoHtml = '';
+      if (d.foto) {
+        const idx = lbPhotos.findIndex(x => x === d.foto);
+        fotoHtml = `
+          <div style="margin-top:8px;">
+            <img class="diario-thumb"
+                 src="${d.foto}"
+                 loading="lazy"
+                 onclick="openLightboxIndex(${idx})">
+          </div>
+        `;
+      }
+
+      return `
+        <div class="entry">
+          <div class="muted">${metaSafe}</div>
+          <div style="margin-top:6px; white-space:pre-wrap;">${testoSafe}</div>
+          ${fotoHtml}
+        </div>
+      `;
+    }).join('');
+  }
+
+  // bottone "Carica altre"
+  const moreBtn = document.getElementById('diario-more');
+  if (moreBtn) {
+    moreBtn.style.display = (list.length > diarioLimit) ? 'block' : 'none';
+    moreBtn.innerText = (list.length > diarioLimit)
+      ? `Carica altre (${Math.min(12, list.length - diarioLimit)} di ${list.length - diarioLimit})`
+      : 'Carica altre';
+  }
+}
+
+  
+function openLightboxIndex(i){
+  if (!Array.isArray(lbPhotos) || lbPhotos.length === 0) return;
+  if (!isFinite(i) || i < 0) i = 0;
+  if (i >= lbPhotos.length) i = lbPhotos.length - 1;
+
+  lbIndex = i;
+
   const box = document.getElementById('lightbox');
   const img = document.getElementById('lightboxImg');
   if (!box || !img) return;
-  img.src = src;
+
+  img.src = lbPhotos[lbIndex];
   box.classList.add('open');
 }
+
+function lightboxNext(){
+  if (!lbPhotos.length) return;
+  lbIndex = (lbIndex + 1) % lbPhotos.length;
+  const img = document.getElementById('lightboxImg');
+  if (img) img.src = lbPhotos[lbIndex];
+}
+
+function lightboxPrev(){
+  if (!lbPhotos.length) return;
+  lbIndex = (lbIndex - 1 + lbPhotos.length) % lbPhotos.length;
+  const img = document.getElementById('lightboxImg');
+  if (img) img.src = lbPhotos[lbIndex];
+}
+
 function closeLightbox(){
   const box = document.getElementById('lightbox');
   const img = document.getElementById('lightboxImg');
@@ -268,12 +474,32 @@ function closeLightbox(){
 }
 
 
+  window.addEventListener('keydown', (e) => {
+  const boxOpen = document.getElementById('lightbox')?.classList.contains('open');
+  if (!boxOpen) return;
+
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowRight') lightboxNext();
+  if (e.key === 'ArrowLeft') lightboxPrev();
+});
+
   
 </script>
 
-  <div id="lightbox" onclick="closeLightbox()">
+<div id="lightbox" onclick="closeLightbox()">
   <button id="lightboxClose" onclick="event.stopPropagation(); closeLightbox()">×</button>
-  <img id="lightboxImg" alt="Foto diario">
+
+  <button onclick="event.stopPropagation(); lightboxPrev()"
+    style="position:fixed;left:14px;top:50%;transform:translateY(-50%);
+           background:#333;color:#fff;border:none;width:42px;height:42px;border-radius:50%;
+           font-size:18px;cursor:pointer;">‹</button>
+
+  <img id="lightboxImg" alt="Foto diario" onclick="event.stopPropagation();">
+
+  <button onclick="event.stopPropagation(); lightboxNext()"
+    style="position:fixed;right:14px;top:50%;transform:translateY(-50%);
+           background:#333;color:#fff;border:none;width:42px;height:42px;border-radius:50%;
+           font-size:18px;cursor:pointer;">›</button>
 </div>
 
   
