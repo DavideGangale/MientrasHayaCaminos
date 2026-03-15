@@ -416,7 +416,7 @@ function debounce(fn, ms=250){
   let map, poly, marker;
 
 let selectedPercorso = null;
-
+let photoLayer = null;
   
   // ===== DIARIO: stato filtri/paginazione
 let diarioAll = [];
@@ -432,6 +432,7 @@ let lbIndex = -1;
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom:19 }).addTo(map);
     poly = L.polyline([], { color:'#d32f2f', weight:4, opacity:0.9 }).addTo(map);
     marker = L.marker([-15, -60]).addTo(map);
+    photoLayer = L.layerGroup().addTo(map);
   }
 
   function cleanCoords(coords) {
@@ -599,6 +600,40 @@ const info =
 
       const coords = p.traccia || [];
       setTrace(coords);
+
+
+// markers foto (diario) dentro start/end del percorso selezionato
+if (photoLayer) photoLayer.clearLayers();
+
+const startTs = Number(p.startTs || 0);
+const endTs = Number(p.endTs || 0);
+
+const pics = (Array.isArray(data.diario) ? data.diario : [])
+  .filter(d => d && d.geo && isFinite(d.geo.lat) && isFinite(d.geo.lon))
+  .filter(d => {
+    const ts = Number(d.ts || d.id || 0);
+    if (startTs && endTs) return ts >= startTs && ts <= endTs;
+    return true; // fallback: se mancano start/end, mostra tutte
+  });
+
+pics.forEach(d => {
+  const lat = Number(d.geo.lat), lon = Number(d.geo.lon);
+  const foto = d.fotoUrl || d.foto;
+  const html = `
+    <div style="min-width:180px">
+      <div style="font-weight:700; margin-bottom:6px;">${(d.paese||'')}</div>
+      ${foto ? `<img src="${foto}" style="width:100%;border-radius:10px;border:1px solid #333;">` : ''}
+      <div style="margin-top:6px; white-space:pre-wrap; color:#ddd;">${(d.testo||'').slice(0,140)}</div>
+    </div>
+  `;
+  L.circleMarker([lat, lon], { radius:7, color:'#ff9800', fillColor:'#ff9800', fillOpacity:0.9 })
+    .addTo(photoLayer)
+    .bindPopup(html);
+});
+
+
+
+      
     }
 initMap();
 
