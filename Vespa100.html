@@ -5328,9 +5328,13 @@ function renderChecklist() {
   container.innerHTML = lista.map((item, i) => `
     <div class="checklist-item ${item.fatto ? 'done' : ''}" onclick="toggleCheck(${i})">
       <input type="checkbox" ${item.fatto ? 'checked' : ''} onclick="event.stopPropagation(); toggleCheck(${i})">
-      <span>${item.nome}</span>
-      <button onclick="event.stopPropagation(); eliminaCheck(${i})"
-        style="background:none; border:none; color:#666; margin-left:auto; cursor:pointer; font-size:16px;">🗑️</button>
+     <span>${item.nome}</span>
+
+<div class="checklist-actions" onclick="event.stopPropagation();">
+  <button class="chk-btn" onclick="moveCheck(${i}, -1)" title="Su">▲</button>
+  <button class="chk-btn" onclick="moveCheck(${i}, +1)" title="Giù">▼</button>
+  <button class="chk-btn danger" onclick="eliminaCheck(${i})" title="Elimina">🗑️</button>
+</div>
     </div>
   `).join('');
 }
@@ -5348,6 +5352,22 @@ function eliminaCheck(i) {
   salva('vt_checklist', lista);
   renderChecklist();
 }
+
+
+  function moveCheck(i, dir) {
+  const lista = caricaJSON('vt_checklist', []);
+  const j = i + dir;
+  if (!lista[i] || !lista[j]) return;
+
+  const tmp = lista[i];
+  lista[i] = lista[j];
+  lista[j] = tmp;
+
+  salva('vt_checklist', lista);
+  renderChecklist();
+}
+
+  
 
 function aggiungiCheckItem() {
   const input = document.getElementById('nuovaCheckItem');
