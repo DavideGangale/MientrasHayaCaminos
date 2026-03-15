@@ -3234,7 +3234,8 @@ async function processUploadQueue(maxItems = 4) {
       }
     } catch (e) {
       console.warn('processUploadQueue job error', e);
-      keep.push(job);
+lastErrMsg = (e && e.message) ? e.message : String(e);
+keep.push(job);
     }
   }
 
@@ -3246,8 +3247,8 @@ async function processUploadQueue(maxItems = 4) {
     renderLogManutenzione?.();
     showToast(`✅ Sync completato: ${done} foto caricate`);
   } else {
-    showToast('ℹ️ Nessuna foto caricata (controlla Drive/permessi)');
-  }
+  showToast('ℹ️ Nessuna foto caricata' + (lastErrMsg ? (': ' + lastErrMsg.slice(0,80)) : ''), 5000);
+}
 }
 
 function syncFotoDriveNow() {
