@@ -457,6 +457,35 @@
       .speed{font-size:50px;}
       .header{padding:8px;font-size:18px;}
     }
+
+
+
+    /* TAG DIARIO */
+.tag-grid{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:10px;
+}
+.tag-chip{
+  padding:8px 10px;
+  border-radius:999px;
+  border:1px solid #555;
+  background:#222;
+  color:#bbb;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+  user-select:none;
+}
+.tag-chip.active{
+  background:var(--giallo);
+  border-color:var(--giallo);
+  color:#000;
+}
+
+
+    
   </style>
 </head>
 
@@ -621,6 +650,13 @@
         <h3 style="margin-top:0; color:#e91e63;">📖 Diario di Viaggio</h3>
         <textarea id="diario-testo" placeholder="Scrivi un pensiero, un incontro, un'esperienza..." rows="3"></textarea>
 
+        
+<div style="margin-top:10px; font-size:12px; color:#aaa; text-align:left;">
+  Tag (seleziona 0 o più):
+</div>
+<div id="diario-tags" class="tag-grid"></div>
+
+        
         <input type="file" id="foto-input" accept="image/*" capture="environment" style="display:none;"
                onchange="anteprima('foto-input','anteprima-foto')">
 
@@ -2952,6 +2988,53 @@ async function anteprima(inputId, containerID) {
   }
 }
 
+
+  // ===== TAG PREDEFINITI DIARIO =====
+const DIARIO_TAGS_PRESET = [
+  'Paesaggi',
+  'Persone',
+  'Officina',
+  'Problemi',
+  'Frontiera',
+  'Burocrazia',
+  'Polizia',
+  'Strade',
+  'Pioggia',
+  'Campeggio',
+  'Cibo',
+  'Animali'
+];
+
+let diarioTagsSelezionati = new Set();
+
+function renderDiarioTagsPreset() {
+  const box = document.getElementById('diario-tags');
+  if (!box) return;
+
+  box.innerHTML = DIARIO_TAGS_PRESET.map(tag => {
+    const on = diarioTagsSelezionati.has(tag);
+    return `
+      <div class="tag-chip ${on ? 'active' : ''}"
+           onclick="toggleDiarioTag('${tag.replace(/'/g, "\\'")}')">
+        ${tag}
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleDiarioTag(tag) {
+  if (diarioTagsSelezionati.has(tag)) diarioTagsSelezionati.delete(tag);
+  else diarioTagsSelezionati.add(tag);
+  renderDiarioTagsPreset();
+}
+
+function clearDiarioTags() {
+  diarioTagsSelezionati = new Set();
+  renderDiarioTagsPreset();
+}
+
+
+  
 function salvaDiario() {
   const testoEl = document.getElementById('diario-testo');
   const testo = testoEl ? testoEl.value.trim() : '';
@@ -2963,16 +3046,16 @@ function salvaDiario() {
   const paese = carica('vt_paeseAttuale','Colombia');
   const now = new Date();
 
-  const entry = {
-    id: Date.now(),
-    data: now.toLocaleDateString('it-IT'),
-    ora: now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
-    paese,
-    km: (parseFloat(carica('vt_kmTotali','0')) || 0).toFixed(1),
-    testo,
-    foto: fotoSrc
-  };
-
+ const entry = {
+  id: Date.now(),
+  data: now.toLocaleDateString('it-IT'),
+  ora: now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
+  paese,
+  km: (parseFloat(carica('vt_kmTotali','0')) || 0).toFixed(1),
+  testo,
+  foto: fotoSrc,
+  tags: Array.from(diarioTagsSelezionati) // <-- NUOVO
+};
   const diario = caricaJSON('vt_diario', []);
   diario.unshift(entry);
   salva('vt_diario', diario);
@@ -2990,6 +3073,9 @@ setTimeout(() => {
     anteprimaDiv.style.display = 'none';
     anteprimaDiv.dataset.src = '';
   }
+
+clearDiarioTags();
+  
   const fi = document.getElementById('foto-input');
   if (fi) fi.value = '';
 
@@ -3013,8 +3099,17 @@ function renderDiario() {
         <span class="diario-data">📅 ${e.data} ${e.ora} — ${e.km} km</span>
         <span class="diario-paese">${e.paese}</span>
       </div>
+      
       <div class="diario-testo">${e.testo}</div>
-      ${e.foto ? `<img src="${e.foto}" class="diario-foto" loading="lazy">` : ''}
+
+${Array.isArray(e.tags) && e.tags.length
+  ? `<div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:6px;">
+      ${e.tags.map(t => `<span style="font-size:11px; padding:4px 8px; border-radius:999px; background:#222; border:1px solid #444; color:var(--giallo); font-weight:bold;">${t}</span>`).join('')}
+     </div>`
+  : ''}
+
+${e.foto ? `<img src="${e.foto}" class="diario-foto" loading="lazy">` : ''}
+      
       <button onclick="eliminaDiario(${e.id})"
         style="background:none; border:none; color:#666; font-size:12px; cursor:pointer; margin-top:5px;">🗑️ Elimina</button>
     </div>
@@ -4209,13 +4304,14 @@ async function esportaDatiPubblici() {
     const diarioPub = await Promise.all(diarioSorted.map(async d => {
       const keepFoto = d.foto && keepFotoIds.has(d.id);
       return {
-        id: d.id,
-        data: d.data, ora: d.ora,
-        paese: d.paese,
-        km: d.km,
-        testo: d.testo,
-        foto: keepFoto ? await sanitizeImageDataUrl(d.foto, FOTO_MAX_W, FOTO_QUALITY) : null
-      };
+  id: d.id,
+  data: d.data, ora: d.ora,
+  paese: d.paese,
+  km: d.km,
+  testo: d.testo,
+  tags: Array.isArray(d.tags) ? d.tags : [],   // <-- NUOVO
+  foto: keepFoto ? await sanitizeImageDataUrl(d.foto, FOTO_MAX_W, FOTO_QUALITY) : null
+};
     }));
 
     // MANUTENZIONI (senza foto)
@@ -4235,6 +4331,7 @@ async function esportaDatiPubblici() {
       _version: 'public-1.0',
       _exportDate: new Date().toISOString(),
       titolo: 'VespaTrek PX150',
+      diarioTagsPreset: DIARIO_TAGS_PRESET,
       paeseAttuale: carica('vt_paeseAttuale','Colombia'),
 
       stats: {
@@ -4462,6 +4559,8 @@ refreshStatsPaeseDropdown();
   aggiornaUIOlioStock();
   aggiornaTempoGuidaUI();
   renderDiario();
+
+    renderDiarioTagsPreset();
 
   await setLoadingProgress(100, '✅ Pronto!');
   await new Promise(r => setTimeout(r, 400));
