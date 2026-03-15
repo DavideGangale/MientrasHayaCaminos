@@ -3658,7 +3658,7 @@ ${Array.isArray(e.tags) && e.tags.length
      </div>`
   : ''}
 
-${e.foto ? `<img src="${e.foto}" class="diario-foto" loading="lazy">` : ''}
+${(e.fotoUrl || e.foto) ? `<img src="${e.fotoUrl || e.foto}" class="diario-foto" loading="lazy">` : ''}
       
       <button onclick="eliminaDiario(${e.id})"
         style="background:none; border:none; color:#666; font-size:12px; cursor:pointer; margin-top:5px;">🗑️ Elimina</button>
