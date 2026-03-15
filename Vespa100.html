@@ -2058,9 +2058,10 @@ function cambiaPagina(id, btn) {
   if (page) page.classList.add('active');
   if (btn) btn.classList.add('active');
 
-  if (id === 'miscela') aggiornaAutonomia();
-  if (id === 'officina') { renderInventario(); renderChecklist(); }
-  if (id === 'viaggio') aggiornaUI();
+ if (id === 'miscela') aggiornaAutonomia();
+if (id === 'officina') { renderInventario(); renderChecklist(); }
+if (id === 'viaggio') aggiornaUI();
+if (id === 'settings') { caricaSettingsAvanzatiUI(); aggiornaFxSettingsUI(); }
 }
 
 /* ============================================================
@@ -3709,6 +3710,7 @@ aggiornaTotTanicheUI();
   //salva('vt_tanicheCapLitri', String(tan.toFixed(3)));
 
   showToast('✅ Parametri viaggio salvati');
+  caricaSettingsAvanzatiUI();
   aggiornaUI();
 }
 
