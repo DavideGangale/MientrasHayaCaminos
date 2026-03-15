@@ -1433,7 +1433,9 @@ initDB('vt_valuta', 'USD');
   initDB('vt_spesaRicambiUsd', '0');
   initDB('vt_spesaManodoperaUsd', '0');
 
-
+// ===== OFFICINA: ultimo cambio + stato avvisi =====
+initDB('vt_manut_lastKm', JSON.stringify({}));     // es: { dischiFrizione: 12345, gomme: 9000, ... }
+initDB('vt_manut_warnState', JSON.stringify({}));  // es: { dischiFrizione: {500:true,250:true,100:false} }
 
   // ===== SETTINGS AVANZATI =====
  // initDB('vt_serbatoioCapLitri', String(SERBATOIO_LITRI.toFixed(3))); // default 7.57 L
@@ -2593,6 +2595,134 @@ function setHTML(id, html) {
   if (el) el.innerHTML = html;
 }
 
+
+
+/* ============================================================
+   OFFICINA — MANUTENZIONE (avvisi) + SPESE RICAMBI
+============================================================ */
+
+const MANUT_LABELS = {
+  candela: 'Candela',
+  olioCambio: 'Olio cambio',
+  ganasceAnt: 'Ganasce freno ant.',
+  ganascePost: 'Ganasce freno post.',
+  dischiFrizione: 'Dischi frizione',
+  gomme: 'Gomme',
+  cavi: 'Cavi'
+};
+
+const MANUT_THRESHOLDS = [500, 250, 100];
+
+function getKmTot() {
+  return parseFloat(carica('vt_kmTotali','0')) || 0;
+}
+
+function getManutIntervalli() {
+  return caricaJSON('vt_manut_intervalli', {});
+}
+
+function getManutLastKmMap() {
+  return caricaJSON('vt_manut_lastKm', {});
+}
+
+function setManutLastKm(key, kmTot) {
+  const m = getManutLastKmMap();
+  m[key] = Number(kmTot || 0);
+  salva('vt_manut_lastKm', m);
+
+  // reset stato avvisi per quella voce
+  const ws = caricaJSON('vt_manut_warnState', {});
+  ws[key] = {}; 
+  salva('vt_manut_warnState', ws);
+}
+
+function getWarnState() {
+  return caricaJSON('vt_manut_warnState', {});
+}
+
+function markWarned(key, th) {
+  const ws = getWarnState();
+  if (!ws[key]) ws[key] = {};
+  ws[key][String(th)] = true;
+  salva('vt_manut_warnState', ws);
+}
+
+function isWarned(key, th) {
+  const ws = getWarnState();
+  return !!(ws[key] && ws[key][String(th)]);
+}
+
+// ritorna una lista di avvisi “attivi” da mostrare in checklist
+function getManutWarningsList() {
+  const km = getKmTot();
+  const intervalli = getManutIntervalli();
+  const lastMap = getManutLastKmMap();
+
+  const out = [];
+
+  for (const [key, intervallo] of Object.entries(intervalli || {})) {
+    const intKm = Number(intervallo || 0);
+    if (!isFinite(intKm) || intKm <= 0) continue;
+
+    const lastKm = Number(lastMap[key] || 0);
+    const nextAt = lastKm + intKm;
+    const remaining = nextAt - km;
+
+    // se già oltre, consideralo “URGENTE”
+    if (remaining <= 0) {
+      out.push({ key, label: MANUT_LABELS[key] || key, remaining, nextAt, urgent: true });
+      continue;
+    }
+
+    // se dentro una soglia, aggiungilo
+    for (const th of MANUT_THRESHOLDS) {
+      if (remaining <= th) {
+        out.push({ key, label: MANUT_LABELS[key] || key, remaining, nextAt, urgent: false });
+        break;
+      }
+    }
+  }
+
+  // ordina: urgenti prima, poi quelli con meno km rimanenti
+  out.sort((a,b) => (b.urgent - a.urgent) || (a.remaining - b.remaining));
+  return out;
+}
+
+// mostra toast SOLO una volta per soglia 500/250/100 (e sempre per urgente quando entra la prima volta)
+function checkManutToasts() {
+  const km = getKmTot();
+  const intervalli = getManutIntervalli();
+  const lastMap = getManutLastKmMap();
+
+  for (const [key, intervallo] of Object.entries(intervalli || {})) {
+    const intKm = Number(intervallo || 0);
+    if (!isFinite(intKm) || intKm <= 0) continue;
+
+    const lastKm = Number(lastMap[key] || 0);
+    const nextAt = lastKm + intKm;
+    const remaining = nextAt - km;
+
+    // urgente
+    if (remaining <= 0) {
+      if (!isWarned(key, 'URG')) {
+        markWarned(key, 'URG');
+        showToast(`🔧 MANUTENZIONE: ${MANUT_LABELS[key] || key} SCADUTA!`);
+      }
+      continue;
+    }
+
+    // soglie
+    for (const th of MANUT_THRESHOLDS) {
+      if (remaining <= th && !isWarned(key, th)) {
+        markWarned(key, th);
+        showToast(`🔧 ${MANUT_LABELS[key] || key}: mancano ~${Math.round(remaining)} km`);
+        break;
+      }
+    }
+  }
+}
+
+  
 /* ============================================================
    OLIO STOCK
 ============================================================ */
@@ -2757,6 +2887,8 @@ if (paeseScope) {
   aggiornaTempoGuidaUI();
   aggiornaAutonomia();
   aggiornaUIOlioStock();
+  // ✅ avvisi manutenzione (500/250/100 + urgente)
+checkManutToasts();
 }
 
 /* ============================================================
@@ -4485,7 +4617,7 @@ function apriTracciaPercorso(id) {
   apriMappaFull(coords, p);
 }
 
-  const coords = Array.isArray(p.traccia) ? p.traccia : [];
+
 
   // ✅ IMPORTANTISSIMO: passa anche il contesto "p"
   // così apriMappaFull può chiamare renderMapFullPhotoMarkersForContext(p)
@@ -4843,6 +4975,35 @@ function aggiungiRicambio() {
   const costoLocal = costoStr ? parseFloat(costoStr) : 0;
   const costoUsd = (costoLocal > 0) ? convertLocalToUsd(costoLocal, cur) : 0;
 
+
+
+
+// ✅ chiedi costo ricambio e somma alle spese (USD)
+const costoLocalStr = prompt('Quanto hai pagato questo ricambio? (valuta locale, opzionale)', '');
+let costoLocal = costoLocalStr ? Number(costoLocalStr) : 0;
+
+if (isFinite(costoLocal) && costoLocal > 0) {
+  const cur = valutaAttuale || 'USD';
+  const usd = convertLocalToUsd(costoLocal, cur);
+  if (usd <= 0) {
+    showToast(`⚠️ Manca cambio per ${cur}. Vai in Settings.`);
+  } else {
+    // globale
+    const old = parseFloat(carica('vt_spesaRicambiUsd','0')) || 0;
+    salva('vt_spesaRicambiUsd', (old + usd).toFixed(3));
+
+    // per paese
+    const paese = carica('vt_paeseAttuale','Colombia');
+    const datiPaesi = caricaJSON('vt_datiPaesi', {});
+    if (!datiPaesi[paese]) datiPaesi[paese] = {};
+    datiPaesi[paese].spesaRicambiUsd = (datiPaesi[paese].spesaRicambiUsd || 0) + usd;
+    salva('vt_datiPaesi', datiPaesi);
+
+    showToast(`🧾 Ricambio: +$${usd.toFixed(2)} (≈ ${costoLocal.toFixed(2)} ${cur})`);
+  }
+}
+
+  
   
    inv.push({
     nome,
