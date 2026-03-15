@@ -921,6 +921,10 @@
 <hr style="border:0;border-top:1px solid #333; margin:15px 0;">
 
 <h3 style="margin:0 0 10px 0; color:#90a4ae;">☁️ Foto su Drive (opzionale)</h3>
+<button class="btn-secondary" style="margin-top:10px;" onclick="testDriveUpload()">🧪 Test upload Drive</button>
+<button class="btn-secondary" style="margin-top:10px;" onclick="syncFotoDriveNow()">☁️ Sync foto su Drive (ora)</button>
+
+    
 <label class="inp-label">URL upload Apps Script</label>
 <input type="text" id="set-drive-upload" placeholder="https://script.google.com/macros/s/.../exec">
 <label class="inp-label">Drive Folder ID (opzionale)</label>
@@ -3135,6 +3139,7 @@ function dataURLToFile(dataUrl, filename = 'foto.jpg') {
 }
 
 let driveUploadPending = null;
+let driveUploadChain = Promise.resolve();
 
 window.addEventListener('message', (ev) => {
   const msg = ev && ev.data;
@@ -3146,20 +3151,15 @@ window.addEventListener('message', (ev) => {
   }
 });
 
-async function uploadFotoToDrive(dataUrl, filenameBase='foto') {
-  const endpoint = (carica('vt_driveUploadUrl','') || '').trim();
-  if (!endpoint) return null;
-
-  const folderId = (carica('vt_driveFolderId','') || '').trim();
-  const filename = `${filenameBase}_${Date.now()}.jpg`;
-
-  // una richiesta alla volta (semplice)
-  if (driveUploadPending) throw new Error('Upload already running');
-
+function uploadViaFormIframe(dataUrl, filename, folderId, endpoint) {
   return new Promise((resolve, reject) => {
+    if (driveUploadPending) {
+      // Non deve succedere perché usiamo la chain, ma per sicurezza:
+      return reject(new Error('Upload in corso'));
+    }
+
     driveUploadPending = { resolve, reject };
 
-    // crea un form temporaneo
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = endpoint;
@@ -3176,7 +3176,7 @@ async function uploadFotoToDrive(dataUrl, filenameBase='foto') {
 
     const inp3 = document.createElement('input');
     inp3.name = 'folderId';
-    inp3.value = folderId;
+    inp3.value = folderId || '';
 
     form.appendChild(inp1);
     form.appendChild(inp2);
@@ -3185,19 +3185,39 @@ async function uploadFotoToDrive(dataUrl, filenameBase='foto') {
     document.body.appendChild(form);
     form.submit();
 
-    // timeout di sicurezza
-    setTimeout(() => {
+    // timeout
+    const t = setTimeout(() => {
       if (driveUploadPending) {
         driveUploadPending = null;
         reject(new Error('Upload timeout'));
       }
     }, 45000);
 
-    setTimeout(() => form.remove(), 1000);
-  }).then((out) => {
-    if (!out || !out.ok || !out.url) throw new Error(out?.error || 'Upload failed');
-    return out.url;
+    // pulizia
+    setTimeout(() => {
+      clearTimeout(t);
+      form.remove();
+    }, 1200);
   });
+}
+
+function uploadFotoToDrive(dataUrl, filenameBase='foto') {
+  const endpoint = (carica('vt_driveUploadUrl','') || '').trim();
+  if (!endpoint) return Promise.resolve(null);
+
+  const folderId = (carica('vt_driveFolderId','') || '').trim();
+  const filename = `${filenameBase}_${Date.now()}.jpg`;
+
+  // ✅ serializza: una richiesta alla volta, in ordine
+  driveUploadChain = driveUploadChain
+    .catch(() => {}) // se una fallisce, non blocca la chain
+    .then(() => uploadViaFormIframe(dataUrl, filename, folderId, endpoint))
+    .then((out) => {
+      if (!out || !out.ok || !out.url) throw new Error(out?.error || 'Upload failed');
+      return out.url;
+    });
+
+  return driveUploadChain;
 }
 
 
@@ -3221,6 +3241,7 @@ function enqueueFoto(kind, id) {
   return !!endpoint;
 }
 
+  let driveSyncRunning = false;
 // carica la foto base64 dall'entry e la carica su Drive
 async function processUploadQueue(maxItems = 4) {
   if (!navigator.onLine) { showToast('📴 Offline: sync rimandato'); return; }
@@ -3229,6 +3250,13 @@ async function processUploadQueue(maxItems = 4) {
   let q = getUploadQueue();
   if (!q.length) { showToast('✅ Nessuna foto in coda'); updateDriveSyncInfo(); return; }
 
+if (driveSyncRunning) {
+  showToast('☁️ Sync già in corso...');
+  return;
+}
+driveSyncRunning = true;
+
+  
   showToast(`☁️ Sync in corso... (${q.length} in coda)`, 2500);
 
   let done = 0;
@@ -3303,7 +3331,23 @@ function syncFotoDriveNow() {
   processUploadQueue(999); // prova a caricarle tutte
 }
 
+async function testDriveUpload() {
+  try {
+    if (!navigator.onLine) { showToast('📴 Sei offline'); return; }
 
+    const tiny =
+      'data:image/jpeg;base64,' +
+      '/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wCEAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAf/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCkA//Z';
+
+    showToast('☁️ Test upload in corso...', 3000);
+    const url = await uploadFotoToDrive(tiny, 'test');
+    if (url) showToast('✅ Test OK: caricato su Drive');
+    else showToast('⚠️ Drive non configurato');
+  } catch (e) {
+    console.warn('testDriveUpload error:', e);
+    showToast('❌ Test fallito: ' + (e?.message || e));
+  }
+}
   
 
   
