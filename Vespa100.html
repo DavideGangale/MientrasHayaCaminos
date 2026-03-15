@@ -436,6 +436,28 @@
     .checklist-item input[type="checkbox"]{transform:scale(1.3);}
     .checklist-item.done{opacity:0.6;text-decoration:line-through;color:#aaa;}
 
+
+    .checklist-item{
+  justify-content:flex-start;
+}
+
+.checklist-item input[type="checkbox"]{
+  margin:0;
+  flex:0 0 auto;
+}
+
+.checklist-text{
+  flex:1;                 /* prende tutto lo spazio centrale */
+  text-align:left;
+  line-height:1.2;
+  word-break:break-word;  /* se è lungo, va a capo bene */
+}
+
+.checklist-actions{
+  flex:0 0 auto;          /* bottoni sempre compatti a destra */
+}
+
+    
 .checklist-actions{
   margin-left:auto;
   display:flex;
@@ -5328,7 +5350,7 @@ function renderChecklist() {
   container.innerHTML = lista.map((item, i) => `
     <div class="checklist-item ${item.fatto ? 'done' : ''}" onclick="toggleCheck(${i})">
       <input type="checkbox" ${item.fatto ? 'checked' : ''} onclick="event.stopPropagation(); toggleCheck(${i})">
-     <span>${item.nome}</span>
+     <span class="checklist-text">${item.nome}</span>
 
 <div class="checklist-actions" onclick="event.stopPropagation();">
   <button class="chk-btn" onclick="moveCheck(${i}, -1)" title="Su">▲</button>
