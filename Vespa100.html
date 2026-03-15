@@ -2889,20 +2889,61 @@ async function condividiMomentoPreview() {
 /* ============================================================
    DIARIO (anteprima + salva + render)
 ============================================================ */
-function anteprima(inputId, containerID) {
+async function anteprima(inputId, containerID) {
   const input = document.getElementById(inputId);
   const file = input && input.files ? input.files[0] : null;
   if (!file) return;
 
-  const reader = new FileReader();
-  reader.onload = (e) => {
+  try {
+    // Debug utile (se vuoi vedere tipo/size in console)
+    console.log('[anteprima]', inputId, file.type, Math.round(file.size/1024) + 'KB');
+
     const div = document.getElementById(containerID);
     if (!div) return;
+
+    // Carica immagine da file (object URL)
+    const url = URL.createObjectURL(file);
+
+    const dataUrlJpeg = await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          // riduci dimensioni per non riempire localStorage
+          const MAX_W = 900;
+          const quality = 0.70;
+
+          const ratio = Math.min(1, MAX_W / img.width);
+          const w = Math.max(1, Math.round(img.width * ratio));
+          const h = Math.max(1, Math.round(img.height * ratio));
+
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+
+          // JPEG => via canvas (rimuove EXIF e rende più compatibile)
+          const out = canvas.toDataURL('image/jpeg', quality);
+          resolve(out);
+        } catch (e) {
+          reject(e);
+        }
+      };
+      img.onerror = () => reject(new Error('Immagine non caricabile'));
+      img.src = url;
+    });
+
+    URL.revokeObjectURL(url);
+
     div.style.display = 'block';
-    div.innerHTML = `<img src="${e.target.result}" style="width:100%; border-radius:10px; max-height:200px; object-fit:cover;">`;
-    div.dataset.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
+    div.innerHTML = `<img src="${dataUrlJpeg}" style="width:100%; border-radius:10px; max-height:240px; object-fit:cover;">`;
+    div.dataset.src = dataUrlJpeg;
+
+    showToast('📷 Foto pronta');
+  } catch (e) {
+    console.warn('anteprima error:', e);
+    showToast('❌ Foto non supportata dal browser');
+  }
 }
 
 function salvaDiario() {
