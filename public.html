@@ -324,17 +324,21 @@ if (lista.length) showPerc(lista[0].id);
 else setTrace([]); // pulisce la mappa se non ci sono percorsi
 
     // diario
-// ===== DIARIO (con filtri + paginazione)
+// ===== DIARIO (con filtri + paginazione + TAG) =====
 diarioAll = Array.isArray(data.diario) ? data.diario : [];
 diarioLimit = 12;
 
-// popola dropdown paesi
+// prepara lista foto per lightbox (solo voci con foto)
+lbPhotos = diarioAll.filter(d => !!d.foto).map(d => d.foto);
+
+// popola dropdown PAESE
 const selPaese = document.getElementById('diario-paese');
 if (selPaese) {
   const paesi = [...new Set(diarioAll.map(d => d.paese).filter(Boolean))].sort();
-  selPaese.innerHTML = `<option value="">Tutti i paesi</option>` + paesi.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
+  selPaese.innerHTML =
+    `<option value="">Tutti i paesi</option>` +
+    paesi.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
 }
-
 
 // popola dropdown TAG
 const selTag = document.getElementById('diario-tag');
@@ -343,14 +347,10 @@ if (selTag) {
   const fromData = [...new Set(diarioAll.flatMap(d => Array.isArray(d.tags) ? d.tags : []))].sort();
   const tags = preset.length ? preset : fromData;
 
-  selTag.innerHTML = `<option value="">Tutti i tag</option>` +
+  selTag.innerHTML =
+    `<option value="">Tutti i tag</option>` +
     tags.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
 }
-
-
-    
-// prepara lista foto per lightbox (solo voci con foto)
-lbPhotos = diarioAll.filter(d => !!d.foto).map(d => d.foto);
 
 // listeners filtri
 const qEl = document.getElementById('diario-q');
@@ -358,12 +358,12 @@ const fotoOnlyEl = document.getElementById('diario-solo-foto');
 const moreBtn = document.getElementById('diario-more');
 
 const rerender = () => renderDiarioPub();
+
 if (qEl) qEl.addEventListener('input', debounce(() => { diarioLimit = 12; rerender(); }, 250));
 if (selPaese) selPaese.addEventListener('change', () => { diarioLimit = 12; rerender(); });
-if (fotoOnlyEl) fotoOnlyEl.addEventListener('change', () => { diarioLimit = 12; rerender(); });
 if (selTag) selTag.addEventListener('change', () => { diarioLimit = 12; rerender(); });
+if (fotoOnlyEl) fotoOnlyEl.addEventListener('change', () => { diarioLimit = 12; rerender(); });
 
-  
 if (moreBtn) {
   moreBtn.addEventListener('click', () => {
     diarioLimit += 12;
@@ -372,7 +372,6 @@ if (moreBtn) {
 }
 
 renderDiarioPub();
-
     // manutenzioni
     const man = data.manutenzioni || [];
     document.getElementById('man').innerHTML = man.map(m => `
