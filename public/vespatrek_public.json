@@ -1,6 +1,6 @@
 {
   "_version": "public-1.0",
-  "_exportDate": "2026-03-14T23:50:25.943Z",
+  "_exportDate": "2026-03-15T00:05:36.901Z",
   "titolo": "VespaTrek PX150",
   "paeseAttuale": "Colombia",
   "stats": {
@@ -84,6 +84,14 @@
     }
   ],
   "diario": [
+    {
+      "id": 1773533006408,
+      "data": "14/03/2026",
+      "ora": "19:03",
+      "paese": "Colombia",
+      "km": "30.0",
+      "testo": "Prooooovolaaaaaaa"
+    },
     {
       "id": 1773532220060,
       "data": "14/03/2026",
