@@ -4104,92 +4104,112 @@ function simplifyTrace(trace, step = 3) {
   return simple.length >= 2 ? simple : trace;
 }
 
+async function sanitizeImageDataUrl(dataUrl, maxW = 900, quality = 0.60) {
+  // Ricodifica in JPEG via canvas: riduce peso e rimuove EXIF
+  return new Promise((resolve) => {
+    try {
+      if (!dataUrl) return resolve(null);
+      const img = new Image();
+      img.onload = () => {
+        const ratio = Math.min(1, maxW / img.width);
+        const w = Math.max(1, Math.round(img.width * ratio));
+        const h = Math.max(1, Math.round(img.height * ratio));
+
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = () => resolve(null);
+      img.src = dataUrl;
+    } catch {
+      resolve(null);
+    }
+  });
+}
+
+function simplifyTrace(trace, step = 3) {
+  if (!Array.isArray(trace) || trace.length < 2) return null;
+  const simple = trace.filter((_, i) => i % step === 0);
+  return (simple.length >= 2) ? simple : trace;
+}
+
 async function esportaDatiPubblici() {
   try {
+    const MAX_FOTO_DIARIO = 30;
+    const FOTO_MAX_W = 900;
+    const FOTO_QUALITY = 0.60;
 
-const MAX_FOTO_DIARIO = 30;   // quante foto massimo nel JSON pubblico
-const FOTO_MAX_W = 900;       // ridimensionamento (px)
-const FOTO_QUALITY = 0.60;    // qualità JPEG (0.0 - 1.0)
-    
-    // opzionale: evita “quasi realtime”
-    const oreNascondi = 0; // metti 24 se vuoi nascondere ultime 24 ore
-    const minId = Date.now() - oreNascondi * 3600 * 1000;
-
-    const tappe = (caricaJSON('vt_tappe', []) || []).filter(t => (t.id || 0) >= 0);
-    const turismo = (caricaJSON('vt_turismo', []) || []).filter(t => (t.id || 0) >= 0);
+    const tappe = caricaJSON('vt_tappe', []) || [];
+    const turismo = caricaJSON('vt_turismo', []) || [];
     const diario = caricaJSON('vt_diario', []) || [];
     const logbook = caricaJSON('vt_logbook', []) || [];
     const datiPaesi = caricaJSON('vt_datiPaesi', {}) || {};
 
-    // === TAPPE PUB: includo traccia ma semplificata ===
-    const tappePub = tappe
-      .filter(t => (oreNascondi > 0 ? (t.id || 0) < minId : true))
-      .map(t => ({
-        id: t.id,
-        tipo: t.tipo || 'Tappa',
-        data: t.data, ora: t.ora,
-        paese: t.paese,
-        km: t.km,
-        durata: t.durata,
-        altMin: t.altMin, altMax: t.altMax,
-        velMax: t.velMax, velMedia: t.velMedia,
+    // TAPPE + TRACCE (semplificate)
+    const tappePub = tappe.map(t => ({
+      id: t.id,
+      tipo: t.tipo || 'Tappa',
+      data: t.data, ora: t.ora,
+      paese: t.paese,
+      km: t.km,
+      durata: t.durata,
+      altMin: t.altMin, altMax: t.altMax,
+      velMax: t.velMax, velMedia: t.velMedia,
 
-        // consumi
-        benzinaStimataLitri: t.benzinaStimataLitri ?? t.benzina ?? null,
-        benzinaRealeLitri: t.benzinaRealeLitri ?? null,
-        consumoStimatoKmL: t.consumoStimatoKmL ?? null,
-        consumoRealeKmL: t.consumoRealeKmL ?? null,
+      benzinaStimataLitri: t.benzinaStimataLitri ?? t.benzina ?? null,
+      benzinaRealeLitri: t.benzinaRealeLitri ?? null,
+      consumoStimatoKmL: t.consumoStimatoKmL ?? null,
+      consumoRealeKmL: t.consumoRealeKmL ?? null,
 
-        titolo: t.titolo || '',
-        note: t.note || '',
+      titolo: t.titolo || '',
+      note: t.note || '',
 
-        // ✅ traccia (semplificata)
-        traccia: simplifyTrace(t.traccia, 3)
-      }));
+      traccia: simplifyTrace(t.traccia, 3)
+    }));
 
-    const turismoPub = turismo
-      .filter(t => (oreNascondi > 0 ? (t.id || 0) < minId : true))
-      .map(t => ({
-        id: t.id,
-        tipo: t.tipo || 'Turismo',
-        data: t.data, ora: t.ora,
-        paese: t.paese,
-        km: t.km,
-        durata: t.durata,
-        altMin: t.altMin, altMax: t.altMax,
-        velMax: t.velMax, velMedia: t.velMedia,
-        benzinaStimataLitri: t.benzinaStimataLitri ?? t.benzina ?? null,
-        benzinaRealeLitri: t.benzinaRealeLitri ?? null,
-        consumoStimatoKmL: t.consumoStimatoKmL ?? null,
-        consumoRealeKmL: t.consumoRealeKmL ?? null,
-        titolo: t.titolo || '',
-        note: t.note || '',
-        traccia: simplifyTrace(t.traccia, 3)
-      }));
+    const turismoPub = turismo.map(t => ({
+      id: t.id,
+      tipo: t.tipo || 'Turismo',
+      data: t.data, ora: t.ora,
+      paese: t.paese,
+      km: t.km,
+      durata: t.durata,
+      altMin: t.altMin, altMax: t.altMax,
+      velMax: t.velMax, velMedia: t.velMedia,
 
-    
-  // === DIARIO PUB con foto (compresse + no EXIF) ===
-// Tiene TUTTE le voci di testo, ma le FOTO solo per le ultime MAX_FOTO_DIARIO voci che hanno una foto.
-const idsConFoto = (diario || [])
-  .filter(d => !!d.foto)
-  .map(d => d.id);
+      benzinaStimataLitri: t.benzinaStimataLitri ?? t.benzina ?? null,
+      benzinaRealeLitri: t.benzinaRealeLitri ?? null,
+      consumoStimatoKmL: t.consumoStimatoKmL ?? null,
+      consumoRealeKmL: t.consumoRealeKmL ?? null,
 
-// prendo gli ultimi N id (più recenti) che hanno foto
-const keepFotoIds = new Set(idsConFoto.slice(0, MAX_FOTO_DIARIO));
+      titolo: t.titolo || '',
+      note: t.note || '',
 
-const diarioPub = await Promise.all((diario || []).map(async d => {
-  const keepFoto = d.foto && keepFotoIds.has(d.id);
-  return {
-    id: d.id,
-    data: d.data, ora: d.ora,
-    paese: d.paese,
-    km: d.km,
-    testo: d.testo,
-    foto: keepFoto ? await sanitizeImageDataUrl(d.foto, FOTO_MAX_W, FOTO_QUALITY) : null
-  };
-}));
+      traccia: simplifyTrace(t.traccia, 3)
+    }));
 
-    // === MANUTENZIONI PUB (foto escluse, per ora) ===
+    // DIARIO: tutte le voci testo, foto solo per le ultime N con foto
+    const diarioSorted = [...diario].sort((a,b) => (b.id||0) - (a.id||0));
+    const idsConFoto = diarioSorted.filter(d => !!d.foto).map(d => d.id);
+    const keepFotoIds = new Set(idsConFoto.slice(0, MAX_FOTO_DIARIO));
+
+    const diarioPub = await Promise.all(diarioSorted.map(async d => {
+      const keepFoto = d.foto && keepFotoIds.has(d.id);
+      return {
+        id: d.id,
+        data: d.data, ora: d.ora,
+        paese: d.paese,
+        km: d.km,
+        testo: d.testo,
+        foto: keepFoto ? await sanitizeImageDataUrl(d.foto, FOTO_MAX_W, FOTO_QUALITY) : null
+      };
+    }));
+
+    // MANUTENZIONI (senza foto)
     const logbookPub = logbook.map(e => ({
       id: e.id,
       data: e.data, ora: e.ora,
@@ -4206,6 +4226,7 @@ const diarioPub = await Promise.all((diario || []).map(async d => {
       _version: 'public-1.0',
       _exportDate: new Date().toISOString(),
       titolo: 'VespaTrek PX150',
+      paeseAttuale: carica('vt_paeseAttuale','Colombia'),
 
       stats: {
         kmTotali: parseFloat(carica('vt_kmTotali','0')) || 0,
@@ -4231,16 +4252,13 @@ const diarioPub = await Promise.all((diario || []).map(async d => {
 
     const a = document.createElement('a');
     a.href = url;
-    a.download = `vespatrek_public.json`; // nome fisso: ti facilita l’upload
+    a.download = 'vespatrek_public.json';
     document.body.appendChild(a);
     a.click();
     a.remove();
 
     URL.revokeObjectURL(url);
     showToast('📤 Esportato: vespatrek_public.json');
-
-    showToast(`📸 Foto incluse: max ${MAX_FOTO_DIARIO} (compresse)`, 3500);
-    
   } catch (e) {
     console.warn('esportaDatiPubblici error:', e);
     showToast('❌ Errore export pubblico (vedi console)');
