@@ -916,6 +916,17 @@
 
 <hr style="border:0;border-top:1px solid #333; margin:15px 0;">
 
+
+<hr style="border:0;border-top:1px solid #333; margin:15px 0;">
+
+<h3 style="margin:0 0 10px 0; color:#90a4ae;">☁️ Foto su Drive (opzionale)</h3>
+<label class="inp-label">URL upload Apps Script</label>
+<input type="text" id="set-drive-upload" placeholder="https://script.google.com/macros/s/.../exec">
+<label class="inp-label">Drive Folder ID (opzionale)</label>
+<input type="text" id="set-drive-folder" placeholder="ID cartella Drive (opzionale)">
+<button class="btn-secondary" onclick="salvaDriveSettings()">💾 Salva impostazioni Drive</button>
+
+    
 <h3 style="margin:0 0 10px 0; color:#90a4ae;">🧰 Parametri viaggio</h3>
 
 <label class="inp-label">Capacità serbatoio (L)</label>
@@ -1732,7 +1743,8 @@ function serveFuelStart() {
   
 function startTrackingNow() {
   const btn = document.getElementById('btn-start-stop');
-
+if (!tappaAttuale.startTs) tappaAttuale.startTs = Date.now();
+salva('vt_tappaAttuale', tappaAttuale);
   inViaggio = true;
   if (btn) { btn.className = 'btn-track stop'; btn.innerText = '⏹ PAUSA GUIDA'; }
 
@@ -1914,6 +1926,9 @@ function concludiTappa() {
     telemetry: Array.isArray(tappaAttuale.telemetry) ? tappaAttuale.telemetry : [],
     tipo: 'Tappa',
 
+    startTs: tappaAttuale.startTs || null,
+    endTs: Date.now(),
+
     fuelStartGal: tappaAttuale.fuelStartGal,
     fuelStartLitri: tappaAttuale.fuelStartLitri,
     fuelAddedLitri: tappaAttuale.fuelAddedLitri || 0,
@@ -2009,6 +2024,9 @@ function concludiTurismo() {
     benzina: parseFloat((tappaAttuale.benzinaUsata || 0).toFixed(2)),
     benzinaStimataLitri: parseFloat((tappaAttuale.benzinaUsata || 0).toFixed(3)),
 
+startTs: tappaAttuale.startTs || null,
+endTs: Date.now(),
+    
     fuelStartGal: tappaAttuale.fuelStartGal,
     fuelStartLitri: tappaAttuale.fuelStartLitri,
     fuelAddedLitri: tappaAttuale.fuelAddedLitri || 0,
@@ -2062,6 +2080,8 @@ function cambiaPagina(id, btn) {
 if (id === 'officina') { renderInventario(); renderChecklist(); }
 if (id === 'viaggio') aggiornaUI();
 if (id === 'settings') { caricaSettingsAvanzatiUI(); aggiornaFxSettingsUI(); }
+
+  caricaDriveSettingsUI();
 }
 
 /* ============================================================
@@ -3074,7 +3094,24 @@ function dataURLToFile(dataUrl, filename = 'foto.jpg') {
   return new File([u8arr], filename, { type: mime });
 }
 
+async function uploadFotoToDrive(dataUrl, filenameBase='foto') {
+  const endpoint = (carica('vt_driveUploadUrl','') || '').trim();
+  if (!endpoint) return null; // Drive non configurato
 
+  const folderId = (carica('vt_driveFolderId','') || '').trim();
+  const filename = `${filenameBase}_${Date.now()}.jpg`;
+
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json' },
+    body: JSON.stringify({ dataUrl, filename, folderId })
+  });
+
+  const out = await res.json().catch(()=>null);
+  if (!out || !out.ok || !out.url) throw new Error(out?.error || 'Upload failed');
+  return out.url;
+}
+  
 async function condividiEntryDiario(entry) {
   try {
     if (!navigator.share) {
@@ -3273,14 +3310,29 @@ function salvaDiario() {
   const paese = carica('vt_paeseAttuale','Colombia');
   const now = new Date();
 
+
+  // geo: uso ultima posizione GPS valida (o marker)
+let geo = null;
+try {
+  if (lastLat != null && lastLon != null) geo = { lat: lastLat, lon: lastLon };
+  else {
+    const ll = marker?.getLatLng?.();
+    if (ll && isFinite(ll.lat) && isFinite(ll.lng)) geo = { lat: ll.lat, lon: ll.lng };
+  }
+} catch {}
+
+  
  const entry = {
   id: Date.now(),
+  ts: Date.now(),
+  geo,
   data: now.toLocaleDateString('it-IT'),
   ora: now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
   paese,
   km: (parseFloat(carica('vt_kmTotali','0')) || 0).toFixed(1),
   testo,
-  foto: fotoSrc,
+  foto: fotoSrc,      // fallback locale
+  fotoUrl: null,      // url drive (se disponibile)
   tags: Array.from(diarioTagsSelezionati) // <-- NUOVO
 };
   const diario = caricaJSON('vt_diario', []);
@@ -3288,6 +3340,32 @@ function salvaDiario() {
   salva('vt_diario', diario);
 
 
+  d// Se c'è foto e Drive configurato: prova upload e sostituisci con URL
+(async () => {
+  try {
+    if (!fotoSrc) return;
+    if (!navigator.onLine) return;
+
+    const url = await uploadFotoToDrive(fotoSrc, 'diario');
+    if (!url) return;
+
+    // aggiorno l'entry appena salvata (in testa)
+    const diario2 = caricaJSON('vt_diario', []);
+    const idx = diario2.findIndex(x => x.id === entry.id);
+    if (idx !== -1) {
+      diario2[idx].fotoUrl = url;
+      diario2[idx].foto = null; // ✅ svuota base64 per non pesare
+      salva('vt_diario', diario2);
+      renderDiario();
+      showToast('☁️ Foto caricata su Drive');
+    }
+  } catch (e) {
+    console.warn('upload drive fail', e);
+    showToast('⚠️ Upload Drive non riuscito (foto resta locale)');
+  }
+})();
+
+  
 setTimeout(() => {
   const ok = confirm('Vuoi condividere ora questo momento?');
   if (ok) condividiEntryDiario(entry);
@@ -3574,6 +3652,26 @@ function salvaFxDaSettings() {
   showToast(`💱 Salvato: 1 ${cur} = ${fx} USD`);
 }
 
+
+  function salvaDriveSettings(){
+  const url = (document.getElementById('set-drive-upload')?.value || '').trim();
+  const folder = (document.getElementById('set-drive-folder')?.value || '').trim();
+  salva('vt_driveUploadUrl', url);
+  salva('vt_driveFolderId', folder);
+  showToast('✅ Impostazioni Drive salvate');
+}
+
+function caricaDriveSettingsUI(){
+  const url = carica('vt_driveUploadUrl','');
+  const folder = carica('vt_driveFolderId','');
+  const a = document.getElementById('set-drive-upload');
+  const b = document.getElementById('set-drive-folder');
+  if (a) a.value = url;
+  if (b) b.value = folder;
+}
+
+
+  
 function convertLocalToUsd(amountLocal, currency) {
   const a = Number(amountLocal || 0);
   if (a <= 0) return 0;
@@ -4668,12 +4766,16 @@ async function esportaDatiPubblici() {
       const keepFoto = d.foto && keepFotoIds.has(d.id);
       return {
   id: d.id,
+         ts: d.ts || d.id,
   data: d.data, ora: d.ora,
   paese: d.paese,
   km: d.km,
   testo: d.testo,
   tags: Array.isArray(d.tags) ? d.tags : [],   // <-- NUOVO
-  foto: keepFoto ? await sanitizeImageDataUrl(d.foto, FOTO_MAX_W, FOTO_QUALITY) : null
+         geo: d.geo || null,
+         fotoUrl: d.fotoUrl || null,
+  //foto: keepFoto ? await sanitizeImageDataUrl(d.foto, FOTO_MAX_W, FOTO_QUALITY) : null
+  foto: (d.fotoUrl ? null : (keepFoto ? await sanitizeImageDataUrl(d.foto, FOTO_MAX_W, FOTO_QUALITY) : null))
 };
     }));
 
