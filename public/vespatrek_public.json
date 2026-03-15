@@ -1,6 +1,6 @@
 {
   "_version": "public-1.0",
-  "_exportDate": "2026-03-15T00:44:50.498Z",
+  "_exportDate": "2026-03-15T01:22:09.068Z",
   "titolo": "VespaTrek PX150",
   "paeseAttuale": "Colombia",
   "stats": {
@@ -39,7 +39,7 @@
       "consumoRealeKmL": null,
       "titolo": "Prova percorso",
       "note": "cuuuu cuuuuu",
-      "traccia": null
+      "traccia": []
     },
     {
       "id": 1773529372983,
@@ -59,7 +59,7 @@
       "consumoRealeKmL": 3.17,
       "titolo": "tappetta provola",
       "note": "cuuuuuuuuu cuuuuuuu",
-      "traccia": null
+      "traccia": []
     }
   ],
   "turismo": [
@@ -81,7 +81,7 @@
       "consumoRealeKmL": null,
       "titolo": "prova páseo",
       "note": "guuuuuguuuuuguuuu",
-      "traccia": null
+      "traccia": []
     }
   ],
   "diario": [
