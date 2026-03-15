@@ -219,6 +219,31 @@ function downloadTextFile(filename, content, mime) {
   URL.revokeObjectURL(url);
 }
 
+
+
+async function shareOrDownloadFile(filename, content, mime) {
+  try {
+    const blob = new Blob([content], { type: mime || 'application/octet-stream' });
+
+    // Prova a condividere come file (Android Chrome spesso supporta)
+    if (navigator.share) {
+      const file = new File([blob], filename, { type: mime || 'application/octet-stream' });
+
+      if (!navigator.canShare || navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: filename, text: 'VespaTrek track' });
+        return; // finito
+      }
+    }
+  } catch (e) {
+    // se l’utente annulla o se fallisce, facciamo fallback al download
+  }
+
+  // fallback: download
+  downloadTextFile(filename, content, mime);
+}
+
+
+  
 function coordsToGPX(traccia, nome = 'VespaTrek') {
   const pts = Array.isArray(traccia) ? traccia : [];
   const norm = pts.map(p => {
@@ -531,7 +556,8 @@ if (btnGpx) {
     if (!selectedPercorso) return;
     const gpx = coordsToGPX(selectedPercorso.traccia, buildFileName(selectedPercorso));
     if (!gpx) return alert('Traccia insufficiente per GPX');
-    downloadTextFile(buildFileName(selectedPercorso) + '.gpx', gpx, 'application/gpx+xml');
+    //downloadTextFile(buildFileName(selectedPercorso) + '.gpx', gpx, 'application/gpx+xml');
+    shareOrDownloadFile(buildFileName(selectedPercorso) + '.gpx', gpx, 'application/gpx+xml');
   });
 }
 
@@ -540,7 +566,8 @@ if (btnKml) {
     if (!selectedPercorso) return;
     const kml = coordsToKML(selectedPercorso.traccia, buildFileName(selectedPercorso));
     if (!kml) return alert('Traccia insufficiente per KML');
-    downloadTextFile(buildFileName(selectedPercorso) + '.kml', kml, 'application/vnd.google-earth.kml+xml');
+    //downloadTextFile(buildFileName(selectedPercorso) + '.kml', kml, 'application/vnd.google-earth.kml+xml');
+    shareOrDownloadFile(buildFileName(selectedPercorso) + '.kml', kml, 'application/vnd.google-earth.kml+xml');
   });
 }
 
