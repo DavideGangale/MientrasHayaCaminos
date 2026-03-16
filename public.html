@@ -351,7 +351,7 @@
     return (d && (d.fotoUrl || d.foto)) ? (d.fotoUrl || d.foto) : null;
   }
 
-  let map, poly, marker;
+  let map, poly;
   let selectedPercorso = null;
   let photoLayer = null;
 
@@ -370,7 +370,7 @@ let routePhotoIndex = new Map(); // url -> index dentro routePhotos
     map = L.map('mapPub', { zoomControl:true, attributionControl:false }).setView([-15, -60], 3);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom:19 }).addTo(map);
     poly = L.polyline([], { color:'#d32f2f', weight:4, opacity:0.9 }).addTo(map);
-    marker = L.marker([-15, -60]).addTo(map);
+    //marker = L.marker([-15, -60]).addTo(map);
     photoLayer = L.layerGroup().addTo(map);
   }
 
@@ -389,22 +389,19 @@ let routePhotoIndex = new Map(); // url -> index dentro routePhotos
   }
 
   function setTrace(coords){
-    if (!map || !poly || !marker) initMap();
+  
+  if (!map || !poly) initMap();
     const cleaned = cleanCoords(coords);
     poly.setLatLngs(cleaned);
 
-    if (cleaned.length > 1) {
-      const last = cleaned[cleaned.length - 1];
-      marker.setLatLng(last);
-      const bounds = poly.getBounds();
-      map.fitBounds(bounds.pad(0.15), { maxZoom: 14 });
-    } else if (cleaned.length === 1) {
-      marker.setLatLng(cleaned[0]);
-      map.setView(cleaned[0], 13);
-    } else {
-      map.setView([-15, -60], 3);
-      marker.setLatLng([-15, -60]);
-    }
+   if (cleaned.length > 1) {
+  const bounds = poly.getBounds();
+  map.fitBounds(bounds.pad(0.15), { maxZoom: 14 });
+} else if (cleaned.length === 1) {
+  map.setView(cleaned[0], 13);
+} else {
+  map.setView([-15, -60], 3);
+}
   }
 
   setTimeout(() => { if (map) map.invalidateSize(); }, 150);
