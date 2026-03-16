@@ -4174,7 +4174,12 @@ window.addEventListener('message', (ev) => {
   if (driveUploadPending.reqId && data.reqId && data.reqId !== driveUploadPending.reqId) {
     return; // ignora messaggi vecchi/cached
   }
-
+  
+  // chiudi timeout se esiste
+  try {
+    if (driveUploadPending.timer) clearTimeout(driveUploadPending.timer);
+  } catch(e) {}
+  
   driveUploadPending.resolve(data);
   driveUploadPending = null;
 });
@@ -4188,11 +4193,12 @@ function uploadViaFormIframe(dataUrl, filename, folderId, endpoint) {
     }
     
 const reqId = 'r' + Date.now() + '_' + Math.random().toString(16).slice(2);
-    driveUploadPending = { resolve, reject, reqId };
+    driveUploadPending = { resolve, reject, reqId, timer: null };
 
     const form = document.createElement('form');
     form.method = 'POST';
-    form.action = endpoint + '?reqId=' + encodeURIComponent(reqId);
+    const actionUrl = endpoint + (endpoint.includes('?') ? '&' : '?') + 'reqId=' + encodeURIComponent(reqId);
+    form.action = actionUrl;
     form.target = 'driveUploadFrame';
     form.style.display = 'none';
 
@@ -4229,18 +4235,18 @@ inp3.type = 'hidden';
     form.submit();
 
     // timeout
-    const t = setTimeout(() => {
-      if (driveUploadPending) {
-        driveUploadPending = null;
-        reject(new Error('Upload timeout'));
-      }
-    }, 45000);
+   driveUploadPending.timer = setTimeout(() => {
+  if (driveUploadPending) {
+    const rej = driveUploadPending.reject;
+    driveUploadPending = null;
+    try { rej(new Error('Upload timeout')); } catch(e) {}
+  }
+}, 45000);
 
-    // pulizia
-    setTimeout(() => {
-      clearTimeout(t);
-      form.remove();
-    }, 1200);
+    // pulizia form (NON cancellare il timeout!)
+setTimeout(() => {
+  try { form.remove(); } catch(e) {}
+}, 1200);
   });
 }
 
