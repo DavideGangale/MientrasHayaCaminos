@@ -66,6 +66,9 @@
       gap:10px;
       align-items:center;
       margin-bottom:10px;
+      position: sticky;
+top: 86px;
+z-index: 40;
     }
     .diario-tools input[type="search"]{
       width:100%;
@@ -101,9 +104,71 @@
         justify-self:end;
       }
     }
+
+
+:root{
+  --bg:#0f0f10;
+  --card:#232325;
+  --card2:#1b1b1d;
+  --border:#3a3a3f;
+  --text:#ffffff;
+  --muted:#b0b0b8;
+  --brand:#2196F3;
+  --accent:#ff9800;
+}
+
+html{ scroll-behavior:smooth; }
+body{ background:var(--bg); color:var(--text); }
+
+.wrap{
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.card{
+  background: linear-gradient(180deg, var(--card), var(--card2));
+  border:1px solid var(--border);
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+
+h1{ letter-spacing:.3px; }
+h2{ letter-spacing:.2px; }
+
+.muted{ color:var(--muted); }
+
+.btn{
+  background: var(--brand);
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow: 0 8px 18px rgba(33,150,243,.18);
+}
+.btn:disabled{ opacity:.55; cursor:not-allowed; }
+
+select, .diario-tools input[type="search"]{
+  border:1px solid var(--border);
+  background:#0f0f10;
+}
+
+.box{
+  background: rgba(0,0,0,.22);
+  border:1px solid var(--border);
+}
+
+.entry{
+  background: rgba(0,0,0,.18);
+  border:1px solid var(--border);
+}
+
+#mapPub{
+  border:1px solid var(--border);
+}
+
+    
   </style>
 </head>
 <body>
+
+  <div class="wrap">
+    
   <div class="card">
     <h1 id="tit">VespaTrek — Pubblico</h1>
     <div class="muted" id="meta">Carico dati…</div>
@@ -118,7 +183,18 @@
     </select>
   </div>
 
-  <div class="card">
+
+      <div class="card" style="position:sticky; top:10px; z-index:50; backdrop-filter: blur(6px);">
+    <div class="muted" style="margin-bottom:8px;">Vai a:</div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <a class="btn" href="#sec-stats"  style="text-decoration:none;">📊 Stats</a>
+      <a class="btn" href="#sec-routes" style="text-decoration:none; background:#9c27b0;">🗺️ Tappe</a>
+      <a class="btn" href="#sec-diary"  style="text-decoration:none; background:#ff9800; color:#000;">📖 Diario</a>
+      <a class="btn" href="#sec-maint"  style="text-decoration:none; background:#4caf50;">🔧 Officina</a>
+    </div>
+  </div>
+
+ <div class="card" id="sec-stats">
     <h2 data-i18n="stats">📊 Statistiche</h2>
     <div class="grid">
       <div class="box"><span data-i18n="km_tot">KM totali</span><br><b id="st-km">--</b></div>
@@ -128,7 +204,7 @@
     </div>
   </div>
 
-  <div class="card">
+  <div class="card" id="sec-routes">
     <h2 data-i18n="routes">🗺️ Tappe / Turismo</h2>
     <div class="muted"><span data-i18n="pick_route">Seleziona un percorso per vedere la traccia.</span></div>
 
@@ -147,7 +223,7 @@
     <div class="muted" id="percInfo" style="margin-top:8px"></div>
   </div>
 
-  <div class="card">
+  <div class="card" id="sec-diary">
     <h2 data-i18n="diary">📖 Diario (con foto)</h2>
 
     <div class="diario-tools">
@@ -172,7 +248,7 @@
     <div id="diario"></div>
   </div>
 
-  <div class="card">
+  <div class="card" id="sec-maint">
     <h2 data-i18n="maint">🔧 Manutenzioni</h2>
     <div id="man"></div>
   </div>
@@ -817,7 +893,7 @@ function openRouteLightboxByUrl(url){
     try { renderDiarioPub(); } catch {}
   });
 </script>
-
+  </div>
 <div id="lightbox" onclick="closeLightbox()">
   <button id="lightboxClose" onclick="event.stopPropagation(); closeLightbox()">×</button>
 
