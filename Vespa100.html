@@ -5248,8 +5248,9 @@ function renderManutCatalog() {
     return;
   }
 
-  box.innerHTML = cat.map((it, idx) => {
+  box.innerHTML = cat.map((it) => {
     const enabled = it.enabled !== false;
+
     return `
       <div class="inv-item" style="gap:10px;">
         <div style="flex-grow:1;">
@@ -5271,14 +5272,13 @@ function renderManutCatalog() {
           ${enabled ? 'N/A' : 'ATTIVA'}
         </button>
 
-        ${String(it.key||'').startsWith('custom_') ? `
-          <button class="btn-secondary"
-        style="margin:0; width:44px; background:#2a0000; border:1px solid #4a0000;"
-        onclick="manutDelete('${it.key}')"
-        title="Elimina voce dal catalogo">
-  🗑️
-</button>
-        ` : ''}
+        <!-- ✅ CESTINO SEMPRE -->
+        <button class="btn-secondary"
+                style="margin:0; width:44px; background:#2a0000; border:1px solid #4a0000;"
+                onclick="manutDelete('${it.key}')"
+                title="Elimina voce dal catalogo">
+          🗑️
+        </button>
       </div>
     `;
   }).join('');
