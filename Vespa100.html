@@ -990,9 +990,14 @@ color:#fff;
 
         
 <div style="margin-top:10px; font-size:12px; color:#aaa; text-align:left;">
-  Tag (seleziona 0 o più):
+  Tag:
 </div>
-<div id="diario-tags" class="tag-grid"></div>
+
+<button class="btn-secondary" style="margin-top:8px;" onclick="apriModal('modalTagPicker'); renderTagPicker();">
+  🏷️ Seleziona hashtag (multi)
+</button>
+
+<div id="diario-tags-selected-inline" class="tag-grid" style="margin-top:8px;"></div>
 
         
         <input type="file" id="foto-input" accept="image/*" capture="environment" style="display:none;"
@@ -1002,7 +1007,11 @@ color:#fff;
         <div id="anteprima-foto" style="margin-top:10px; display:none;"></div>
   
         <button id="btn-salva-diario" class="btn-azione" style="background:#e91e63;" onclick="salvaDiario()">💾 Salva nel Diario</button>
-        <div id="lista-diario" style="margin-top:20px;"></div>
+        <button class="btn-secondary" style="margin-top:12px;" onclick="apriModal('modalDiario'); renderDiarioFull();">
+  📖 Apri Diario (tutti i post)
+</button>
+
+<div id="lista-diario-preview" style="margin-top:12px;"></div>
       </div>
 
       <!-- EXPORT / IMPORT -->
@@ -1261,6 +1270,15 @@ color:#fff;
 <div id="set-drive-sync-info" style="font-size:12px;color:#777;text-align:left;margin-top:8px;">
   --
 </div>
+
+
+<hr style="border:0;border-top:1px solid #333; margin:15px 0;">
+
+<h3 style="margin:0 0 10px 0; color:#90a4ae;">🏷️ Hashtag Diario</h3>
+<button class="btn-secondary" onclick="apriModal('modalTagSettings'); renderTagSettings();">
+  🏷️ Gestisci hashtag (aggiungi/rimuovi)
+</button>
+
     
 <h3 style="margin:0 0 10px 0; color:#90a4ae;">🧰 Parametri viaggio</h3>
 
@@ -1327,6 +1345,34 @@ color:#fff;
 
   
 
+<!-- TAG SETTINGS (modal) -->
+<div id="modalTagSettings" class="modal-overlay">
+  <div class="modal-content" style="border-color:#ff9800; max-width:560px;">
+    <button class="close-modal" onclick="chiudiModal('modalTagSettings')">×</button>
+    <h2 style="color:#ff9800; text-align:center; margin-top:0;">🏷️ Gestisci Hashtag</h2>
+
+    <div class="dash-card" style="padding:12px;">
+      <div style="font-size:12px;color:#aaa;text-align:left;">
+        Aggiungi hashtag che ti vengono in mente. Saranno disponibili nel Diario.
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:10px;">
+        <input id="tag-new" type="text" placeholder="Es. Frontiera, Officina, Pioggia..."
+               style="margin:0; text-align:left;">
+        <button class="btn-azione" style="margin:0; width:110px; background:#ff9800; color:black;"
+                onclick="addTagFromSettings()">
+          ➕ Aggiungi
+        </button>
+      </div>
+
+      <div id="tag-settings-list" style="margin-top:12px;"></div>
+    </div>
+  </div>
+</div>
+
+
+
+  
   <div id="modalMapFull" class="modal-overlay">
     <div class="modal-content" style="border-color:#2196F3; max-width:900px;">
       <button class="close-modal" onclick="chiudiModal('modalMapFull')">×</button>
@@ -1595,6 +1641,48 @@ color:#fff;
   </div>
 </div>
 
+  <!-- TAG PICKER (modal) -->
+<div id="modalTagPicker" class="modal-overlay">
+  <div class="modal-content" style="border-color:#ff9800; max-width:560px;">
+    <button class="close-modal" onclick="chiudiModal('modalTagPicker')">×</button>
+    <h2 style="color:#ff9800; text-align:center; margin-top:0;">🏷️ Seleziona Tag</h2>
+
+    <div class="dash-card" style="padding:12px;">
+      <div style="font-size:12px;color:#aaa;text-align:left;">
+        Seleziona uno o più hashtag (li puoi gestire in Settings).
+      </div>
+
+      <div id="tag-picker-list" style="margin-top:10px;"></div>
+
+      <div style="margin-top:10px; font-size:12px; color:#aaa; text-align:left;">Selezionati:</div>
+      <div id="diario-tags-selected" class="tag-grid" style="margin-top:8px;"></div>
+
+      <button class="btn-secondary" onclick="clearDiarioTags(); renderTagPicker();">
+        🧹 Svuota selezione
+      </button>
+
+      <button class="btn-azione" style="background:#ff9800;color:black;" onclick="chiudiModal('modalTagPicker')">
+        ✅ Fatto
+      </button>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- DIARIO FULL (modal) -->
+<div id="modalDiario" class="modal-overlay">
+  <div class="modal-content" style="border-color:#e91e63; max-width:900px;">
+    <button class="close-modal" onclick="chiudiModal('modalDiario')">×</button>
+    <h2 style="color:#e91e63; text-align:center; margin-top:0;">📖 Diario di Viaggio</h2>
+    <div id="lista-diario-modal"></div>
+  </div>
+</div>
+
+
+
+
+  
   
   <!-- ==================== NAV ==================== -->
   <div class="nav">
@@ -1820,7 +1908,7 @@ function ricostruisciSpeseGlobaliDaPaesi() {
 function initAllData() {
   initDB('vt_olioStockMl', '0');            // ml di olio disponibili
   initDB('vt_olioCostoStockUsd', '0');      // USD “contenuti” nello stock
-
+initDB('vt_diarioTagsCustom', JSON.stringify([])); // hashtag aggiunti da Settings
   initDB('vt_kmTotali', '0.0');
   initDB('vt_odoUltimoPieno', '0.0');
   initDB('vt_litriVespa', '0.0');
@@ -2426,7 +2514,59 @@ function toggleTracking() {
 
 
 
+function renderTagSettings() {
+  const box = document.getElementById('tag-settings-list');
+  if (!box) return;
 
+  const custom = getCustomDiarioTags();
+
+  if (!custom.length) {
+    box.innerHTML = `<div style="color:#777;text-align:center;padding:10px;">Nessun hashtag custom</div>`;
+    return;
+  }
+
+  box.innerHTML = custom.map(t => `
+    <div class="inv-item">
+      <div class="inv-nome">#${t}</div>
+      <button class="btn-secondary danger" style="margin:0;"
+              onclick="removeTagFromSettings('${escSQ(t)}')">
+        🗑️ Rimuovi
+      </button>
+    </div>
+  `).join('');
+}
+
+function addTagFromSettings() {
+  const inp = document.getElementById('tag-new');
+  const raw = (inp?.value || '').trim();
+  if (!raw) { showToast('⚠️ Inserisci un hashtag'); return; }
+
+  const tag = raw.replace(/^#/,'').trim();
+  if (!tag) { showToast('⚠️ Tag non valido'); return; }
+
+  const custom = getCustomDiarioTags();
+  custom.push(tag);
+  setCustomDiarioTags(custom);
+
+  if (inp) inp.value = '';
+  renderTagSettings();
+
+  // aggiorna anche picker + inline (se aperti)
+  renderSelectedTagsInline();
+  showToast('✅ Hashtag aggiunto: #' + tag);
+}
+
+function removeTagFromSettings(tag) {
+  const custom = getCustomDiarioTags().filter(x => x !== tag);
+  setCustomDiarioTags(custom);
+
+  // se era selezionato, toglilo
+  if (diarioTagsSelezionati?.has(tag)) diarioTagsSelezionati.delete(tag);
+
+  renderTagSettings();
+  renderSelectedTagsInline();
+  showToast('🗑️ Rimosso: #' + tag);
+}
 
 
   
@@ -4387,6 +4527,74 @@ const DIARIO_TAGS_PRESET = [
   'Animali'
 ];
 
+function escSQ(s){ return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+
+function getCustomDiarioTags() {
+  const arr = caricaJSON('vt_diarioTagsCustom', []);
+  return Array.isArray(arr) ? arr.map(x => String(x||'').trim()).filter(Boolean) : [];
+}
+
+function setCustomDiarioTags(arr) {
+  const clean = Array.isArray(arr)
+    ? arr.map(x => String(x||'').trim()).filter(Boolean)
+    : [];
+  // unique
+  const out = Array.from(new Set(clean));
+  salva('vt_diarioTagsCustom', out);
+}
+
+function getAllDiarioTags() {
+  const set = new Set([...(DIARIO_TAGS_PRESET||[]), ...getCustomDiarioTags()]);
+  return Array.from(set).sort((a,b) => a.localeCompare(b));
+}
+
+function renderSelectedTagsInline() {
+  const box = document.getElementById('diario-tags-selected-inline');
+  if (!box) return;
+
+  const tags = Array.from(diarioTagsSelezionati || []);
+  if (!tags.length) {
+    box.innerHTML = `<div style="color:#777;font-size:12px;">Nessun tag selezionato</div>`;
+    return;
+  }
+
+  box.innerHTML = tags.map(t => `
+    <div class="tag-chip active" onclick="toggleDiarioTag('${escSQ(t)}'); renderSelectedTagsInline();">
+      ${t}
+    </div>
+  `).join('');
+}
+
+function renderTagPicker() {
+  const list = document.getElementById('tag-picker-list');
+  if (!list) return;
+
+  const tags = getAllDiarioTags();
+  if (!tags.length) {
+    list.innerHTML = `<div style="color:#777;text-align:center;padding:10px;">Nessun tag</div>`;
+  } else {
+    list.innerHTML = tags.map(t => `
+      <label class="checklist-item" style="cursor:pointer;">
+        <input type="checkbox" ${diarioTagsSelezionati.has(t) ? 'checked' : ''}
+               onchange="toggleDiarioTag('${escSQ(t)}'); renderTagPicker(); renderSelectedTagsInline();">
+        <span class="checklist-text">#${t}</span>
+        <span></span>
+      </label>
+    `).join('');
+  }
+
+  // area “Selezionati” nel modal
+  const selBox = document.getElementById('diario-tags-selected');
+  if (selBox) {
+    const sel = Array.from(diarioTagsSelezionati || []);
+    selBox.innerHTML = sel.length
+      ? sel.map(t => `<div class="tag-chip active" onclick="toggleDiarioTag('${escSQ(t)}'); renderTagPicker(); renderSelectedTagsInline();">${t}</div>`).join('')
+      : `<div style="color:#777;font-size:12px;">Nessuno</div>`;
+  }
+}
+
+
+  
 let diarioTagsSelezionati = new Set();
 
 function renderDiarioTagsPreset() {
@@ -4408,11 +4616,13 @@ function toggleDiarioTag(tag) {
   if (diarioTagsSelezionati.has(tag)) diarioTagsSelezionati.delete(tag);
   else diarioTagsSelezionati.add(tag);
   renderDiarioTagsPreset();
+   renderSelectedTagsInline();
 }
 
 function clearDiarioTags() {
   diarioTagsSelezionati = new Set();
   renderDiarioTagsPreset();
+    renderSelectedTagsInline();
 }
 
 let diarioSaving = false;
@@ -4512,44 +4722,61 @@ function salvaDiario() {
 
   
 
-function renderDiario() {
+function renderDiarioList(containerId, limit = null) {
   const diario = caricaJSON('vt_diario', []);
-  const container = document.getElementById('lista-diario');
+  const container = document.getElementById(containerId);
   if (!container) return;
 
-  if (!diario.length) {
+  const arr = Array.isArray(diario) ? diario : [];
+  const list = (limit != null) ? arr.slice(0, limit) : arr;
+
+  if (!list.length) {
     container.innerHTML = '<div style="color:#888; text-align:center; padding:20px;">Nessuna voce nel diario</div>';
     return;
   }
 
-  container.innerHTML = diario.map(e => `
+  container.innerHTML = list.map(e => `
     <div class="diario-entry">
       <div class="diario-header">
         <span class="diario-data">📅 ${e.data} ${e.ora} — ${e.km} km</span>
         <span class="diario-paese">${e.paese}</span>
       </div>
-      
+
       <div class="diario-testo">${e.testo}</div>
 
-${Array.isArray(e.tags) && e.tags.length
-  ? `<div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:6px;">
-      ${e.tags.map(t => `<span style="font-size:11px; padding:4px 8px; border-radius:999px; background:#222; border:1px solid #444; color:var(--giallo); font-weight:bold;">${t}</span>`).join('')}
-     </div>`
-  : ''}
+      ${Array.isArray(e.tags) && e.tags.length
+        ? `<div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:6px;">
+            ${e.tags.map(t => `<span style="font-size:11px; padding:4px 8px; border-radius:999px; background:#222; border:1px solid #444; color:var(--giallo); font-weight:bold;">#${t}</span>`).join('')}
+           </div>`
+        : ''}
 
-${(e.fotoUrl || e.foto) ? `<img src="${e.fotoUrl || e.foto}" class="diario-foto" loading="lazy">` : ''}
-      
+      ${(e.fotoUrl || e.foto) ? `<img src="${e.fotoUrl || e.foto}" class="diario-foto" loading="lazy">` : ''}
+
       <button onclick="eliminaDiario(${e.id})"
-        style="background:none; border:none; color:#666; font-size:12px; cursor:pointer; margin-top:5px;">🗑️ Elimina</button>
+        style="background:none; border:none; color:#666; font-size:12px; cursor:pointer; margin-top:5px;">
+        🗑️ Elimina
+      </button>
     </div>
   `).join('');
+}
+
+function renderDiario() {
+  // preview corta in pagina VIAGGIO
+  renderDiarioList('lista-diario-preview', 4);
+}
+
+function renderDiarioFull() {
+  // lista completa nel modal
+  renderDiarioList('lista-diario-modal', null);
 }
 
 function eliminaDiario(id) {
   if (!confirm('Eliminare questa voce?')) return;
   const diario = caricaJSON('vt_diario', []).filter(e => e.id !== id);
   salva('vt_diario', diario);
-  renderDiario();
+   renderDiario();
+  renderDiarioFull();
+
 }
 </script>
 
@@ -7271,8 +7498,7 @@ refreshStatsPaeseDropdown();
   aggiornaUIOlioStock();
   aggiornaTempoGuidaUI();
   renderDiario();
-  renderDiarioTagsPreset();
-
+ renderSelectedTagsInline();
 
 caricaDriveAutoSyncUI?.();
 updateDriveSyncInfo?.();
