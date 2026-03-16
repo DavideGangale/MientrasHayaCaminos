@@ -3823,12 +3823,19 @@ function aggiornaAutonomia() {
     if (rapida) {
       rapida.innerText = autonomiaVis > 0 ? `${Math.round(autonomiaVis)} ${distLabel}` : `-- ${distLabel}`;
     }
+
+// autonomia mini sotto la velocità
+const mini = document.getElementById('ui-autonomia-mini');
+if (mini) {
+  mini.innerText = autonomiaVis > 0 ? `${Math.round(autonomiaVis)} ${distLabel}` : `-- ${distLabel}`;
+}
+
+    
   } catch (e) {
     console.error('aggiornaAutonomia error:', e);
   }
 
-const mini = document.getElementById('ui-autonomia-mini');
-if (mini) mini.innerText = autonomiaVis > 0 ? `${Math.round(autonomiaVis)} ${distLabel}` : `-- ${distLabel}`;
+
 
   
   checkLowFuelWarning(false);
