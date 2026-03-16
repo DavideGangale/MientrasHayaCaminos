@@ -500,12 +500,12 @@
   font-weight:900;
 }
 
+
 .chk-btn:disabled{
   opacity:0.35;
   cursor:not-allowed;
+  filter:grayscale(1);
 }
-
-
     
 .chk-btn:active{opacity:0.8;}
 .chk-btn.danger{background:#2a0000;border-color:#4a0000;color:#ffb3b3;}
@@ -936,39 +936,34 @@
   </div>
 
   <!-- ==================== PAGINA 4: OFFICINA ==================== -->
-  <div id="officina" class="page">
+ <!-- ==================== PAGINA 4: OFFICINA ==================== -->
+<div id="officina" class="page">
 
-    <!-- RICAMBI -->
+  <!-- STOCK RICAMBI -->
+  <button class="btn-azione" style="background:#ff9800;color:black;"
+          onclick="apriModal('modalRicambi'); renderInventario(); renderChecklist();">
+    🧰 STOCK RICAMBI
+  </button>
 
-    <button class="btn-azione" style="background:#ff9800;color:black;" onclick="apriModal('modalRicambi'); renderInventario(); renderChecklist();">
-  🧰 STOCK RICAMBI
-</button>
- 
+  <!-- CARBURAZIONE (apre modal dedicato) -->
+  <button class="btn-azione" style="background:#00bcd4; color:black;"
+          onclick="apriModal('modalCarbSetup')">
+    🌬️ CARBURAZIONE (SETUP)
+  </button>
 
-    <!-- CARBURAZIONE -->
-    <!-- CARBURAZIONE (apre modal) -->
-<button class="btn-azione" style="background:#00bcd4; color:black;" onclick="apriModal('modalCarbSetup')">
-  🌬️ CARBURAZIONE (Setup)
-</button>
-      <div style="display:flex; gap:10px;">
-        <input type="number" id="carbChiclerMax" placeholder="Chicler Max (es. 115)" min="1" max="999">
-        <input type="number" id="carbChiclerMin" placeholder="Minimo (es. 55)" min="1" max="999">
-      </div>
-      <input type="text" id="carbNote" placeholder="Note (es. Fuma in altitudine...)">
-      <button class="btn-azione" style="background:#00bcd4; color:black;" onclick="salvaCarburazione()">💾 Salva Setup</button>
-      <button class="btn-secondary" onclick="apriModal('modalCarb')">📖 Storico Altitudini</button>
-    </div>
+  <!-- CHECKLIST OFFICINA -->
+  <div class="dash-card" style="border:2px solid #ff9800; margin-top:12px;">
+    <h2 style="margin:0 0 10px 0; color:#ff9800;">✅ Checklist Officina</h2>
+    <div id="checklist-container"></div>
 
-    <!-- CHECKLIST -->
-    <div class="dash-card" style="border:2px solid #ff9800;">
-      <h2 style="margin:0 0 10px 0; color:#ff9800;">✅ Checklist Officina</h2>
-      <div id="checklist-container"></div>
-      <div style="display:flex; gap:10px; margin-top:10px;">
-        <input type="text" id="nuovaCheckItem" style="margin:0; text-align:left;" placeholder="Nuovo elemento...">
-        <button class="btn-azione" style="margin:0; width:60px; padding:0; font-size:24px;" onclick="aggiungiCheckItem()">+</button>
-      </div>
+    <div style="display:flex; gap:10px; margin-top:10px;">
+      <input type="text" id="nuovaCheckItem" style="margin:0; text-align:left;" placeholder="Nuovo elemento...">
+      <button class="btn-azione" style="margin:0; width:60px; padding:0; font-size:24px;"
+              onclick="aggiungiCheckItem()">+</button>
     </div>
   </div>
+
+</div>
 
   <!-- ==================== PAGINA 5: SETTINGS==================== -->
 
