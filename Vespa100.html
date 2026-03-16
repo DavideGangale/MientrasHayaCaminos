@@ -609,6 +609,14 @@ color:#fff;
   border-radius:8px;
   cursor:pointer;
 }
+
+/* Tag picker: più spazio al testo (niente colonna azioni) */
+.checklist-item.tagpick{
+  grid-template-columns: 44px minmax(0, 1fr) !important;
+}
+.checklist-item.tagpick .checklist-actions{ display:none !important; }
+
+    
     .checklist-item input[type="checkbox"]{transform:scale(1.3);}
     .checklist-item.done{opacity:0.6;text-decoration:line-through;color:#aaa;}
 
@@ -1011,14 +1019,14 @@ color:#fff;
   📖 Apri Diario (tutti i post)
 </button>
 
-<div id="lista-diario-preview" style="margin-top:12px;"></div>
+
       </div>
 
       <!-- EXPORT / IMPORT -->
       <div class="dash-card" style="border:2px solid #555; margin-top:10px;">
         <h3 style="margin-top:0; color:#aaa;">💾 Backup Dati</h3>
         <button class="btn-azione" style="background:#607d8b;" onclick="esportaDati()">⬇️ ESPORTA BACKUP JSON</button>
-        <button class="btn-secondary" onclick="esportaDatiLight()">⬇️ ESPORTA BACKUP (LIGHT)</button>
+       
 
         <button class="btn-azione" style="background:#009688;" onclick="esportaDatiPubblici()">
         📤 ESPORTA JSON PUBBLICO (foto + tracce)
@@ -1263,9 +1271,7 @@ color:#fff;
   <span>Auto-sync foto quando torna internet</span>
 </label>
 
-<button class="btn-secondary" style="margin-top:10px;" onclick="syncFotoDriveNow()">
-  ☁️ Sync foto su Drive (ora)
-</button>
+
 
 <div id="set-drive-sync-info" style="font-size:12px;color:#777;text-align:left;margin-top:8px;">
   --
@@ -1278,7 +1284,7 @@ color:#fff;
 <button class="btn-secondary" onclick="apriModal('modalTagSettings'); renderTagSettings();">
   🏷️ Gestisci hashtag (aggiungi/rimuovi)
 </button>
-
+<div style="height:12px;"></div>
     
 <h3 style="margin:0 0 10px 0; color:#90a4ae;">🧰 Parametri viaggio</h3>
 
@@ -4183,6 +4189,9 @@ function uploadViaFormIframe(dataUrl, filename, folderId, endpoint) {
     form.style.display = 'none';
 
     const inp1 = document.createElement('input');
+    inp1.type = 'hidden';
+    inp2.type = 'hidden';
+    inp3.type = 'hidden';
     inp1.name = 'dataUrl';
     inp1.value = dataUrl;
 
@@ -4514,6 +4523,14 @@ async function anteprima(inputId, containerID) {
   // ===== TAG PREDEFINITI DIARIO =====
 const DIARIO_TAGS_PRESET = [
   'Paesaggi',
+  'Vespistas',
+  'Moteros',
+  'Turismo',
+  'Sterrato',
+  'Paisajes',
+  'Rio',
+  'Storia',
+  'Arte',
   'Persone',
   'Officina',
   'Problemi',
@@ -4574,7 +4591,7 @@ function renderTagPicker() {
     list.innerHTML = `<div style="color:#777;text-align:center;padding:10px;">Nessun tag</div>`;
   } else {
     list.innerHTML = tags.map(t => `
-      <label class="checklist-item" style="cursor:pointer;">
+     <label class="checklist-item tagpick" style="cursor:pointer;">
         <input type="checkbox" ${diarioTagsSelezionati.has(t) ? 'checked' : ''}
                onchange="toggleDiarioTag('${escSQ(t)}'); renderTagPicker(); renderSelectedTagsInline();">
         <span class="checklist-text">#${t}</span>
@@ -4762,7 +4779,7 @@ function renderDiarioList(containerId, limit = null) {
 
 function renderDiario() {
   // preview corta in pagina VIAGGIO
-  renderDiarioList('lista-diario-preview', 4);
+ // renderDiarioList('lista-diario-preview', 4);
 }
 
 function renderDiarioFull() {
