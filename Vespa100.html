@@ -3962,15 +3962,22 @@ if (mini) {
   mini.innerText = autonomiaVis > 0 ? `${Math.round(autonomiaVis)} ${distLabel}` : `-- ${distLabel}`;
 }
 
+
+      // ✅ sotto AUT: totale carburante (serbatoio + scorta) in L/gal
+const fuelMini = document.getElementById('ui-fuel-tot-mini');
+if (fuelMini) {
+  const totL_local = (parseFloat(carica('vt_scortaLitri','0')) || 0) + (parseFloat(carica('vt_serbatoioLitri','0')) || 0);
+  const volLabel_local = (unitaAttuale === 'G') ? 'gal' : 'L';
+  const totVis_local = (unitaAttuale === 'G') ? (totL_local / FAT_GAL) : totL_local;
+  fuelMini.innerText = `${totVis_local.toFixed(1)} ${volLabel_local}`;
+}
     
   } catch (e) {
     console.error('aggiornaAutonomia error:', e);
   }
 
 
-    // ✅ sotto AUT: totale carburante in L/gal (serbatoio + scorta)
-    const fuelMini = document.getElementById('ui-fuel-tot-mini');
-    if (fuelMini) fuelMini.innerText = `${totVis.toFixed(1)} ${volLabel}`;
+
   
   checkLowFuelWarning(false);
 }
