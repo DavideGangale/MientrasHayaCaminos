@@ -175,25 +175,58 @@ select, .diario-tools input[type="search"]{
   backdrop-filter: blur(6px);
 }
 
+
+/* Fade laterali per far capire che si può scrollare */
+#floatingNav{
+  position: sticky;
+  top: 10px;
+  z-index: 60;
+  backdrop-filter: blur(6px);
+}
+#floatingNav::before,
+#floatingNav::after{
+  content:"";
+  position:absolute;
+  top: 44px;              /* circa sotto la riga "Vai a:" */
+  bottom: 10px;
+  width: 18px;
+  pointer-events:none;
+  z-index: 2;
+}
+#floatingNav::before{
+  left: 10px;
+  background: linear-gradient(90deg, rgba(18,18,18,0.95), rgba(18,18,18,0));
+}
+#floatingNav::after{
+  right: 10px;
+  background: linear-gradient(270deg, rgba(18,18,18,0.95), rgba(18,18,18,0));
+}
+
+/* scrollbar piccola e discreta */
+#floatingNav .float-row::-webkit-scrollbar{ height:6px; }
+#floatingNav .float-row::-webkit-scrollbar-thumb{ background:#2f2f35; border-radius:999px; }
+#floatingNav .float-row{ scrollbar-color:#2f2f35 transparent; scrollbar-width:thin; }
+
+    
 /* i 4 bottoni: NON vanno a capo, scorrono orizzontalmente su schermi piccoli */
 #floatingNav .float-row{
   display:flex;
   gap:8px;
-  flex-wrap:nowrap;
-  overflow-x:auto;
+  flex-wrap:nowrap;                 /* mai a capo */
+  overflow-x:auto;                  /* scroll orizzontale */
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 2px;
+  padding: 2px 2px 4px 2px;
+  scroll-snap-type: x proximity;    /* scroll più “pulito” */
 }
-#floatingNav .float-row::-webkit-scrollbar{ height: 6px; }
-#floatingNav .float-row::-webkit-scrollbar-thumb{ background:#333; border-radius:999px; }
 
 #floatingNav .btn{
-  padding:8px 10px;
+  padding:7px 10px;
   font-size:12px;
   border-radius:10px;
   white-space:nowrap;
   flex: 0 0 auto;
   box-shadow:none;
+  scroll-snap-align: start;
 }
 
 /* i filtri del diario restano visibili: top = altezza menu flottante */
