@@ -1284,7 +1284,7 @@ color:#fff;
 <button class="btn-secondary" onclick="apriModal('modalTagSettings'); renderTagSettings();">
   🏷️ Gestisci hashtag (aggiungi/rimuovi)
 </button>
-<div style="height:12px;"></div>
+<hr style="border:0;border-top:1px solid #333; margin:18px 0;">
     
 <h3 style="margin:0 0 10px 0; color:#90a4ae;">🧰 Parametri viaggio</h3>
 
@@ -4167,11 +4167,18 @@ window.addEventListener('message', (ev) => {
   const msg = ev && ev.data;
   if (!msg || msg.type !== 'VESPA_UPLOAD_RESULT') return;
 
-  if (driveUploadPending) {
-    driveUploadPending.resolve(msg.data);
-    driveUploadPending = null;
+  if (!driveUploadPending) return;
+
+  const data = msg.data || {};
+  // ✅ accetta solo la risposta del reqId corrente
+  if (driveUploadPending.reqId && data.reqId && data.reqId !== driveUploadPending.reqId) {
+    return; // ignora messaggi vecchi/cached
   }
+
+  driveUploadPending.resolve(data);
+  driveUploadPending = null;
 });
+
 
 function uploadViaFormIframe(dataUrl, filename, folderId, endpoint) {
   return new Promise((resolve, reject) => {
@@ -4179,12 +4186,13 @@ function uploadViaFormIframe(dataUrl, filename, folderId, endpoint) {
       // Non deve succedere perché usiamo la chain, ma per sicurezza:
       return reject(new Error('Upload in corso'));
     }
-
-    driveUploadPending = { resolve, reject };
+    
+const reqId = 'r' + Date.now() + '_' + Math.random().toString(16).slice(2);
+    driveUploadPending = { resolve, reject, reqId };
 
     const form = document.createElement('form');
     form.method = 'POST';
-    form.action = endpoint;
+    form.action = endpoint + '?reqId=' + encodeURIComponent(reqId);
     form.target = 'driveUploadFrame';
     form.style.display = 'none';
 
@@ -4202,6 +4210,16 @@ function uploadViaFormIframe(dataUrl, filename, folderId, endpoint) {
     const inp3 = document.createElement('input');
     inp3.name = 'folderId';
     inp3.value = folderId || '';
+
+  const inp4 = document.createElement('input');
+inp4.name = 'reqId';
+inp4.value = reqId;
+inp4.type = 'hidden';
+form.appendChild(inp4);
+
+  inp1.type = 'hidden';
+inp2.type = 'hidden';
+inp3.type = 'hidden';
 
     form.appendChild(inp1);
     form.appendChild(inp2);
