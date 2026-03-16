@@ -430,9 +430,26 @@ color:#fff;
   align-items:center;
   justify-content:center;
   line-height:1;
+    height:56px;     /* ✅ altezza fissa: niente sobbalzi quando cambia icona */
+  padding:0;       /* la centratura la fa il flex */
+  user-select:none;
 }
 
+.guida-ico .ico-fixed{
+  width:30px;
+  height:30px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:26px;
+  line-height:1;
+}
 
+.guida-ico svg{
+  width:32px;
+  height:32px;
+  display:block;
+}
     
 .guida-ico:active{ opacity:0.85; }
 
@@ -878,11 +895,10 @@ color:#fff;
     </div>
 
     <!-- info piccole sotto i bottoni -->
-    <div style="font-size:11px; color:#888; margin-top:10px; display:flex; justify-content:space-between; gap:10px;">
-      <div>Totale viaggio: <b id="ui-km-tot-mini">0.0 km</b></div>
-      <div>Ore tappa: <b id="ui-tempo-guida">00:00:00</b></div>
-    </div>
-  </div>
+  <div style="font-size:14px; color:#bbb; margin-top:10px; display:flex; justify-content:space-between; gap:10px;">
+  <div>TOT KM: <b id="ui-km-tot-mini" style="color:#fff;">0.0 km</b></div>
+  <div>ORE TAPPA: <b id="ui-tempo-guida" style="color:#fff;">00:00:00</b></div>
+</div>
 
   <!-- mappa PER ULTIMA -->
   <div id="map"></div>
@@ -2506,16 +2522,18 @@ function aggiornaModalitaUI() {
 
   const isTur = (modalitaGuida === 'TURISMO');
 
-  // ✅ Icona sullo STESSO bottone:
-  // - TAPPA: due punti + linea
-  // - TURISMO: monumento
   if (isTur) {
-    b.innerHTML = '🏛️';
+    // ✅ icona turismo “fissa” (stessa box, niente sobbalzi)
+    b.innerHTML = `<span class="ico-fixed" aria-hidden="true">🏛️</span>`;
   } else {
+    // ✅ icona tappa: due punti (verde/rosso) + linea ondulata
     b.innerHTML = `
-      <span class="ico-route" aria-hidden="true">
-        <span class="dot"></span><span class="line"></span><span class="dot"></span>
-      </span>
+      <svg viewBox="0 0 64 24" aria-hidden="true">
+        <circle cx="10" cy="12" r="5" fill="#4caf50"></circle>
+        <path d="M16 12 C 24 2, 34 22, 44 12 S 54 2, 58 12"
+              stroke="#ffffff" stroke-width="3" fill="none" stroke-linecap="round"></path>
+        <circle cx="54" cy="12" r="5" fill="#f44336"></circle>
+      </svg>
     `;
   }
 
