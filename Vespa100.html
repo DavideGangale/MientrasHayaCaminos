@@ -5202,62 +5202,60 @@ function manutDelete(key) {
   renderChecklist();
 }
 
-  
-  
+
+
+
 function renderInventario() {
   const inv = caricaJSON('vt_inventario', []);
   const kmTot = parseFloat(carica('vt_kmTotali','0')) || 0;
   const container = document.getElementById('listaRicambi');
   if (!container) return;
 
-  if (!inv.length) {
+  if (!Array.isArray(inv) || inv.length === 0) {
     container.innerHTML = '<div style="color:#888; text-align:center; padding:20px;">Nessun ricambio in lista</div>';
     return;
   }
 
   container.innerHTML = inv.map((item, i) => {
-   const kmDaUltimo = kmTot - (item.lastKm || 0);
+    const kmDaUltimo = kmTot - (Number(item.lastKm || 0));
 
-const durataEff = getDurataEffettivaKmPerItem(item); // da catalogo o durata manuale
+    const durataEff = getDurataEffettivaKmPerItem(item); // da catalogo o durata manuale
 
-let usuraHtml = '';
-//let warn = '';
+    let usuraHtml = '';
+    let warnIcon = '';
 
-if (durataEff > 0) {
-  const pctUsura = Math.min(100, Math.round(kmDaUltimo / durataEff * 100));
-  const coloreUsura = pctUsura >= 80 ? '#f44336' : pctUsura >= 60 ? '#ff9800' : '#4caf50';
-  warn = pctUsura >= 80 ? ' ⚠️' : '';
+    if (durataEff > 0) {
+      const pctUsura = Math.min(100, Math.round((kmDaUltimo / durataEff) * 100));
+      const coloreUsura = (pctUsura >= 80) ? '#f44336' : (pctUsura >= 60) ? '#ff9800' : '#4caf50';
 
-  usuraHtml = `
-    Usura: <span style="color:${coloreUsura}; font-weight:bold;">${pctUsura}%</span>
-    (${Math.round(kmDaUltimo)}/${durataEff} km)
-  `;
-} else {
-  usuraHtml = `Usura: <span style="color:#888; font-weight:bold;">N/A</span>`;
-}
+      warnIcon = (pctUsura >= 80) ? ' ⚠️' : '';
 
+      usuraHtml = `
+        Usura: <span style="color:${coloreUsura}; font-weight:bold;">${pctUsura}%</span>
+        (${Math.round(kmDaUltimo)}/${durataEff} km)
+      `;
+    } else {
+      // N/A: nessuna usura programmata
+      usuraHtml = `Usura: <span style="color:#888; font-weight:bold;">N/A</span>`;
+      warnIcon = '';
+    }
 
-    
-const warnIcon = pctUsura >= 80 ? ' ⚠️' : '';
- 
-
-    
     return `
       <div class="inv-item">
         <div style="flex-grow:1;">
-          <div class="inv-nome">${item.nome}${warnIcon}</div>
+          <div class="inv-nome">${item.nome || 'Ricambio'}${warnIcon}</div>
           <div class="inv-durabilita">${usuraHtml}</div>
-            Usura: <span style="color:${coloreUsura}; font-weight:bold;">${pctUsura}%</span>
-          (${Math.round(kmDaUltimo)}/${durataEff} km)
-          </div>
         </div>
+
         <button class="inv-btn minus" onclick="cambiaQta(${i},-1)">−</button>
-        <span class="inv-qta ${item.qta===0?'zero':''}">${item.qta}</span>
+        <span class="inv-qta ${Number(item.qta||0)===0?'zero':''}">${Number(item.qta||0)}</span>
         <button class="inv-btn plus" onclick="cambiaQta(${i},+1)">+</button>
+
         <button onclick="resetUsura(${i})"
           style="background:#00bcd4; border:none; color:white; padding:5px 8px; border-radius:5px; font-size:11px; cursor:pointer; margin-left:5px;">
           Reset
         </button>
+
         <button onclick="eliminaRicambio(${i})"
           style="background:#555; border:none; color:white; padding:5px 8px; border-radius:5px; font-size:11px; cursor:pointer; margin-left:3px;">
           🗑️
@@ -5266,6 +5264,11 @@ const warnIcon = pctUsura >= 80 ? ' ⚠️' : '';
     `;
   }).join('');
 }
+
+
+
+
+  
 
 function cambiaQta(i, delta) {
   const inv = caricaJSON('vt_inventario', []);
