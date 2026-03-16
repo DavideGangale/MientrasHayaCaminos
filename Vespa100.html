@@ -6273,29 +6273,29 @@ const canUse = stock > 0;
   }
 
   // ===== AVVISI USURA (inventario) =====
-  const usuraWarns = getUsuraWarningsInventario(); // <-- questi sono i ricambi con lastKm/durata
-  if (usuraWarns.length) {
-    html += `<div style="color:#ff9800;font-weight:900;margin:6px 0 10px 0;">🔧 Avvisi usura (inventario)</div>`;
+  //const usuraWarns = getUsuraWarningsInventario(); // <-- questi sono i ricambi con lastKm/durata
+  //if (usuraWarns.length) {
+  //  html += `<div style="color:#ff9800;font-weight:900;margin:6px 0 10px 0;">🔧 Avvisi usura (inventario)</div>`;
 
-    html += usuraWarns.map(w => {
-      const col = colorForRemaining(w.remaining);
-      const msg = (w.remaining <= 0)
-        ? `SCADUTO di ${Math.abs(Math.round(w.remaining))} km`
-        : `mancano ~${Math.round(w.remaining)} km (soglia ${w.level})`;
+  //  html += usuraWarns.map(w => {
+  //    const col = colorForRemaining(w.remaining);
+  //    const msg = (w.remaining <= 0)
+  //      ? `SCADUTO di ${Math.abs(Math.round(w.remaining))} km`
+  //      : `mancano ~${Math.round(w.remaining)} km (soglia ${w.level})`;
 
-      return `
-        <div class="checklist-item" style="border-left:5px solid ${col}; cursor:default;" onclick="event.stopPropagation();">
-          <input type="checkbox" disabled>
-          <span class="checklist-text">
-            <b>${w.nome}</b> — <span style="color:${col};font-weight:900;">${msg}</span>
-          </span>
-          <div class="checklist-actions"></div>
-        </div>
-      `;
-    }).join('');
+ //     return `
+ //       <div class="checklist-item" style="border-left:5px solid ${col}; cursor:default;" onclick="event.stopPropagation();">
+ //         <input type="checkbox" disabled>
+ //         <span class="checklist-text">
+ //           <b>${w.nome}</b> — <span style="color:${col};font-weight:900;">${msg}</span>
+ //         </span>
+ //         <div class="checklist-actions"></div>
+//        </div>
+//      `;
+//    }).join('');
 
-    html += `<hr style="border:0;border-top:1px solid #333; margin:12px 0;">`;
-  }
+//    html += `<hr style="border:0;border-top:1px solid #333; margin:12px 0;">`;
+// }
 
   // ===== CHECKLIST NORMALE =====
   if (!Array.isArray(lista) || !lista.length) {
