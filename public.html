@@ -655,7 +655,7 @@ pics.forEach(d => {
         ${(m.fotoUrl) ? `<div style="margin-top:8px;"><img class="diario-thumb" src="${m.fotoUrl}" loading="lazy" onclick="openLightboxDirect('${m.fotoUrl}')"></div>` : ''}
       </div>
     `).join('') || '<div class="muted">Nessun intervento</div>';
-  
+  }
 
   main().catch(err => {
     document.body.innerHTML = '<pre style="white-space:pre-wrap;color:#fff;">Errore: ' + (err && err.stack ? err.stack : err) + '</pre>';
