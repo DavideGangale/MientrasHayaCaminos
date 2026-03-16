@@ -158,6 +158,41 @@
       margin-top:8px;
     }
 
+
+.guida-mini{
+display:grid;
+grid-template-columns:1fr 1fr 1fr;
+gap:8px;
+margin-top:10px;
+}
+.guida-mini .mini-box{
+background:#111;
+border:1px solid #333;
+border-radius:12px;
+padding:10px 8px;
+text-align:center;
+}
+.guida-mini .mini-label{
+font-size:10px;
+color:#777;
+letter-spacing:0.6px;
+text-transform:uppercase;
+}
+.guida-mini .mini-value{
+font-size:18px;
+font-weight:900;
+margin-top:3px;
+color:#fff;
+}
+.guida-mini .mini-value.alt{ color: var(--blu); }
+.guida-mini .mini-value.aut{ color: var(--giallo); }
+.guida-mini .mini-value.trip{ color: #fff; }
+
+
+
+
+
+    
     /* ODOMETRO */
     .odometer-container{
       display:flex;
@@ -2208,6 +2243,7 @@ salva('vt_tappaAttuale', tappaAttuale);
   }, 1000);
 
   showToast('▶ Tracking avviato');
+  aggiornaGuidaButtonsUI();
   if (modalitaGuida === 'TAPPA') showPreRideBanner();
   syncWakeLock();
 }
@@ -2299,6 +2335,7 @@ function toggleTracking() {
     const btn = document.getElementById('btn-start-stop');
 
     inViaggio = false;
+    aggiornaGuidaButtonsUI();
     if (btn) {
   btn.classList.remove('stop');
   btn.classList.add('play');
@@ -2414,27 +2451,60 @@ aggiornaTestoModaliSerbatoio();
 
   showToast(`🏁 Tappa salvata: ${tappa.km} km`);
   aggiornaUI();
+  aggiornaGuidaButtonsUI();
 }
 
 let modalitaGuida = 'TAPPA'; // 'TAPPA' | 'TURISMO'
 let pendingFuelKind = null; // 'tappa' | 'turismo'
 
-function aggiornaModalitaUI() {
-  const b = document.getElementById('btn-modalita');
-  const c = document.getElementById('btn-concludi');
 
-  if (b) {
-    const isTur = (modalitaGuida === 'TURISMO');
-    b.innerText = isTur ? '🌆' : '🌄';
-    b.classList.remove('tappa','turismo');
-    b.classList.add(isTur ? 'turismo' : 'tappa');
+
+
+  function aggiornaModalitaUI() {
+  const b = document.getElementById('btn-modalita');
+  if (!b) return;
+
+  const isTur = (modalitaGuida === 'TURISMO');
+  b.innerText = isTur ? '🏛️' : '🧭';
+
+  b.classList.remove('tappa','turismo');
+  b.classList.add(isTur ? 'turismo' : 'tappa');
+}
+
+
+
+  function aggiornaGuidaButtonsUI() {
+  const startBtn = document.getElementById('btn-start-stop');
+  const endBtn   = document.getElementById('btn-concludi');
+
+  // START / PAUSA
+  if (startBtn) {
+    if (inViaggio) {
+      startBtn.classList.remove('play');
+      startBtn.classList.add('stop');
+      startBtn.innerText = '⏸';
+    } else {
+      startBtn.classList.remove('stop');
+      startBtn.classList.add('play');
+      startBtn.innerText = '▶';
+    }
   }
 
-  if (c) {
-    c.innerText = (modalitaGuida === 'TURISMO') ? '🌆' : '🏁';
-    // se vuoi: in turismo icona diversa; altrimenti lascia sempre 🏁
+  // CONCLUDI: attivo se ho km percorsi nella tappa/giro
+  const kmTrip = Number(tappaAttuale?.kmPercorsi || 0);
+  const canEnd = kmTrip >= 0.1;
+
+  if (endBtn) {
+    endBtn.disabled = !canEnd;
+
+    endBtn.classList.remove('active','ready');
+    endBtn.classList.add(canEnd ? 'active' : 'ready');
+
+    endBtn.innerText = '🏁';
   }
 }
+
+  
 
 function toggleModalitaGuida() {
   if (inViaggio) { showToast('⚠️ Ferma la guida prima di cambiare modalità'); return; }
@@ -2524,6 +2594,7 @@ aggiornaTestoModaliSerbatoio();
 
   showToast(`🌆 Turismo salvato: ${giro.km} km`);
   aggiornaUI();
+ aggiornaGuidaButtonsUI(); 
 }
 
 
@@ -3280,6 +3351,7 @@ if (paeseScope) {
   aggiornaTempoGuidaUI();
   aggiornaAutonomia();
   aggiornaUIOlioStock();
+  aggiornaGuidaButtonsUI();
   // ✅ avvisi manutenzione (500/250/100 + urgente)
 checkManutToasts();
 }
@@ -7095,7 +7167,7 @@ if (g <= 0.0001) ricostruisciSpeseGlobaliDaPaesi();
   // aggiorna UI settings e guida
   aggiornaSettingsUI?.();
   aggiornaModalitaUI?.();
-
+aggiornaGuidaButtonsUI?.();
   await setLoadingProgress(85, '⚙️ Componenti...');
 
 
