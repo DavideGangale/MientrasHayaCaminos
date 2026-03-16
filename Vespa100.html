@@ -5487,6 +5487,64 @@ function cambiaQta(i, delta) {
   const newQ = Math.max(0, oldQ + Number(delta || 0));
   if (newQ === oldQ) return;
 
+
+
+
+
+    // ✅ Se sto aumentando lo stock (+), chiedi il costo e aggiorna spese ricambi
+  if (delta > 0) {
+    const cur = valutaAttuale || 'USD';
+    const nome = inv[i].nome || 'Ricambio';
+
+    const s = prompt(`Quanto hai pagato 1 pezzo "${nome}"? (in ${cur})\n(0 o vuoto se già pagato / regalo)`, '');
+    if (s === null) {
+      // annullato: non faccio nulla
+      return;
+    }
+
+    const costoUnitLocal = (String(s).trim() === '') ? 0 : Number(s);
+    if (!isFinite(costoUnitLocal) || costoUnitLocal < 0) {
+      showToast('⚠️ Costo non valido');
+      return;
+    }
+
+    const totLocal = costoUnitLocal * delta;
+    let totUsd = 0;
+
+    if (totLocal > 0) {
+      totUsd = convertLocalToUsd(totLocal, cur); // se manca cambio mostra toast e torna 0
+      if (!totUsd || totUsd <= 0) {
+        // se manca FX, aggiungo comunque lo stock, ma NON registro spesa
+        showToast(`⚠️ Cambio mancante per ${cur}: stock aggiornato, spesa NON registrata`);
+        totUsd = 0;
+      }
+    }
+
+    // aggiorna costo accumulato nel ricambio (opzionale ma utile)
+    inv[i].costoLocal = Number(inv[i].costoLocal || 0) + totLocal;
+    inv[i].costoUsd   = Number(inv[i].costoUsd   || 0) + totUsd;
+    inv[i].valuta = cur;
+    inv[i].fxToUsd = (typeof getFxToUsd === 'function') ? getFxToUsd(cur) : null;
+
+    // aggiorna spese globali + per paese
+    if (totUsd > 0) {
+      salva('vt_spesaRicambiUsd', (parseFloat(carica('vt_spesaRicambiUsd','0')) || 0) + totUsd);
+
+      const paese = carica('vt_paeseAttuale','Colombia');
+      const datiPaesi = caricaJSON('vt_datiPaesi', {});
+      if (!datiPaesi[paese]) datiPaesi[paese] = {};
+      datiPaesi[paese].spesaRicambiUsd = (datiPaesi[paese].spesaRicambiUsd || 0) + totUsd;
+      datiPaesi[paese].valuta = cur;
+      salva('vt_datiPaesi', datiPaesi);
+
+      aggiornaUI();
+    }
+  }
+
+
+
+
+  
   inv[i].qta = newQ;
   salva('vt_inventario', inv);
 
