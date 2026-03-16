@@ -162,6 +162,57 @@ select, .diario-tools input[type="search"]{
   border:1px solid var(--border);
 }
 
+    :root{
+  --floatNavH: 0px;     /* altezza menu flottante calcolata via JS */
+  --stickyGap: 12px;    /* spazio sotto menu */
+}
+
+/* card menu flottante */
+#floatingNav{
+  position: sticky;
+  top: 10px;
+  z-index: 60;
+  backdrop-filter: blur(6px);
+}
+
+/* i 4 bottoni: NON vanno a capo, scorrono orizzontalmente su schermi piccoli */
+#floatingNav .float-row{
+  display:flex;
+  gap:8px;
+  flex-wrap:nowrap;
+  overflow-x:auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px;
+}
+#floatingNav .float-row::-webkit-scrollbar{ height: 6px; }
+#floatingNav .float-row::-webkit-scrollbar-thumb{ background:#333; border-radius:999px; }
+
+#floatingNav .btn{
+  padding:8px 10px;
+  font-size:12px;
+  border-radius:10px;
+  white-space:nowrap;
+  flex: 0 0 auto;
+  box-shadow:none;
+}
+
+/* i filtri del diario restano visibili: top = altezza menu flottante */
+.diario-tools{
+  position: sticky;
+  top: calc(var(--floatNavH) + var(--stickyGap));
+  z-index: 50;
+  background: rgba(15,15,16,0.92);
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 10px;
+}
+
+/* quando clicchi i link del menu, il titolo sezione non resta “sotto” al menu */
+#sec-stats, #sec-routes, #sec-diary, #sec-maint{
+  scroll-margin-top: calc(var(--floatNavH) + 16px);
+}
+
+
     
   </style>
 </head>
@@ -183,16 +234,15 @@ select, .diario-tools input[type="search"]{
     </select>
   </div>
 
-
-      <div class="card" style="position:sticky; top:10px; z-index:50; backdrop-filter: blur(6px);">
-    <div class="muted" style="margin-bottom:8px;">Vai a:</div>
-    <div style="display:flex; gap:10px; flex-wrap:wrap;">
-      <a class="btn" href="#sec-stats"  style="text-decoration:none;">📊 Stats</a>
-      <a class="btn" href="#sec-routes" style="text-decoration:none; background:#9c27b0;">🗺️ Tappe</a>
-      <a class="btn" href="#sec-diary"  style="text-decoration:none; background:#ff9800; color:#000;">📖 Diario</a>
-      <a class="btn" href="#sec-maint"  style="text-decoration:none; background:#4caf50;">🔧 Officina</a>
-    </div>
+<div class="card" id="floatingNav">
+  <div class="muted" style="margin-bottom:8px;">Vai a:</div>
+  <div class="float-row">
+    <a class="btn" href="#sec-stats"  style="text-decoration:none;">📊 Stats</a>
+    <a class="btn" href="#sec-routes" style="text-decoration:none; background:#9c27b0;">🗺️ Tappe</a>
+    <a class="btn" href="#sec-diary"  style="text-decoration:none; background:#ff9800; color:#000;">📖 Diario</a>
+    <a class="btn" href="#sec-maint"  style="text-decoration:none; background:#4caf50;">🔧 Officina</a>
   </div>
+</div>
 
  <div class="card" id="sec-stats">
     <h2 data-i18n="stats">📊 Statistiche</h2>
@@ -211,13 +261,23 @@ select, .diario-tools input[type="search"]{
     <select id="selPerc"></select>
 
     <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; align-items:center;">
-      <button class="btn" id="btnKml" type="button" style="background:#00bcd4; color:#000;">
-        ⬇️ KML (Google Earth)
-      </button>
-      <div class="muted" style="margin-top:6px;">
-        KML: Google Earth / My Maps
-      </div>
-    </div>
+      
+
+<div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; align-items:center;">
+  <button class="btn" id="btnKml" type="button" style="background:#00bcd4; color:#000;">
+    ⬇️ KML (Google Earth)
+  </button>
+
+  <button class="btn" id="btnMapFull" type="button" style="background:#ff9800; color:#000;">
+    🗺️ Mappa Full Screen
+  </button>
+
+  <div class="muted" style="margin-top:6px;">
+    KML: Google Earth / My Maps
+  </div>
+</div>
+
+      
 
     <div style="margin-top:10px" id="mapPub"></div>
     <div class="muted" id="percInfo" style="margin-top:8px"></div>
@@ -428,6 +488,12 @@ select, .diario-tools input[type="search"]{
   }
 
   let map, poly;
+
+  let mapFull = null, polyFull = null, photoLayerFull = null;
+let lastTraceCoords = [];
+let lastPics = []; // foto (diario) filtrate per percorso selezionato
+
+  
   let selectedPercorso = null;
   let photoLayer = null;
 
@@ -449,6 +515,73 @@ let routePhotoIndex = new Map(); // url -> index dentro routePhotos
     //marker = L.marker([-15, -60]).addTo(map);
     photoLayer = L.layerGroup().addTo(map);
   }
+
+
+  function initMapFull(){
+  if (mapFull) return;
+  mapFull = L.map('mapPubFull', { zoomControl:true, attributionControl:false }).setView([-15, -60], 3);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom:19 }).addTo(mapFull);
+  polyFull = L.polyline([], { color:'#d32f2f', weight:4, opacity:0.9 }).addTo(mapFull);
+  photoLayerFull = L.layerGroup().addTo(mapFull);
+}
+
+function setTraceOn(mapX, polyX, coords){
+  const cleaned = cleanCoords(coords);
+  polyX.setLatLngs(cleaned);
+
+  if (cleaned.length > 1) {
+    const bounds = polyX.getBounds();
+    mapX.fitBounds(bounds.pad(0.15), { maxZoom: 14 });
+  } else if (cleaned.length === 1) {
+    mapX.setView(cleaned[0], 13);
+  } else {
+    mapX.setView([-15, -60], 3);
+  }
+}
+
+function renderPicsOn(layerX, pics){
+  if (!layerX) return;
+  layerX.clearLayers();
+
+  (pics || []).forEach(d => {
+    const lat = Number(d.geo.lat), lon = Number(d.geo.lon);
+    if (!isFinite(lat) || !isFinite(lon)) return;
+    const foto = fotoOf(d);
+
+    const m = L.circleMarker([lat, lon], {
+      radius: 7,
+      color: '#ff9800',
+      fillColor: '#ff9800',
+      fillOpacity: 0.9
+    }).addTo(layerX);
+
+    // click marker => apri lightbox (stesso comportamento)
+    m.on('click', () => {
+      if (foto) openRouteLightboxByUrl(foto);
+    });
+  });
+}
+
+function openMapModal(){
+  const modal = document.getElementById('mapModal');
+  if (!modal) return;
+  modal.style.display = 'block';
+
+  initMapFull();
+
+  // disegna traccia+foto del percorso corrente
+  setTraceOn(mapFull, polyFull, lastTraceCoords || []);
+  renderPicsOn(photoLayerFull, lastPics || []);
+
+  setTimeout(() => { try { mapFull.invalidateSize(); } catch{} }, 120);
+}
+
+function closeMapModal(){
+  const modal = document.getElementById('mapModal');
+  if (modal) modal.style.display = 'none';
+}
+
+  
 
   function cleanCoords(coords) {
     if (!Array.isArray(coords)) return [];
@@ -482,6 +615,16 @@ let routePhotoIndex = new Map(); // url -> index dentro routePhotos
 
   setTimeout(() => { if (map) map.invalidateSize(); }, 150);
 
+
+function updateStickyOffsets(){
+  const nav = document.getElementById('floatingNav');
+  const h = nav ? Math.ceil(nav.getBoundingClientRect().height) : 0;
+  document.documentElement.style.setProperty('--floatNavH', h + 'px');
+}
+window.addEventListener('resize', updateStickyOffsets);
+window.addEventListener('orientationchange', updateStickyOffsets);
+
+  
   async function main(){
     const src = qs('src') || 'public/vespatrek_public.json';
     const res = await fetch(src, { cache:'no-store' });
@@ -495,6 +638,12 @@ let routePhotoIndex = new Map(); // url -> index dentro routePhotos
     const langSel = document.getElementById('lang');
     if (langSel) langSel.value = LANG;
     applyLang();
+
+
+    updateStickyOffsets();
+    setTimeout(updateStickyOffsets, 250);
+
+    
 
     document.getElementById('tit').innerText = data.titolo || 'VespaTrek';
     document.getElementById('meta').innerText = `Aggiornato: ${data._exportDate || '--'} · File: ${src}`;
@@ -514,17 +663,45 @@ let routePhotoIndex = new Map(); // url -> index dentro routePhotos
       .sort((a,b)=>(b.id||0)-(a.id||0));
 
     const sel = document.getElementById('selPerc');
-    sel.innerHTML = lista.map(p => {
+
+
+    
+if (!lista.length) {
+  sel.innerHTML = `<option value="">(nessun percorso pubblicato)</option>`;
+} else {
+  const byCountry = new Map();
+  for (const p of lista) {
+    const paese = (p.paese || 'Sconosciuto');
+    if (!byCountry.has(paese)) byCountry.set(paese, []);
+    byCountry.get(paese).push(p);
+  }
+
+  // ordina paesi alfabetico; dentro ogni paese: più recenti prima (lista è già ordinata)
+  const countries = [...byCountry.keys()].sort((a,b)=>a.localeCompare(b));
+
+  sel.innerHTML = countries.map(paese => {
+    const items = byCountry.get(paese) || [];
+    const opts = items.map(p => {
       const tipo = (p.tipo || 'Tappa');
-      const label = `${p.data||''} ${p.ora||''} — ${p.paese||''} — ${tipo} — ${Number(p.km||0).toFixed(1)} km`;
+      const label = `${p.data||''} ${p.ora||''} — ${tipo} — ${Number(p.km||0).toFixed(1)} km`;
       return `<option value="${p.id}">${escapeHtml(label)}</option>`;
     }).join('');
 
-    if (!lista.length) {
-      sel.innerHTML = `<option value="">(nessun percorso pubblicato)</option>`;
-    }
+    return `<optgroup label="${escapeHtml(paese)}">${opts}</optgroup>`;
+  }).join('');
+}
 
+
+    
     const btnKml = document.getElementById('btnKml');
+
+    const btnMapFull = document.getElementById('btnMapFull');
+btnMapFull?.addEventListener('click', () => openMapModal());
+
+document.getElementById('mapModalClose')?.addEventListener('click', closeMapModal);
+document.getElementById('mapModal')?.addEventListener('click', (e) => {
+  if (e.target && e.target.id === 'mapModal') closeMapModal();
+});
 
     function buildFileName(p) {
       const tipo = p.tipo || 'Percorso';
@@ -571,6 +748,8 @@ let routePhotoIndex = new Map(); // url -> index dentro routePhotos
 
       setTrace(p.traccia || []);
 
+      lastTraceCoords = p.traccia || [];
+
      // markers foto (diario) dentro start/end del percorso selezionato
 if (photoLayer) photoLayer.clearLayers();
 
@@ -581,6 +760,9 @@ const endTs = Number(p.endTs || 0);
 const MARGIN = 15 * 60 * 1000;
 
 const pics = (Array.isArray(data.diario) ? data.diario : [])
+
+  lastPics = pics;
+      
   .filter(d => d && d.geo && isFinite(d.geo.lat) && isFinite(d.geo.lon))
   .filter(d => !!fotoOf(d))
   .filter(d => {
@@ -884,6 +1066,7 @@ function openRouteLightboxByUrl(url){
     if (e.key === 'Escape') closeLightbox();
     if (e.key === 'ArrowRight') lightboxNext();
     if (e.key === 'ArrowLeft') lightboxPrev();
+    if (e.key === 'Escape') closeMapModal();
   });
 
   document.getElementById('lang')?.addEventListener('change', (e) => {
@@ -893,6 +1076,19 @@ function openRouteLightboxByUrl(url){
     try { renderDiarioPub(); } catch {}
   });
 </script>
+
+<div id="mapModal" style="display:none; position:fixed; inset:0; z-index:9998; background:rgba(0,0,0,0.92);">
+  <button id="mapModalClose"
+    style="position:fixed; top:14px; right:14px; z-index:9999;
+           background:#f44336; color:#fff; border:none; width:42px; height:42px;
+           border-radius:50%; font-size:22px; cursor:pointer;">
+    ×
+  </button>
+
+  <div id="mapPubFull" style="position:absolute; inset:70px 14px 14px 14px; border-radius:12px; border:1px solid #444;"></div>
+</div>
+
+    
   </div>
 <div id="lightbox" onclick="closeLightbox()">
   <button id="lightboxClose" onclick="event.stopPropagation(); closeLightbox()">×</button>
