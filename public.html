@@ -521,21 +521,7 @@ routePhotos = pics.map(fotoOf).filter(Boolean);
 routePhotoIndex = new Map();
 routePhotos.forEach((url, i) => routePhotoIndex.set(url, i));
 
-// (se vuoi: se il percorso non ha foto, non tocca lbPhotos globale del diario)
-//function openRouteLightboxByUrl(url){
-//  if (!url) return;
-//
-  // se ho foto del percorso, uso quelle (frecce = solo foto di questa tappa)
-//  if (routePhotos && routePhotos.length) {
-//    lbPhotos = routePhotos;
-//    const idx = routePhotoIndex.get(url);
-//    openLightboxIndex(isFinite(idx) ? idx : 0);
-//    return;
-//  }
 
-  // fallback: usa lightbox “globale”
-  openLightboxDirect(url);
-}
 
 pics.forEach(d => {
   const lat = Number(d.geo.lat), lon = Number(d.geo.lon);
