@@ -900,17 +900,11 @@
   <div id="officina" class="page">
 
     <!-- RICAMBI -->
-    <div class="dash-card" style="padding:15px;">
-      <h2 style="margin:0 0 10px 0; color:#ff9800;">⚙️ Bauletto & Ricambi</h2>
-      <div id="listaRicambi"></div>
-      <div style="display:flex; gap:10px; margin-top:15px;">
-        <input type="text" id="nuovoRicambioNome" style="margin:0; padding:12px; text-align:left;" placeholder="Nuovo ricambio (es. CDI)...">
-        <button class="btn-azione" style="margin:0; width:60px; padding:0; font-size:24px;" onclick="aggiungiRicambio()">+</button>
-      </div>
-      <button class="btn-azione" style="background:#2196F3;" onclick="apriModal('modalRegistro')">📄 LOG MANUTENZIONE</button>
-      <button class="btn-secondary" onclick="apriModal('modalLogDettaglio')">🔧 NUOVO INTERVENTO</button>
-      <button class="btn-secondary" style="background:#111;border:1px solid #333;" onclick="apriModal('modalManutCatalog'); renderManutCatalog();">📏 Catalogo manutenzione</button>
-    </div>
+
+    <button class="btn-azione" style="background:#ff9800;color:black;" onclick="apriModal('modalRicambi'); renderInventario(); renderChecklist();">
+  🧰 RICAMBI & OFFICINA
+</button>
+ 
 
     <!-- CARBURAZIONE -->
     <div class="dash-card" style="padding:15px; border:2px solid #00bcd4;">
@@ -1067,32 +1061,7 @@
 
 <hr style="border:0;border-top:1px solid #333; margin:15px 0;">
 
-<h3 style="margin:0 0 10px 0; color:#ff9800;">🔧 Intervalli manutenzione (km)</h3>
 
-<label class="inp-label">Candela ogni (km)</label>
-<input type="number" id="set-int-candela" step="100" min="0">
-
-<label class="inp-label">Olio cambio ogni (km) (se applicabile)</label>
-<input type="number" id="set-int-olioCambio" step="100" min="0">
-
-<label class="inp-label">Ganasce freno ant. ogni (km)</label>
-<input type="number" id="set-int-ganasceAnt" step="100" min="0">
-
-<label class="inp-label">Ganasce freno post. ogni (km)</label>
-<input type="number" id="set-int-ganascePost" step="100" min="0">
-
-<label class="inp-label">Dischi frizione ogni (km)</label>
-<input type="number" id="set-int-dischiFrizione" step="100" min="0">
-
-<label class="inp-label">Gomme ogni (km)</label>
-<input type="number" id="set-int-gomme" step="100" min="0">
-
-<label class="inp-label">Cavi (generico) ogni (km)</label>
-<input type="number" id="set-int-cavi" step="100" min="0">
-
-<button class="btn-secondary" onclick="salvaIntervalliManutenzione()">
-  💾 Salva intervalli manutenzione
-</button>
 
     
   </div>
@@ -1101,6 +1070,36 @@
 
   
   <!-- ==================== MODALI ==================== -->
+
+
+<!-- RICAMBI & OFFICINA (modal) -->
+<div id="modalRicambi" class="modal-overlay">
+  <div class="modal-content" style="border-color:#ff9800; max-width:560px;">
+    <button class="close-modal" onclick="chiudiModal('modalRicambi')">×</button>
+    <h2 style="color:#ff9800; text-align:center; margin-top:0;">🧰 Ricambi & Officina</h2>
+
+    <!-- QUI DENTRO incolla la vecchia card "Bauletto & Ricambi" che hai tagliato -->
+    <div class="dash-card" style="padding:15px;">
+      <h2 style="margin:0 0 10px 0; color:#ff9800;">⚙️ Bauletto & Ricambi</h2>
+
+      <button class="btn-secondary" style="margin-top:0;" onclick="apriModal('modalManutCatalog'); renderManutCatalog();">
+        📏 Catalogo manutenzione
+      </button>
+
+      <div id="listaRicambi" style="margin-top:10px;"></div>
+
+      <div style="display:flex; gap:10px; margin-top:15px;">
+        <input type="text" id="nuovoRicambioNome" style="margin:0; padding:12px; text-align:left;" placeholder="Nuovo ricambio (es. CDI)...">
+        <button class="btn-azione" style="margin:0; width:60px; padding:0; font-size:24px;" onclick="aggiungiRicambio()">+</button>
+      </div>
+
+      <button class="btn-azione" style="background:#2196F3;" onclick="apriModal('modalRegistro')">📄 LOG MANUTENZIONE</button>
+      <button class="btn-secondary" onclick="apriModal('modalLogDettaglio')">🔧 NUOVO INTERVENTO</button>
+    </div>
+  </div>
+</div>
+
+  
 
   <div id="modalMapFull" class="modal-overlay">
     <div class="modal-content" style="border-color:#2196F3; max-width:900px;">
@@ -1390,6 +1389,8 @@ function nuovaTappa(kmInizio) {
 
 let tappaAttuale = nuovaTappa(0);
   let pendingMount = null; // { invId, nome }
+  let pendingManutFromChecklist = null; 
+// { key, nome }
 
 /* ============================================================
    WAKE LOCK (tieni schermo acceso durante tracking)
@@ -1515,12 +1516,13 @@ initDB('vt_unita', 'L');
 initDB('vt_dist', 'KM');
 initDB('vt_valuta', 'USD');
 
-
+initDB('vt_manut_lastKm', JSON.stringify({}));
+initDB('vt_manut_warnState', JSON.stringify({}));
 initDB('vt_manutCatalog', JSON.stringify([
   { key:'candela',        nome:'Candela',              intervalKm:4000, enabled:true },
   { key:'olioCambio',     nome:'Olio cambio',          intervalKm:5000, enabled:true },
-  { key:'ganasceAnt',     nome:'Ganasce freno ant.',   intervalKm:7000, enabled:true },
-  { key:'ganascePost',    nome:'Ganasce freno post.',  intervalKm:7000, enabled:true },
+  { key:'ganasceAnt',     nome:'Ganasce freno ant.',   intervalKm:5000, enabled:true },
+  { key:'ganascePost',    nome:'Ganasce freno post.',  intervalKm:3000, enabled:true },
   { key:'dischiFrizione', nome:'Dischi frizione',      intervalKm:12000, enabled:true },
   { key:'gomme',          nome:'Gomme',                intervalKm:10000, enabled:true },
   { key:'cavi',           nome:'Cavi',                 intervalKm:6000, enabled:true }
@@ -5313,27 +5315,104 @@ function eliminaRicambio(i) {
 
 function aggiungiRicambio() {
   const input = document.getElementById('nuovoRicambioNome');
-  const nome = input ? input.value.trim() : '';
-  if (!nome) { showToast('⚠️ Inserisci un nome'); return; }
+  const nomeRaw = input ? input.value.trim() : '';
+  if (!nomeRaw) { showToast('⚠️ Inserisci un nome'); return; }
 
-  // ✅ chiedi se questo ricambio deve generare avvisi usura
-const isWear = confirm(
-  `"${nome}" è un componente con USURA programmata?\n\n` +
-  `OK = sì (avvisi a km)\n` +
-  `Annulla = N/A (nessun avviso)`
-);
+  const nome = nomeRaw; // nome ricambio
+  const inv = caricaJSON('vt_inventario', []);
+  const kmTot = parseFloat(carica('vt_kmTotali','0')) || 0;
 
-// manutKey: prova a inferirla dal nome (candela, frizione, gomme…)
-const mk = inferManutKeyFromNome(nome);
+  // ✅ USURA o N/A
+  const isWear = confirm(
+    `"${nome}" è un componente con USURA programmata?\n\n` +
+    `OK = sì (avvisi a km)\n` +
+    `Annulla = N/A (nessun avviso)`
+  );
 
+  // prova inferenza chiave manutenzione
+  let manutKey = isWear ? (inferManutKeyFromNome(nome) || null) : null;
 
-let durataManuale = 0;
-if (isWear) {
-  if (!mk) {
-    const s = prompt(`"${nome}": intervallo usura (km)?\n(Es: 2000)`, '1000');
+  // ✅ Caso speciale: GANASCE -> chiedi ant/post se non specificato nel nome
+  if (isWear) {
+    const s = nome.toLowerCase();
+    const isGanasce = s.includes('ganasce');
+    const hasAnt = s.includes('ant') || s.includes('anter');
+    const hasPost = s.includes('post');
+
+    if (isGanasce && !hasAnt && !hasPost) {
+      const pick = prompt('Ganasce: scrivi A = Anteriore (5000km) oppure P = Posteriore (3000km)', 'P');
+      if (String(pick || '').trim().toUpperCase() === 'A') manutKey = 'ganasceAnt';
+      else manutKey = 'ganascePost';
+    } else if (isGanasce && hasAnt) {
+      manutKey = 'ganasceAnt';
+    } else if (isGanasce && hasPost) {
+      manutKey = 'ganascePost';
+    }
+  }
+
+  // ✅ Se è usura ma NON riconosciuto, chiedi durata manuale subito
+  let durataManuale = 0;
+  if (isWear && !manutKey) {
+    const s = prompt(`"${nome}": intervallo usura (km)? (opzionale)`, '1000');
     const km = s ? Number(s) : 0;
     durataManuale = (isFinite(km) && km > 0) ? km : 0;
   }
+
+  // ✅ costo ricambio (valuta locale corrente)
+  const cur = valutaAttuale || 'USD';
+  const costoStr = prompt(`Quanto hai pagato "${nome}"? (in ${cur}) (opzionale)`, '');
+  const costoLocal = costoStr ? parseFloat(costoStr) : 0;
+
+  let costoUsd = 0;
+  if (isFinite(costoLocal) && costoLocal > 0) {
+    costoUsd = convertLocalToUsd(costoLocal, cur);
+    if (!isFinite(costoUsd) || costoUsd <= 0) {
+      showToast(`⚠️ Manca cambio per ${cur}. Vai in Settings.`);
+      costoUsd = 0;
+    }
+  }
+
+  inv.push({
+    id: String(Date.now()) + '_' + Math.random().toString(16).slice(2),
+    nome,
+    qta: 1,
+
+    // ✅ usura
+    wear: isWear ? 'interval' : 'na',
+    manutKey: isWear ? manutKey : null,
+
+    // durata manuale solo se non abbiamo manutKey/catalogo
+    durata: durataManuale || 0,
+
+    lastKm: kmTot,
+
+    // costi
+    costoLocal: costoLocal || 0,
+    costoUsd: costoUsd || 0,
+    valuta: cur,
+    fxToUsd: (typeof getFxToUsd === 'function') ? getFxToUsd(cur) : null
+  });
+
+  salva('vt_inventario', inv);
+
+  // ✅ somma a spesa ricambi
+  if (costoUsd > 0) {
+    salva('vt_spesaRicambiUsd', (parseFloat(carica('vt_spesaRicambiUsd','0')) || 0) + costoUsd);
+
+    const paese = carica('vt_paeseAttuale','Colombia');
+    const datiPaesi = caricaJSON('vt_datiPaesi', {});
+    if (!datiPaesi[paese]) datiPaesi[paese] = {};
+    datiPaesi[paese].spesaRicambiUsd = (datiPaesi[paese].spesaRicambiUsd || 0) + costoUsd;
+    datiPaesi[paese].valuta = cur;
+    salva('vt_datiPaesi', datiPaesi);
+
+    aggiornaUI();
+  }
+
+  if (input) input.value = '';
+  renderInventario();
+  renderChecklist();
+  showToast('✅ Ricambio aggiunto: ' + nome);
 }
 
 
@@ -5550,7 +5629,23 @@ if (pendingMount && pendingMount.invId) {
   renderChecklist();
 }
 
+// ✅ Se questo intervento nasce da un avviso manutenzione, segna “ultimo cambio”
+if (pendingManutFromChecklist && pendingManutFromChecklist.key) {
+  const kmTot = parseFloat(carica('vt_kmTotali','0')) || 0;
 
+  const last = caricaJSON('vt_manut_lastKm', {});
+  last[pendingManutFromChecklist.key] = kmTot;
+  salva('vt_manut_lastKm', last);
+
+  const ws = caricaJSON('vt_manut_warnState', {});
+  ws[pendingManutFromChecklist.key] = {};
+  salva('vt_manut_warnState', ws);
+
+  pendingManutFromChecklist = null;
+
+  renderChecklist();
+  renderInventario();
+}
 
 
   
@@ -5630,7 +5725,7 @@ function eliminaIntervento(id) {
 
 
 
-  const USURA_WARN_THRESHOLDS = [500, 250, 10]; // km prima (modifica qui se vuoi 100 invece di 10)
+  const USURA_WARN_THRESHOLDS = [500, 250, 100]; // km prima (modifica qui se vuoi 100 invece di 10)
 
 function getUsuraWarningsInventario() {
   const inv = caricaJSON('vt_inventario', []);
@@ -5682,12 +5777,117 @@ function colorForRemaining(remaining) {
 }
 
 
+
+
+
+const MANUT_WARN_THRESHOLDS = [500, 250, 100];
+
+function getCatalogWarnings() {
+  const kmTot = parseFloat(carica('vt_kmTotali','0')) || 0;
+  const cat = getManutCatalog();                 // deve esistere già
+  const last = caricaJSON('vt_manut_lastKm', {}); // { key: kmUltimoCambio }
+
+  const out = [];
+
+  for (const it of cat) {
+    if (!it || it.enabled === false) continue;
+
+    const intervalKm = Number(it.intervalKm || 0);
+    if (!isFinite(intervalKm) || intervalKm <= 0) continue;
+
+    const lastKm = Number(last[it.key] || 0);
+    const nextAt = lastKm + intervalKm;
+    const remaining = nextAt - kmTot;
+
+    // Mostra solo se entro 500km o già scaduto
+    if (remaining > MANUT_WARN_THRESHOLDS[0]) continue;
+
+    let level = 500;
+    if (remaining <= 10) level = 10;
+    else if (remaining <= 250) level = 250;
+
+    out.push({
+      key: it.key,
+      nome: it.nome || it.key,
+      remaining,
+      level
+    });
+  }
+
+  out.sort((a,b) => a.remaining - b.remaining);
+  return out;
+}
+
+function segnaManutFatta(key) {
+  const kmTot = parseFloat(carica('vt_kmTotali','0')) || 0;
+
+  const last = caricaJSON('vt_manut_lastKm', {});
+  last[key] = kmTot;
+  salva('vt_manut_lastKm', last);
+
+  const ws = caricaJSON('vt_manut_warnState', {});
+  ws[key] = {};
+  salva('vt_manut_warnState', ws);
+
+  showToast('✅ Segnato come fatto');
+  renderChecklist();
+  renderInventario();
+}
+
+
+
+function apriInterventoDaAvvisoManut(key, nome) {
+  pendingManutFromChecklist = { key, nome };
+
+  const n = document.getElementById('log-nome');
+  const d = document.getElementById('log-descrizione');
+  const c = document.getElementById('log-costo');
+
+  if (n) n.value = `Sostituzione ${nome}`;
+  if (d) d.value = `Avviso manutenzione (${key}).`;
+  if (c) c.value = '';
+
+  apriModal('modalLogDettaglio');
+}
+
+
+  
   
 function renderChecklist() {
   const lista = caricaJSON('vt_checklist', []);
   const container = document.getElementById('checklist-container');
   if (!container) return;
 
+
+const warns = getCatalogWarnings();
+let html = '';
+
+if (warns.length) {
+  html += `<div style="color:#ff9800;font-weight:900;margin:6px 0 10px 0;">🔧 Avvisi manutenzione</div>`;
+
+  html += warns.map(w => {
+    const col = (w.remaining <= 0) ? '#f44336' : (w.level === 10 ? '#f44336' : (w.level === 250 ? '#ff9800' : '#4caf50'));
+    const msg = (w.remaining <= 0)
+      ? `SCADUTO di ${Math.abs(Math.round(w.remaining))} km`
+      : `mancano ~${Math.round(w.remaining)} km (soglia ${w.level})`;
+
+    return `
+      <div class="checklist-item" style="border-left:5px solid ${col}; cursor:default;" onclick="event.stopPropagation();">
+        <input type="checkbox" disabled>
+        <span class="checklist-text"><b>${w.nome}</b> — <span style="color:${col};font-weight:900;">${msg}</span></span>
+        <div class="checklist-actions">
+          <button class="chk-btn" onclick="apriInterventoDaAvvisoManut('${w.key}', '${String(w.nome).replace(/'/g,"\\'")}')" title="Sostituisci ora">✅</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  html += `<hr style="border:0;border-top:1px solid #333; margin:12px 0;">`;
+}
+
+
+
+  
   const warns = getUsuraWarningsInventario();
 
   let html = '';
