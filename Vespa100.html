@@ -511,6 +511,14 @@
 .chk-btn:active{opacity:0.8;}
 .chk-btn.danger{background:#2a0000;border-color:#4a0000;color:#ffb3b3;}
 
+
+
+    .chk-btn:disabled{
+  opacity:0.35;
+  cursor:not-allowed;
+  filter:grayscale(1);
+}
+
     /* PAESE STATS */
     .paese-stat{background:#2a2a2a;padding:10px;margin-bottom:10px;border-radius:10px;border-left:4px solid var(--giallo);}
     .paese-name{font-size:18px;font-weight:bold;color:var(--giallo);}
@@ -6206,9 +6214,6 @@ const canUse = stock > 0;
         title="Scala 1 ricambio dallo stock + apri intervento">
   📦
 </button>
-
-<button class="chk-btn" ${canUse ? '' : 'disabled'}
-        onclick="usaRicambioDaAvvisoManut('${w.key}', '${String(w.nome).replace(/'/g,"\\'")}')">📦</button>
 
 
   <button class="chk-btn"
