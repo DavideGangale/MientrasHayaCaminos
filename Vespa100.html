@@ -602,6 +602,36 @@
   <!-- ===== TOAST ===== -->
   <div id="toast"></div>
 
+
+
+<!-- ===== PRE-RIDE BANNER (inizio TAPPA) ===== -->
+<div id="preRideBanner" style="
+  display:none;
+  position:fixed;
+  top:70px;
+  left:50%;
+  transform:translateX(-50%);
+  width:min(92vw, 520px);
+  background:#1e1e1e;
+  border:2px solid #00bcd4;
+  border-radius:14px;
+  padding:12px;
+  z-index:5000;
+  box-shadow:0 8px 25px rgba(0,0,0,.65);
+">
+  <div style="font-weight:900;color:#00bcd4;margin-bottom:6px;">✅ Check pre-partenza (TAPPA)</div>
+  <div style="font-size:13px;color:#ddd;line-height:1.35;">
+    • Pressione gomme<br>
+    • Documenti / passaporto / patente<br>
+    • Freni + luci<br>
+    • Livello benzina / scorta<br>
+    • Olio / perdite
+  </div>
+  <button class="btn-secondary" style="margin-top:10px;" onclick="hidePreRideBanner()">OK</button>
+</div>
+
+  
+  
   <!-- ===== ALERT CAMBIO PAESE ===== -->
   <div id="alert-paese">
     <h3 style="color:var(--giallo); margin-top:0;">🛑 CAMBIO PAESE</h3>
@@ -907,11 +937,10 @@
  
 
     <!-- CARBURAZIONE -->
-    <div class="dash-card" style="padding:15px; border:2px solid #00bcd4;">
-      <h2 style="margin:0 0 10px 0; color:#00bcd4;">🌬️ Setup Carburatore 30</h2>
-      <div style="font-size:12px; color:#aaa; margin-bottom:10px;">
-        Altitudine Attuale: <strong id="carb-alt" style="color:white;">0</strong> m
-      </div>
+    <!-- CARBURAZIONE (apre modal) -->
+<button class="btn-azione" style="background:#00bcd4; color:black;" onclick="apriModal('modalCarbSetup')">
+  🌬️ CARBURAZIONE (Setup)
+</button>
       <div style="display:flex; gap:10px;">
         <input type="number" id="carbChiclerMax" placeholder="Chicler Max (es. 115)" min="1" max="999">
         <input type="number" id="carbChiclerMin" placeholder="Minimo (es. 55)" min="1" max="999">
@@ -1127,6 +1156,40 @@
     </div>
   </div>
 
+
+<!-- SETUP CARBURAZIONE (modal) -->
+<div id="modalCarbSetup" class="modal-overlay">
+  <div class="modal-content" style="border-color:#00bcd4; max-width:560px;">
+    <button class="close-modal" onclick="chiudiModal('modalCarbSetup')">×</button>
+
+    <h2 style="color:#00bcd4; text-align:center; margin-top:0;">🌬️ Setup Carburatore</h2>
+
+    <!-- questa è la tua vecchia card, identica, solo dentro il modal -->
+    <div class="dash-card" style="padding:15px; border:2px solid #00bcd4;">
+      <h2 style="margin:0 0 10px 0; color:#00bcd4;">🌬️ Setup Carburatore 30</h2>
+      <div style="font-size:12px; color:#aaa; margin-bottom:10px;">
+        Altitudine Attuale: <strong id="carb-alt" style="color:white;">0</strong> m
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <input type="number" id="carbChiclerMax" placeholder="Chicler Max (es. 115)" min="1" max="999">
+        <input type="number" id="carbChiclerMin" placeholder="Minimo (es. 55)" min="1" max="999">
+      </div>
+
+      <input type="text" id="carbNote" placeholder="Note (es. Fuma in altitudine...)">
+
+      <button class="btn-azione" style="background:#00bcd4; color:black;" onclick="salvaCarburazione()">
+        💾 Salva Setup
+      </button>
+
+      <button class="btn-secondary" onclick="apriModal('modalCarb')">
+        📖 Storico Altitudini
+      </button>
+    </div>
+  </div>
+</div>
+
+  
   <!-- STORICO CARBURAZIONE -->
   <div id="modalCarb" class="modal-overlay">
     <div class="modal-content" style="border-color:#00bcd4;">
@@ -1466,6 +1529,29 @@ function showToast(msg, durata = 2500) {
   toastTimer = setTimeout(() => t.classList.remove('show'), durata);
 }
 
+
+
+let preRideTimer = null;
+
+function showPreRideBanner() {
+  const b = document.getElementById('preRideBanner');
+  if (!b) return;
+
+  b.style.display = 'block';
+
+  clearTimeout(preRideTimer);
+  preRideTimer = setTimeout(() => {
+    hidePreRideBanner();
+  }, 15000); // 15s
+}
+
+function hidePreRideBanner() {
+  const b = document.getElementById('preRideBanner');
+  if (!b) return;
+  b.style.display = 'none';
+}
+
+  
 /* ============================================================
    INIT DATABASE
 ============================================================ */
@@ -1613,6 +1699,29 @@ initDB('vt_kmFuoriTappa', '0.0');
     { id:'c5', nome:'Documenti (passaporto/patente)', fatto:false },
     { id:'c6', nome:'Livello benzina/scorta', fatto:false }
   ]));
+
+
+
+// ✅ MIGRAZIONE: sposta “pre-ride” fuori dalla checklist officina (una sola volta)
+if (carica('vt_mig_checklist_preride_v1', '') !== '1') {
+  const removeNames = new Set([
+    'Controllo olio motore',
+    'Pressione gomme',
+    'Controllo freni',
+    'Kit attrezzi completo',
+    'Documenti (passaporto/patente)',
+    'Livello benzina/scorta'
+  ]);
+
+  const list = caricaJSON('vt_checklist', []);
+  if (Array.isArray(list) && list.length) {
+    const filtered = list.filter(x => x && !removeNames.has(String(x.nome || '').trim()));
+    salva('vt_checklist', filtered);
+  }
+
+  salva('vt_mig_checklist_preride_v1', '1');
+}
+  
 
   initDB('vt_inventario', JSON.stringify([
     { nome:'Cavi Cambio', qta:4, durata:6000, lastKm:0 },
@@ -1949,6 +2058,7 @@ salva('vt_tappaAttuale', tappaAttuale);
   }, 1000);
 
   showToast('▶ Tracking avviato');
+  if (modalitaGuida === 'TAPPA') showPreRideBanner();
   syncWakeLock();
 }
 
@@ -5803,7 +5913,18 @@ function apriInterventoDaAvvisoManut(key, nome) {
 }
 
 
-  
+  function getStockQtyForManutKey(manutKey) {
+  const inv = caricaJSON('vt_inventario', []);
+  if (!Array.isArray(inv) || !manutKey) return 0;
+
+  let tot = 0;
+  for (const it of inv) {
+    if (!it) continue;
+    const key = it.manutKey || inferManutKeyFromNome(it.nome);
+    if (key === manutKey) tot += Number(it.qta || 0);
+  }
+  return tot;
+}
   
 function renderChecklist() {
   const lista = caricaJSON('vt_checklist', []);
@@ -5823,10 +5944,21 @@ function renderChecklist() {
         ? `SCADUTO di ${Math.abs(Math.round(w.remaining))} km`
         : `mancano ~${Math.round(w.remaining)} km (soglia ${w.level})`;
 
+const stock = getStockQtyForManutKey(w.key);
+const stockTxt = `Stock: <b style="color:${stock>0?'var(--verde)':'#f44336'}">${stock}</b>`;
+
+      
       return `
         <div class="checklist-item" style="border-left:5px solid ${col}; cursor:default;" onclick="event.stopPropagation();">
           <input type="checkbox" disabled>
-          <span class="checklist-text"><b>${w.nome}</b> — <span style="color:${col};font-weight:900;">${msg}</span></span>
+         
+
+<span class="checklist-text">
+  <b>${w.nome}</b> — <span style="color:${col};font-weight:900;">${msg}</span>
+  <div style="margin-top:4px; font-size:12px; color:#bbb;">${stockTxt}</div>
+</span>
+
+          
           <div class="checklist-actions">
             <button class="chk-btn" onclick="apriInterventoDaAvvisoManut('${w.key}', '${String(w.nome).replace(/'/g,"\\'")}')" title="Sostituisci ora">✅</button>
           </div>
