@@ -1497,7 +1497,7 @@ function ricostruisciSpeseGlobaliDaPaesi() {
 function initAllData() {
   initDB('vt_olioStockMl', '0');            // ml di olio disponibili
   initDB('vt_olioCostoStockUsd', '0');      // USD “contenuti” nello stock
-initDB('vt_unita', 'L');
+
   initDB('vt_kmTotali', '0.0');
   initDB('vt_odoUltimoPieno', '0.0');
   initDB('vt_litriVespa', '0.0');
@@ -1592,7 +1592,6 @@ if (oldTan != null && localStorage.getItem('vt_tanica1CapLitri') == null) {
 initDB('vt_turismo', JSON.stringify([]));
 initDB('vt_modalitaGuida', 'TAPPA');
 
-initDB('vt_benzinaFuoriTappaLitri', '0.0');
   
 initDB('vt_benzinaFuoriTappaLitri', '0.0');
 initDB('vt_kmFuoriTappa', '0.0');
@@ -2288,37 +2287,16 @@ function apriModal(id) {
   m.classList.add('open');
 
 
+  // Fuel modals: testo + select
+  if (id === 'modalFuelStart') {
+    aggiornaTestoModaliSerbatoio();
+    popolaSelectLivelloSerbatoio('fuel-start-select', true);
+  }
+  if (id === 'modalFuelEnd') {
+    aggiornaTestoModaliSerbatoio();
+    popolaSelectLivelloSerbatoio('fuel-end-select', true);
+  }
 
-// ✅ Fuel modals: popola sempre select + testo (così il select non sarà mai vuoto)
-if (id === 'modalFuelStart') {
-  aggiornaTestoModaliSerbatoio();
-  popolaSelectLivelloSerbatoio('fuel-start-select', true);
-}
-if (id === 'modalFuelEnd') {
-  aggiornaTestoModaliSerbatoio();
-  popolaSelectLivelloSerbatoio('fuel-end-select', true);
-}
-  
-
-// ✅ popola sempre i select fuel quando apro i modali
-if (id === 'modalFuelStart') {
-  popolaSelectLivelloSerbatoio('fuel-start-select', true);
-}
-if (id === 'modalFuelEnd') {
-  popolaSelectLivelloSerbatoio('fuel-end-select', true);
-}
-  
-// ✅ popola sempre i select fuel quando apro i modali
-if (id === 'modalFuelStart') {
-  popolaSelectLivelloSerbatoio('fuel-start-select', true);
-}
-if (id === 'modalFuelEnd') {
-  popolaSelectLivelloSerbatoio('fuel-end-select', true);
-}
-  if (id === 'modalTappe') renderTappe();
-  if (id === 'modalRegistro') renderLogManutenzione();
-  if (id === 'modalCarb') renderStoricoCarbur();
-  if (id === 'modalLogCarburanti') renderLogCarburanti();
 }
 
 function chiudiModal(id) {
@@ -3655,6 +3633,7 @@ function enqueueFoto(kind, id) {
 }
 
   let driveSyncRunning = false;
+  let lastErrMsg = '';
 // carica la foto base64 dall'entry e la carica su Drive
 async function processUploadQueue(maxItems = 4) {
   if (!navigator.onLine) { showToast('📴 Offline: sync rimandato'); return; }
@@ -3668,7 +3647,7 @@ if (driveSyncRunning) {
   return;
 }
 driveSyncRunning = true;
-
+lastErrMsg = '';
   
   showToast(`☁️ Sync in corso... (${q.length} in coda)`, 2500);
 
@@ -3738,6 +3717,8 @@ keep.push(job);
   } else {
   showToast('ℹ️ Nessuna foto caricata' + (lastErrMsg ? (': ' + lastErrMsg.slice(0,80)) : ''), 5000);
 }
+
+  driveSyncRunning = false;
 }
 
 function syncFotoDriveNow() {
@@ -4369,9 +4350,7 @@ function getSerbatoioCapLitri() {
   return parseFloat(carica('vt_serbatoioCapLitri', String(SERBATOIO_LITRI))) || SERBATOIO_LITRI;
 }
 
-//function getTanicheCapLitri() {
-//  return parseFloat(carica('vt_tanicheCapLitri', '0')) || 0;
-//}
+
 function getTanicheCapLitri() {
   const t1 = parseFloat(carica('vt_tanica1CapLitri', '0')) || 0;
   const t2 = parseFloat(carica('vt_tanica2CapLitri', '0')) || 0;
@@ -4511,12 +4490,6 @@ function salvaIntervalliManutenzione() {
   showToast('✅ Intervalli manutenzione salvati');
 }
 
-
-function getTanicheCapLitri() {
-  const t1 = parseFloat(carica('vt_tanica1CapLitri', '0')) || 0;
-  const t2 = parseFloat(carica('vt_tanica2CapLitri', '0')) || 0;
-  return Math.max(0, t1) + Math.max(0, t2);
-}
 
 function aggiornaTotTanicheUI() {
   const tot = getTanicheCapLitri();
@@ -5066,10 +5039,7 @@ function slugKey(s) {
     .slice(0, 40) || ('k_' + Date.now());
 }
 
-function getManutCatalog() {
-  const c = caricaJSON('vt_manutCatalog', []);
-  return Array.isArray(c) ? c : [];
-}
+
 
 function saveManutCatalog(list) {
   salva('vt_manutCatalog', list);
@@ -5318,21 +5288,21 @@ function aggiungiRicambio() {
   const nomeRaw = input ? input.value.trim() : '';
   if (!nomeRaw) { showToast('⚠️ Inserisci un nome'); return; }
 
-  const nome = nomeRaw; // nome ricambio
+  const nome = nomeRaw;
   const inv = caricaJSON('vt_inventario', []);
   const kmTot = parseFloat(carica('vt_kmTotali','0')) || 0;
 
-  // ✅ USURA o N/A
+  // USURA o N/A
   const isWear = confirm(
     `"${nome}" è un componente con USURA programmata?\n\n` +
     `OK = sì (avvisi a km)\n` +
     `Annulla = N/A (nessun avviso)`
   );
 
-  // prova inferenza chiave manutenzione
+  // inferenza chiave manutenzione
   let manutKey = isWear ? (inferManutKeyFromNome(nome) || null) : null;
 
-  // ✅ Caso speciale: GANASCE -> chiedi ant/post se non specificato nel nome
+  // Caso speciale: ganasce -> chiedi ant/post se non specificato
   if (isWear) {
     const s = nome.toLowerCase();
     const isGanasce = s.includes('ganasce');
@@ -5340,7 +5310,7 @@ function aggiungiRicambio() {
     const hasPost = s.includes('post');
 
     if (isGanasce && !hasAnt && !hasPost) {
-      const pick = prompt('Ganasce: scrivi A = Anteriore (5000km) oppure P = Posteriore (3000km)', 'P');
+      const pick = prompt('Ganasce: scrivi A = Anteriore oppure P = Posteriore', 'P');
       if (String(pick || '').trim().toUpperCase() === 'A') manutKey = 'ganasceAnt';
       else manutKey = 'ganascePost';
     } else if (isGanasce && hasAnt) {
@@ -5350,7 +5320,7 @@ function aggiungiRicambio() {
     }
   }
 
-  // ✅ Se è usura ma NON riconosciuto, chiedi durata manuale subito
+  // Se è usura ma non riconosciuto, chiedi durata manuale
   let durataManuale = 0;
   if (isWear && !manutKey) {
     const s = prompt(`"${nome}": intervallo usura (km)? (opzionale)`, '1000');
@@ -5358,7 +5328,7 @@ function aggiungiRicambio() {
     durataManuale = (isFinite(km) && km > 0) ? km : 0;
   }
 
-  // ✅ costo ricambio (valuta locale corrente)
+  // costo ricambio (valuta locale corrente)
   const cur = valutaAttuale || 'USD';
   const costoStr = prompt(`Quanto hai pagato "${nome}"? (in ${cur}) (opzionale)`, '');
   const costoLocal = costoStr ? parseFloat(costoStr) : 0;
@@ -5372,55 +5342,29 @@ function aggiungiRicambio() {
     }
   }
 
+  // crea oggetto
   inv.push({
     id: String(Date.now()) + '_' + Math.random().toString(16).slice(2),
     nome,
     qta: 1,
 
-    // ✅ usura
     wear: isWear ? 'interval' : 'na',
     manutKey: isWear ? manutKey : null,
 
-    // durata manuale solo se non abbiamo manutKey/catalogo
+    // durata manuale solo se non c’è manutKey/catalogo
     durata: durataManuale || 0,
 
     lastKm: kmTot,
 
-    // costi
     costoLocal: costoLocal || 0,
     costoUsd: costoUsd || 0,
     valuta: cur,
     fxToUsd: (typeof getFxToUsd === 'function') ? getFxToUsd(cur) : null
   });
 
-
-
-  // aggiungo ricambio in inventario
-  inv.push({
-    id: String(Date.now()) + '_' + Math.random().toString(16).slice(2),
-    nome,
-    qta: 1,
-    durata: 5000,     // puoi cambiarlo dopo
-    lastKm: kmTot,    // “inizio usura” (di solito = ora)
-    costoLocal: costoLocal || 0,
-    costoUsd: costoUsd || 0,
-    valuta: cur,
-    wear: isWear ? 'interval' : 'na',
-    manutKey: (isWear ? (mk || null) : null),
-    wear: isWear ? 'interval' : 'na',
-    manutKey: isWear ? (mk || null) : null,
-    durata: durataManuale || 0,   // usata solo se non c’è manutKey o catalogo
-    
-    fxToUsd: (typeof getFxToUsd === 'function') ? getFxToUsd(cur) : null
-  });
-
-
-
-
-  
   salva('vt_inventario', inv);
 
-  // ✅ somma a spesa ricambi
+  // somma a spesa ricambi
   if (costoUsd > 0) {
     salva('vt_spesaRicambiUsd', (parseFloat(carica('vt_spesaRicambiUsd','0')) || 0) + costoUsd);
 
@@ -5439,9 +5383,6 @@ function aggiungiRicambio() {
   renderChecklist();
   showToast('✅ Ricambio aggiunto: ' + nome);
 }
-
-
-
 
   
 
@@ -5817,47 +5758,40 @@ function renderChecklist() {
   const container = document.getElementById('checklist-container');
   if (!container) return;
 
+  let html = '';
 
-const warns = getCatalogWarnings();
-let html = '';
+  // ===== AVVISI MANUTENZIONE (catalogo) =====
+  const manutWarns = getCatalogWarnings();
+  if (manutWarns.length) {
+    html += `<div style="color:#ff9800;font-weight:900;margin:6px 0 10px 0;">🔧 Avvisi manutenzione</div>`;
 
-if (warns.length) {
-  html += `<div style="color:#ff9800;font-weight:900;margin:6px 0 10px 0;">🔧 Avvisi manutenzione</div>`;
+    html += manutWarns.map(w => {
+      const col = (w.remaining <= 0) ? '#f44336' : (w.level === 10 ? '#f44336' : (w.level === 250 ? '#ff9800' : '#4caf50'));
+      const msg = (w.remaining <= 0)
+        ? `SCADUTO di ${Math.abs(Math.round(w.remaining))} km`
+        : `mancano ~${Math.round(w.remaining)} km (soglia ${w.level})`;
 
-  html += warns.map(w => {
-    const col = (w.remaining <= 0) ? '#f44336' : (w.level === 10 ? '#f44336' : (w.level === 250 ? '#ff9800' : '#4caf50'));
-    const msg = (w.remaining <= 0)
-      ? `SCADUTO di ${Math.abs(Math.round(w.remaining))} km`
-      : `mancano ~${Math.round(w.remaining)} km (soglia ${w.level})`;
-
-    return `
-      <div class="checklist-item" style="border-left:5px solid ${col}; cursor:default;" onclick="event.stopPropagation();">
-        <input type="checkbox" disabled>
-        <span class="checklist-text"><b>${w.nome}</b> — <span style="color:${col};font-weight:900;">${msg}</span></span>
-        <div class="checklist-actions">
-          <button class="chk-btn" onclick="apriInterventoDaAvvisoManut('${w.key}', '${String(w.nome).replace(/'/g,"\\'")}')" title="Sostituisci ora">✅</button>
+      return `
+        <div class="checklist-item" style="border-left:5px solid ${col}; cursor:default;" onclick="event.stopPropagation();">
+          <input type="checkbox" disabled>
+          <span class="checklist-text"><b>${w.nome}</b> — <span style="color:${col};font-weight:900;">${msg}</span></span>
+          <div class="checklist-actions">
+            <button class="chk-btn" onclick="apriInterventoDaAvvisoManut('${w.key}', '${String(w.nome).replace(/'/g,"\\'")}')" title="Sostituisci ora">✅</button>
+          </div>
         </div>
-      </div>
-    `;
-  }).join('');
+      `;
+    }).join('');
 
-  html += `<hr style="border:0;border-top:1px solid #333; margin:12px 0;">`;
-}
+    html += `<hr style="border:0;border-top:1px solid #333; margin:12px 0;">`;
+  }
 
+  // ===== AVVISI USURA (inventario) =====
+  const usuraWarns = getUsuraWarningsInventario(); // <-- questi sono i ricambi con lastKm/durata
+  if (usuraWarns.length) {
+    html += `<div style="color:#ff9800;font-weight:900;margin:6px 0 10px 0;">🔧 Avvisi usura (inventario)</div>`;
 
-
-  
- // const warns = getUsuraWarningsInventario();
-
-//  let html = '';
-
-  // ===== AVVISI USURA (AUTO) =====
-  if (warns.length) {
-    html += `<div style="color:#ff9800;font-weight:900;margin:6px 0 10px 0;">🔧 Avvisi usura (automatici)</div>`;
-
-    html += warns.map(w => {
+    html += usuraWarns.map(w => {
       const col = colorForRemaining(w.remaining);
-
       const msg = (w.remaining <= 0)
         ? `SCADUTO di ${Math.abs(Math.round(w.remaining))} km`
         : `mancano ~${Math.round(w.remaining)} km (soglia ${w.level})`;
@@ -5898,7 +5832,6 @@ if (warns.length) {
 
   container.innerHTML = html;
 }
-
 function toggleCheck(i) {
   const lista = caricaJSON('vt_checklist', []);
   if (!lista[i]) return;
