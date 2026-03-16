@@ -5925,6 +5925,70 @@ function apriInterventoDaAvvisoManut(key, nome) {
   }
   return tot;
 }
+
+
+
+function findBestInventoryIndexForManutKey(manutKey) {
+  const inv = caricaJSON('vt_inventario', []);
+  if (!Array.isArray(inv) || !manutKey) return -1;
+
+  // scegli il primo item con quella manutKey e qta > 0
+  for (let i = 0; i < inv.length; i++) {
+    const it = inv[i];
+    if (!it) continue;
+    const key = it.manutKey || inferManutKeyFromNome(it.nome);
+    const qta = Number(it.qta || 0);
+    if (key === manutKey && qta > 0) return i;
+  }
+  return -1;
+}
+
+function usaRicambioDaAvvisoManut(manutKey, nomeVoce) {
+  const inv = caricaJSON('vt_inventario', []);
+  if (!Array.isArray(inv)) { showToast('⚠️ Inventario non valido'); return; }
+
+  const idx = findBestInventoryIndexForManutKey(manutKey);
+  if (idx === -1) {
+    showToast('⚠️ Nessun ricambio disponibile in stock per: ' + (nomeVoce || manutKey), 3500);
+    return;
+  }
+
+  // ID stabile
+  if (!inv[idx].id) inv[idx].id = String(Date.now()) + '_' + Math.random().toString(16).slice(2);
+
+  const ok = confirm(`Scalare 1 pezzo da stock e registrare intervento per "${nomeVoce}"?`);
+  if (!ok) return;
+
+  // scala 1 pezzo
+  const oldQ = Number(inv[idx].qta || 0);
+  inv[idx].qta = Math.max(0, oldQ - 1);
+  salva('vt_inventario', inv);
+
+  // prepara "pendingMount" come quando scali da inventario
+  pendingMount = {
+    invId: inv[idx].id,
+    nome: inv[idx].nome,
+    manutKey: manutKey
+  };
+
+  // precompila modal intervento
+  const n = document.getElementById('log-nome');
+  const d = document.getElementById('log-descrizione');
+  const c = document.getElementById('log-costo');
+
+  if (n) n.value = `Sostituzione ${nomeVoce || inv[idx].nome}`;
+  if (d) d.value = `Fatto da checklist (stock scalato automaticamente).`;
+  if (c) c.value = '';
+
+  renderInventario();
+  renderChecklist();
+
+  apriModal('modalLogDettaglio');
+  showToast('📦 Stock scalato: -1 ' + (inv[idx].nome || 'ricambio'));
+}
+
+
+  
   
 function renderChecklist() {
   const lista = caricaJSON('vt_checklist', []);
@@ -5959,9 +6023,20 @@ const stockTxt = `Stock: <b style="color:${stock>0?'var(--verde)':'#f44336'}">${
 </span>
 
           
-          <div class="checklist-actions">
-            <button class="chk-btn" onclick="apriInterventoDaAvvisoManut('${w.key}', '${String(w.nome).replace(/'/g,"\\'")}')" title="Sostituisci ora">✅</button>
-          </div>
+        <div class="checklist-actions">
+  <button class="chk-btn"
+          onclick="usaRicambioDaAvvisoManut('${w.key}', '${String(w.nome).replace(/'/g,"\\'")}')"
+          title="Scala 1 ricambio dallo stock + apri intervento">
+    📦
+  </button>
+
+  <button class="chk-btn"
+          onclick="apriInterventoDaAvvisoManut('${w.key}', '${String(w.nome).replace(/'/g,"\\'")}')"
+          title="Apri intervento (senza scalare stock)">
+    ✅
+  </button>
+</div>
+
         </div>
       `;
     }).join('');
