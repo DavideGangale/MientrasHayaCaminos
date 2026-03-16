@@ -302,6 +302,7 @@
 #modalDettagli { z-index: 6600; }
 #modalConsumo  { z-index: 6500; }
 #modalMapFull  { z-index: 7000; }
+    #modalAddRicambio { z-index: 6700; }
     #modalCarbSetup { z-index: 6750; }
     #modalGrafico  { z-index: 6800; }
 
@@ -935,7 +936,7 @@
     <button class="btn-azione" style="background:#795548;" onclick="apriModal('modalLogCarburanti')">📊 LOG RIFORNIMENTI</button>
   </div>
 
-  <!-- ==================== PAGINA 4: OFFICINA ==================== -->
+
  <!-- ==================== PAGINA 4: OFFICINA ==================== -->
 <div id="officina" class="page">
 
@@ -1122,8 +1123,9 @@
       <div id="listaRicambi" style="margin-top:10px;"></div>
 
       <div style="display:flex; gap:10px; margin-top:15px;">
-        <input type="text" id="nuovoRicambioNome" style="margin:0; padding:12px; text-align:left;" placeholder="Nuovo ricambio (es. CDI)...">
-        <button class="btn-azione" style="margin:0; width:60px; padding:0; font-size:24px;" onclick="aggiungiRicambio()">+</button>
+       <button class="btn-secondary" style="margin-top:10px;" onclick="apriAggiungiRicambio()">
+  ➕ Aggiungi ricambio (da catalogo / custom)
+</button>
       </div>
 
       <button class="btn-azione" style="background:#2196F3;" onclick="apriModal('modalRegistro')">📄 LOG MANUTENZIONE</button>
@@ -1220,6 +1222,47 @@
     </div>
   </div>
 
+
+
+<!-- AGGIUNGI RICAMBIO (modal) -->
+<div id="modalAddRicambio" class="modal-overlay">
+  <div class="modal-content" style="border-color:#ff9800; max-width:560px;">
+    <button class="close-modal" onclick="chiudiModal('modalAddRicambio')">×</button>
+    <h2 style="color:#ff9800; text-align:center; margin-top:0;">➕ Aggiungi ricambio</h2>
+
+    <div class="dash-card" style="padding:12px;">
+      <div class="inp-label">Scegli dal catalogo manutenzione</div>
+      <select id="add-ricambio-select" class="inp-select" onchange="onAddRicambioSelectChange()"></select>
+
+      <div id="add-ricambio-custom-box" style="display:none;">
+        <div class="inp-label">Nome ricambio (custom)</div>
+        <input id="add-ricambio-custom-name" type="text" placeholder="Es. CDI / Guarnizione / Leva..." style="text-align:left;">
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <div style="flex:1;">
+          <div class="inp-label">Quantità</div>
+          <input id="add-ricambio-qta" type="number" min="1" step="1" value="1">
+        </div>
+        <div style="flex:1;">
+          <div class="inp-label">Costo (valuta corrente, opzionale)</div>
+          <input id="add-ricambio-costo" type="number" min="0" step="0.01" placeholder="0">
+        </div>
+      </div>
+
+      <button class="btn-azione" style="background:#ff9800;color:black;" onclick="confermaAggiungiRicambio()">
+        ✅ Aggiungi allo stock
+      </button>
+
+      <div style="font-size:12px;color:#888;margin-top:8px;text-align:left;">
+        Suggerimento: se lo scegli dal catalogo, l’app lo collega automaticamente agli avvisi e all’usura.
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  
 
   <!-- CATALOGO MANUTENZIONE -->
 <div id="modalManutCatalog" class="modal-overlay">
@@ -5441,6 +5484,136 @@ function eliminaRicambio(i) {
   renderInventario();
 }
 
+
+function apriAggiungiRicambio() {
+  // popola la select dal catalogo
+  const sel = document.getElementById('add-ricambio-select');
+  if (!sel) { showToast('⚠️ Select add-ricambio-select non trovata'); return; }
+
+  const cat = getManutCatalog(); // [{key,nome,intervalKm,enabled}, ...]
+  const items = Array.isArray(cat) ? cat : [];
+
+  // Mostro TUTTE le voci del catalogo (anche N/A) + custom
+  const opt = [];
+  opt.push(`<option value="__custom__">✍️ Custom (non in catalogo)</option>`);
+  opt.push(`<option value="" disabled>──────────</option>`);
+
+  for (const it of items) {
+    if (!it || !it.key) continue;
+    const enabled = it.enabled !== false && Number(it.intervalKm || 0) > 0;
+    const label = `${it.nome || it.key}${enabled ? '' : ' (N/A)'}`;
+    opt.push(`<option value="${it.key}">${label}</option>`);
+  }
+
+  sel.innerHTML = opt.join('');
+  sel.value = (items[0] && items[0].key) ? items[0].key : '__custom__';
+
+  // reset campi
+  const qta = document.getElementById('add-ricambio-qta');
+  const costo = document.getElementById('add-ricambio-costo');
+  const cname = document.getElementById('add-ricambio-custom-name');
+  if (qta) qta.value = 1;
+  if (costo) costo.value = '';
+  if (cname) cname.value = '';
+
+  onAddRicambioSelectChange();
+  apriModal('modalAddRicambio');
+}
+
+function onAddRicambioSelectChange() {
+  const sel = document.getElementById('add-ricambio-select');
+  const box = document.getElementById('add-ricambio-custom-box');
+  if (!sel || !box) return;
+
+  const isCustom = sel.value === '__custom__';
+  box.style.display = isCustom ? 'block' : 'none';
+}
+
+function confermaAggiungiRicambio() {
+  const sel = document.getElementById('add-ricambio-select');
+  const qtaEl = document.getElementById('add-ricambio-qta');
+  const costoEl = document.getElementById('add-ricambio-costo');
+  const cnameEl = document.getElementById('add-ricambio-custom-name');
+
+  if (!sel || !qtaEl) return;
+
+  const chosenKey = sel.value;
+  const qta = Math.max(1, parseInt(qtaEl.value || '1', 10) || 1);
+  const costoLocal = parseFloat(costoEl?.value || '0') || 0;
+
+  const cur = valutaAttuale || 'USD';
+  const costoUsd = (costoLocal > 0) ? convertLocalToUsd(costoLocal, cur) : 0;
+
+  const cat = getManutCatalog();
+  const catItem = (chosenKey && chosenKey !== '__custom__')
+    ? (cat.find(x => x && x.key === chosenKey) || null)
+    : null;
+
+  let nome = '';
+  let manutKey = null;
+
+  if (catItem) {
+    nome = catItem.nome || catItem.key;
+    manutKey = catItem.key; // ✅ collegamento robusto (chiave, non nome)
+  } else {
+    nome = (cnameEl?.value || '').trim();
+    if (!nome) { showToast('⚠️ Inserisci un nome ricambio'); return; }
+    manutKey = null; // custom non collegato
+  }
+
+  const inv = caricaJSON('vt_inventario', []);
+  const list = Array.isArray(inv) ? inv : [];
+
+  // se esiste già stesso manutKey (o stesso nome per custom), somma quantità
+  const idx = manutKey
+    ? list.findIndex(x => x && x.manutKey === manutKey)
+    : list.findIndex(x => x && !x.manutKey && String(x.nome||'').toLowerCase() === nome.toLowerCase());
+
+  if (idx !== -1) {
+    list[idx].qta = Number(list[idx].qta || 0) + qta;
+  } else {
+    list.push({
+      id: String(Date.now()) + '_' + Math.random().toString(16).slice(2),
+      nome,
+      qta,
+
+      // questo "lastKm" rappresenta il pezzo montato (ultimo cambio) → lo inizializziamo a quello attuale se non esiste
+      lastKm: (parseFloat(carica('vt_kmTotali','0')) || 0),
+
+      // collegamento catalogo
+      manutKey: manutKey,
+
+      // costo
+      costoLocal: costoLocal || 0,
+      costoUsd: costoUsd || 0,
+      valuta: cur,
+      fxToUsd: (typeof getFxToUsd === 'function') ? getFxToUsd(cur) : null
+    });
+  }
+
+  salva('vt_inventario', list);
+
+  // spesa ricambi (solo se costoUsd valido)
+  if (costoUsd > 0) {
+    salva('vt_spesaRicambiUsd', (parseFloat(carica('vt_spesaRicambiUsd','0')) || 0) + costoUsd);
+
+    const paese = carica('vt_paeseAttuale','Colombia');
+    const datiPaesi = caricaJSON('vt_datiPaesi', {});
+    if (!datiPaesi[paese]) datiPaesi[paese] = {};
+    datiPaesi[paese].spesaRicambiUsd = (datiPaesi[paese].spesaRicambiUsd || 0) + costoUsd;
+    datiPaesi[paese].valuta = cur;
+    salva('vt_datiPaesi', datiPaesi);
+    aggiornaUI();
+  }
+
+  chiudiModal('modalAddRicambio');
+  renderInventario();
+  renderChecklist();
+  showToast(`✅ Aggiunto: ${nome} (x${qta})`);
+}
+
+
+  
 function aggiungiRicambio() {
   const input = document.getElementById('nuovoRicambioNome');
   const nomeRaw = input ? input.value.trim() : '';
@@ -6033,6 +6206,10 @@ const canUse = stock > 0;
         title="Scala 1 ricambio dallo stock + apri intervento">
   📦
 </button>
+
+<button class="chk-btn" ${canUse ? '' : 'disabled'}
+        onclick="usaRicambioDaAvvisoManut('${w.key}', '${String(w.nome).replace(/'/g,"\\'")}')">📦</button>
+
 
   <button class="chk-btn"
           onclick="apriInterventoDaAvvisoManut('${w.key}', '${String(w.nome).replace(/'/g,"\\'")}')"
