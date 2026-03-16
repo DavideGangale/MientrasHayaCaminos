@@ -1,4 +1,4 @@
-<!doctype html>
+<<!doctype html>
 <html lang="it">
 <head>
   <meta charset="utf-8"/>
@@ -9,17 +9,84 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <style>
-    body{margin:0;font-family:system-ui,Segoe UI,Roboto,sans-serif;background:#121212;color:#fff;padding:14px;}
-    .card{background:#2c2c2c;border-radius:14px;padding:14px;margin-bottom:12px;border:1px solid #444;}
-    h1,h2{margin:0 0 10px 0}
-    .muted{color:#aaa;font-size:13px}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .box{background:#1e1e1e;border:1px solid #333;border-radius:12px;padding:10px}
-    #mapPub{height:320px;border-radius:12px;border:1px solid #444}
-    .btn{background:#2196F3;color:#fff;border:none;border-radius:10px;padding:10px 12px;font-weight:700;cursor:pointer}
-    select{width:100%;padding:10px;border-radius:10px;background:#111;color:#fff;border:1px solid #444}
-    .entry{background:#1e1e1e;border:1px solid #333;border-radius:12px;padding:10px;margin-top:10px}
-    img{max-width:100%;border-radius:12px;border:1px solid #333}
+    :root{
+      --bg:#0f0f10;
+      --card:#232325;
+      --card2:#1b1b1d;
+      --border:#3a3a3f;
+      --text:#ffffff;
+      --muted:#b0b0b8;
+      --brand:#2196F3;
+      --accent:#ff9800;
+
+      --floatNavH: 86px;   /* fallback, verrà ricalcolato via JS */
+      --stickyGap: 12px;
+    }
+
+    html{ scroll-behavior:smooth; }
+    body{
+      margin:0;
+      font-family:system-ui,Segoe UI,Roboto,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      padding:14px;
+    }
+
+    .wrap{ max-width:980px; margin:0 auto; }
+
+    .card{
+      background: linear-gradient(180deg, var(--card), var(--card2));
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:14px;
+      margin-bottom:12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      position:relative;
+    }
+
+    h1,h2{ margin:0 0 10px 0; letter-spacing:.2px; }
+    .muted{ color:var(--muted); font-size:13px; }
+
+    .grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .box{
+      background: rgba(0,0,0,.22);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:10px;
+    }
+
+    #mapPub{ height:320px; border-radius:12px; border:1px solid var(--border); }
+
+    .btn{
+      background: var(--brand);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:10px;
+      padding:10px 12px;
+      font-weight:800;
+      cursor:pointer;
+      box-shadow: 0 8px 18px rgba(33,150,243,.18);
+    }
+    .btn:disabled{ opacity:.55; cursor:not-allowed; box-shadow:none; }
+
+    select{
+      width:100%;
+      padding:10px;
+      border-radius:10px;
+      background:#0f0f10;
+      color:#fff;
+      border:1px solid var(--border);
+    }
+
+    .entry{
+      background: rgba(0,0,0,.18);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:10px;
+      margin-top:10px;
+    }
+
+    img{ max-width:100%; border-radius:12px; border:1px solid #333; }
 
     .diario-thumb{
       width:100%;
@@ -29,6 +96,110 @@
       border:1px solid #333;
       cursor:pointer;
     }
+
+    /* ===== MENU FLOTTANTE ===== */
+    #floatingNav{
+      position: sticky;
+      top: 10px;
+      z-index: 60;
+      backdrop-filter: blur(6px);
+    }
+
+    /* Fade laterali per far capire che si può scrollare */
+    #floatingNav::before,
+    #floatingNav::after{
+      content:"";
+      position:absolute;
+      top: 44px;
+      bottom: 10px;
+      width: 18px;
+      pointer-events:none;
+      z-index: 2;
+    }
+    #floatingNav::before{
+      left: 10px;
+      background: linear-gradient(90deg, rgba(18,18,18,0.95), rgba(18,18,18,0));
+    }
+    #floatingNav::after{
+      right: 10px;
+      background: linear-gradient(270deg, rgba(18,18,18,0.95), rgba(18,18,18,0));
+    }
+
+    #floatingNav .float-row{
+      display:flex;
+      gap:8px;
+      flex-wrap:nowrap;
+      overflow-x:auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 2px 2px 4px 2px;
+      scroll-snap-type: x proximity;
+      scrollbar-color:#2f2f35 transparent;
+      scrollbar-width:thin;
+    }
+    #floatingNav .float-row::-webkit-scrollbar{ height:6px; }
+    #floatingNav .float-row::-webkit-scrollbar-thumb{ background:#2f2f35; border-radius:999px; }
+
+    #floatingNav .btn{
+      padding:7px 10px;
+      font-size:12px;
+      border-radius:10px;
+      white-space:nowrap;
+      flex: 0 0 auto;
+      box-shadow:none;
+      scroll-snap-align:start;
+    }
+
+    /* ===== DIARIO TOOLS STICKY sotto al menu flottante ===== */
+    .diario-tools{
+      display:grid;
+      grid-template-columns: 1fr 160px;
+      gap:10px;
+      align-items:center;
+      margin-bottom:10px;
+
+      position: sticky;
+      top: calc(var(--floatNavH) + var(--stickyGap));
+      z-index: 50;
+
+      background: rgba(15,15,16,0.92);
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 10px;
+    }
+    .diario-tools input[type="search"]{
+      width:100%;
+      padding:10px;
+      border-radius:10px;
+      background:#0f0f10;
+      color:#fff;
+      border:1px solid var(--border);
+    }
+    .diario-tools .chk{
+      grid-column:1 / -1;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      color:var(--muted);
+      font-size:13px;
+    }
+    .diario-tools #diario-more{
+      grid-column:1 / -1;
+      width:100%;
+    }
+    @media (min-width: 700px){
+      .diario-tools{
+        grid-template-columns: 1fr 200px 200px 180px 160px;
+      }
+      .diario-tools .chk{ grid-column:auto; justify-content:flex-start; }
+      .diario-tools #diario-more{ grid-column:auto; width:auto; justify-self:end; }
+    }
+
+    /* fallback scroll-margin-top (se uno scrolla manualmente agli anchor) */
+    #sec-stats, #sec-routes, #sec-diary, #sec-maint{
+      scroll-margin-top: calc(var(--floatNavH) + 16px);
+    }
+
+    /* ===== LIGHTBOX ===== */
     #lightbox{
       display:none;
       position:fixed;
@@ -60,290 +231,151 @@
       cursor:pointer;
     }
 
-    .diario-tools{
-      display:grid;
-      grid-template-columns: 1fr 160px;
-      gap:10px;
-      align-items:center;
-      margin-bottom:10px;
-      position: sticky;
-top: 86px;
-z-index: 40;
+    /* ===== MAP MODAL FULL ===== */
+    #mapModal{
+      display:none;
+      position:fixed;
+      inset:0;
+      z-index:9998;
+      background:rgba(0,0,0,0.92);
     }
-    .diario-tools input[type="search"]{
-      width:100%;
-      padding:10px;
-      border-radius:10px;
-      background:#111;
-      color:#fff;
+    #mapPubFull{
+      position:absolute;
+      inset:70px 14px 14px 14px;
+      border-radius:12px;
       border:1px solid #444;
     }
-    .diario-tools .chk{
-      grid-column:1 / -1;
-      display:flex;
-      gap:10px;
-      align-items:center;
-      color:#aaa;
-      font-size:13px;
+    #mapModalClose{
+      position:fixed;
+      top:14px;
+      right:14px;
+      z-index:9999;
+      background:#f44336;
+      color:#fff;
+      border:none;
+      width:42px;
+      height:42px;
+      border-radius:50%;
+      font-size:22px;
+      cursor:pointer;
     }
-    .diario-tools #diario-more{
-      grid-column:1 / -1;
-      width:100%;
-    }
-    @media (min-width: 700px){
-      .diario-tools{
-        grid-template-columns: 1fr 200px 200px 180px 160px;
-      }
-      .diario-tools .chk{
-        grid-column:auto;
-        justify-content:flex-start;
-      }
-      .diario-tools #diario-more{
-        grid-column:auto;
-        width:auto;
-        justify-self:end;
-      }
-    }
-
-
-:root{
-  --bg:#0f0f10;
-  --card:#232325;
-  --card2:#1b1b1d;
-  --border:#3a3a3f;
-  --text:#ffffff;
-  --muted:#b0b0b8;
-  --brand:#2196F3;
-  --accent:#ff9800;
-}
-
-html{ scroll-behavior:smooth; }
-body{ background:var(--bg); color:var(--text); }
-
-.wrap{
-  max-width: 980px;
-  margin: 0 auto;
-}
-
-.card{
-  background: linear-gradient(180deg, var(--card), var(--card2));
-  border:1px solid var(--border);
-  box-shadow: 0 10px 30px rgba(0,0,0,.35);
-}
-
-h1{ letter-spacing:.3px; }
-h2{ letter-spacing:.2px; }
-
-.muted{ color:var(--muted); }
-
-.btn{
-  background: var(--brand);
-  border:1px solid rgba(255,255,255,.08);
-  box-shadow: 0 8px 18px rgba(33,150,243,.18);
-}
-.btn:disabled{ opacity:.55; cursor:not-allowed; }
-
-select, .diario-tools input[type="search"]{
-  border:1px solid var(--border);
-  background:#0f0f10;
-}
-
-.box{
-  background: rgba(0,0,0,.22);
-  border:1px solid var(--border);
-}
-
-.entry{
-  background: rgba(0,0,0,.18);
-  border:1px solid var(--border);
-}
-
-#mapPub{
-  border:1px solid var(--border);
-}
-
-    :root{
-  --floatNavH: 0px;     /* altezza menu flottante calcolata via JS */
-  --stickyGap: 12px;    /* spazio sotto menu */
-}
-
-/* card menu flottante */
-#floatingNav{
-  position: sticky;
-  top: 10px;
-  z-index: 60;
-  backdrop-filter: blur(6px);
-}
-
-
-/* Fade laterali per far capire che si può scrollare */
-#floatingNav{
-  position: sticky;
-  top: 10px;
-  z-index: 60;
-  backdrop-filter: blur(6px);
-}
-#floatingNav::before,
-#floatingNav::after{
-  content:"";
-  position:absolute;
-  top: 44px;              /* circa sotto la riga "Vai a:" */
-  bottom: 10px;
-  width: 18px;
-  pointer-events:none;
-  z-index: 2;
-}
-#floatingNav::before{
-  left: 10px;
-  background: linear-gradient(90deg, rgba(18,18,18,0.95), rgba(18,18,18,0));
-}
-#floatingNav::after{
-  right: 10px;
-  background: linear-gradient(270deg, rgba(18,18,18,0.95), rgba(18,18,18,0));
-}
-
-/* scrollbar piccola e discreta */
-#floatingNav .float-row::-webkit-scrollbar{ height:6px; }
-#floatingNav .float-row::-webkit-scrollbar-thumb{ background:#2f2f35; border-radius:999px; }
-#floatingNav .float-row{ scrollbar-color:#2f2f35 transparent; scrollbar-width:thin; }
-
-    
-/* i 4 bottoni: NON vanno a capo, scorrono orizzontalmente su schermi piccoli */
-#floatingNav .float-row{
-  display:flex;
-  gap:8px;
-  flex-wrap:nowrap;                 /* mai a capo */
-  overflow-x:auto;                  /* scroll orizzontale */
-  -webkit-overflow-scrolling: touch;
-  padding: 2px 2px 4px 2px;
-  scroll-snap-type: x proximity;    /* scroll più “pulito” */
-}
-
-#floatingNav .btn{
-  padding:7px 10px;
-  font-size:12px;
-  border-radius:10px;
-  white-space:nowrap;
-  flex: 0 0 auto;
-  box-shadow:none;
-  scroll-snap-align: start;
-}
-
-/* i filtri del diario restano visibili: top = altezza menu flottante */
-.diario-tools{
-  position: sticky;
-  top: calc(var(--floatNavH) + var(--stickyGap));
-  z-index: 50;
-  background: rgba(15,15,16,0.92);
-  border: 1px solid #333;
-  border-radius: 12px;
-  padding: 10px;
-}
-
-/* quando clicchi i link del menu, il titolo sezione non resta “sotto” al menu */
-#sec-stats, #sec-routes, #sec-diary, #sec-maint{
-  scroll-margin-top: calc(var(--floatNavH) + 16px);
-}
-
-
-    
   </style>
 </head>
+
 <body>
-
   <div class="wrap">
-    
-  <div class="card">
-    <h1 id="tit">VespaTrek — Pubblico</h1>
-    <div class="muted" id="meta">Carico dati…</div>
-  </div>
 
-  <div class="card">
-    <div class="muted" style="margin-bottom:6px;">Language / Idioma / Lingua</div>
-    <select id="lang">
-      <option value="it">Italiano</option>
-      <option value="en">English</option>
-      <option value="es">Español</option>
-    </select>
-  </div>
-
-<div class="card" id="floatingNav">
-  <div class="muted" style="margin-bottom:8px;">Vai a:</div>
-  <div class="float-row">
-    <a class="btn" href="#sec-stats"  style="text-decoration:none;">📊 Stats</a>
-    <a class="btn" href="#sec-routes" style="text-decoration:none; background:#9c27b0;">🗺️ Tappe</a>
-    <a class="btn" href="#sec-diary"  style="text-decoration:none; background:#ff9800; color:#000;">📖 Diario</a>
-    <a class="btn" href="#sec-maint"  style="text-decoration:none; background:#4caf50;">🔧 Officina</a>
-  </div>
-</div>
-
- <div class="card" id="sec-stats">
-    <h2 data-i18n="stats">📊 Statistiche</h2>
-    <div class="grid">
-      <div class="box"><span data-i18n="km_tot">KM totali</span><br><b id="st-km">--</b></div>
-      <div class="box"><span data-i18n="benzina_l">Benzina (L)</span><br><b id="st-bz">--</b></div>
-      <div class="box"><span data-i18n="spesa_tot">Spesa totale (USD)</span><br><b id="st-sp">--</b></div>
-      <div class="box"><span data-i18n="olio_l">Olio (L)</span><br><b id="st-ol">--</b></div>
-    </div>
-  </div>
-
-  <div class="card" id="sec-routes">
-    <h2 data-i18n="routes">🗺️ Tappe / Turismo</h2>
-    <div class="muted"><span data-i18n="pick_route">Seleziona un percorso per vedere la traccia.</span></div>
-
-    <select id="selPerc"></select>
-
-    <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; align-items:center;">
-      
-
-<div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; align-items:center;">
-  <button class="btn" id="btnKml" type="button" style="background:#00bcd4; color:#000;">
-    ⬇️ KML (Google Earth)
-  </button>
-
-  <button class="btn" id="btnMapFull" type="button" style="background:#ff9800; color:#000;">
-    🗺️ Mappa Full Screen
-  </button>
-
-  <div class="muted" style="margin-top:6px;">
-    KML: Google Earth / My Maps
-  </div>
-</div>
-
-      
-
-    <div style="margin-top:10px" id="mapPub"></div>
-    <div class="muted" id="percInfo" style="margin-top:8px"></div>
-  </div>
-
-  <div class="card" id="sec-diary">
-    <h2 data-i18n="diary">📖 Diario (con foto)</h2>
-
-    <div class="diario-tools">
-      <input id="diario-q" type="search" placeholder="Cerca nel diario (testo/paese/km)..." />
-
-      <select id="diario-paese">
-        <option value="">Tutti i paesi</option>
-      </select>
-
-      <select id="diario-tag">
-        <option value="">Tutti i tag</option>
-      </select>
-
-      <label class="chk">
-        <input id="diario-solo-foto" type="checkbox">
-        Solo con foto
-      </label>
-
-      <button class="btn" id="diario-more" type="button">Carica altre</button>
+    <div class="card">
+      <h1 id="tit">VespaTrek — Pubblico</h1>
+      <div class="muted" id="meta">Carico dati…</div>
     </div>
 
-    <div id="diario"></div>
+    <div class="card">
+      <div class="muted" style="margin-bottom:6px;">Language / Idioma / Lingua</div>
+      <select id="lang">
+        <option value="it">Italiano</option>
+        <option value="en">English</option>
+        <option value="es">Español</option>
+      </select>
+    </div>
+
+    <div class="card" id="floatingNav">
+      <div class="muted" style="margin-bottom:8px;">Vai a:</div>
+      <div class="float-row">
+        <a class="btn" href="#sec-stats"  style="text-decoration:none;">📊 Stats</a>
+        <a class="btn" href="#sec-routes" style="text-decoration:none; background:#9c27b0;">🗺️ Tappe</a>
+        <a class="btn" href="#sec-diary"  style="text-decoration:none; background:#ff9800; color:#000;">📖 Diario</a>
+        <a class="btn" href="#sec-maint"  style="text-decoration:none; background:#4caf50;">🔧 Officina</a>
+      </div>
+    </div>
+
+    <div class="card" id="sec-stats">
+      <h2 data-i18n="stats">📊 Statistiche</h2>
+      <div class="grid">
+        <div class="box"><span data-i18n="km_tot">KM totali</span><br><b id="st-km">--</b></div>
+        <div class="box"><span data-i18n="benzina_l">Benzina (L)</span><br><b id="st-bz">--</b></div>
+        <div class="box"><span data-i18n="spesa_tot">Spesa totale (USD)</span><br><b id="st-sp">--</b></div>
+        <div class="box"><span data-i18n="olio_l">Olio (L)</span><br><b id="st-ol">--</b></div>
+      </div>
+    </div>
+
+    <div class="card" id="sec-routes">
+      <h2 data-i18n="routes">🗺️ Tappe / Turismo</h2>
+      <div class="muted"><span data-i18n="pick_route">Seleziona un percorso per vedere la traccia.</span></div>
+
+      <select id="selPerc"></select>
+
+      <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; align-items:center;">
+        <button class="btn" id="btnKml" type="button" style="background:#00bcd4; color:#000;">
+          ⬇️ KML (Google Earth)
+        </button>
+
+        <button class="btn" id="btnMapFull" type="button" style="background:#ff9800; color:#000;">
+          🗺️ Mappa Full Screen
+        </button>
+
+        <div class="muted" style="margin-top:6px;">
+          KML: Google Earth / My Maps
+        </div>
+      </div>
+
+      <div style="margin-top:10px" id="mapPub"></div>
+      <div class="muted" id="percInfo" style="margin-top:8px"></div>
+    </div>
+
+    <div class="card" id="sec-diary">
+      <h2 data-i18n="diary">📖 Diario (con foto)</h2>
+
+      <div class="diario-tools">
+        <input id="diario-q" type="search" placeholder="Cerca nel diario (testo/paese/km)..." />
+
+        <select id="diario-paese">
+          <option value="">Tutti i paesi</option>
+        </select>
+
+        <select id="diario-tag">
+          <option value="">Tutti i tag</option>
+        </select>
+
+        <label class="chk">
+          <input id="diario-solo-foto" type="checkbox">
+          Solo con foto
+        </label>
+
+        <button class="btn" id="diario-more" type="button">Carica altre</button>
+      </div>
+
+      <div id="diario"></div>
+    </div>
+
+    <div class="card" id="sec-maint">
+      <h2 data-i18n="maint">🔧 Manutenzioni</h2>
+      <div id="man"></div>
+    </div>
+
+  </div><!-- /wrap -->
+
+  <!-- MAP MODAL FULL -->
+  <div id="mapModal">
+    <button id="mapModalClose">×</button>
+    <div id="mapPubFull"></div>
   </div>
 
-  <div class="card" id="sec-maint">
-    <h2 data-i18n="maint">🔧 Manutenzioni</h2>
-    <div id="man"></div>
+  <!-- LIGHTBOX -->
+  <div id="lightbox" onclick="closeLightbox()">
+    <button id="lightboxClose" onclick="event.stopPropagation(); closeLightbox()">×</button>
+
+    <button onclick="event.stopPropagation(); lightboxPrev()"
+      style="position:fixed;left:14px;top:50%;transform:translateY(-50%);
+             background:#333;color:#fff;border:none;width:42px;height:42px;border-radius:50%;
+             font-size:18px;cursor:pointer;">‹</button>
+
+    <img id="lightboxImg" alt="Foto diario" onclick="event.stopPropagation();">
+
+    <button onclick="event.stopPropagation(); lightboxNext()"
+      style="position:fixed;right:14px;top:50%;transform:translateY(-50%);
+             background:#333;color:#fff;border:none;width:42px;height:42px;border-radius:50%;
+             font-size:18px;cursor:pointer;">›</button>
   </div>
 
 <script>
@@ -391,7 +423,7 @@ select, .diario-tools input[type="search"]{
   function coordsToKML(traccia, nome = 'VespaTrek') {
     const pts = Array.isArray(traccia) ? traccia : [];
     const norm = pts.map(p => {
-      if (Array.isArray(p)) return [Number(p[1]), Number(p[0])]; // KML: lon,lat
+      if (Array.isArray(p)) return [Number(p[1]), Number(p[0])];
       if (p && typeof p === 'object') return [Number(p.lng ?? p.lon), Number(p.lat)];
       return null;
     }).filter(p => p && isFinite(p[0]) && isFinite(p[1]));
@@ -520,109 +552,63 @@ select, .diario-tools input[type="search"]{
     return (d && (d.fotoUrl || d.foto)) ? (d.fotoUrl || d.foto) : null;
   }
 
-  let map, poly;
+  /* ===== Sticky offsets + scroll con offset (fix “sezione coperta”) ===== */
+  function updateStickyOffsets(){
+    const nav = document.getElementById('floatingNav');
+    const h = nav ? Math.ceil(nav.getBoundingClientRect().height) : 86;
+    document.documentElement.style.setProperty('--floatNavH', h + 'px');
+  }
+  window.addEventListener('resize', updateStickyOffsets);
+  window.addEventListener('orientationchange', updateStickyOffsets);
 
-  let mapFull = null, polyFull = null, photoLayerFull = null;
-let lastTraceCoords = [];
-let lastPics = []; // foto (diario) filtrate per percorso selezionato
+  function scrollToSectionWithOffset(targetId){
+    const el = document.getElementById(targetId);
+    if (!el) return;
 
-  
-  let selectedPercorso = null;
-  let photoLayer = null;
+    updateStickyOffsets();
+    const nav = document.getElementById('floatingNav');
+    const navH = nav ? Math.ceil(nav.getBoundingClientRect().height) : 86;
 
-  // ===== DIARIO: stato filtri/paginazione
-  let diarioAll = [];
-  let diarioLimit = 12;
+    const y = el.getBoundingClientRect().top + window.scrollY - navH - 14;
+    window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+  }
 
-  // ===== LIGHTBOX
-  let lbPhotos = [];
-  let lbIndex = -1;
+  function hookFloatingNavLinks(){
+    document.querySelectorAll('#floatingNav a[href^="#"]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        const id = (a.getAttribute('href') || '').slice(1);
+        scrollToSectionWithOffset(id);
+      });
+    });
+  }
 
-  let routePhotos = [];      // foto del percorso selezionato (per lightbox “contestuale”)
-let routePhotoIndex = new Map(); // url -> index dentro routePhotos
+  /* ===== MAPPE ===== */
+  let map=null, poly=null, photoLayer=null;
+  let mapFull=null, polyFull=null, photoLayerFull=null;
 
   function initMap(){
+    if (map) return;
     map = L.map('mapPub', { zoomControl:true, attributionControl:false }).setView([-15, -60], 3);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom:19 }).addTo(map);
     poly = L.polyline([], { color:'#d32f2f', weight:4, opacity:0.9 }).addTo(map);
-    //marker = L.marker([-15, -60]).addTo(map);
     photoLayer = L.layerGroup().addTo(map);
   }
 
-
   function initMapFull(){
-  if (mapFull) return;
-  mapFull = L.map('mapPubFull', { zoomControl:true, attributionControl:false }).setView([-15, -60], 3);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom:19 }).addTo(mapFull);
-  polyFull = L.polyline([], { color:'#d32f2f', weight:4, opacity:0.9 }).addTo(mapFull);
-  photoLayerFull = L.layerGroup().addTo(mapFull);
-}
-
-function setTraceOn(mapX, polyX, coords){
-  const cleaned = cleanCoords(coords);
-  polyX.setLatLngs(cleaned);
-
-  if (cleaned.length > 1) {
-    const bounds = polyX.getBounds();
-    mapX.fitBounds(bounds.pad(0.15), { maxZoom: 14 });
-  } else if (cleaned.length === 1) {
-    mapX.setView(cleaned[0], 13);
-  } else {
-    mapX.setView([-15, -60], 3);
+    if (mapFull) return;
+    mapFull = L.map('mapPubFull', { zoomControl:true, attributionControl:false }).setView([-15, -60], 3);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom:19 }).addTo(mapFull);
+    polyFull = L.polyline([], { color:'#d32f2f', weight:4, opacity:0.9 }).addTo(mapFull);
+    photoLayerFull = L.layerGroup().addTo(mapFull);
   }
-}
-
-function renderPicsOn(layerX, pics){
-  if (!layerX) return;
-  layerX.clearLayers();
-
-  (pics || []).forEach(d => {
-    const lat = Number(d.geo.lat), lon = Number(d.geo.lon);
-    if (!isFinite(lat) || !isFinite(lon)) return;
-    const foto = fotoOf(d);
-
-    const m = L.circleMarker([lat, lon], {
-      radius: 7,
-      color: '#ff9800',
-      fillColor: '#ff9800',
-      fillOpacity: 0.9
-    }).addTo(layerX);
-
-    // click marker => apri lightbox (stesso comportamento)
-    m.on('click', () => {
-      if (foto) openRouteLightboxByUrl(foto);
-    });
-  });
-}
-
-function openMapModal(){
-  const modal = document.getElementById('mapModal');
-  if (!modal) return;
-  modal.style.display = 'block';
-
-  initMapFull();
-
-  // disegna traccia+foto del percorso corrente
-  setTraceOn(mapFull, polyFull, lastTraceCoords || []);
-  renderPicsOn(photoLayerFull, lastPics || []);
-
-  setTimeout(() => { try { mapFull.invalidateSize(); } catch{} }, 120);
-}
-
-function closeMapModal(){
-  const modal = document.getElementById('mapModal');
-  if (modal) modal.style.display = 'none';
-}
-
-  
 
   function cleanCoords(coords) {
     if (!Array.isArray(coords)) return [];
     const out = [];
     for (const p of coords) {
       if (!Array.isArray(p) || p.length < 2) continue;
-      const lat = Number(p[0]);
-      const lon = Number(p[1]);
+      const lat = Number(p[0]), lon = Number(p[1]);
       if (!isFinite(lat) || !isFinite(lon)) continue;
       if (lat < -90 || lat > 90 || lon < -180 || lon > 180) continue;
       out.push([lat, lon]);
@@ -630,35 +616,158 @@ function closeMapModal(){
     return out;
   }
 
-  function setTrace(coords){
-  
-  if (!map || !poly) initMap();
+  function setTraceOn(mapX, polyX, coords){
     const cleaned = cleanCoords(coords);
-    poly.setLatLngs(cleaned);
+    polyX.setLatLngs(cleaned);
 
-   if (cleaned.length > 1) {
-  const bounds = poly.getBounds();
-  map.fitBounds(bounds.pad(0.15), { maxZoom: 14 });
-} else if (cleaned.length === 1) {
-  map.setView(cleaned[0], 13);
-} else {
-  map.setView([-15, -60], 3);
-}
+    if (cleaned.length > 1) {
+      mapX.fitBounds(polyX.getBounds().pad(0.15), { maxZoom: 14 });
+    } else if (cleaned.length === 1) {
+      mapX.setView(cleaned[0], 13);
+    } else {
+      mapX.setView([-15, -60], 3);
+    }
   }
 
-  setTimeout(() => { if (map) map.invalidateSize(); }, 150);
+  function setTrace(coords){
+    initMap();
+    setTraceOn(map, poly, coords);
+    setTimeout(() => { try{ map.invalidateSize(); }catch{} }, 120);
+  }
 
+  function renderPicsOn(layerX, pics){
+    if (!layerX) return;
+    layerX.clearLayers();
 
-function updateStickyOffsets(){
-  const nav = document.getElementById('floatingNav');
-  const h = nav ? Math.ceil(nav.getBoundingClientRect().height) : 0;
-  document.documentElement.style.setProperty('--floatNavH', h + 'px');
-}
-window.addEventListener('resize', updateStickyOffsets);
-window.addEventListener('orientationchange', updateStickyOffsets);
+    (pics || []).forEach(d => {
+      const lat = Number(d.geo.lat), lon = Number(d.geo.lon);
+      if (!isFinite(lat) || !isFinite(lon)) return;
 
-  
+      const foto = fotoOf(d);
+      const m = L.circleMarker([lat, lon], {
+        radius: 7,
+        color: '#ff9800',
+        fillColor: '#ff9800',
+        fillOpacity: 0.9
+      }).addTo(layerX);
+
+      m.on('click', () => { if (foto) openRouteLightboxByUrl(foto); });
+    });
+  }
+
+  function openMapModal(lastTraceCoords, lastPics){
+    const modal = document.getElementById('mapModal');
+    if (!modal) return;
+    modal.style.display = 'block';
+
+    initMapFull();
+    setTraceOn(mapFull, polyFull, lastTraceCoords || []);
+    renderPicsOn(photoLayerFull, lastPics || []);
+
+    setTimeout(() => { try { mapFull.invalidateSize(); } catch{} }, 120);
+  }
+
+  function closeMapModal(){
+    const modal = document.getElementById('mapModal');
+    if (modal) modal.style.display = 'none';
+  }
+
+  /* ===== DIARIO + LIGHTBOX ===== */
+  let selectedPercorso = null;
+  let diarioAll = [];
+  let diarioLimit = 12;
+
+  let lbPhotos = [];
+  let lbIndex = -1;
+
+  let routePhotos = [];
+  let routePhotoIndex = new Map();
+
+  function openRouteLightboxByUrl(url){
+    if (!url) return;
+
+    if (routePhotos && routePhotos.length) {
+      lbPhotos = routePhotos;
+      const idx = routePhotoIndex.get(url);
+      openLightboxIndex(Number.isFinite(idx) ? idx : 0);
+      return;
+    }
+    openLightboxDirect(url);
+  }
+
+  function openLightboxDirect(url){
+    if (!url) return;
+    lbPhotos = [url];
+    openLightboxIndex(0);
+  }
+
+  function openLightboxIndex(i){
+    if (!Array.isArray(lbPhotos) || lbPhotos.length === 0) return;
+    if (!Number.isFinite(i) || i < 0) i = 0;
+    if (i >= lbPhotos.length) i = lbPhotos.length - 1;
+
+    lbIndex = i;
+
+    const box = document.getElementById('lightbox');
+    const img = document.getElementById('lightboxImg');
+    if (!box || !img) return;
+
+    img.src = lbPhotos[lbIndex];
+    box.classList.add('open');
+  }
+
+  function lightboxNext(){
+    if (!lbPhotos.length) return;
+    lbIndex = (lbIndex + 1) % lbPhotos.length;
+    const img = document.getElementById('lightboxImg');
+    if (img) img.src = lbPhotos[lbIndex];
+  }
+
+  function lightboxPrev(){
+    if (!lbPhotos.length) return;
+    lbIndex = (lbIndex - 1 + lbPhotos.length) % lbPhotos.length;
+    const img = document.getElementById('lightboxImg');
+    if (img) img.src = lbPhotos[lbIndex];
+  }
+
+  function closeLightbox(){
+    const box = document.getElementById('lightbox');
+    const img = document.getElementById('lightboxImg');
+    if (img) img.src = '';
+    if (box) box.classList.remove('open');
+    try { if (map) map.closePopup(); } catch {}
+  }
+
+  window.addEventListener('keydown', (e) => {
+    const lightboxOpen = document.getElementById('lightbox')?.classList.contains('open');
+    const mapModalOpen = (document.getElementById('mapModal')?.style.display === 'block');
+
+    if (e.key === 'Escape') {
+      if (lightboxOpen) closeLightbox();
+      if (mapModalOpen) closeMapModal();
+    }
+
+    if (!lightboxOpen) return;
+    if (e.key === 'ArrowRight') lightboxNext();
+    if (e.key === 'ArrowLeft') lightboxPrev();
+  });
+
+  document.getElementById('lang')?.addEventListener('change', (e) => {
+    LANG = e.target.value;
+    localStorage.setItem('vt_pub_lang', LANG);
+    applyLang();
+    try { renderDiarioPub(); } catch {}
+  });
+
+  document.getElementById('mapModalClose')?.addEventListener('click', closeMapModal);
+  document.getElementById('mapModal')?.addEventListener('click', (e) => {
+    if (e.target && e.target.id === 'mapModal') closeMapModal();
+  });
+
+  /* ===== MAIN ===== */
   async function main(){
+    hookFloatingNavLinks();
+
     const src = qs('src') || 'public/vespatrek_public.json';
     const res = await fetch(src, { cache:'no-store' });
     if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText} per ${src}`);
@@ -672,11 +781,8 @@ window.addEventListener('orientationchange', updateStickyOffsets);
     if (langSel) langSel.value = LANG;
     applyLang();
 
-
     updateStickyOffsets();
     setTimeout(updateStickyOffsets, 250);
-
-    
 
     document.getElementById('tit').innerText = data.titolo || 'VespaTrek';
     document.getElementById('meta').innerText = `Aggiornato: ${data._exportDate || '--'} · File: ${src}`;
@@ -689,7 +795,6 @@ window.addEventListener('orientationchange', updateStickyOffsets);
     document.getElementById('st-ol').innerText = (st.olioTotaleLitri||0).toFixed(2);
     document.getElementById('st-sp').innerText = moneyUsd(spTot);
 
-    // percorsi
     const lista = []
       .concat(data.tappe || [])
       .concat(data.turismo || [])
@@ -697,44 +802,32 @@ window.addEventListener('orientationchange', updateStickyOffsets);
 
     const sel = document.getElementById('selPerc');
 
+    // Raggruppa per paese (optgroup)
+    if (!lista.length) {
+      sel.innerHTML = `<option value="">(nessun percorso pubblicato)</option>`;
+    } else {
+      const byCountry = new Map();
+      for (const p of lista) {
+        const paese = (p.paese || 'Sconosciuto');
+        if (!byCountry.has(paese)) byCountry.set(paese, []);
+        byCountry.get(paese).push(p);
+      }
 
-    
-if (!lista.length) {
-  sel.innerHTML = `<option value="">(nessun percorso pubblicato)</option>`;
-} else {
-  const byCountry = new Map();
-  for (const p of lista) {
-    const paese = (p.paese || 'Sconosciuto');
-    if (!byCountry.has(paese)) byCountry.set(paese, []);
-    byCountry.get(paese).push(p);
-  }
+      const countries = [...byCountry.keys()].sort((a,b)=>a.localeCompare(b));
 
-  // ordina paesi alfabetico; dentro ogni paese: più recenti prima (lista è già ordinata)
-  const countries = [...byCountry.keys()].sort((a,b)=>a.localeCompare(b));
+      sel.innerHTML = countries.map(paese => {
+        const items = byCountry.get(paese) || [];
+        const opts = items.map(p => {
+          const tipo = (p.tipo || 'Tappa');
+          const label = `${p.data||''} ${p.ora||''} — ${tipo} — ${Number(p.km||0).toFixed(1)} km`;
+          return `<option value="${p.id}">${escapeHtml(label)}</option>`;
+        }).join('');
+        return `<optgroup label="${escapeHtml(paese)}">${opts}</optgroup>`;
+      }).join('');
+    }
 
-  sel.innerHTML = countries.map(paese => {
-    const items = byCountry.get(paese) || [];
-    const opts = items.map(p => {
-      const tipo = (p.tipo || 'Tappa');
-      const label = `${p.data||''} ${p.ora||''} — ${tipo} — ${Number(p.km||0).toFixed(1)} km`;
-      return `<option value="${p.id}">${escapeHtml(label)}</option>`;
-    }).join('');
-
-    return `<optgroup label="${escapeHtml(paese)}">${opts}</optgroup>`;
-  }).join('');
-}
-
-
-    
     const btnKml = document.getElementById('btnKml');
-
     const btnMapFull = document.getElementById('btnMapFull');
-btnMapFull?.addEventListener('click', () => openMapModal());
-
-document.getElementById('mapModalClose')?.addEventListener('click', closeMapModal);
-document.getElementById('mapModal')?.addEventListener('click', (e) => {
-  if (e.target && e.target.id === 'mapModal') closeMapModal();
-});
 
     function buildFileName(p) {
       const tipo = p.tipo || 'Percorso';
@@ -760,6 +853,9 @@ document.getElementById('mapModal')?.addEventListener('click', (e) => {
       });
     }
 
+    let lastTraceCoords = [];
+    let lastPics = [];
+
     function showPerc(id){
       const p = lista.find(x => String(x.id) === String(id));
       if (!p) return;
@@ -780,100 +876,93 @@ document.getElementById('mapModal')?.addEventListener('click', (e) => {
       document.getElementById('percInfo').innerText = info;
 
       setTrace(p.traccia || []);
-
       lastTraceCoords = p.traccia || [];
 
-     // markers foto (diario) dentro start/end del percorso selezionato
-if (photoLayer) photoLayer.clearLayers();
+      // marker foto nel range start/end
+      initMap();
+      if (photoLayer) photoLayer.clearLayers();
 
-const startTs = Number(p.startTs || 0);
-const endTs = Number(p.endTs || 0);
+      const startTs = Number(p.startTs || 0);
+      const endTs = Number(p.endTs || 0);
+      const MARGIN = 15 * 60 * 1000;
 
-// margine per includere foto scattate poco prima/dopo
-const MARGIN = 15 * 60 * 1000;
+      const pics = (Array.isArray(data.diario) ? data.diario : [])
+        .filter(d => d && d.geo && isFinite(d.geo.lat) && isFinite(d.geo.lon))
+        .filter(d => !!fotoOf(d))
+        .filter(d => {
+          const ts = Number(d.ts || d.id || 0);
+          if (startTs && endTs) return ts >= (startTs - MARGIN) && ts <= (endTs + MARGIN);
+          return true;
+        });
 
-const pics = (Array.isArray(data.diario) ? data.diario : [])
+      lastPics = pics;
 
-  lastPics = pics;
-      
-  .filter(d => d && d.geo && isFinite(d.geo.lat) && isFinite(d.geo.lon))
-  .filter(d => !!fotoOf(d))
-  .filter(d => {
-    const ts = Number(d.ts || d.id || 0);
-    if (startTs && endTs) return ts >= (startTs - MARGIN) && ts <= (endTs + MARGIN);
-    return true; // fallback se mancano start/end
-  });
+      // playlist foto del percorso
+      routePhotos = pics.map(fotoOf).filter(Boolean);
+      routePhotoIndex = new Map();
+      routePhotos.forEach((url, i) => routePhotoIndex.set(url, i));
 
-// ✅ Prepara la “playlist” foto del percorso per lightbox
-routePhotos = pics.map(fotoOf).filter(Boolean);
-routePhotoIndex = new Map();
-routePhotos.forEach((url, i) => routePhotoIndex.set(url, i));
+      pics.forEach(d => {
+        const lat = Number(d.geo.lat), lon = Number(d.geo.lon);
+        const foto = fotoOf(d);
 
+        const html = `
+          <div style="min-width:180px">
+            <div style="font-weight:700; margin-bottom:6px;">${escapeHtml(d.paese||'')}</div>
 
+            ${foto ? `
+              <img src="${foto}"
+                   class="diario-thumb"
+                   style="max-height:140px"
+                   onclick="openRouteLightboxByUrl('${String(foto).replaceAll("'", "\\'")}')">
+            ` : ''}
 
-pics.forEach(d => {
-  const lat = Number(d.geo.lat), lon = Number(d.geo.lon);
-  const foto = fotoOf(d);
+            <div class="muted" style="margin-top:6px;">${escapeHtml(d.data||'')} ${escapeHtml(d.ora||'')} — km ${escapeHtml(d.km||'')}</div>
+            <div style="margin-top:6px; white-space:pre-wrap; color:#ddd;">${escapeHtml((d.testo||'').slice(0,140))}</div>
 
-  const html = `
-    <div style="min-width:180px">
-      <div style="font-weight:700; margin-bottom:6px;">${escapeHtml(d.paese||'')}</div>
+            ${foto ? `
+              <button class="btn" type="button" style="margin-top:10px; width:100%; background:#ff9800; color:#000;"
+                      onclick="openRouteLightboxByUrl('${String(foto).replaceAll("'", "\\'")}')">
+                Apri foto
+              </button>
+            ` : ''}
+          </div>
+        `;
 
-      ${foto ? `
-        <img src="${foto}"
-             class="diario-thumb"
-             style="max-height:140px"
-             onclick="openRouteLightboxByUrl('${String(foto).replaceAll("'", "\\'")}')">
-      ` : ''}
+        const m = L.circleMarker([lat, lon], {
+          radius: 7,
+          color: '#ff9800',
+          fillColor: '#ff9800',
+          fillOpacity: 0.9
+        }).addTo(photoLayer);
 
-      <div class="muted" style="margin-top:6px;">${escapeHtml(d.data||'')} ${escapeHtml(d.ora||'')} — km ${escapeHtml(d.km||'')}</div>
-      <div style="margin-top:6px; white-space:pre-wrap; color:#ddd;">${escapeHtml((d.testo||'').slice(0,140))}</div>
+        m.bindPopup(html, {
+          autoPan: false,
+          closeButton: false,
+          closeOnClick: false,
+          autoClose: false,
+          maxWidth: 260,
+          interactive: true
+        });
 
-      ${foto ? `
-        <button class="btn" type="button" style="margin-top:10px; width:100%; background:#ff9800; color:#000;"
-                onclick="openRouteLightboxByUrl('${String(foto).replaceAll("'", "\\'")}')">
-          Apri foto
-        </button>
-      ` : ''}
-    </div>
-  `;
+        m.on('mouseover', () => m.openPopup());
+        m.on('mouseout', () => {
+          setTimeout(() => {
+            const popEl = m.getPopup() && m.getPopup().getElement ? m.getPopup().getElement() : null;
+            if (popEl && popEl.matches(':hover')) return;
+            m.closePopup();
+          }, 40);
+        });
 
-  // ✅ Marker cliccabile: click = lightbox
-  const m = L.circleMarker([lat, lon], {
-    radius: 7,
-    color: '#ff9800',
-    fillColor: '#ff9800',
-    fillOpacity: 0.9
-  }).addTo(photoLayer);
+        m.on('click', () => {
+          try { m.closePopup(); } catch {}
+          try { if (map) map.closePopup(); } catch {}
+          if (foto) openRouteLightboxByUrl(foto);
+        });
+      });
 
-m.bindPopup(html, {
-  autoPan: false,
-  closeButton: false,
-  closeOnClick: false,
-  autoClose: false,
-  maxWidth: 260,
-  interactive: true
-});
-
-// ✅ Preview: solo hover (desktop)
-m.on('mouseover', () => m.openPopup());
-
-m.on('mouseout', () => {
-  // aspetta un attimo: se il mouse è entrato nel popup, non chiudere
-  setTimeout(() => {
-    const popEl = m.getPopup() && m.getPopup().getElement ? m.getPopup().getElement() : null;
-    if (popEl && popEl.matches(':hover')) return;
-    m.closePopup();
-  }, 40);
-});
-
-// ✅ Click: apre lightbox e chiude SEMPRE la preview
-m.on('click', () => {
-  try { m.closePopup(); } catch {}
-  try { if (map) map.closePopup(); } catch {}
-  if (foto) openRouteLightboxByUrl(foto);
-});
-});
+      // collega il bottone full screen all’ultima selezione
+      btnMapFull?.onclick = () => openMapModal(lastTraceCoords, lastPics);
     }
 
     initMap();
@@ -892,14 +981,12 @@ m.on('click', () => {
       updateExportButtons();
     }
 
-    // ===== DIARIO (filtri + paginazione + TAG) =====
+    /* ===== DIARIO FILTRI ===== */
     diarioAll = Array.isArray(data.diario) ? data.diario : [];
     diarioLimit = 12;
 
-    // ✅ foto lista lightbox: usa fotoUrl || foto
     lbPhotos = diarioAll.map(fotoOf).filter(Boolean);
 
-    // popola dropdown PAESE
     const selPaese = document.getElementById('diario-paese');
     if (selPaese) {
       const paesi = [...new Set(diarioAll.map(d => d.paese).filter(Boolean))].sort();
@@ -908,7 +995,6 @@ m.on('click', () => {
         paesi.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
     }
 
-    // popola dropdown TAG
     const selTag = document.getElementById('diario-tag');
     if (selTag) {
       const preset = Array.isArray(data.diarioTagsPreset) ? data.diarioTagsPreset : [];
@@ -940,7 +1026,7 @@ m.on('click', () => {
 
     renderDiarioPub();
 
-    // manutenzioni
+    /* ===== MANUTENZIONI ===== */
     const man = data.manutenzioni || [];
     document.getElementById('man').innerHTML = man.map(m => `
       <div class="entry">
@@ -954,7 +1040,10 @@ m.on('click', () => {
   }
 
   main().catch(err => {
-    document.body.innerHTML = '<pre style="white-space:pre-wrap;color:#fff;">Errore: ' + (err && err.stack ? err.stack : err) + '</pre>';
+    document.body.innerHTML =
+      '<pre style="white-space:pre-wrap;color:#fff;">Errore: ' +
+      (err && err.stack ? err.stack : err) +
+      '</pre>';
   });
 
   function renderDiarioPub(){
@@ -1030,114 +1119,7 @@ m.on('click', () => {
         : t('load_more');
     }
   }
-
-
-function openRouteLightboxByUrl(url){
-  if (!url) return;
-
-  // se ho foto del percorso, uso quelle (frecce = solo foto di questa tappa)
-  if (routePhotos && routePhotos.length) {
-    lbPhotos = routePhotos;
-    const idx = routePhotoIndex.get(url);
-    openLightboxIndex(isFinite(idx) ? idx : 0);
-    return;
-  }
-
-  // fallback: usa lightbox “globale”
-  openLightboxDirect(url);
-}
-
-  
-  function openLightboxDirect(url){
-    if (!url) return;
-    lbPhotos = [url];
-    openLightboxIndex(0);
-  }
-
-  function openLightboxIndex(i){
-    if (!Array.isArray(lbPhotos) || lbPhotos.length === 0) return;
-    if (!isFinite(i) || i < 0) i = 0;
-    if (i >= lbPhotos.length) i = lbPhotos.length - 1;
-
-    lbIndex = i;
-
-    const box = document.getElementById('lightbox');
-    const img = document.getElementById('lightboxImg');
-    if (!box || !img) return;
-
-    img.src = lbPhotos[lbIndex];
-    box.classList.add('open');
-  }
-
-  function lightboxNext(){
-    if (!lbPhotos.length) return;
-    lbIndex = (lbIndex + 1) % lbPhotos.length;
-    const img = document.getElementById('lightboxImg');
-    if (img) img.src = lbPhotos[lbIndex];
-  }
-
-  function lightboxPrev(){
-    if (!lbPhotos.length) return;
-    lbIndex = (lbIndex - 1 + lbPhotos.length) % lbPhotos.length;
-    const img = document.getElementById('lightboxImg');
-    if (img) img.src = lbPhotos[lbIndex];
-  }
-
-  function closeLightbox(){
-  const box = document.getElementById('lightbox');
-  const img = document.getElementById('lightboxImg');
-  if (img) img.src = '';
-  if (box) box.classList.remove('open');
-
-  // ✅ chiudi eventuali preview rimaste aperte sulla mappa
-  try { if (map) map.closePopup(); } catch {}
-}
-
-  window.addEventListener('keydown', (e) => {
-    const boxOpen = document.getElementById('lightbox')?.classList.contains('open');
-    if (!boxOpen) return;
-    if (e.key === 'Escape') closeLightbox();
-    if (e.key === 'ArrowRight') lightboxNext();
-    if (e.key === 'ArrowLeft') lightboxPrev();
-    if (e.key === 'Escape') closeMapModal();
-  });
-
-  document.getElementById('lang')?.addEventListener('change', (e) => {
-    LANG = e.target.value;
-    localStorage.setItem('vt_pub_lang', LANG);
-    applyLang();
-    try { renderDiarioPub(); } catch {}
-  });
 </script>
-
-<div id="mapModal" style="display:none; position:fixed; inset:0; z-index:9998; background:rgba(0,0,0,0.92);">
-  <button id="mapModalClose"
-    style="position:fixed; top:14px; right:14px; z-index:9999;
-           background:#f44336; color:#fff; border:none; width:42px; height:42px;
-           border-radius:50%; font-size:22px; cursor:pointer;">
-    ×
-  </button>
-
-  <div id="mapPubFull" style="position:absolute; inset:70px 14px 14px 14px; border-radius:12px; border:1px solid #444;"></div>
-</div>
-
-    
-  </div>
-<div id="lightbox" onclick="closeLightbox()">
-  <button id="lightboxClose" onclick="event.stopPropagation(); closeLightbox()">×</button>
-
-  <button onclick="event.stopPropagation(); lightboxPrev()"
-    style="position:fixed;left:14px;top:50%;transform:translateY(-50%);
-           background:#333;color:#fff;border:none;width:42px;height:42px;border-radius:50%;
-           font-size:18px;cursor:pointer;">‹</button>
-
-  <img id="lightboxImg" alt="Foto diario" onclick="event.stopPropagation();">
-
-  <button onclick="event.stopPropagation(); lightboxNext()"
-    style="position:fixed;right:14px;top:50%;transform:translateY(-50%);
-           background:#333;color:#fff;border:none;width:42px;height:42px;border-radius:50%;
-           font-size:18px;cursor:pointer;">›</button>
-</div>
 
 </body>
 </html>
