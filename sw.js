@@ -1,19 +1,31 @@
-const CACHE = 'vespatrek-v1';
+const CACHE = 'vespatrek-v2';
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll([
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE);
+    // Metti qui SOLO file che esistono sicuramente
+    const urls = [
       './',
       './manifest.json',
       './icon-192.png',
       './icon-512.png'
-    ]))
-  );
-  self.skipWaiting();
+    ];
+
+    for (const url of urls) {
+      try { await cache.add(url); } catch (e) { /* ignora */ }
+    }
+
+    self.skipWaiting();
+  })());
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil((async () => {
+    // pulizia vecchie cache
+    const keys = await caches.keys();
+    await Promise.all(keys.map(k => (k !== CACHE) ? caches.delete(k) : null));
+    await self.clients.claim();
+  })());
 });
 
 self.addEventListener('fetch', (event) => {
