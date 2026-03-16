@@ -4166,20 +4166,19 @@ let driveUploadChain = Promise.resolve();
 window.addEventListener('message', (ev) => {
   const msg = ev && ev.data;
   if (!msg || msg.type !== 'VESPA_UPLOAD_RESULT') return;
-
   if (!driveUploadPending) return;
 
   const data = msg.data || {};
-  // ✅ accetta solo la risposta del reqId corrente
+
+  // ✅ accetta solo la risposta del reqId corrente (evita “risposte vecchie”)
   if (driveUploadPending.reqId && data.reqId && data.reqId !== driveUploadPending.reqId) {
-    return; // ignora messaggi vecchi/cached
+    return;
   }
-  
-  // chiudi timeout se esiste
+
   try {
     if (driveUploadPending.timer) clearTimeout(driveUploadPending.timer);
-  } catch(e) {}
-  
+  } catch (e) {}
+
   driveUploadPending.resolve(data);
   driveUploadPending = null;
 });
@@ -4188,65 +4187,65 @@ window.addEventListener('message', (ev) => {
 function uploadViaFormIframe(dataUrl, filename, folderId, endpoint) {
   return new Promise((resolve, reject) => {
     if (driveUploadPending) {
-      // Non deve succedere perché usiamo la chain, ma per sicurezza:
       return reject(new Error('Upload in corso'));
     }
-    
-const reqId = 'r' + Date.now() + '_' + Math.random().toString(16).slice(2);
+
+    const reqId = 'r' + Date.now() + '_' + Math.random().toString(16).slice(2);
+
     driveUploadPending = { resolve, reject, reqId, timer: null };
 
     const form = document.createElement('form');
     form.method = 'POST';
+
     const actionUrl = endpoint + (endpoint.includes('?') ? '&' : '?') + 'reqId=' + encodeURIComponent(reqId);
     form.action = actionUrl;
+
     form.target = 'driveUploadFrame';
     form.style.display = 'none';
 
+    // ✅ crea input in ordine e metti hidden subito (così NON può capitare inp2 prima di init)
     const inp1 = document.createElement('input');
     inp1.type = 'hidden';
-    inp2.type = 'hidden';
-    inp3.type = 'hidden';
     inp1.name = 'dataUrl';
     inp1.value = dataUrl;
 
     const inp2 = document.createElement('input');
+    inp2.type = 'hidden';
     inp2.name = 'filename';
     inp2.value = filename;
 
     const inp3 = document.createElement('input');
+    inp3.type = 'hidden';
     inp3.name = 'folderId';
     inp3.value = folderId || '';
 
-  const inp4 = document.createElement('input');
-inp4.name = 'reqId';
-inp4.value = reqId;
-inp4.type = 'hidden';
-form.appendChild(inp4);
-
-  inp1.type = 'hidden';
-inp2.type = 'hidden';
-inp3.type = 'hidden';
+    const inp4 = document.createElement('input');
+    inp4.type = 'hidden';
+    inp4.name = 'reqId';
+    inp4.value = reqId;
 
     form.appendChild(inp1);
     form.appendChild(inp2);
     form.appendChild(inp3);
+    form.appendChild(inp4);
 
     document.body.appendChild(form);
+
+    // ✅ timeout vero: se non arriva postMessage, sblocca tutto
+    driveUploadPending.timer = setTimeout(() => {
+      if (driveUploadPending) {
+        const rej = driveUploadPending.reject;
+        driveUploadPending = null;
+        try { rej(new Error('Upload timeout')); } catch (e) {}
+      }
+    }, 45000);
+
     form.submit();
 
-    // timeout
-   driveUploadPending.timer = setTimeout(() => {
-  if (driveUploadPending) {
-    const rej = driveUploadPending.reject;
-    driveUploadPending = null;
-    try { rej(new Error('Upload timeout')); } catch(e) {}
-  }
-}, 45000);
-
-    // pulizia form (NON cancellare il timeout!)
-setTimeout(() => {
-  try { form.remove(); } catch(e) {}
-}, 1200);
+    // pulizia form (non toccare il timeout)
+    setTimeout(() => {
+      try { form.remove(); } catch (e) {}
+    }, 1200);
   });
 }
 
