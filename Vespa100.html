@@ -2785,34 +2785,56 @@ function getManutWarningsList() {
 
 // mostra toast SOLO una volta per soglia 500/250/100 (e sempre per urgente quando entra la prima volta)
 function checkManutToasts() {
-  const km = getKmTot();
-  const intervalli = getManutIntervalli();
-  const lastMap = getManutLastKmMap();
+  // ✅ TOAST basati SOLO sul Catalogo manutenzione (vt_manutCatalog)
+  const kmTot = getKmTot(); // km totali attuali
+  const cat = getManutCatalog(); // [{key,nome,intervalKm,enabled}, ...]
+  const lastMap = caricaJSON('vt_manut_lastKm', {}); // { key: kmUltimoCambio }
+  const THS = [500, 250, 100]; // soglie avviso (km mancanti)
 
-  for (const [key, intervallo] of Object.entries(intervalli || {})) {
-    const intKm = Number(intervallo || 0);
-    if (!isFinite(intKm) || intKm <= 0) continue;
+  if (!Array.isArray(cat) || cat.length === 0) return;
+
+  // (opzionale ma consigliato) limita quanti toast possono uscire in una singola aggiornaUI
+  let shown = 0;
+  const MAX_TOASTS_PER_RUN = 2;
+
+  for (const it of cat) {
+    if (!it || it.enabled === false) continue;
+
+    const key = it.key;
+    if (!key) continue;
+
+    const nome = it.nome || key;
+
+    const intervalKm = Number(it.intervalKm || 0);
+    if (!isFinite(intervalKm) || intervalKm <= 0) continue;
 
     const lastKm = Number(lastMap[key] || 0);
-    const nextAt = lastKm + intKm;
-    const remaining = nextAt - km;
+    const nextAt = lastKm + intervalKm;
+    const remaining = nextAt - kmTot;
 
-    // urgente
+    // 1) SCADUTO (remaining <= 0): toast una volta sola
     if (remaining <= 0) {
       if (!isWarned(key, 'URG')) {
         markWarned(key, 'URG');
-        showToast(`🔧 MANUTENZIONE: ${MANUT_LABELS[key] || key} SCADUTA!`);
+        showToast(`🔧 MANUTENZIONE SCADUTA: ${nome}`);
+        shown++;
+        if (shown >= MAX_TOASTS_PER_RUN) return;
       }
       continue;
     }
 
-    // soglie
-    for (const th of MANUT_THRESHOLDS) {
-      if (remaining <= th && !isWarned(key, th)) {
-        markWarned(key, th);
-        showToast(`🔧 ${MANUT_LABELS[key] || key}: mancano ~${Math.round(remaining)} km`);
-        break;
-      }
+    // 2) soglie: scegli la più "severa" non ancora avvisata
+    // (così se entri direttamente a 90km non ti spara prima 500 poi 250 poi 100)
+    let thToWarn = null;
+    if (remaining <= THS[2]) thToWarn = THS[2];       // 100
+    else if (remaining <= THS[1]) thToWarn = THS[1];  // 250
+    else if (remaining <= THS[0]) thToWarn = THS[0];  // 500
+
+    if (thToWarn != null && !isWarned(key, thToWarn)) {
+      markWarned(key, thToWarn);
+      showToast(`🔧 ${nome}: mancano ~${Math.round(remaining)} km`);
+      shown++;
+      if (shown >= MAX_TOASTS_PER_RUN) return;
     }
   }
 }
