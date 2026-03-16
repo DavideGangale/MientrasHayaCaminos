@@ -1,4 +1,4 @@
-<<!doctype html>
+<!doctype html>
 <html lang="it">
 <head>
   <meta charset="utf-8"/>
@@ -194,7 +194,7 @@
       .diario-tools #diario-more{ grid-column:auto; width:auto; justify-self:end; }
     }
 
-    /* fallback scroll-margin-top (se uno scrolla manualmente agli anchor) */
+    /* fallback scroll-margin-top */
     #sec-stats, #sec-routes, #sec-diary, #sec-maint{
       scroll-margin-top: calc(var(--floatNavH) + 16px);
     }
@@ -384,6 +384,15 @@
     return u.searchParams.get(name);
   }
 
+  function escapeHtml(s){
+    return String(s ?? '')
+      .replaceAll('&','&amp;')
+      .replaceAll('<','&lt;')
+      .replaceAll('>','&gt;')
+      .replaceAll('"','&quot;')
+      .replaceAll("'","&#39;");
+  }
+
   function moneyUsd(x){ return '$' + Number(x||0).toFixed(2); }
 
   function safeName(s) {
@@ -392,18 +401,6 @@
       .replace(/[\/\\?%*:|"<>]/g, '-')
       .replace(/\s+/g, ' ')
       .slice(0, 90);
-  }
-
-  function downloadTextFile(filename, content, mime) {
-    const blob = new Blob([content], { type: mime || 'application/octet-stream' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
   }
 
   async function shareOrDownloadFile(filename, content, mime) {
@@ -416,8 +413,27 @@
           return;
         }
       }
-    } catch (e) {}
-    downloadTextFile(filename, content, mime);
+      // fallback download
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      // fallback download (se share fallisce)
+      const blob = new Blob([content], { type: mime || 'application/octet-stream' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
   }
 
   function coordsToKML(traccia, nome = 'VespaTrek') {
@@ -531,20 +547,11 @@
     if (more) more.textContent = t('load_more');
   }
 
-  function escapeHtml(s){
-    return String(s ?? '')
-      .replaceAll('&','&amp;')
-      .replaceAll('<','&lt;')
-      .replaceAll('>','&gt;')
-      .replaceAll('"','&quot;')
-      .replaceAll("'","&#39;");
-  }
-
   function debounce(fn, ms=250){
-    let t=null;
+    let tt=null;
     return (...args) => {
-      clearTimeout(t);
-      t = setTimeout(() => fn(...args), ms);
+      clearTimeout(tt);
+      tt = setTimeout(() => fn(...args), ms);
     };
   }
 
@@ -552,7 +559,7 @@
     return (d && (d.fotoUrl || d.foto)) ? (d.fotoUrl || d.foto) : null;
   }
 
-  /* ===== Sticky offsets + scroll con offset (fix “sezione coperta”) ===== */
+  /* ===== Sticky offsets + scroll con offset ===== */
   function updateStickyOffsets(){
     const nav = document.getElementById('floatingNav');
     const h = nav ? Math.ceil(nav.getBoundingClientRect().height) : 86;
@@ -581,6 +588,65 @@
         scrollToSectionWithOffset(id);
       });
     });
+  }
+
+  /* ===== Fetch JSON con fallback path (fix GitHub Pages) ===== */
+  function toAbsUrl(path){
+    return new URL(path, location.href).toString();
+  }
+
+  async function fetchJsonWithFallback(){
+    const srcParam = qs('src');
+
+    const candidates = srcParam ? [srcParam] : [
+      // 1) stesso folder dell'HTML
+      toAbsUrl('vespatrek_public.json'),
+      toAbsUrl('./vespatrek_public.json'),
+
+      // 2) /public accanto all'HTML
+      toAbsUrl('public/vespatrek_public.json'),
+      toAbsUrl('./public/vespatrek_public.json'),
+
+      // 3) /docs se usi docs come root (a volte serve quando sposti file)
+      toAbsUrl('docs/vespatrek_public.json'),
+      toAbsUrl('./docs/vespatrek_public.json'),
+    ];
+
+    let lastErr = null;
+
+    for (const url of candidates) {
+      try {
+        const res = await fetch(url, { cache:'no-store' });
+
+        // se 404 ecc: prova il prossimo
+        if (!res.ok) {
+          lastErr = new Error(`HTTP ${res.status} ${res.statusText}`);
+          continue;
+        }
+
+        const txt = await res.text();
+        const head = (txt || '').trim().slice(0, 40).toLowerCase();
+
+        // se è HTML (tipico di 404 pages su GitHub): prova il prossimo
+        if (head.startsWith('<!doctype') || head.startsWith('<html') || head.startsWith('<')) {
+          lastErr = new Error(`Ricevuto HTML invece di JSON (probabile path sbagliato)`);
+          continue;
+        }
+
+        const data = JSON.parse(txt);
+        return { data, url };
+      } catch (e) {
+        lastErr = e;
+      }
+    }
+
+    const msg =
+      `Impossibile caricare il JSON pubblico.\n\n` +
+      `Percorsi provati:\n` + candidates.map(x => ' - ' + x).join('\n') + `\n\n` +
+      `Ultimo errore: ${lastErr ? (lastErr.message || String(lastErr)) : 'sconosciuto'}\n\n` +
+      `Suggerimento GitHub Pages: assicurati che vespatrek_public.json sia pubblicato (stesso branch/folder del sito).`;
+
+    throw new Error(msg);
   }
 
   /* ===== MAPPE ===== */
@@ -635,7 +701,7 @@
     setTimeout(() => { try{ map.invalidateSize(); }catch{} }, 120);
   }
 
-  function renderPicsOn(layerX, pics){
+  function renderPicsOn(layerX, pics, openRouteLightboxByUrlFn){
     if (!layerX) return;
     layerX.clearLayers();
 
@@ -651,18 +717,18 @@
         fillOpacity: 0.9
       }).addTo(layerX);
 
-      m.on('click', () => { if (foto) openRouteLightboxByUrl(foto); });
+      m.on('click', () => { if (foto) openRouteLightboxByUrlFn(foto); });
     });
   }
 
-  function openMapModal(lastTraceCoords, lastPics){
+  function openMapModal(lastTraceCoords, lastPics, openRouteLightboxByUrlFn){
     const modal = document.getElementById('mapModal');
     if (!modal) return;
     modal.style.display = 'block';
 
     initMapFull();
     setTraceOn(mapFull, polyFull, lastTraceCoords || []);
-    renderPicsOn(photoLayerFull, lastPics || []);
+    renderPicsOn(photoLayerFull, lastPics || [], openRouteLightboxByUrlFn);
 
     setTimeout(() => { try { mapFull.invalidateSize(); } catch{} }, 120);
   }
@@ -768,14 +834,7 @@
   async function main(){
     hookFloatingNavLinks();
 
-    const src = qs('src') || 'public/vespatrek_public.json';
-    const res = await fetch(src, { cache:'no-store' });
-    if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText} per ${src}`);
-
-    const txt = await res.text();
-    if (!txt || txt.trim().length < 5) throw new Error(`File JSON vuoto: ${src}`);
-    if (!txt.trim().endsWith('}')) throw new Error(`JSON incompleto/troncato (size=${txt.length} chars): ${src}`);
-    const data = JSON.parse(txt);
+    const { data, url: usedUrl } = await fetchJsonWithFallback();
 
     const langSel = document.getElementById('lang');
     if (langSel) langSel.value = LANG;
@@ -785,7 +844,7 @@
     setTimeout(updateStickyOffsets, 250);
 
     document.getElementById('tit').innerText = data.titolo || 'VespaTrek';
-    document.getElementById('meta').innerText = `Aggiornato: ${data._exportDate || '--'} · File: ${src}`;
+    document.getElementById('meta').innerText = `Aggiornato: ${data._exportDate || '--'} · JSON: ${usedUrl}`;
 
     const st = data.stats || {};
     const spTot = (st.spesaBenzinaUsd||0) + (st.spesaOlioUsd||0) + (st.spesaRicambiUsd||0) + (st.spesaManodoperaUsd||0);
@@ -878,7 +937,6 @@
       setTrace(p.traccia || []);
       lastTraceCoords = p.traccia || [];
 
-      // marker foto nel range start/end
       initMap();
       if (photoLayer) photoLayer.clearLayers();
 
@@ -900,69 +958,13 @@
       // playlist foto del percorso
       routePhotos = pics.map(fotoOf).filter(Boolean);
       routePhotoIndex = new Map();
-      routePhotos.forEach((url, i) => routePhotoIndex.set(url, i));
+      routePhotos.forEach((u, i) => routePhotoIndex.set(u, i));
 
-      pics.forEach(d => {
-        const lat = Number(d.geo.lat), lon = Number(d.geo.lon);
-        const foto = fotoOf(d);
+      // marker “semplici” per performance
+      renderPicsOn(photoLayer, pics, openRouteLightboxByUrl);
 
-        const html = `
-          <div style="min-width:180px">
-            <div style="font-weight:700; margin-bottom:6px;">${escapeHtml(d.paese||'')}</div>
-
-            ${foto ? `
-              <img src="${foto}"
-                   class="diario-thumb"
-                   style="max-height:140px"
-                   onclick="openRouteLightboxByUrl('${String(foto).replaceAll("'", "\\'")}')">
-            ` : ''}
-
-            <div class="muted" style="margin-top:6px;">${escapeHtml(d.data||'')} ${escapeHtml(d.ora||'')} — km ${escapeHtml(d.km||'')}</div>
-            <div style="margin-top:6px; white-space:pre-wrap; color:#ddd;">${escapeHtml((d.testo||'').slice(0,140))}</div>
-
-            ${foto ? `
-              <button class="btn" type="button" style="margin-top:10px; width:100%; background:#ff9800; color:#000;"
-                      onclick="openRouteLightboxByUrl('${String(foto).replaceAll("'", "\\'")}')">
-                Apri foto
-              </button>
-            ` : ''}
-          </div>
-        `;
-
-        const m = L.circleMarker([lat, lon], {
-          radius: 7,
-          color: '#ff9800',
-          fillColor: '#ff9800',
-          fillOpacity: 0.9
-        }).addTo(photoLayer);
-
-        m.bindPopup(html, {
-          autoPan: false,
-          closeButton: false,
-          closeOnClick: false,
-          autoClose: false,
-          maxWidth: 260,
-          interactive: true
-        });
-
-        m.on('mouseover', () => m.openPopup());
-        m.on('mouseout', () => {
-          setTimeout(() => {
-            const popEl = m.getPopup() && m.getPopup().getElement ? m.getPopup().getElement() : null;
-            if (popEl && popEl.matches(':hover')) return;
-            m.closePopup();
-          }, 40);
-        });
-
-        m.on('click', () => {
-          try { m.closePopup(); } catch {}
-          try { if (map) map.closePopup(); } catch {}
-          if (foto) openRouteLightboxByUrl(foto);
-        });
-      });
-
-      // collega il bottone full screen all’ultima selezione
-      btnMapFull?.onclick = () => openMapModal(lastTraceCoords, lastPics);
+      // bottone full screen usa l'ultima selezione
+      btnMapFull.onclick = () => openMapModal(lastTraceCoords, lastPics, openRouteLightboxByUrl);
     }
 
     initMap();
@@ -981,7 +983,7 @@
       updateExportButtons();
     }
 
-    /* ===== DIARIO FILTRI ===== */
+    // ===== DIARIO FILTRI =====
     diarioAll = Array.isArray(data.diario) ? data.diario : [];
     diarioLimit = 12;
 
@@ -1026,7 +1028,7 @@
 
     renderDiarioPub();
 
-    /* ===== MANUTENZIONI ===== */
+    // ===== MANUTENZIONI =====
     const man = data.manutenzioni || [];
     document.getElementById('man').innerHTML = man.map(m => `
       <div class="entry">
@@ -1038,13 +1040,6 @@
       </div>
     `).join('') || '<div class="muted">Nessun intervento</div>';
   }
-
-  main().catch(err => {
-    document.body.innerHTML =
-      '<pre style="white-space:pre-wrap;color:#fff;">Errore: ' +
-      (err && err.stack ? err.stack : err) +
-      '</pre>';
-  });
 
   function renderDiarioPub(){
     const container = document.getElementById('diario');
@@ -1119,6 +1114,21 @@
         : t('load_more');
     }
   }
+
+  // Avvio
+  main().catch(err => {
+    // NON stampo HTML grezzo: lo “escapo”
+    document.body.innerHTML =
+      `<div style="max-width:980px;margin:20px auto;font-family:system-ui;color:#fff;">
+        <div style="background:#2a0000;border:1px solid #4a0000;border-radius:14px;padding:14px;">
+          <div style="font-weight:900;margin-bottom:10px;">❌ Errore caricamento dati</div>
+          <pre style="white-space:pre-wrap;margin:0;color:#ffb3b3;">${escapeHtml(err && err.message ? err.message : String(err))}</pre>
+          <div style="margin-top:10px;color:#bbb;font-size:13px;">
+            Se sei su GitHub Pages, controlla che <b>vespatrek_public.json</b> sia pubblicato nella stessa cartella del sito.
+          </div>
+        </div>
+      </div>`;
+  });
 </script>
 
 </body>
