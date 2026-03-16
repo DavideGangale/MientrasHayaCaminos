@@ -909,6 +909,7 @@
       </div>
       <button class="btn-azione" style="background:#2196F3;" onclick="apriModal('modalRegistro')">📄 LOG MANUTENZIONE</button>
       <button class="btn-secondary" onclick="apriModal('modalLogDettaglio')">🔧 NUOVO INTERVENTO</button>
+      <button class="btn-secondary" style="background:#111;border:1px solid #333;" onclick="apriModal('modalManutCatalog'); renderManutCatalog();">📏 Catalogo manutenzione</button>
     </div>
 
     <!-- CARBURAZIONE -->
@@ -1154,6 +1155,31 @@
     </div>
   </div>
 
+
+  <!-- CATALOGO MANUTENZIONE -->
+<div id="modalManutCatalog" class="modal-overlay">
+  <div class="modal-content" style="border-color:#ff9800; max-width:560px;">
+    <button class="close-modal" onclick="chiudiModal('modalManutCatalog')">×</button>
+    <h2 style="color:#ff9800; text-align:center; margin-top:0;">📏 Catalogo Manutenzione</h2>
+
+    <div style="font-size:12px;color:#aaa;text-align:left;margin-bottom:10px;">
+      Qui imposti gli intervalli (km) per gli avvisi. Se una voce è “N/A”, non genererà avvisi.
+    </div>
+
+    <div id="contenutoManutCatalog"></div>
+
+    <hr style="border:0;border-top:1px solid #333; margin:12px 0;">
+
+    <div style="display:flex; gap:10px;">
+      <input id="manut-new-name" type="text" placeholder="Nuova voce (es. Cuscinetti ruota)" style="margin:0;text-align:left;">
+      <input id="manut-new-km" type="number" placeholder="km" step="50" min="0" style="margin:0; max-width:130px;">
+    </div>
+
+    <button class="btn-secondary" style="margin-top:10px;" onclick="manutAddCustom()">
+      ➕ Aggiungi voce
+    </button>
+  </div>
+</div>
 
 
 <div id="modalGrafico" class="modal-overlay">
@@ -1490,6 +1516,17 @@ initDB('vt_dist', 'KM');
 initDB('vt_valuta', 'USD');
 
 
+initDB('vt_manutCatalog', JSON.stringify([
+  { key:'candela',        nome:'Candela',              intervalKm:4000, enabled:true },
+  { key:'olioCambio',     nome:'Olio cambio',          intervalKm:5000, enabled:true },
+  { key:'ganasceAnt',     nome:'Ganasce freno ant.',   intervalKm:7000, enabled:true },
+  { key:'ganascePost',    nome:'Ganasce freno post.',  intervalKm:7000, enabled:true },
+  { key:'dischiFrizione', nome:'Dischi frizione',      intervalKm:12000, enabled:true },
+  { key:'gomme',          nome:'Gomme',                intervalKm:10000, enabled:true },
+  { key:'cavi',           nome:'Cavi',                 intervalKm:6000, enabled:true }
+]));
+
+  
   // cambi valuta -> USD (1 valuta = X USD)
   initDB('vt_fxRates', JSON.stringify({ USD: 1 }));
 
@@ -4974,18 +5011,195 @@ function inferManutKeyFromNome(nome) {
   return null;
 }
 
+function getManutCatalog() {
+  const c = caricaJSON('vt_manutCatalog', []);
+  return Array.isArray(c) ? c : [];
+}
 
+function getCatalogIntervalKm(key) {
+  const cat = getManutCatalog();
+  const it = cat.find(x => x && x.key === key);
+  if (!it || it.enabled === false) return 0;
+  const v = Number(it.intervalKm || 0);
+  return (isFinite(v) && v > 0) ? v : 0;
+}
+
+
+
+
+
+
+
+
+
+  
 
 function getDurataEffettivaKmPerItem(item) {
-  const key = inferManutKeyFromNome(item?.nome);
+  if (!item) return 0;
+
+  // se è N/A → nessuna usura
+  if (item.wear === 'na') return 0;
+
+  // se è collegato a una voce manutenzione
+  const key = item.manutKey || inferManutKeyFromNome(item.nome);
   if (key) {
-    const intervalli = caricaJSON('vt_manut_intervalli', {});
-    const v = Number(intervalli?.[key] || 0);
-    if (isFinite(v) && v > 0) return v;
+    const v = getCatalogIntervalKm(key);
+    if (v > 0) return v;
   }
 
-  const d = Number(item?.durata || 0);
+  // fallback: durata salvata nel ricambio (vecchio sistema)
+  const d = Number(item.durata || 0);
   return (isFinite(d) && d > 0) ? d : 0;
+}
+
+
+
+function slugKey(s) {
+  return String(s || '')
+    .toLowerCase()
+    .trim()
+    .replace(/à/g,'a').replace(/è/g,'e').replace(/é/g,'e').replace(/ì/g,'i').replace(/ò/g,'o').replace(/ù/g,'u')
+    .replace(/[^a-z0-9]+/g,'_')
+    .replace(/^_+|_+$/g,'')
+    .slice(0, 40) || ('k_' + Date.now());
+}
+
+function getManutCatalog() {
+  const c = caricaJSON('vt_manutCatalog', []);
+  return Array.isArray(c) ? c : [];
+}
+
+function saveManutCatalog(list) {
+  salva('vt_manutCatalog', list);
+}
+
+function renderManutCatalog() {
+  const box = document.getElementById('contenutoManutCatalog');
+  if (!box) return;
+
+  const cat = getManutCatalog();
+
+  if (!cat.length) {
+    box.innerHTML = `<div style="color:#888;text-align:center;padding:10px;">Catalogo vuoto</div>`;
+    return;
+  }
+
+  box.innerHTML = cat.map((it, idx) => {
+    const enabled = it.enabled !== false;
+    return `
+      <div class="inv-item" style="gap:10px;">
+        <div style="flex-grow:1;">
+          <div class="inv-nome">${it.nome || it.key}</div>
+          <div class="inv-durabilita" style="margin-top:4px;">
+            Stato: <b style="color:${enabled ? 'var(--verde)' : '#888'}">${enabled ? 'ATTIVO' : 'N/A'}</b>
+          </div>
+        </div>
+
+        <input type="number"
+               value="${enabled ? Number(it.intervalKm||0) : 0}"
+               min="0" step="50"
+               style="max-width:120px; margin:0;"
+               ${enabled ? '' : 'disabled'}
+               onchange="manutSetKm('${it.key}', this.value)">
+
+        <button class="btn-secondary" style="margin:0; width:90px;"
+                onclick="manutToggle('${it.key}')">
+          ${enabled ? 'N/A' : 'ATTIVA'}
+        </button>
+
+        ${String(it.key||'').startsWith('custom_') ? `
+          <button class="btn-secondary" style="margin:0; width:44px; background:#2a0000; border:1px solid #4a0000;"
+                  onclick="manutDelete('${it.key}')">
+            🗑️
+          </button>
+        ` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+function manutSetKm(key, kmVal) {
+  const km = Number(kmVal || 0);
+  const cat = getManutCatalog();
+  const idx = cat.findIndex(x => x && x.key === key);
+  if (idx === -1) return;
+
+  cat[idx].intervalKm = isFinite(km) ? Math.max(0, km) : 0;
+  cat[idx].enabled = (cat[idx].intervalKm > 0);
+
+  saveManutCatalog(cat);
+  renderManutCatalog();
+  renderInventario();
+  renderChecklist();
+}
+
+function manutToggle(key) {
+  const cat = getManutCatalog();
+  const idx = cat.findIndex(x => x && x.key === key);
+  if (idx === -1) return;
+
+  const enabled = cat[idx].enabled !== false;
+  if (enabled) {
+    cat[idx].enabled = false; // N/A
+  } else {
+    // se riattivo e km è 0 chiedo
+    cat[idx].enabled = true;
+    if (!cat[idx].intervalKm || Number(cat[idx].intervalKm) <= 0) {
+      const s = prompt(`Intervallo km per "${cat[idx].nome}"`, '1000');
+      const km = s ? Number(s) : 0;
+      cat[idx].intervalKm = (isFinite(km) && km > 0) ? km : 0;
+      if (cat[idx].intervalKm <= 0) cat[idx].enabled = false;
+    }
+  }
+
+  saveManutCatalog(cat);
+  renderManutCatalog();
+  renderInventario();
+  renderChecklist();
+}
+
+function manutAddCustom() {
+  const nameEl = document.getElementById('manut-new-name');
+  const kmEl = document.getElementById('manut-new-km');
+
+  const nome = nameEl ? nameEl.value.trim() : '';
+  const km = kmEl ? Number(kmEl.value || 0) : 0;
+
+  if (!nome) { showToast('⚠️ Inserisci un nome'); return; }
+
+  const key = 'custom_' + slugKey(nome);
+  const cat = getManutCatalog();
+
+  if (cat.some(x => x && x.key === key)) {
+    showToast('⚠️ Voce già esistente');
+    return;
+  }
+
+  cat.push({
+    key,
+    nome,
+    intervalKm: (isFinite(km) && km > 0) ? km : 0,
+    enabled: (isFinite(km) && km > 0)
+  });
+
+  saveManutCatalog(cat);
+
+  if (nameEl) nameEl.value = '';
+  if (kmEl) kmEl.value = '';
+
+  renderManutCatalog();
+  renderInventario();
+  renderChecklist();
+  showToast('✅ Voce aggiunta al catalogo');
+}
+
+function manutDelete(key) {
+  if (!confirm('Eliminare questa voce dal catalogo?')) return;
+  const cat = getManutCatalog().filter(x => x && x.key !== key);
+  saveManutCatalog(cat);
+  renderManutCatalog();
+  renderInventario();
+  renderChecklist();
 }
 
   
@@ -5102,6 +5316,33 @@ function aggiungiRicambio() {
   const nome = input ? input.value.trim() : '';
   if (!nome) { showToast('⚠️ Inserisci un nome'); return; }
 
+  // ✅ chiedi se questo ricambio deve generare avvisi usura
+const isWear = confirm(
+  `"${nome}" è un componente con USURA programmata?\n\n` +
+  `OK = sì (avvisi a km)\n` +
+  `Annulla = N/A (nessun avviso)`
+);
+
+// manutKey: prova a inferirla dal nome (candela, frizione, gomme…)
+const mk = inferManutKeyFromNome(nome);
+
+
+let durataManuale = 0;
+if (isWear) {
+  if (!mk) {
+    const s = prompt(`"${nome}": intervallo usura (km)?\n(Es: 2000)`, '1000');
+    const km = s ? Number(s) : 0;
+    durataManuale = (isFinite(km) && km > 0) ? km : 0;
+  }
+}
+
+
+
+
+  
+
+// se è “usura” ma non riconosciuto, lo lasciamo senza key (userà durata fallback)
+
   const inv = caricaJSON('vt_inventario', []);
   const kmTot = parseFloat(carica('vt_kmTotali','0')) || 0;
 
@@ -5130,6 +5371,13 @@ function aggiungiRicambio() {
     costoLocal: costoLocal || 0,
     costoUsd: costoUsd || 0,
     valuta: cur,
+    wear: isWear ? 'interval' : 'na',
+    manutKey: (isWear ? (mk || null) : null),
+
+    wear: isWear ? 'interval' : 'na',
+    manutKey: isWear ? (mk || null) : null,
+    durata: durataManuale || 0,   // usata solo se non c’è manutKey o catalogo
+    
     fxToUsd: (typeof getFxToUsd === 'function') ? getFxToUsd(cur) : null
   });
 
@@ -5397,6 +5645,9 @@ function getUsuraWarningsInventario() {
 
    const durata = getDurataEffettivaKmPerItem(item);
     if (!isFinite(durata) || durata <= 0) continue;
+
+   // const durata = getDurataEffettivaKmPerItem(item);
+   // if (!durata) continue; // N/A o non configurato
 
     const lastKm = Number(item.lastKm || 0);
     const kmDaUltimo = kmTot - lastKm;
