@@ -5395,6 +5395,24 @@ function aggiungiRicambio() {
 
 
 
+  // aggiungo ricambio in inventario
+  inv.push({
+    id: String(Date.now()) + '_' + Math.random().toString(16).slice(2),
+    nome,
+    qta: 1,
+    durata: 5000,     // puoi cambiarlo dopo
+    lastKm: kmTot,    // “inizio usura” (di solito = ora)
+    costoLocal: costoLocal || 0,
+    costoUsd: costoUsd || 0,
+    valuta: cur,
+    wear: isWear ? 'interval' : 'na',
+    manutKey: (isWear ? (mk || null) : null),
+    wear: isWear ? 'interval' : 'na',
+    manutKey: isWear ? (mk || null) : null,
+    durata: durataManuale || 0,   // usata solo se non c’è manutKey o catalogo
+    
+    fxToUsd: (typeof getFxToUsd === 'function') ? getFxToUsd(cur) : null
+  });
 
 
 
@@ -5829,9 +5847,9 @@ if (warns.length) {
 
 
   
-  const warns = getUsuraWarningsInventario();
+ // const warns = getUsuraWarningsInventario();
 
-  let html = '';
+//  let html = '';
 
   // ===== AVVISI USURA (AUTO) =====
   if (warns.length) {
