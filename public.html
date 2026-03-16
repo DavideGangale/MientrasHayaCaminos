@@ -19,7 +19,7 @@
       --brand:#2196F3;
       --accent:#ff9800;
 
-      --floatNavH: 86px;   /* fallback, verrà ricalcolato via JS */
+      --floatNavH: 86px;
       --stickyGap: 12px;
     }
 
@@ -61,21 +61,20 @@
       background: var(--brand);
       color:#fff;
       border:1px solid rgba(255,255,255,.08);
-      border-radius:10px;
+      border-radius:12px;
       padding:10px 12px;
-      font-weight:800;
+      font-weight:900;
       cursor:pointer;
       box-shadow: 0 8px 18px rgba(33,150,243,.18);
     }
     .btn:disabled{ opacity:.55; cursor:not-allowed; box-shadow:none; }
 
-    select{
-      width:100%;
-      padding:10px;
-      border-radius:10px;
-      background:#0f0f10;
-      color:#fff;
+    .btn-ghost{
+      background: rgba(0,0,0,.18);
       border:1px solid var(--border);
+      color:#fff;
+      box-shadow:none;
+      font-weight:800;
     }
 
     .entry{
@@ -105,7 +104,6 @@
       backdrop-filter: blur(6px);
     }
 
-    /* Fade laterali per far capire che si può scrollare */
     #floatingNav::before,
     #floatingNav::after{
       content:"";
@@ -149,52 +147,6 @@
       scroll-snap-align:start;
     }
 
-    /* ===== DIARIO TOOLS STICKY sotto al menu flottante ===== */
-    .diario-tools{
-      display:grid;
-      grid-template-columns: 1fr 160px;
-      gap:10px;
-      align-items:center;
-      margin-bottom:10px;
-
-      position: sticky;
-      top: calc(var(--floatNavH) + var(--stickyGap));
-      z-index: 50;
-
-      background: rgba(15,15,16,0.92);
-      border: 1px solid #333;
-      border-radius: 12px;
-      padding: 10px;
-    }
-    .diario-tools input[type="search"]{
-      width:100%;
-      padding:10px;
-      border-radius:10px;
-      background:#0f0f10;
-      color:#fff;
-      border:1px solid var(--border);
-    }
-    .diario-tools .chk{
-      grid-column:1 / -1;
-      display:flex;
-      gap:10px;
-      align-items:center;
-      color:var(--muted);
-      font-size:13px;
-    }
-    .diario-tools #diario-more{
-      grid-column:1 / -1;
-      width:100%;
-    }
-    @media (min-width: 700px){
-      .diario-tools{
-        grid-template-columns: 1fr 200px 200px 180px 160px;
-      }
-      .diario-tools .chk{ grid-column:auto; justify-content:flex-start; }
-      .diario-tools #diario-more{ grid-column:auto; width:auto; justify-self:end; }
-    }
-
-    /* fallback scroll-margin-top */
     #sec-stats, #sec-routes, #sec-diary, #sec-maint{
       scroll-margin-top: calc(var(--floatNavH) + 16px);
     }
@@ -259,6 +211,87 @@
       font-size:22px;
       cursor:pointer;
     }
+
+    /* ===== PICKER (bottom sheet) ===== */
+    #pickerOverlay{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.88);
+      z-index:10000;
+      align-items:flex-end;
+      justify-content:center;
+      padding:14px;
+    }
+    #pickerOverlay.open{ display:flex; }
+
+    .pickerSheet{
+      width:min(680px, 96vw);
+      max-height:82vh;
+      background: linear-gradient(180deg, #1b1b1d, #121214);
+      border:1px solid #333;
+      border-radius:16px;
+      overflow:hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,.6);
+    }
+    .pickerHead{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:12px 12px;
+      border-bottom:1px solid #2b2b2f;
+    }
+    .pickerTitle{
+      font-weight:900;
+      letter-spacing:.2px;
+    }
+    .pickerClose{
+      background:#2a0000;
+      border:1px solid #4a0000;
+      color:#ffb3b3;
+      width:38px;height:38px;
+      border-radius:12px;
+      font-size:20px;
+      cursor:pointer;
+    }
+    .pickerList{
+      max-height: calc(82vh - 60px);
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .pickerItem{
+      width:100%;
+      text-align:left;
+      padding:12px 12px;
+      background:transparent;
+      border:0;
+      border-bottom:1px solid #242428;
+      color:#fff;
+      cursor:pointer;
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+    }
+    .pickerItem:active{ opacity:.85; }
+    .pickerItem .dot{
+      width:10px;height:10px;border-radius:999px;
+      margin-top:6px;
+      background:#555;
+      flex:0 0 auto;
+    }
+    .pickerItem.active .dot{ background: var(--accent); }
+    .pickerItem .main{ font-weight:900; }
+    .pickerItem .sub{ color:var(--muted); font-size:12px; margin-top:3px; }
+    .pickerHeader{
+      padding:10px 12px;
+      font-size:12px;
+      color:#ff9800;
+      font-weight:900;
+      background: rgba(255,152,0,0.08);
+      border-bottom:1px solid #2b2b2f;
+      letter-spacing:.4px;
+      text-transform:uppercase;
+    }
   </style>
 </head>
 
@@ -270,13 +303,19 @@
       <div class="muted" id="meta">Carico dati…</div>
     </div>
 
+    <!-- Lingua: button + bottom sheet -->
     <div class="card">
       <div class="muted" style="margin-bottom:6px;">Language / Idioma / Lingua</div>
-      <select id="lang">
-        <option value="it">Italiano</option>
-        <option value="en">English</option>
-        <option value="es">Español</option>
-      </select>
+      <button class="btn-ghost btn" id="btnPickLang" type="button">🌐 Lingua: --</button>
+    </div>
+
+    <!-- Paese generale -->
+    <div class="card">
+      <div class="muted" style="margin-bottom:6px;">Filtro Paese (generale)</div>
+      <button class="btn-ghost btn" id="btnPickCountry" type="button">🌍 Paese: Tutti</button>
+      <div class="muted" style="margin-top:8px;">
+        Questo filtro applica a: statistiche, tappe, diario e manutenzioni.
+      </div>
     </div>
 
     <div class="card" id="floatingNav">
@@ -297,13 +336,16 @@
         <div class="box"><span data-i18n="spesa_tot">Spesa totale (USD)</span><br><b id="st-sp">--</b></div>
         <div class="box"><span data-i18n="olio_l">Olio (L)</span><br><b id="st-ol">--</b></div>
       </div>
+      <div class="muted" id="statsScopeNote" style="margin-top:10px;"></div>
     </div>
 
     <div class="card" id="sec-routes">
       <h2 data-i18n="routes">🗺️ Tappe / Turismo</h2>
-      <div class="muted"><span data-i18n="pick_route">Seleziona un percorso per vedere la traccia.</span></div>
+      <div class="muted" data-i18n="pick_route">Seleziona un percorso per vedere la traccia.</div>
 
-      <select id="selPerc"></select>
+      <button class="btn-ghost btn" id="btnPickRoute" type="button" style="margin-top:10px;">
+        🧭 Percorso: --
+      </button>
 
       <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; align-items:center;">
         <button class="btn" id="btnKml" type="button" style="background:#00bcd4; color:#000;">
@@ -326,26 +368,11 @@
     <div class="card" id="sec-diary">
       <h2 data-i18n="diary">📖 Diario (con foto)</h2>
 
-      <div class="diario-tools">
-        <input id="diario-q" type="search" placeholder="Cerca nel diario (testo/paese/km)..." />
-
-        <select id="diario-paese">
-          <option value="">Tutti i paesi</option>
-        </select>
-
-        <select id="diario-tag">
-          <option value="">Tutti i tag</option>
-        </select>
-
-        <label class="chk">
-          <input id="diario-solo-foto" type="checkbox">
-          Solo con foto
-        </label>
-
-        <button class="btn" id="diario-more" type="button">Carica altre</button>
-      </div>
-
       <div id="diario"></div>
+
+      <button class="btn" id="diario-more" type="button" style="margin-top:12px; width:100%;">
+        Carica altre
+      </button>
     </div>
 
     <div class="card" id="sec-maint">
@@ -378,6 +405,17 @@
              font-size:18px;cursor:pointer;">›</button>
   </div>
 
+  <!-- PICKER (bottom sheet) -->
+  <div id="pickerOverlay">
+    <div class="pickerSheet" role="dialog" aria-modal="true">
+      <div class="pickerHead">
+        <div class="pickerTitle" id="pickerTitle">Seleziona</div>
+        <button class="pickerClose" id="pickerClose" type="button">×</button>
+      </div>
+      <div class="pickerList" id="pickerList"></div>
+    </div>
+  </div>
+
 <script>
   function qs(name){
     const u = new URL(location.href);
@@ -404,8 +442,8 @@
   }
 
   async function shareOrDownloadFile(filename, content, mime) {
+    const blob = new Blob([content], { type: mime || 'application/octet-stream' });
     try {
-      const blob = new Blob([content], { type: mime || 'application/octet-stream' });
       if (navigator.share) {
         const file = new File([blob], filename, { type: mime || 'application/octet-stream' });
         if (!navigator.canShare || navigator.canShare({ files: [file] })) {
@@ -413,27 +451,15 @@
           return;
         }
       }
-      // fallback download
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    } catch (e) {
-      // fallback download (se share fallisce)
-      const blob = new Blob([content], { type: mime || 'application/octet-stream' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    }
+    } catch (e) {}
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   }
 
   function coordsToKML(traccia, nome = 'VespaTrek') {
@@ -477,12 +503,7 @@
       km_tot: 'KM totali',
       benzina_l: 'Benzina (L)',
       spesa_tot: 'Spesa totale (USD)',
-      olio_l: 'Olio (L)',
-      all_countries: 'Tutti i paesi',
-      all_tags: 'Tutti i tag',
-      only_photos: 'Solo con foto',
-      load_more: 'Carica altre',
-      search_ph: 'Cerca nel diario (testo/paese/km)...'
+      olio_l: 'Olio (L)'
     },
     en: {
       stats: '📊 Stats',
@@ -493,12 +514,7 @@
       km_tot: 'Total km',
       benzina_l: 'Fuel (L)',
       spesa_tot: 'Total cost (USD)',
-      olio_l: '2T Oil (L)',
-      all_countries: 'All countries',
-      all_tags: 'All tags',
-      only_photos: 'Photos only',
-      load_more: 'Load more',
-      search_ph: 'Search diary (text/country/km)...'
+      olio_l: '2T Oil (L)'
     },
     es: {
       stats: '📊 Estadísticas',
@@ -509,50 +525,24 @@
       km_tot: 'Km totales',
       benzina_l: 'Combustible (L)',
       spesa_tot: 'Gasto total (USD)',
-      olio_l: 'Aceite 2T (L)',
-      all_countries: 'Todos los países',
-      all_tags: 'Todas las etiquetas',
-      only_photos: 'Solo fotos',
-      load_more: 'Cargar más',
-      search_ph: 'Buscar en diario (texto/país/km)...'
+      olio_l: 'Aceite 2T (L)'
     }
   };
 
   let LANG = localStorage.getItem('vt_pub_lang') || 'it';
-
-  function t(key){
-    return (I18N[LANG] && I18N[LANG][key]) ? I18N[LANG][key] : key;
-  }
+  function t(key){ return (I18N[LANG] && I18N[LANG][key]) ? I18N[LANG][key] : key; }
 
   function applyLang(){
     document.documentElement.lang = LANG;
-
     document.querySelectorAll('[data-i18n]').forEach(el => {
       const key = el.getAttribute('data-i18n');
       el.textContent = t(key);
     });
-
-    const q = document.getElementById('diario-q');
-    if (q) q.placeholder = t('search_ph');
-
-    const chk = document.querySelector('.diario-tools .chk');
-    if (chk) {
-      const input = chk.querySelector('input');
-      chk.innerHTML = '';
-      chk.appendChild(input);
-      chk.append(' ' + t('only_photos'));
-    }
-
-    const more = document.getElementById('diario-more');
-    if (more) more.textContent = t('load_more');
   }
 
   function debounce(fn, ms=250){
     let tt=null;
-    return (...args) => {
-      clearTimeout(tt);
-      tt = setTimeout(() => fn(...args), ms);
-    };
+    return (...args) => { clearTimeout(tt); tt = setTimeout(() => fn(...args), ms); };
   }
 
   function fotoOf(d){
@@ -590,26 +580,16 @@
     });
   }
 
-  /* ===== Fetch JSON con fallback path (fix GitHub Pages) ===== */
-  function toAbsUrl(path){
-    return new URL(path, location.href).toString();
-  }
+  /* ===== Fetch JSON con fallback path (GitHub Pages) ===== */
+  function toAbsUrl(path){ return new URL(path, location.href).toString(); }
 
   async function fetchJsonWithFallback(){
     const srcParam = qs('src');
-
     const candidates = srcParam ? [srcParam] : [
-      // 1) stesso folder dell'HTML
       toAbsUrl('vespatrek_public.json'),
       toAbsUrl('./vespatrek_public.json'),
-
-      // 2) /public accanto all'HTML
       toAbsUrl('public/vespatrek_public.json'),
-      toAbsUrl('./public/vespatrek_public.json'),
-
-      // 3) /docs se usi docs come root (a volte serve quando sposti file)
-      toAbsUrl('docs/vespatrek_public.json'),
-      toAbsUrl('./docs/vespatrek_public.json'),
+      toAbsUrl('./public/vespatrek_public.json')
     ];
 
     let lastErr = null;
@@ -617,37 +597,76 @@
     for (const url of candidates) {
       try {
         const res = await fetch(url, { cache:'no-store' });
-
-        // se 404 ecc: prova il prossimo
-        if (!res.ok) {
-          lastErr = new Error(`HTTP ${res.status} ${res.statusText}`);
-          continue;
-        }
+        if (!res.ok) { lastErr = new Error(`HTTP ${res.status} ${res.statusText}`); continue; }
 
         const txt = await res.text();
         const head = (txt || '').trim().slice(0, 40).toLowerCase();
-
-        // se è HTML (tipico di 404 pages su GitHub): prova il prossimo
         if (head.startsWith('<!doctype') || head.startsWith('<html') || head.startsWith('<')) {
-          lastErr = new Error(`Ricevuto HTML invece di JSON (probabile path sbagliato)`);
+          lastErr = new Error('Ricevuto HTML invece di JSON (path sbagliato o 404 GitHub Pages)');
           continue;
         }
-
-        const data = JSON.parse(txt);
-        return { data, url };
-      } catch (e) {
-        lastErr = e;
-      }
+        return { data: JSON.parse(txt), url };
+      } catch (e) { lastErr = e; }
     }
 
-    const msg =
-      `Impossibile caricare il JSON pubblico.\n\n` +
-      `Percorsi provati:\n` + candidates.map(x => ' - ' + x).join('\n') + `\n\n` +
-      `Ultimo errore: ${lastErr ? (lastErr.message || String(lastErr)) : 'sconosciuto'}\n\n` +
-      `Suggerimento GitHub Pages: assicurati che vespatrek_public.json sia pubblicato (stesso branch/folder del sito).`;
-
-    throw new Error(msg);
+    throw new Error(
+      'Impossibile caricare il JSON pubblico.\n' +
+      'Percorsi provati:\n' + candidates.map(x => ' - ' + x).join('\n') + '\n' +
+      'Ultimo errore: ' + (lastErr ? (lastErr.message || String(lastErr)) : 'sconosciuto')
+    );
   }
+
+  /* ===== Picker bottom-sheet ===== */
+  let pickerOnSelect = null;
+  function closePicker(){
+    const ov = document.getElementById('pickerOverlay');
+    if (ov) ov.classList.remove('open');
+    pickerOnSelect = null;
+  }
+  function openPicker(title, items, selectedValue, onSelect){
+    const ov = document.getElementById('pickerOverlay');
+    const tt = document.getElementById('pickerTitle');
+    const list = document.getElementById('pickerList');
+
+    if (!ov || !tt || !list) return;
+
+    tt.textContent = title || 'Seleziona';
+    pickerOnSelect = onSelect;
+
+    list.innerHTML = (items || []).map(it => {
+      if (it && it.type === 'header') {
+        return `<div class="pickerHeader">${escapeHtml(it.label || '')}</div>`;
+      }
+      const val = String(it.value ?? '');
+      const active = (String(selectedValue ?? '') === val) ? 'active' : '';
+      const main = escapeHtml(it.label || '');
+      const sub = it.sub ? `<div class="sub">${escapeHtml(it.sub)}</div>` : '';
+      return `
+        <button class="pickerItem ${active}" type="button" data-value="${escapeHtml(val)}">
+          <span class="dot"></span>
+          <div>
+            <div class="main">${main}</div>
+            ${sub}
+          </div>
+        </button>
+      `;
+    }).join('');
+
+    list.querySelectorAll('.pickerItem').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const v = btn.getAttribute('data-value');
+        if (pickerOnSelect) pickerOnSelect(v);
+        closePicker();
+      });
+    });
+
+    ov.classList.add('open');
+  }
+
+  document.getElementById('pickerClose')?.addEventListener('click', closePicker);
+  document.getElementById('pickerOverlay')?.addEventListener('click', (e) => {
+    if (e.target && e.target.id === 'pickerOverlay') closePicker();
+  });
 
   /* ===== MAPPE ===== */
   let map=null, poly=null, photoLayer=null;
@@ -738,10 +757,16 @@
     if (modal) modal.style.display = 'none';
   }
 
+  document.getElementById('mapModalClose')?.addEventListener('click', closeMapModal);
+  document.getElementById('mapModal')?.addEventListener('click', (e) => {
+    if (e.target && e.target.id === 'mapModal') closeMapModal();
+  });
+
   /* ===== DIARIO + LIGHTBOX ===== */
   let selectedPercorso = null;
   let diarioAll = [];
   let diarioLimit = 12;
+  let COUNTRY_FILTER = '';   // '' = tutti
 
   let lbPhotos = [];
   let lbIndex = -1;
@@ -769,6 +794,7 @@
 
   function openLightboxIndex(i){
     if (!Array.isArray(lbPhotos) || lbPhotos.length === 0) return;
+    i = Number(i);
     if (!Number.isFinite(i) || i < 0) i = 0;
     if (i >= lbPhotos.length) i = lbPhotos.length - 1;
 
@@ -806,10 +832,12 @@
 
   window.addEventListener('keydown', (e) => {
     const lightboxOpen = document.getElementById('lightbox')?.classList.contains('open');
+    const pickerOpen = document.getElementById('pickerOverlay')?.classList.contains('open');
     const mapModalOpen = (document.getElementById('mapModal')?.style.display === 'block');
 
     if (e.key === 'Escape') {
       if (lightboxOpen) closeLightbox();
+      if (pickerOpen) closePicker();
       if (mapModalOpen) closeMapModal();
     }
 
@@ -818,288 +846,228 @@
     if (e.key === 'ArrowLeft') lightboxPrev();
   });
 
-  document.getElementById('lang')?.addEventListener('change', (e) => {
-    LANG = e.target.value;
+  /* ===== Rendering ===== */
+  let DATA = null;
+  let routesAll = [];
+  let routesFiltered = [];
+  let selectedRouteId = null;
+
+  function getCountriesFromData(data){
+    const set = new Set();
+    const datiPaesi = data?.datiPaesi || {};
+    Object.keys(datiPaesi || {}).forEach(p => set.add(p));
+    (data?.tappe || []).forEach(p => p?.paese && set.add(p.paese));
+    (data?.turismo || []).forEach(p => p?.paese && set.add(p.paese));
+    (data?.diario || []).forEach(d => d?.paese && set.add(d.paese));
+    (data?.manutenzioni || []).forEach(m => m?.paese && set.add(m.paese));
+    return [...set].filter(Boolean).sort((a,b)=>a.localeCompare(b));
+  }
+
+  function setLang(lang){
+    LANG = lang || 'it';
     localStorage.setItem('vt_pub_lang', LANG);
     applyLang();
-    try { renderDiarioPub(); } catch {}
-  });
+    updateLangButton();
+    // re-render testi che dipendono dalla lingua (minimo)
+    renderStats();
+    renderRoutesUI();
+    renderDiarioPub();
+    renderManut();
+  }
 
-  document.getElementById('mapModalClose')?.addEventListener('click', closeMapModal);
-  document.getElementById('mapModal')?.addEventListener('click', (e) => {
-    if (e.target && e.target.id === 'mapModal') closeMapModal();
-  });
+  function updateLangButton(){
+    const btn = document.getElementById('btnPickLang');
+    if (!btn) return;
+    const map = { it:'Italiano', en:'English', es:'Español' };
+    btn.textContent = '🌐 Lingua: ' + (map[LANG] || LANG);
+  }
 
-  /* ===== MAIN ===== */
-  async function main(){
-    hookFloatingNavLinks();
+  function setCountryFilter(country){
+    COUNTRY_FILTER = String(country || '');
+    updateCountryButton();
 
-    const { data, url: usedUrl } = await fetchJsonWithFallback();
-
-    const langSel = document.getElementById('lang');
-    if (langSel) langSel.value = LANG;
-    applyLang();
-
-    updateStickyOffsets();
-    setTimeout(updateStickyOffsets, 250);
-
-    document.getElementById('tit').innerText = data.titolo || 'VespaTrek';
-    document.getElementById('meta').innerText = `Aggiornato: ${data._exportDate || '--'} · JSON: ${usedUrl}`;
-
-    const st = data.stats || {};
-    const spTot = (st.spesaBenzinaUsd||0) + (st.spesaOlioUsd||0) + (st.spesaRicambiUsd||0) + (st.spesaManodoperaUsd||0);
-
-    document.getElementById('st-km').innerText = (st.kmTotali||0).toFixed(1);
-    document.getElementById('st-bz').innerText = ((st.benzinaUsataLitri||0) + (st.benzinaFuoriTappaLitri||0)).toFixed(1);
-    document.getElementById('st-ol').innerText = (st.olioTotaleLitri||0).toFixed(2);
-    document.getElementById('st-sp').innerText = moneyUsd(spTot);
-
-    const lista = []
-      .concat(data.tappe || [])
-      .concat(data.turismo || [])
-      .sort((a,b)=>(b.id||0)-(a.id||0));
-
-    const sel = document.getElementById('selPerc');
-
-    // Raggruppa per paese (optgroup)
-    if (!lista.length) {
-      sel.innerHTML = `<option value="">(nessun percorso pubblicato)</option>`;
-    } else {
-      const byCountry = new Map();
-      for (const p of lista) {
-        const paese = (p.paese || 'Sconosciuto');
-        if (!byCountry.has(paese)) byCountry.set(paese, []);
-        byCountry.get(paese).push(p);
-      }
-
-      const countries = [...byCountry.keys()].sort((a,b)=>a.localeCompare(b));
-
-      sel.innerHTML = countries.map(paese => {
-        const items = byCountry.get(paese) || [];
-        const opts = items.map(p => {
-          const tipo = (p.tipo || 'Tappa');
-          const label = `${p.data||''} ${p.ora||''} — ${tipo} — ${Number(p.km||0).toFixed(1)} km`;
-          return `<option value="${p.id}">${escapeHtml(label)}</option>`;
-        }).join('');
-        return `<optgroup label="${escapeHtml(paese)}">${opts}</optgroup>`;
-      }).join('');
-    }
-
-    const btnKml = document.getElementById('btnKml');
-    const btnMapFull = document.getElementById('btnMapFull');
-
-    function buildFileName(p) {
-      const tipo = p.tipo || 'Percorso';
-      const paese = p.paese || '';
-      const dataStr = (p.data || '').replaceAll('/','-');
-      const km = Number(p.km || 0).toFixed(1);
-      const titolo = p.titolo || '';
-      return safeName(`VespaTrek_${tipo}_${dataStr}_${paese}_${km}km_${titolo}`) || 'VespaTrek';
-    }
-
-    function updateExportButtons() {
-      const ok = selectedPercorso && Array.isArray(selectedPercorso.traccia) && selectedPercorso.traccia.length >= 2;
-      if (btnKml) btnKml.disabled = !ok;
-      if (btnKml) btnKml.style.opacity = ok ? '1' : '0.5';
-    }
-
-    if (btnKml) {
-      btnKml.addEventListener('click', async () => {
-        if (!selectedPercorso) return;
-        const kml = coordsToKML(selectedPercorso.traccia, buildFileName(selectedPercorso));
-        if (!kml) return alert('Traccia insufficiente per KML');
-        await shareOrDownloadFile(buildFileName(selectedPercorso) + '.kml', kml, 'application/vnd.google-earth.kml+xml');
-      });
-    }
-
-    let lastTraceCoords = [];
-    let lastPics = [];
-
-    function showPerc(id){
-      const p = lista.find(x => String(x.id) === String(id));
-      if (!p) return;
-
-      selectedPercorso = p;
-
-      const altMin = (p.altMin != null) ? Number(p.altMin) : null;
-      const altMax = (p.altMax != null) ? Number(p.altMax) : null;
-      const disl = (isFinite(altMin) && isFinite(altMax)) ? Math.max(0, altMax - altMin) : null;
-
-      const info =
-        `📏 ${Number(p.km||0).toFixed(1)} km · ` +
-        `⛰️ alt: ${isFinite(altMin) ? Math.round(altMin) : '--'} → ${isFinite(altMax) ? Math.round(altMax) : '--'} m` +
-        ` · Δ ${disl != null ? Math.round(disl) : '--'} m` +
-        `\n⛽ stim: ${(p.benzinaStimataLitri??0).toFixed(2)} L · reale: ${(p.benzinaRealeLitri!=null?Number(p.benzinaRealeLitri).toFixed(2):'--')} L · ` +
-        `km/L stim: ${(p.consumoStimatoKmL!=null?Number(p.consumoStimatoKmL).toFixed(2):'--')} · km/L reale: ${(p.consumoRealeKmL!=null?Number(p.consumoRealeKmL).toFixed(2):'--')}`;
-
-      document.getElementById('percInfo').innerText = info;
-
-      setTrace(p.traccia || []);
-      lastTraceCoords = p.traccia || [];
-
-      initMap();
-      if (photoLayer) photoLayer.clearLayers();
-
-      const startTs = Number(p.startTs || 0);
-      const endTs = Number(p.endTs || 0);
-      const MARGIN = 15 * 60 * 1000;
-
-      const pics = (Array.isArray(data.diario) ? data.diario : [])
-        .filter(d => d && d.geo && isFinite(d.geo.lat) && isFinite(d.geo.lon))
-        .filter(d => !!fotoOf(d))
-        .filter(d => {
-          const ts = Number(d.ts || d.id || 0);
-          if (startTs && endTs) return ts >= (startTs - MARGIN) && ts <= (endTs + MARGIN);
-          return true;
-        });
-
-      lastPics = pics;
-
-      // playlist foto del percorso
-      routePhotos = pics.map(fotoOf).filter(Boolean);
-      routePhotoIndex = new Map();
-      routePhotos.forEach((u, i) => routePhotoIndex.set(u, i));
-
-      // marker “semplici” per performance
-      renderPicsOn(photoLayer, pics, openRouteLightboxByUrl);
-
-      // bottone full screen usa l'ultima selezione
-      btnMapFull.onclick = () => openMapModal(lastTraceCoords, lastPics, openRouteLightboxByUrl);
-    }
-
-    initMap();
-
-    sel.onchange = () => {
-      showPerc(sel.value);
-      updateExportButtons();
-    };
-
-    if (lista.length) {
-      showPerc(lista[0].id);
-      updateExportButtons();
-    } else {
-      selectedPercorso = null;
-      setTrace([]);
-      updateExportButtons();
-    }
-
-    // ===== DIARIO FILTRI =====
-    diarioAll = Array.isArray(data.diario) ? data.diario : [];
+    // Reset paginazione diario
     diarioLimit = 12;
 
-    lbPhotos = diarioAll.map(fotoOf).filter(Boolean);
-
-    const selPaese = document.getElementById('diario-paese');
-    if (selPaese) {
-      const paesi = [...new Set(diarioAll.map(d => d.paese).filter(Boolean))].sort();
-      selPaese.innerHTML =
-        `<option value="">${escapeHtml(t('all_countries'))}</option>` +
-        paesi.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
-    }
-
-    const selTag = document.getElementById('diario-tag');
-    if (selTag) {
-      const preset = Array.isArray(data.diarioTagsPreset) ? data.diarioTagsPreset : [];
-      const fromData = [...new Set(diarioAll.flatMap(d => Array.isArray(d.tags) ? d.tags : []))].sort();
-      const tags = preset.length ? preset : fromData;
-
-      selTag.innerHTML =
-        `<option value="">${escapeHtml(t('all_tags'))}</option>` +
-        tags.map(tg => `<option value="${escapeHtml(tg)}">${escapeHtml(tg)}</option>`).join('');
-    }
-
-    const qEl = document.getElementById('diario-q');
-    const fotoOnlyEl = document.getElementById('diario-solo-foto');
-    const moreBtn = document.getElementById('diario-more');
-
-    const rerender = () => renderDiarioPub();
-
-    if (qEl) qEl.addEventListener('input', debounce(() => { diarioLimit = 12; rerender(); }, 250));
-    if (selPaese) selPaese.addEventListener('change', () => { diarioLimit = 12; rerender(); });
-    if (selTag) selTag.addEventListener('change', () => { diarioLimit = 12; rerender(); });
-    if (fotoOnlyEl) fotoOnlyEl.addEventListener('change', () => { diarioLimit = 12; rerender(); });
-
-    if (moreBtn) {
-      moreBtn.addEventListener('click', () => {
-        diarioLimit += 12;
-        rerender();
-      });
-    }
-
+    // Filtra routes e ricarica UI
+    filterRoutes();
+    renderStats();
+    renderRoutesUI();
     renderDiarioPub();
+    renderManut();
+  }
 
-    // ===== MANUTENZIONI =====
-    const man = data.manutenzioni || [];
-    document.getElementById('man').innerHTML = man.map(m => `
-      <div class="entry">
-        <div><b>${escapeHtml(m.nome||'')}</b></div>
-        <div class="muted">${escapeHtml(m.data||'')} ${escapeHtml(m.ora||'')} — ${escapeHtml(m.paese||'')} — km ${escapeHtml(m.km||'')}</div>
-        ${m.desc ? `<div style="margin-top:6px; white-space:pre-wrap;">${escapeHtml(m.desc||'')}</div>` : ''}
-        ${(m.costoUsd && Number(m.costoUsd)>0) ? `<div class="muted" style="margin-top:6px;">Costo ≈ ${moneyUsd(m.costoUsd)}</div>` : ''}
-        ${(m.fotoUrl) ? `<div style="margin-top:8px;"><img class="diario-thumb" src="${m.fotoUrl}" loading="lazy" onclick="openLightboxDirect('${m.fotoUrl}')"></div>` : ''}
-      </div>
-    `).join('') || '<div class="muted">Nessun intervento</div>';
+  function updateCountryButton(){
+    const btn = document.getElementById('btnPickCountry');
+    if (!btn) return;
+    btn.textContent = '🌍 Paese: ' + (COUNTRY_FILTER ? COUNTRY_FILTER : 'Tutti');
+  }
+
+  function filterRoutes(){
+    if (!DATA) return;
+    const all = routesAll;
+    routesFiltered = COUNTRY_FILTER ? all.filter(r => String(r.paese||'') === COUNTRY_FILTER) : all;
+
+    // Se la route selezionata non è nel filtro, prendi la prima
+    if (selectedRouteId && !routesFiltered.some(r => String(r.id) === String(selectedRouteId))) {
+      selectedRouteId = null;
+    }
+    if (!selectedRouteId && routesFiltered.length) {
+      selectedRouteId = routesFiltered[0].id;
+    }
+  }
+
+  function renderStats(){
+    if (!DATA) return;
+
+    const st = DATA.stats || {};
+    const dpAll = DATA.datiPaesi || {};
+
+    let km = st.kmTotali || 0;
+    let bz = (st.benzinaUsataLitri||0) + (st.benzinaFuoriTappaLitri||0);
+    let ol = st.olioTotaleLitri || 0;
+    let sp = (st.spesaBenzinaUsd||0)+(st.spesaOlioUsd||0)+(st.spesaRicambiUsd||0)+(st.spesaManodoperaUsd||0);
+
+    const note = document.getElementById('statsScopeNote');
+
+    if (COUNTRY_FILTER) {
+      const dp = dpAll[COUNTRY_FILTER] || {};
+      km = Number(dp.km||0);
+      bz = Number(dp.benzina||0) + Number(dp.benzinaFuori||0);
+
+      // spese per paese (se presenti nel JSON)
+      sp = Number(dp.spesaBenzinaUsd||0) + Number(dp.spesaOlioUsd||0) + Number(dp.spesaRicambiUsd||0) + Number(dp.spesaManodoperaUsd||0);
+
+      // olio per paese non disponibile: lo lasciamo globale ma lo segnaliamo
+      if (note) note.textContent = `Vista: ${COUNTRY_FILTER}. (Olio mostrato: totale globale)`;
+    } else {
+      if (note) note.textContent = `Vista: Globale.`;
+    }
+
+    document.getElementById('st-km').innerText = Number(km||0).toFixed(1);
+    document.getElementById('st-bz').innerText = Number(bz||0).toFixed(1);
+    document.getElementById('st-ol').innerText = Number(ol||0).toFixed(2);
+    document.getElementById('st-sp').innerText = moneyUsd(sp||0);
+  }
+
+  function buildRouteLabel(r){
+    const tipo = (r.tipo || 'Tappa');
+    return `${r.data||''} ${r.ora||''} — ${r.paese||''} — ${tipo} — ${Number(r.km||0).toFixed(1)} km`;
+  }
+
+  function renderRoutesUI(){
+    const btn = document.getElementById('btnPickRoute');
+    if (!btn) return;
+
+    if (!routesFiltered.length) {
+      btn.textContent = '🧭 Percorso: (nessuno)';
+      document.getElementById('percInfo').innerText = '';
+      setTrace([]);
+      document.getElementById('btnKml').disabled = true;
+      document.getElementById('btnKml').style.opacity = '0.5';
+      return;
+    }
+
+    // se selectedRouteId è null, prova a mettere la prima
+    if (!selectedRouteId) selectedRouteId = routesFiltered[0].id;
+
+    const r = routesFiltered.find(x => String(x.id) === String(selectedRouteId)) || routesFiltered[0];
+    if (!r) return;
+
+    btn.textContent = '🧭 Percorso: ' + buildRouteLabel(r);
+    showPerc(r.id);
+
+    // abilita KML se traccia ok
+    const ok = Array.isArray(r.traccia) && r.traccia.length >= 2;
+    const btnKml = document.getElementById('btnKml');
+    if (btnKml) { btnKml.disabled = !ok; btnKml.style.opacity = ok ? '1' : '0.5'; }
+  }
+
+  function showPerc(id){
+    const p = routesAll.find(x => String(x.id) === String(id));
+    if (!p) return;
+
+    selectedPercorso = p;
+    selectedRouteId = p.id;
+
+    const altMin = (p.altMin != null) ? Number(p.altMin) : null;
+    const altMax = (p.altMax != null) ? Number(p.altMax) : null;
+    const disl = (isFinite(altMin) && isFinite(altMax)) ? Math.max(0, altMax - altMin) : null;
+
+    const info =
+      `📏 ${Number(p.km||0).toFixed(1)} km · ` +
+      `⛰️ alt: ${isFinite(altMin) ? Math.round(altMin) : '--'} → ${isFinite(altMax) ? Math.round(altMax) : '--'} m` +
+      ` · Δ ${disl != null ? Math.round(disl) : '--'} m` +
+      `\n⛽ stim: ${(p.benzinaStimataLitri??0).toFixed(2)} L · reale: ${(p.benzinaRealeLitri!=null?Number(p.benzinaRealeLitri).toFixed(2):'--')} L · ` +
+      `km/L stim: ${(p.consumoStimatoKmL!=null?Number(p.consumoStimatoKmL).toFixed(2):'--')} · km/L reale: ${(p.consumoRealeKmL!=null?Number(p.consumoRealeKmL).toFixed(2):'--')}`;
+
+    document.getElementById('percInfo').innerText = info;
+    setTrace(p.traccia || []);
+
+    // Foto “contestuali” al percorso (range start/end)
+    initMap();
+    if (photoLayer) photoLayer.clearLayers();
+
+    const startTs = Number(p.startTs || 0);
+    const endTs = Number(p.endTs || 0);
+    const MARGIN = 15 * 60 * 1000;
+
+    const pics = (Array.isArray(DATA.diario) ? DATA.diario : [])
+      .filter(d => d && d.geo && isFinite(d.geo.lat) && isFinite(d.geo.lon))
+      .filter(d => !!fotoOf(d))
+      .filter(d => {
+        const ts = Number(d.ts || d.id || 0);
+        if (startTs && endTs) return ts >= (startTs - MARGIN) && ts <= (endTs + MARGIN);
+        return true;
+      });
+
+    // playlist foto del percorso
+    routePhotos = pics.map(fotoOf).filter(Boolean);
+    routePhotoIndex = new Map();
+    routePhotos.forEach((u, i) => routePhotoIndex.set(u, i));
+
+    renderPicsOn(photoLayer, pics, openRouteLightboxByUrl);
+
+    // full screen
+    document.getElementById('btnMapFull').onclick = () => openMapModal(p.traccia || [], pics, openRouteLightboxByUrl);
   }
 
   function renderDiarioPub(){
     const container = document.getElementById('diario');
-    if (!container) return;
+    if (!container || !DATA) return;
 
-    const q = (document.getElementById('diario-q')?.value || '').trim().toLowerCase();
-    const paeseSel = document.getElementById('diario-paese')?.value || '';
-    const tagSel = document.getElementById('diario-tag')?.value || '';
-    const soloFoto = !!document.getElementById('diario-solo-foto')?.checked;
+    let list = Array.isArray(DATA.diario) ? [...DATA.diario] : [];
+    if (COUNTRY_FILTER) list = list.filter(d => String(d.paese||'') === COUNTRY_FILTER);
 
-    let list = [...diarioAll];
-
-    if (paeseSel) list = list.filter(d => String(d.paese||'') === String(paeseSel));
-    if (tagSel) list = list.filter(d => Array.isArray(d.tags) && d.tags.includes(tagSel));
-    if (soloFoto) list = list.filter(d => !!fotoOf(d));
-
-    if (q) {
-      list = list.filter(d => {
-        const hay = `${d.data||''} ${d.ora||''} ${d.paese||''} ${d.km||''} ${d.testo||''}`.toLowerCase();
-        return hay.includes(q);
-      });
-    }
-
-    list.sort((a,b) => (b.id||0) - (a.id||0));
+    list.sort((a,b)=>(b.id||0)-(a.id||0));
     const shown = list.slice(0, diarioLimit);
 
     if (!shown.length) {
-      container.innerHTML = '<div class="muted">Nessuna voce (con questi filtri)</div>';
+      container.innerHTML = `<div class="muted">Nessuna voce di diario${COUNTRY_FILTER ? ' in ' + escapeHtml(COUNTRY_FILTER) : ''}</div>`;
     } else {
       container.innerHTML = shown.map(d => {
-        const testoSafe = escapeHtml(d.testo || '');
-        const metaSafe = `📅 ${escapeHtml(d.data||'')} ${escapeHtml(d.ora||'')} — ${escapeHtml(d.paese||'')} — km ${escapeHtml(d.km||'')}`;
-
+        const meta = `📅 ${escapeHtml(d.data||'')} ${escapeHtml(d.ora||'')} — ${escapeHtml(d.paese||'')} — km ${escapeHtml(d.km||'')}`;
         const foto = fotoOf(d);
-        let fotoHtml = '';
 
+        let fotoHtml = '';
         if (foto) {
-          const idx = lbPhotos.findIndex(x => x === foto);
+          // lightbox “globale”: usa tutte le foto visibili (filtrate per paese)
+          const allPhotos = list.map(fotoOf).filter(Boolean);
+          const idx = allPhotos.findIndex(x => x === foto);
           const idxOk = (idx >= 0) ? idx : 0;
+
           fotoHtml = `
             <div style="margin-top:8px;">
-              <img class="diario-thumb"
-                   src="${foto}"
-                   loading="lazy"
-                   onclick="openLightboxIndex(${idxOk})">
+              <img class="diario-thumb" src="${foto}" loading="lazy"
+                   onclick="(function(){ lbPhotos = ${JSON.stringify(allPhotos).replaceAll('<','\\u003c')}; openLightboxIndex(${idxOk}); })()">
             </div>
           `;
         }
 
         return `
           <div class="entry">
-            <div class="muted">${metaSafe}</div>
-
-            ${Array.isArray(d.tags) && d.tags.length ? `
-              <div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:6px;">
-                ${d.tags.map(tg => `<span style="font-size:11px; padding:4px 8px; border-radius:999px; background:#111; border:1px solid #333; color:#ff9800; font-weight:700;">${escapeHtml(tg)}</span>`).join('')}
-              </div>
-            ` : ''}
-
-            <div style="margin-top:6px; white-space:pre-wrap;">${testoSafe}</div>
+            <div class="muted">${meta}</div>
+            <div style="margin-top:6px; white-space:pre-wrap;">${escapeHtml(d.testo||'')}</div>
             ${fotoHtml}
           </div>
         `;
@@ -1109,23 +1077,151 @@
     const moreBtn = document.getElementById('diario-more');
     if (moreBtn) {
       moreBtn.style.display = (list.length > diarioLimit) ? 'block' : 'none';
-      moreBtn.innerText = (list.length > diarioLimit)
-        ? `${t('load_more')} (${Math.min(12, list.length - diarioLimit)} / ${list.length - diarioLimit})`
-        : t('load_more');
+      moreBtn.textContent = (list.length > diarioLimit) ? `Carica altre (${Math.min(12, list.length - diarioLimit)} / ${list.length - diarioLimit})` : 'Carica altre';
     }
   }
 
-  // Avvio
+  function renderManut(){
+    const box = document.getElementById('man');
+    if (!box || !DATA) return;
+
+    let man = Array.isArray(DATA.manutenzioni) ? [...DATA.manutenzioni] : [];
+    if (COUNTRY_FILTER) man = man.filter(m => String(m.paese||'') === COUNTRY_FILTER);
+
+    if (!man.length) {
+      box.innerHTML = `<div class="muted">Nessun intervento${COUNTRY_FILTER ? ' in ' + escapeHtml(COUNTRY_FILTER) : ''}</div>`;
+      return;
+    }
+
+    man.sort((a,b)=>(b.id||0)-(a.id||0));
+
+    box.innerHTML = man.map(m => `
+      <div class="entry">
+        <div><b>${escapeHtml(m.nome||'')}</b></div>
+        <div class="muted">${escapeHtml(m.data||'')} ${escapeHtml(m.ora||'')} — ${escapeHtml(m.paese||'')} — km ${escapeHtml(m.km||'')}</div>
+        ${m.desc ? `<div style="margin-top:6px; white-space:pre-wrap;">${escapeHtml(m.desc||'')}</div>` : ''}
+        ${(m.costoUsd && Number(m.costoUsd)>0) ? `<div class="muted" style="margin-top:6px;">Costo ≈ ${moneyUsd(m.costoUsd)}</div>` : ''}
+        ${(m.fotoUrl) ? `<div style="margin-top:8px;"><img class="diario-thumb" src="${m.fotoUrl}" loading="lazy" onclick="openLightboxDirect('${m.fotoUrl}')"></div>` : ''}
+      </div>
+    `).join('');
+  }
+
+  /* ===== UI events ===== */
+  document.getElementById('diario-more')?.addEventListener('click', () => {
+    diarioLimit += 12;
+    renderDiarioPub();
+  });
+
+  document.getElementById('btnPickLang')?.addEventListener('click', () => {
+    openPicker('Lingua', [
+      { value:'it', label:'Italiano' },
+      { value:'en', label:'English' },
+      { value:'es', label:'Español' }
+    ], LANG, (v) => setLang(v));
+  });
+
+  document.getElementById('btnPickCountry')?.addEventListener('click', () => {
+    const countries = getCountriesFromData(DATA || {});
+    const items = [{ value:'', label:'Tutti i paesi', sub:'Vista globale' }]
+      .concat(countries.map(p => ({ value:p, label:p })));
+
+    openPicker('Paese', items, COUNTRY_FILTER, (v) => setCountryFilter(v));
+  });
+
+  document.getElementById('btnPickRoute')?.addEventListener('click', () => {
+    if (!routesFiltered.length) return;
+
+    // Se NON c'è filtro paese, raggruppa per paese nel picker
+    let items = [];
+    if (!COUNTRY_FILTER) {
+      const by = new Map();
+      for (const r of routesFiltered) {
+        const p = r.paese || 'Sconosciuto';
+        if (!by.has(p)) by.set(p, []);
+        by.get(p).push(r);
+      }
+      const keys = [...by.keys()].sort((a,b)=>a.localeCompare(b));
+      for (const paese of keys) {
+        items.push({ type:'header', label: paese });
+        const arr = by.get(paese) || [];
+        for (const r of arr) {
+          items.push({
+            value: String(r.id),
+            label: `${r.data||''} ${r.ora||''} — ${(r.tipo||'Tappa')} — ${Number(r.km||0).toFixed(1)} km`
+          });
+        }
+      }
+    } else {
+      items = routesFiltered.map(r => ({
+        value: String(r.id),
+        label: `${r.data||''} ${r.ora||''} — ${(r.tipo||'Tappa')} — ${Number(r.km||0).toFixed(1)} km`
+      }));
+    }
+
+    openPicker('Percorso', items, String(selectedRouteId||''), (v) => {
+      selectedRouteId = v;
+      renderRoutesUI();
+    });
+  });
+
+  document.getElementById('btnKml')?.addEventListener('click', async () => {
+    if (!selectedPercorso) return;
+    const kml = coordsToKML(selectedPercorso.traccia, safeName('VespaTrek_' + buildRouteLabel(selectedPercorso)));
+    if (!kml) return alert('Traccia insufficiente per KML');
+    await shareOrDownloadFile(safeName('VespaTrek_' + buildRouteLabel(selectedPercorso)) + '.kml', kml, 'application/vnd.google-earth.kml+xml');
+  });
+
+  function buildRouteLabel(r){
+    const tipo = (r.tipo || 'Tappa');
+    return `${r.data||''}_${r.ora||''}_${r.paese||''}_${tipo}_${Number(r.km||0).toFixed(1)}km`;
+  }
+
+  /* ===== AVVIO ===== */
+  async function main(){
+    hookFloatingNavLinks();
+    applyLang();
+    updateLangButton();
+    updateCountryButton();
+
+    const { data, url } = await fetchJsonWithFallback();
+    DATA = data;
+
+    document.getElementById('tit').innerText = data.titolo || 'VespaTrek';
+    document.getElementById('meta').innerText = `Aggiornato: ${data._exportDate || '--'} · JSON: ${url}`;
+
+    updateStickyOffsets();
+    setTimeout(updateStickyOffsets, 250);
+
+    // Routes
+    routesAll = []
+      .concat(data.tappe || [])
+      .concat(data.turismo || [])
+      .sort((a,b)=>(b.id||0)-(a.id||0));
+
+    // default: tutto
+    filterRoutes();
+
+    // Diario
+    diarioAll = Array.isArray(data.diario) ? data.diario : [];
+    diaryResetPhotos();
+
+    // Render
+    renderStats();
+    renderRoutesUI();
+    renderDiarioPub();
+    renderManut();
+  }
+
+  function diaryResetPhotos(){
+    // no-op: gestiamo le foto direttamente in renderDiarioPub
+  }
+
   main().catch(err => {
-    // NON stampo HTML grezzo: lo “escapo”
     document.body.innerHTML =
       `<div style="max-width:980px;margin:20px auto;font-family:system-ui;color:#fff;">
         <div style="background:#2a0000;border:1px solid #4a0000;border-radius:14px;padding:14px;">
           <div style="font-weight:900;margin-bottom:10px;">❌ Errore caricamento dati</div>
           <pre style="white-space:pre-wrap;margin:0;color:#ffb3b3;">${escapeHtml(err && err.message ? err.message : String(err))}</pre>
-          <div style="margin-top:10px;color:#bbb;font-size:13px;">
-            Se sei su GitHub Pages, controlla che <b>vespatrek_public.json</b> sia pubblicato nella stessa cartella del sito.
-          </div>
         </div>
       </div>`;
   });
