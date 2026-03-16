@@ -29,7 +29,32 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  const req = event.request;
+  const url = new URL(req.url);
+
+  // Applica la regola solo al tuo sito
+  if (url.origin !== location.origin) return;
+
+  // ✅ Network-first per la pagina HTML principale (aggiornamenti automatici)
+  const isHTML = req.mode === 'navigate' || (req.headers.get('accept') || '').includes('text/html');
+
+  if (isHTML) {
+    event.respondWith((async () => {
+      try {
+        const fresh = await fetch(req);
+        const cache = await caches.open(CACHE);
+        cache.put(req, fresh.clone());
+        return fresh;
+      } catch (e) {
+        const cached = await caches.match(req);
+        return cached || caches.match(BASE + 'Vespa100.html');
+      }
+    })());
+    return;
+  }
+
+  // Cache-first per il resto (icone/manifest ecc.)
   event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request))
+    caches.match(req).then((cached) => cached || fetch(req))
   );
 });
