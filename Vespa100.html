@@ -190,7 +190,45 @@ color:#fff;
 
 
 
+/* Sottoriga piccola nei box (es. L/gal, unità) */
+.guida-mini .mini-sub{
+  font-size:10px;
+  color:#777;
+  margin-top:3px;
+  font-weight:800;
+}
 
+/* Badge benzina bassa vicino ad AUT */
+#ui-fuel-badge{
+  display:none;
+  margin-left:6px;
+  background:#f44336;
+  color:#fff;
+  padding:2px 6px;
+  border-radius:999px;
+  font-weight:900;
+  font-size:10px;
+}
+
+/* Icona TAPPA (due punti + linea) */
+.ico-route{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+}
+.ico-route .dot{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:#fff;
+}
+.ico-route .line{
+  width:18px;
+  height:3px;
+  border-radius:3px;
+  background:#fff;
+  opacity:0.9;
+}
 
     
     /* ODOMETRO */
@@ -377,6 +415,8 @@ color:#fff;
   gap:10px;
   margin-top:10px;
 }
+
+
 .guida-ico{
   width:100%;
   padding:14px 0;
@@ -385,7 +425,15 @@ color:#fff;
   font-size:22px;
   font-weight:900;
   cursor:pointer;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1;
 }
+
+
+    
 .guida-ico:active{ opacity:0.85; }
 
 .guida-ico.mode{ background:#333; color:#fff; border:2px solid #555; }
@@ -774,84 +822,76 @@ color:#fff;
 
 
 
-  <!-- ==================== PAGINA 1: GUIDA ==================== -->
-  <div id="guida" class="page active">
+ <!-- ==================== PAGINA 1: GUIDA ==================== -->
+<div id="guida" class="page active">
 
-    
+  <div class="dash-card">
+    <div style="font-size:12px; color:#aaa;">VELOCITÀ</div>
+    <div class="speed" id="speedometer">0</div>
+    <div style="font-size:12px; color:#888; margin-bottom:10px;">KM/H</div>
 
+    <!-- mini: ALT / AUT / TRIP -->
+    <div class="guida-mini">
+      <div class="mini-box">
+        <div class="mini-label">ALT</div>
+        <div class="mini-value alt" id="ui-altitudine">0 m</div>
+      </div>
 
+      <div class="mini-box">
+        <div class="mini-label">
+          AUT
+          <span id="ui-fuel-badge" title="Benzina bassa">⛽</span>
+        </div>
+        <div class="mini-value aut" id="ui-autonomia-mini">-- km</div>
+        <div class="mini-sub" id="ui-fuel-tot-mini">-- L</div>
+      </div>
+
+      <div class="mini-box">
+        <div class="mini-label">TRIP</div>
+        <div class="mini-value trip" id="ui-trip-mini">0.0</div>
+        <div class="mini-sub" id="ui-trip-unit-mini">km</div>
+      </div>
+    </div>
+
+    <!-- bottoni GUIDA (spostati QUI, al posto del riquadro ODO/TRIP) -->
+    <div class="guida-actions" style="margin-top:12px;">
+      <button id="btn-modalita" class="guida-ico mode tappa"
+              onclick="toggleModalitaGuida()"
+              title="Modalità (Tappa/Turismo)"
+              type="button">
+        <!-- riempito da JS -->
+      </button>
+
+      <button id="btn-start-stop" class="guida-ico play"
+              onclick="toggleTracking()"
+              title="Start / Pausa guida"
+              type="button">
+        ▶
+      </button>
+
+      <button id="btn-concludi" class="guida-ico end"
+              onclick="concludiPercorso()"
+              title="Concludi (Tappa/Turismo)"
+              type="button">
+        🏁
+      </button>
+    </div>
+
+    <!-- info piccole sotto i bottoni -->
+    <div style="font-size:11px; color:#888; margin-top:10px; display:flex; justify-content:space-between; gap:10px;">
+      <div>Totale viaggio: <b id="ui-km-tot-mini">0.0 km</b></div>
+      <div>Ore tappa: <b id="ui-tempo-guida">00:00:00</b></div>
+    </div>
+  </div>
+
+  <!-- mappa PER ULTIMA -->
+  <div id="map"></div>
+
+</div>
 
 
 
   
-    
-    <div class="dash-card">
-      <div style="font-size:12px; color:#aaa;">VELOCITÀ</div>
-      <div class="speed" id="speedometer">0</div>
-      <div style="font-size:12px; color:#888; margin-bottom:10px;">KM/H</div>
-
-    <div class="guida-mini">
-  <div class="mini-box">
-    <div class="mini-label">ALT</div>
-    <div class="mini-value alt" id="ui-altitudine">0 m</div>
-  </div>
-
-  <div class="mini-box">
-    <div class="mini-label">AUT</div>
-    <div class="mini-value aut" id="ui-autonomia-mini">-- km</div>
-  </div>
-
-  <div class="mini-box">
-    <div class="mini-label">TRIP</div>
-    <div class="mini-value trip" id="ui-trip-mini">0.0</div>
-  </div>
-</div>
-
-      <div class="odometer-container">
-        <div class="odo-box">
-          <div class="odo-label">ODO TOTALE</div>
-          <div class="odo-value" id="ui-odo-tot">0.0</div>
-        </div>
-        <div class="odo-box">
-          <div class="odo-label">TRIP TAPPA</div>
-          <div class="odo-value trip" id="ui-odo-trip">0.0</div>
-        </div>
-      </div>
-
-      <div style="font-size:11px; color:#888; margin-top:5px;">
-        Ore guida tappa: <span id="ui-tempo-guida">00:00:00</span>
-      </div>
-    </div>
-
-    <div id="map"></div>
-<div class="guida-actions">
-  <button id="btn-modalita" class="guida-ico mode tappa" onclick="toggleModalitaGuida()" title="Modalità (Tappa/Turismo)">
-    🌄
-  </button>
-
-  <button id="btn-start-stop" class="guida-ico play" onclick="toggleTracking()" title="Start/Pausa guida">
-    ▶
-  </button>
-
-  <button id="btn-concludi" class="guida-ico end" onclick="concludiPercorso()" title="Concludi (Tappa/Turismo)">
-    🏁
-  </button>
-</div>
-    <div class="dash-card" style="padding:10px; border:1px solid #333;">
-              
-        <div style="font-size:11px; color:#aaa; display:flex; align-items:center; justify-content:space-between;">
-          <span>AUTONOMIA STIMATA</span>
-          <span id="ui-fuel-badge" style="display:none; background:#f44336; color:white; padding:3px 8px; border-radius:999px; font-weight:bold; font-size:11px;">
-            ⛽ BENZINA BASSA
-          </span>
-        </div>
-
-      
-      <div id="ui-autonomia-rapida" style="font-size:22px; font-weight:bold; color:var(--verde);">-- km</div>
-      <div style="font-size:11px; color:#888;">Scorta: <span id="ui-scorta-rapida">0.0</span> <span class="txt-unita">L</span></div>
-    </div>
-  </div>
-
   <!-- ==================== PAGINA 2: VIAGGIO ==================== -->
   <div id="viaggio" class="page">
     <div class="dash-card">
@@ -2460,17 +2500,28 @@ let pendingFuelKind = null; // 'tappa' | 'turismo'
 
 
 
-  function aggiornaModalitaUI() {
+function aggiornaModalitaUI() {
   const b = document.getElementById('btn-modalita');
   if (!b) return;
 
   const isTur = (modalitaGuida === 'TURISMO');
-  b.innerText = isTur ? '🏛️' : '🧭';
+
+  // ✅ Icona sullo STESSO bottone:
+  // - TAPPA: due punti + linea
+  // - TURISMO: monumento
+  if (isTur) {
+    b.innerHTML = '🏛️';
+  } else {
+    b.innerHTML = `
+      <span class="ico-route" aria-hidden="true">
+        <span class="dot"></span><span class="line"></span><span class="dot"></span>
+      </span>
+    `;
+  }
 
   b.classList.remove('tappa','turismo');
   b.classList.add(isTur ? 'turismo' : 'tappa');
 }
-
 
 
   function aggiornaGuidaButtonsUI() {
@@ -3300,6 +3351,18 @@ if (paeseScope) {
   const kmVisShow = (distAttuale === 'MI') ? (kmVis * MI_PER_KM) : kmVis;
   const distLabel = (distAttuale === 'MI') ? 'mi' : 'km';
 
+
+
+    // ✅ Totale viaggio sotto i bottoni in GUIDA
+  const totMini = document.getElementById('ui-km-tot-mini');
+  if (totMini) totMini.innerText = `${kmTotShow.toFixed(1)} ${distLabel}`;
+
+  const tripUnit = document.getElementById('ui-trip-unit-mini');
+  if (tripUnit) tripUnit.innerText = distLabel;
+
+
+
+  
   // Consumo: (km o mi) / (L o gal)
   const consumo = benzVis > 0 ? (kmVisShow / benzVis).toFixed(1) : '--';
 
@@ -3893,6 +3956,8 @@ function aggiornaAutonomia() {
 
 // autonomia mini sotto la velocità
 const mini = document.getElementById('ui-autonomia-mini');
+
+    
 if (mini) {
   mini.innerText = autonomiaVis > 0 ? `${Math.round(autonomiaVis)} ${distLabel}` : `-- ${distLabel}`;
 }
@@ -3903,7 +3968,9 @@ if (mini) {
   }
 
 
-
+    // ✅ sotto AUT: totale carburante in L/gal (serbatoio + scorta)
+    const fuelMini = document.getElementById('ui-fuel-tot-mini');
+    if (fuelMini) fuelMini.innerText = `${totVis.toFixed(1)} ${volLabel}`;
   
   checkLowFuelWarning(false);
 }
