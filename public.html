@@ -558,11 +558,18 @@ pics.forEach(d => {
     fillOpacity: 0.9
   }).addTo(photoLayer);
 
-  m.bindPopup(html);
+ m.bindPopup(html);
 
-  m.on('click', () => {
-    if (foto) openRouteLightboxByUrl(foto);
-  });
+// ✅ Preview: solo hover (desktop)
+m.on('mouseover', () => m.openPopup());
+m.on('mouseout', () => m.closePopup());
+
+// ✅ Click: apre lightbox e chiude SEMPRE la preview
+m.on('click', () => {
+  try { m.closePopup(); } catch {}
+  try { if (map) map.closePopup(); } catch {}
+  if (foto) openRouteLightboxByUrl(foto);
+});
 });
     }
 
@@ -774,11 +781,14 @@ function openRouteLightboxByUrl(url){
   }
 
   function closeLightbox(){
-    const box = document.getElementById('lightbox');
-    const img = document.getElementById('lightboxImg');
-    if (img) img.src = '';
-    if (box) box.classList.remove('open');
-  }
+  const box = document.getElementById('lightbox');
+  const img = document.getElementById('lightboxImg');
+  if (img) img.src = '';
+  if (box) box.classList.remove('open');
+
+  // ✅ chiudi eventuali preview rimaste aperte sulla mappa
+  try { if (map) map.closePopup(); } catch {}
+}
 
   window.addEventListener('keydown', (e) => {
     const boxOpen = document.getElementById('lightbox')?.classList.contains('open');
