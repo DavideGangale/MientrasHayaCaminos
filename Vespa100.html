@@ -4179,10 +4179,10 @@ window.addEventListener('message', (ev) => {
   if (!msg || msg.type !== 'VESPA_UPLOAD_RESULT') return;
   if (!driveUploadPending) return;
 
-  const data = msg.data || {};
+   const data = msg.data || {};
 
-  // ✅ accetta solo la risposta del reqId corrente (evita “risposte vecchie”)
-  if (driveUploadPending.reqId && data.reqId && data.reqId !== driveUploadPending.reqId) {
+  // ✅ OBBLIGATORIO: se manca reqId o è diverso, ignora
+  if (!data.reqId || data.reqId !== driveUploadPending.reqId) {
     return;
   }
 
