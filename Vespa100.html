@@ -5272,10 +5272,12 @@ function renderManutCatalog() {
         </button>
 
         ${String(it.key||'').startsWith('custom_') ? `
-          <button class="btn-secondary" style="margin:0; width:44px; background:#2a0000; border:1px solid #4a0000;"
-                  onclick="manutDelete('${it.key}')">
-            🗑️
-          </button>
+          <button class="btn-secondary"
+        style="margin:0; width:44px; background:#2a0000; border:1px solid #4a0000;"
+        onclick="manutDelete('${it.key}')"
+        title="Elimina voce dal catalogo">
+  🗑️
+</button>
         ` : ''}
       </div>
     `;
@@ -5358,12 +5360,52 @@ function manutAddCustom() {
 }
 
 function manutDelete(key) {
-  if (!confirm('Eliminare questa voce dal catalogo?')) return;
-  const cat = getManutCatalog().filter(x => x && x.key !== key);
-  saveManutCatalog(cat);
+  if (!key) return;
+
+  const cat = getManutCatalog();
+  const it = cat.find(x => x && x.key === key);
+  const nome = (it && (it.nome || it.key)) ? (it.nome || it.key) : key;
+
+  const ok = confirm(
+    `Eliminare "${nome}" dal catalogo manutenzione?\n\n` +
+    `Nota: eventuali ricambi in stock collegati a questa voce verranno scollegati.`
+  );
+  if (!ok) return;
+
+  // 1) rimuovi dal catalogo
+  const cat2 = cat.filter(x => x && x.key !== key);
+  saveManutCatalog(cat2);
+
+  // 2) pulisci ultimo cambio + stato avvisi
+  const last = caricaJSON('vt_manut_lastKm', {});
+  if (last && Object.prototype.hasOwnProperty.call(last, key)) {
+    delete last[key];
+    salva('vt_manut_lastKm', last);
+  }
+
+  const ws = caricaJSON('vt_manut_warnState', {});
+  if (ws && Object.prototype.hasOwnProperty.call(ws, key)) {
+    delete ws[key];
+    salva('vt_manut_warnState', ws);
+  }
+
+  // 3) scollega ricambi inventario che puntavano a questa voce
+  const inv = caricaJSON('vt_inventario', []);
+  if (Array.isArray(inv)) {
+    let changed = false;
+    for (const r of inv) {
+      if (r && r.manutKey === key) {
+        r.manutKey = null;
+        changed = true;
+      }
+    }
+    if (changed) salva('vt_inventario', inv);
+  }
+
   renderManutCatalog();
   renderInventario();
   renderChecklist();
+  showToast('🗑️ Voce eliminata: ' + nome);
 }
 
 
