@@ -558,11 +558,26 @@ pics.forEach(d => {
     fillOpacity: 0.9
   }).addTo(photoLayer);
 
- m.bindPopup(html);
+m.bindPopup(html, {
+  autoPan: false,
+  closeButton: false,
+  closeOnClick: false,
+  autoClose: false,
+  maxWidth: 260,
+  interactive: true
+});
 
 // ✅ Preview: solo hover (desktop)
 m.on('mouseover', () => m.openPopup());
-m.on('mouseout', () => m.closePopup());
+
+m.on('mouseout', () => {
+  // aspetta un attimo: se il mouse è entrato nel popup, non chiudere
+  setTimeout(() => {
+    const popEl = m.getPopup() && m.getPopup().getElement ? m.getPopup().getElement() : null;
+    if (popEl && popEl.matches(':hover')) return;
+    m.closePopup();
+  }, 40);
+});
 
 // ✅ Click: apre lightbox e chiude SEMPRE la preview
 m.on('click', () => {
