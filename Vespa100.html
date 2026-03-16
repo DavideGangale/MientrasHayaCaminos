@@ -5393,6 +5393,31 @@ function aggiungiRicambio() {
     fxToUsd: (typeof getFxToUsd === 'function') ? getFxToUsd(cur) : null
   });
 
+
+
+
+  // aggiungo ricambio in inventario
+  inv.push({
+    id: String(Date.now()) + '_' + Math.random().toString(16).slice(2),
+    nome,
+    qta: 1,
+    durata: 5000,     // puoi cambiarlo dopo
+    lastKm: kmTot,    // “inizio usura” (di solito = ora)
+    costoLocal: costoLocal || 0,
+    costoUsd: costoUsd || 0,
+    valuta: cur,
+    wear: isWear ? 'interval' : 'na',
+    manutKey: (isWear ? (mk || null) : null),
+    wear: isWear ? 'interval' : 'na',
+    manutKey: isWear ? (mk || null) : null,
+    durata: durataManuale || 0,   // usata solo se non c’è manutKey o catalogo
+    
+    fxToUsd: (typeof getFxToUsd === 'function') ? getFxToUsd(cur) : null
+  });
+
+
+
+  
   salva('vt_inventario', inv);
 
   // ✅ somma a spesa ricambi
@@ -5417,72 +5442,6 @@ function aggiungiRicambio() {
 
 
 
-
-  
-
-// se è “usura” ma non riconosciuto, lo lasciamo senza key (userà durata fallback)
-
-  const inv = caricaJSON('vt_inventario', []);
-  const kmTot = parseFloat(carica('vt_kmTotali','0')) || 0;
-
-  // ✅ chiedi costo (valuta locale corrente)
-  const cur = valutaAttuale || 'USD';
-  const costoStr = prompt(`Quanto hai pagato "${nome}"? (in ${cur}) (opzionale)`, '');
-  const costoLocal = costoStr ? parseFloat(costoStr) : 0;
-
-  // converto in USD se c’è costo
-  let costoUsd = 0;
-  if (isFinite(costoLocal) && costoLocal > 0) {
-    costoUsd = convertLocalToUsd(costoLocal, cur);
-    if (!isFinite(costoUsd) || costoUsd <= 0) {
-      showToast(`⚠️ Manca cambio per ${cur}. Vai in Settings.`);
-      costoUsd = 0;
-    }
-  }
-
-  // aggiungo ricambio in inventario
-  inv.push({
-    id: String(Date.now()) + '_' + Math.random().toString(16).slice(2),
-    nome,
-    qta: 1,
-    durata: 5000,     // puoi cambiarlo dopo
-    lastKm: kmTot,    // “inizio usura” (di solito = ora)
-    costoLocal: costoLocal || 0,
-    costoUsd: costoUsd || 0,
-    valuta: cur,
-    wear: isWear ? 'interval' : 'na',
-    manutKey: (isWear ? (mk || null) : null),
-
-    wear: isWear ? 'interval' : 'na',
-    manutKey: isWear ? (mk || null) : null,
-    durata: durataManuale || 0,   // usata solo se non c’è manutKey o catalogo
-    
-    fxToUsd: (typeof getFxToUsd === 'function') ? getFxToUsd(cur) : null
-  });
-
-  salva('vt_inventario', inv);
-
-  // ✅ somma a spesa ricambi (globale + paese)
-  if (costoUsd > 0) {
-    salva('vt_spesaRicambiUsd', (parseFloat(carica('vt_spesaRicambiUsd','0')) || 0) + costoUsd);
-
-    const paese = carica('vt_paeseAttuale','Colombia');
-    const datiPaesi = caricaJSON('vt_datiPaesi', {});
-    if (!datiPaesi[paese]) datiPaesi[paese] = {};
-    datiPaesi[paese].spesaRicambiUsd = (datiPaesi[paese].spesaRicambiUsd || 0) + costoUsd;
-    datiPaesi[paese].valuta = cur;
-    salva('vt_datiPaesi', datiPaesi);
-
-    aggiornaUI();
-    showToast(`🧾 Ricambio aggiunto: +$${costoUsd.toFixed(2)}`);
-  } else {
-    showToast('✅ Ricambio aggiunto: ' + nome);
-  }
-
-  if (input) input.value = '';
-  renderInventario();
-  renderChecklist();
-}
 
   
 
