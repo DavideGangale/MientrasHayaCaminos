@@ -5502,21 +5502,27 @@ const costoUsd = (costoLocal > 0) ? convertLocalToUsd(costoLocal, cur) : 0;
   const foto = (ante && ante.dataset) ? (ante.dataset.src || null) : null;
 
   const now = new Date();
-  const entry = {
-    id: Date.now(),
-    data: now.toLocaleDateString('it-IT'),
-    ora: now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
-    paese: carica('vt_paeseAttuale','Colombia'),
-    km: (parseFloat(carica('vt_kmTotali','0')) || 0).toFixed(1),
-    nome,
-    desc,
-    valuta: cur,
-    fotoUrl:null
-fxToUsd: getFxToUsd(cur),
-costoLocal,
-costoUsd,
-    foto
-  };
+
+  
+ const entry = {
+  id: Date.now(),
+  data: now.toLocaleDateString('it-IT'),
+  ora: now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
+  paese: carica('vt_paeseAttuale','Colombia'),
+  km: (parseFloat(carica('vt_kmTotali','0')) || 0).toFixed(1),
+
+  nome,
+  desc,
+
+  valuta: cur,
+  fxToUsd: getFxToUsd(cur),
+
+  costoLocal: costoLocal,
+  costoUsd: costoUsd,
+
+  foto: foto,
+  fotoUrl: null
+};
 
   const log = caricaJSON('vt_logbook', []);
   log.unshift(entry);
