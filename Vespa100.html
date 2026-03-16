@@ -304,7 +304,11 @@
 #modalMapFull  { z-index: 7000; }
     #modalAddRicambio { z-index: 6700; }
     #modalCarbSetup { z-index: 6750; }
+    #modalCarb      { z-index: 6900; }
     #modalGrafico  { z-index: 6800; }
+
+  
+
 
 
 
@@ -1195,9 +1199,9 @@
         💾 Salva Setup
       </button>
 
-      <button class="btn-secondary" onclick="apriModal('modalCarb'); renderStoricoCarbur();">
-        📖 Storico Altitudini
-      </button>
+     <button class="btn-secondary" onclick="chiudiModal('modalCarbSetup'); apriModal('modalCarb'); renderStoricoCarbur();">
+  📖 Storico Carburazioni
+</button>
     </div>
   </div>
 </div>
@@ -6386,9 +6390,46 @@ function toggleCheck(i) {
 }
 
 function eliminaCheck(i) {
-  const lista = caricaJSON('vt_checklist', []).filter((_, idx) => idx !== i);
-  salva('vt_checklist', lista);
+  const lista = caricaJSON('vt_checklist', []);
+  if (!Array.isArray(lista) || !lista[i]) return;
+
+  const item = lista[i];
+  const nome = String(item.nome || 'Voce checklist');
+
+  if (!confirm(`Eliminare "${nome}" dalla checklist?`)) return;
+
+  // rimuovi dalla checklist
+  const nuova = lista.filter((_, idx) => idx !== i);
+  salva('vt_checklist', nuova);
   renderChecklist();
+
+  // domanda log manutenzione
+  const già = confirm(
+    `Hai già registrato questo intervento nel LOG manutenzione?\n\n` +
+    `OK = Sì, già registrato\n` +
+    `Annulla = No, voglio aggiungerlo ora`
+  );
+
+  if (già) return;
+
+  // apri modal intervento precompilato
+  const n = document.getElementById('log-nome');
+  const d = document.getElementById('log-descrizione');
+  const c = document.getElementById('log-costo');
+
+  if (n) n.value = nome;
+  if (d) d.value = 'Da checklist officina (registrato al momento della rimozione).';
+  if (c) c.value = '';
+
+  // se il nome corrisponde a una manutenzione “nota”, aggiorna anche lastKm quando salvi
+  const key = inferManutKeyFromNome(nome);
+  if (key) {
+    pendingManutFromChecklist = { key, nome };
+  } else {
+    pendingManutFromChecklist = null;
+  }
+
+  apriModal('modalLogDettaglio');
 }
 
 
