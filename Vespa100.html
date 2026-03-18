@@ -1822,10 +1822,7 @@ color:#fff;
 /* ============================================================
    HELPERS
 ============================================================ */
-function setText(id, txt) {
-  const el = document.getElementById(id);
-  if (el) el.innerText = txt;
-}
+
 function setHTML(id, html) {
   const el = document.getElementById(id);
   if (el) el.innerHTML = html;
@@ -1864,6 +1861,19 @@ let unitaAttuale = 'L';
 
 let distAttuale = 'KM';   // 'KM' | 'MI'
 let valutaAttuale = 'USD';
+
+// ===== THROTTLE UI (riduce consumo batteria) =====
+let lastUIRedrawAt = 0;
+function aggiornaUIThrottled(minMs = 1200) {
+  const now = Date.now();
+  if (now - lastUIRedrawAt < minMs) return;
+  lastUIRedrawAt = now;
+  aggiornaUI();
+}
+
+
+
+  
 const KM_PER_MI = 1.60934;
 const MI_PER_KM = 1 / KM_PER_MI;
   
@@ -2479,7 +2489,7 @@ salva('vt_tappaAttuale', tappaAttuale);
         
         checkLowFuelWarning(false);
         
-        aggiornaUI();
+   aggiornaUIThrottled();
       }
     }
 
@@ -4477,8 +4487,14 @@ if (driveSyncRunning) {
   showToast('☁️ Sync già in corso...');
   return;
 }
+
+  
 driveSyncRunning = true;
 lastErrMsg = '';
+
+
+
+  try {
   
   showToast(`☁️ Sync in corso... (${q.length} in coda)`, 2500);
 
@@ -4549,7 +4565,9 @@ keep.push(job);
   showToast('ℹ️ Nessuna foto caricata' + (lastErrMsg ? (': ' + lastErrMsg.slice(0,80)) : ''), 5000);
 }
 
+ } finally {
   driveSyncRunning = false;
+};
 }
 
 function syncFotoDriveNow() {
@@ -4893,32 +4911,29 @@ function salvaDiario() {
       }
     } catch {}
 
-   //let geo = null;
-  try {
-    if (typeof lastLat !== 'undefined' && lastLat != null) geo = { lat: lastLat, lon: lastLon };
-    else if (typeof marker !== 'undefined' && marker.getLatLng) {
-      const ll = marker.getLatLng();
-      if (ll && isFinite(ll.lat)) geo = { lat: ll.lat, lon: ll.lng };
-    }
-  } catch(e) {}
 
  const entry = {
   id: Date.now(),
-  geo: geo,
+  ts: Date.now(),
+
   data: now.toLocaleDateString('it-IT'),
-      
-      ts: Date.now(),
-      geo,
-      
-      ora: now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
-      paese,
-      km: (parseFloat(carica('vt_kmTotali','0')) || 0).toFixed(1),
-      testo,
-      tags: Array.from(diarioTagsSelezionati || []),
-      foto: fotoSrc,     // fallback locale
-      fotoUrl: null,      // verrà popolato dalla sync Drive
-      videoUrl: videoUrl // NUOVO LINK YOUTUBE
-    };
+  ora: now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }),
+
+  paese,
+  km: (parseFloat(carica('vt_kmTotali','0')) || 0).toFixed(1),
+
+  testo,
+
+  // ✅ usa i tag finali (selezionati + hashtag trovati nel testo)
+  tags: tagsFinal,
+
+  // ✅ geo una sola volta
+  geo: geo,
+
+  foto: fotoSrc,      // base64 locale (se c’è)
+  fotoUrl: null,      // verrà riempito dalla sync Drive
+  videoUrl: videoUrl  // link YouTube opzionale
+};
 
     // salva subito
     const diario = caricaJSON('vt_diario', []);
@@ -7280,7 +7295,22 @@ function esportaDatiLight() {
     'vt_datiPaesi','vt_tappe','vt_logbook','vt_diario',
     'vt_logCarburanti','vt_coordinateTracciato',
     'vt_carburazione','vt_checklist','vt_inventario','vt_tappaAttuale',
-    'vt_serbatoioLitri','vt_olioStockMl','vt_olioCostoStockUsd','vt_spesaBenzinaUsd','vt_spesaOlioUsd','vt_spesaRicambiUsd','vt_spesaManodoperaUsd'
+    'vt_serbatoioLitri','vt_olioStockMl','vt_olioCostoStockUsd','vt_spesaBenzinaUsd','vt_spesaOlioUsd','vt_spesaRicambiUsd','vt_spesaManodoperaUsd',
+    'vt_turismo',
+'vt_benzinaFuoriTappaLitri','vt_kmFuoriTappa',
+
+'vt_unita','vt_dist','vt_valuta',
+'vt_fxRates',
+
+'vt_manutCatalog','vt_manut_lastKm','vt_manut_warnState',
+
+'vt_serbatoioCapLitri','vt_tanica1CapLitri','vt_tanica2CapLitri','vt_consumoMedioManuale',
+
+'vt_driveUploadUrl','vt_driveFolderId','vt_driveAutoSync','vt_uploadQueue',
+
+'vt_gh_token','vt_gh_repo','vt_gh_path',
+
+'vt_diarioTagsCustom'
   ];
 
   const backup = { _version:'1.2-light', _exportDate: new Date().toISOString() };
@@ -7577,7 +7607,24 @@ function esportaDati() {
     'vt_tappe','vt_logbook','vt_diario','vt_logCarburanti',
     'vt_coordinateTracciato','vt_carburazione','vt_checklist','vt_inventario',
     'vt_tappaAttuale','vt_serbatoioLitri','vt_olioStockMl','vt_olioCostoStockUsd',
-    'vt_spesaBenzina','vt_spesaOlio','vt_spesaBenzinaUsd','vt_spesaOlioUsd','vt_spesaRicambiUsd','vt_spesaManodoperaUsd'
+    'vt_spesaBenzina','vt_spesaOlio','vt_spesaBenzinaUsd','vt_spesaOlioUsd','vt_spesaRicambiUsd','vt_spesaManodoperaUsd',
+
+'vt_turismo',
+'vt_benzinaFuoriTappaLitri','vt_kmFuoriTappa',
+
+'vt_unita','vt_dist','vt_valuta',
+'vt_fxRates',
+
+'vt_manutCatalog','vt_manut_lastKm','vt_manut_warnState',
+
+'vt_serbatoioCapLitri','vt_tanica1CapLitri','vt_tanica2CapLitri','vt_consumoMedioManuale',
+
+'vt_driveUploadUrl','vt_driveFolderId','vt_driveAutoSync','vt_uploadQueue',
+
+'vt_gh_token','vt_gh_repo','vt_gh_path',
+
+'vt_diarioTagsCustom'
+    
   ];
 
   const backup = { _version:'1.2', _exportDate: new Date().toISOString() };
