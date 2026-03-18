@@ -3098,30 +3098,14 @@ m.on('popupopen', (ev) => {
 function apriMappaFull(coordsOverride = null, ctx = null) {
   apriModal('modalMapFull');
 
-  const tryOpen = (attempt = 0) => {
+  setTimeout(() => {
     const el = document.getElementById('mapFull');
     if (!el) return;
 
-    // ✅ su mobile a volte vh fa scherzi dentro i modali: imposta anche un'altezza px
-    try {
-      const h = Math.max(320, Math.round(window.innerHeight * 0.70));
-      el.style.height = h + 'px';
-    } catch {}
-
-    const wOk = el.offsetWidth > 50;
-    const hOk = el.offsetHeight > 50;
-
-    // aspetta finché il container ha dimensione reale
-    if ((!wOk || !hOk) && attempt < 12) {
-      return setTimeout(() => tryOpen(attempt + 1), 120);
-    }
-
-    // reset id interno se Leaflet ha lasciato "sporco"
-    try {
-      if (!mapFullInstance && el._leaflet_id) el._leaflet_id = null;
-    } catch {}
-
     if (!mapFullInstance) {
+      // reset in caso di inizializzazione sporca
+      try { el._leaflet_id = null; } catch {}
+
       mapFullInstance = L.map(el, { zoomControl:true, attributionControl:false });
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         maxZoom: 19,
@@ -3136,31 +3120,21 @@ function apriMappaFull(coordsOverride = null, ctx = null) {
     const coords = coordsOverride || polyline.getLatLngs();
     mapFullPolyline.setLatLngs(coords);
 
-    if (coords && coords.length) {
-      mapFullMarker.setLatLng(coords[coords.length - 1]);
-    } else {
-      try { mapFullMarker.setLatLng(marker.getLatLng()); } catch {}
-    }
+    if (coords && coords.length) mapFullMarker.setLatLng(coords[coords.length - 1]);
+    else mapFullMarker.setLatLng(marker.getLatLng());
 
     const pts = mapFullPolyline.getLatLngs();
-    if (pts && pts.length > 1) {
-      mapFullInstance.fitBounds(mapFullPolyline.getBounds().pad(0.15));
-    } else {
-      mapFullInstance.setView(mapFullMarker.getLatLng(), 13);
-    }
+    if (pts && pts.length > 1) mapFullInstance.fitBounds(mapFullPolyline.getBounds().pad(0.15));
+    else mapFullInstance.setView(mapFullMarker.getLatLng(), 13);
 
     renderMapFullPhotoMarkersForContext(ctx);
 
-    // invalidate multiplo (mobile)
+    // invalidate doppio per modali
     try { mapFullInstance.invalidateSize(true); } catch {}
     setTimeout(() => { try { mapFullInstance.invalidateSize(true); } catch {} }, 250);
-    setTimeout(() => { try { mapFullInstance.invalidateSize(true); } catch {} }, 800);
-  };
 
-  // avvia dopo un attimo
-  setTimeout(() => tryOpen(0), 80);
+  }, 300);
 }
-
 function apriMappaFullDaPercorso(tipo, id) {
   // tipo: 'tappa' | 'turismo'
   const key = (tipo === 'turismo') ? 'vt_turismo' : 'vt_tappe';
