@@ -158,9 +158,7 @@ z-index: 1;
       <span id="statsMini" style="font-size:12px; color:#aaa; font-weight:normal;">Caricamento...</span>
     </div>
     
-    <div class="filters">
-      <!-- Filtri Tracciati -->
-          <div class="top-controls">
+    <div class="top-controls">
       <!-- Tracce -->
       <select class="btn-filter" onchange="setMode(this.value)">
         <option value="TUTTO">🛣️ Tutte le tracce</option>
@@ -186,30 +184,10 @@ z-index: 1;
       <!-- Bottone Statistiche -->
       <button class="btn-filter" onclick="apriStats()">📊 Statistiche</button>
     </div>
-      
-      <div style="width:1px; background:#555; margin:0 5px;"></div>
-      
-      <!-- Filtri Paese -->
-      <button class="btn-filter active" id="btnFilterMondo" onclick="setCountry('')">🌎 Mondo</button>
-      <select id="selectCountry" class="btn-filter" style="background:#333; color:#ccc;" onchange="setCountry(this.value)">
-        <option value="" disabled selected>Scegli Paese...</option>
-      </select>
-    </div>
-
-    <!-- Filtri Marker -->
-        
-    <div class="filters" id="markerFilters">
-      <button class="btn-filter" style="background:#ff9800; color:#000;" onclick="apriStats()">📊 Statistiche</button>
-      <button class="btn-filter active-blue" onclick="setMarkerFilter('ALL', this)">Tutti i Marker</button>
-      <button class="btn-filter" onclick="setMarkerFilter('FOTO', this)">📷 Foto</button>
-      <button class="btn-filter" onclick="setMarkerFilter('VIDEO', this)">▶️ Video</button>
-      <button class="btn-filter" onclick="setMarkerFilter('MAINT', this)">🔧 Officina</button>
-      <button class="btn-filter" onclick="setMarkerFilter('FUEL', this)">⛽ Benzina</button>
-      <button class="btn-filter" onclick="setMarkerFilter('CARB', this)">🌬️ Carb</button>
-    </div>
   </div>
 
   <!-- MAPPA -->
+  <div id="mapPub"></div>
 
 
 
