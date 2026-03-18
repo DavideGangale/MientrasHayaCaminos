@@ -299,6 +299,29 @@ const I18N = {
     global: '🌎 Globali',
     totalMini: (km, l) => `Totale: ${km} km | ${l} L Benzina`,
     loading: 'Caricamento...'
+
+tappa: 'TAPPA',
+giri: 'GIRI',
+time: '⏱️ Tempo',
+alt: '⛰️ Alt',
+speedMax: '🏎️ Vel. Max',
+speedAvg: 'Media',
+fuelEst: '⛽ Benzina stimata',
+fuelReal: '🔥 Benzina reale',
+consumption: 'Consumo',
+details: 'Dettagli',
+graph: '📈 Grafico',
+
+refuel: '⛽ Rifornimento',
+paid: 'Pagato',
+destination: 'Destinazione',
+
+workshop: '🔧 Officina',
+cost: 'Costo',
+
+carbSetup: '🌬️ Setup Carburatore',
+altitude: 'Altitudine'
+    
   },
 
   en: {
@@ -319,6 +342,30 @@ const I18N = {
     global: '🌎 Global',
     totalMini: (km, l) => `Total: ${km} km | ${l} L Fuel`,
     loading: 'Loading...'
+
+    tappa: 'TRIP',
+giri: 'RIDE',
+time: '⏱️ Time',
+alt: '⛰️ Alt',
+speedMax: '🏎️ Max speed',
+speedAvg: 'Avg',
+fuelEst: '⛽ Estimated fuel',
+fuelReal: '🔥 Real fuel',
+consumption: 'Consumption',
+details: 'Details',
+graph: '📈 Chart',
+
+refuel: '⛽ Refuel',
+paid: 'Paid',
+destination: 'Destination',
+
+workshop: '🔧 Workshop',
+cost: 'Cost',
+
+carbSetup: '🌬️ Carb setup',
+altitude: 'Altitude'
+
+    
   },
 
   es: {
@@ -339,6 +386,30 @@ const I18N = {
     global: '🌎 Global',
     totalMini: (km, l) => `Total: ${km} km | ${l} L Gasolina`,
     loading: 'Cargando...'
+
+    tappa: 'ETAPA',
+giri: 'PASEO',
+time: '⏱️ Tiempo',
+alt: '⛰️ Alt',
+speedMax: '🏎️ Vel. máx',
+speedAvg: 'Media',
+fuelEst: '⛽ Gasolina estimada',
+fuelReal: '🔥 Gasolina real',
+consumption: 'Consumo',
+details: 'Detalles',
+graph: '📈 Gráfico',
+
+refuel: '⛽ Repostaje',
+paid: 'Pagado',
+destination: 'Destino',
+
+workshop: '🔧 Taller',
+cost: 'Costo',
+
+carbSetup: '🌬️ Carburación',
+altitude: 'Altitud'
+
+    
   }
 };
 
@@ -481,21 +552,28 @@ const consReal = (benzReal > 0) ? (t.km / benzReal).toFixed(2) : '--';
 const hasGraph = Array.isArray(t.telemetry) && t.telemetry.length >= 3;
 
 const infoEstesa = `
-  <div class="popup-title">${isGiro ? '🛵' : '🏁'} ${isGiro ? 'GIRI' : 'TAPPA'} — ${t.paese}</div>
+  <div class="popup-title">
+    ${isGiro ? '🛵' : '🏁'} ${isGiro ? T('giri') : T('tappa')} — ${t.paese}
+  </div>
   <div class="popup-meta">📅 ${t.data} ${t.ora || ''} | 📏 <b>${Number(t.km || 0).toFixed(1)} km</b></div>
 
   <div style="font-size:13px; margin-bottom:8px; line-height:1.45;">
-    <div>⏱️ Tempo: ${h}h ${m}m</div>
-    <div>⛰️ Alt: ${t.altMin || 0}m → ${t.altMax || 0}m</div>
-    <div>🏎️ Vel. Max: <b>${t.velMax || 0}</b> km/h ${t.velMedia ? ` (Media: <b>${t.velMedia}</b>)` : ''}</div>
+    <div>${T('time')}: ${h}h ${m}m</div>
+    <div>${T('alt')}: ${t.altMin || 0}m → ${t.altMax || 0}m</div>
+    <div>
+      ${T('speedMax')}: <b>${t.velMax || 0}</b> km/h
+      ${t.velMedia ? ` (${T('speedAvg')}: <b>${t.velMedia}</b>)` : ''}
+    </div>
 
     <div style="margin-top:6px;">
-      ⛽ Benzina stimata: <b>${benzStim.toFixed(2)} L</b> — <b style="color:var(--accent)">${consStim} km/L</b>
+      ${T('fuelEst')}: <b>${benzStim.toFixed(2)} L</b> —
+      <b style="color:var(--accent)">${consStim} km/L</b>
     </div>
 
     ${benzReal > 0 ? `
       <div>
-        🔥 Benzina reale: <b>${benzReal.toFixed(2)} L</b> — <b style="color:#4caf50">${consReal} km/L</b>
+        ${T('fuelReal')}: <b>${benzReal.toFixed(2)} L</b> —
+        <b style="color:#4caf50">${consReal} km/L</b>
       </div>
     ` : ``}
   </div>
@@ -507,11 +585,12 @@ const infoEstesa = `
     style="background:var(--brand); border:none; color:white; padding:8px 10px; border-radius:8px; font-size:12px; cursor:pointer; width:100%;"
     onclick="window.apriGraficoPercorsoPublic(${t.id})"
     ${hasGraph ? '' : 'disabled'}
-    title="${hasGraph ? 'Apri grafico' : 'Telemetria non disponibile'}"
   >
-    📈 Grafico
+    ${T('graph')}
   </button>
 `;
+
+      
       clickPoly.bindPopup(infoEstesa);
 
       const lastPoint = latlngs[latlngs.length - 1];
@@ -561,16 +640,13 @@ const infoEstesa = `
       if (currentMarkerFilter !== 'ALL' && currentMarkerFilter !== 'MAINT') return;
 
       creaMarker(m.geo.lat, m.geo.lon, iconMaint, `
-        <div class="popup-title" style="color:var(--maint)">🔧 Officina: ${m.nome}</div>
-        <div class="popup-meta">📅 ${m.data} | 📏 km ${m.km}</div>
-        <div>${m.desc || ''}</div>
-       ${(Number(m.costoUsd || 0) > 0) ? `
-  <div style="margin-top:5px; color:#4caf50;">
-    💰 Costo: <b>
+  <div class="popup-title" style="color:var(--maint)">${T('workshop')}: ${m.nome}</div>
+  <div class="popup-meta">📅 ${m.data} | 📏 km ${m.km}</div>
+  <div>${m.desc || ''}</div>
+  ${Number(m.costoUsd || 0) > 0 ? `<div style="margin-top:5px; color:#4caf50;">💰 ${T('cost')}: <b>
 $$
-{Number(m.costoUsd).toFixed(2)}</b>
-  </div>` : ''}
-      `);
+{Number(m.costoUsd).toFixed(2)}</b></div>` : ''}
+`);
     });
 
     const rifornimenti = Array.isArray(DATA.rifornimenti) ? DATA.rifornimenti : [];
@@ -580,16 +656,15 @@ $$
       if (currentMarkerFilter !== 'ALL' && currentMarkerFilter !== 'FUEL') return;
 
       creaMarker(r.geo.lat, r.geo.lon, iconFuel, `
-        <div class="popup-title" style="color:var(--fuel)">⛽ Rifornimento</div>
-        <div class="popup-meta">📅 ${r.data} | 📏 km ${r.km}</div>
-        <div>📦 <b>${r.qta} L</b> (Destinazione: ${r.dest})</div>
-       ${(Number(r.costoBenzUsd || 0) > 0) ? `
-  <div style="margin-top:5px; color:#4caf50;">
-    💰 Pagato: <b>
+  <div class="popup-title" style="color:var(--fuel)">${T('refuel')}</div>
+  <div class="popup-meta">📅 ${r.data} | 📏 km ${r.km}</div>
+  <div>📦 <b>${r.qta} L</b> (${T('destination')}: ${r.dest})</div>
+  ${Number(r.costoBenzUsd || 0) > 0 ? `<div style="margin-top:5px; color:#4caf50;">💰 ${T('paid')}: <b>
 $$
-{Number(r.costoBenzUsd).toFixed(2)}</b>
-  </div>` : ''}
-      `);
+{Number(r.costoBenzUsd).toFixed(2)}</b></div>` : ''}
+`);
+
+      
     });
 
     const carburazioni = Array.isArray(DATA.carburazioni) ? DATA.carburazioni : [];
@@ -598,11 +673,11 @@ $$
       if (currentMarkerFilter !== 'ALL' && currentMarkerFilter !== 'CARB') return;
 
       creaMarker(c.geo.lat, c.geo.lon, iconCarb, `
-        <div class="popup-title" style="color:var(--carb)">🌬️ Setup Carburatore</div>
-        <div class="popup-meta">📅 ${c.data} | ⛰️ Altitudine: ${c.alt}m</div>
-        <div>Max: <b>${c.chicMax}</b> | Min: <b>${c.chicMin}</b></div>
-        ${c.nota ? `<div style="margin-top:5px; font-style:italic;">"${c.nota}"</div>` : ''}
-      `);
+  <div class="popup-title" style="color:var(--carb)">${T('carbSetup')}</div>
+  <div class="popup-meta">📅 ${c.data} | ⛰️ ${T('altitude')}: ${c.alt}m</div>
+  <div>Max: <b>${c.chicMax}</b> | Min: <b>${c.chicMin}</b></div>
+  ${c.nota ? `<div style="margin-top:5px; font-style:italic;">"${c.nota}"</div>` : ''}
+`);
     });
 
     if (drawnLines > 0 || layerMarkers.getLayers().length > 0) {
