@@ -4355,7 +4355,7 @@ function uploadFotoToDrive(dataUrl, filenameBase='foto', clientKey='') {
 function enqueueFoto(kind, id) {
   const q = getUploadQueue();
   // evita duplicati
-  if (q.some(x => x.kind === kind && x.id === id)) return;
+  if (q.some(x => x.kind === kind && String(x.id) === String(id))) return;
   q.push({ kind, id, addedAt: Date.now() });
   setUploadQueue(q);
   updateDriveSyncInfo();
@@ -7631,9 +7631,11 @@ refreshStatsPaeseDropdown();
 caricaDriveAutoSyncUI?.();
 updateDriveSyncInfo?.();
 if (navigator.onLine && carica('vt_driveAutoSync','1') === '1') {
-  processUploadQueue(2);
+  setTimeout(() => {
+    // evita sync se tab non è visibile
+    if (document.visibilityState === 'visible') processUploadQueue(2);
+  }, 6000);
 }
-  
 
   await setLoadingProgress(100, '✅ Pronto!');
   await new Promise(r => setTimeout(r, 400));
