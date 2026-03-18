@@ -53,7 +53,11 @@
       justify-content:center;
       align-items:center;
       gap:10px;
+      display:none !important;
     }
+
+    body{ padding-top:0; }
+    
     .page{display:none;padding:15px;animation:fadeIn 0.3s;}
     .page.active{display:block;}
     @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
@@ -70,13 +74,39 @@
 
     /* SPEED */
     .speed{
-  font-size:92px;
+  font-size: clamp(108px, 20vw, 150px);
   font-weight:1000;
   color:var(--verde);
   margin:0;
   line-height:0.95;
   text-shadow:0 0 16px rgba(76,175,80,0.25);
 }
+
+.speed-wrap{
+  position:relative;
+  padding-right:86px;   /* spazio per GPS + km/h a destra */
+  padding-bottom:6px;
+}
+
+.speed-corner{
+  position:absolute;
+  right:8px;
+  bottom:10px;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:6px;
+  text-align:right;
+}
+
+.speed-unit{
+  font-size:14px;
+  font-weight:1000;
+  color:#9a9a9a;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+    
     .altitude{font-size:30px;color:var(--blu);font-weight:bold;margin-bottom:5px;text-shadow:0 0 10px rgba(33,150,243,0.3);}
 
     /* BOTTONI */
@@ -461,7 +491,7 @@ color:#fff;
 
 .guida-ico.mode{ background:#333; color:#fff; border:2px solid #555; }
 .guida-ico.mode.tappa{ border-color:#9c27b0; }
-.guida-ico.mode.turismo{ border-color:#2196F3; }
+.guida-ico.mode.giri{ border-color:#2196F3; }
 
 .guida-ico.play{ background:var(--verde); color:#000; }
 .guida-ico.stop{ background:#f44336; color:#000; }
@@ -811,7 +841,7 @@ color:#fff;
 <div id="preRideBanner" style="
   display:none;
   position:fixed;
-  top:70px;
+  top:12px;
   left:50%;
   transform:translateX(-50%);
   width:min(92vw, 520px);
@@ -846,10 +876,9 @@ color:#fff;
   </div>
 
   <!-- ===== HEADER ===== -->
-  <div class="header">
-    VESPATREK PX150
-    <span id="gps-badge" class="gps-badge gps-off">GPS OFF</span>
-  </div>
+<div class="header">
+  VESPATREK PX150
+</div>
 
 
 
@@ -857,9 +886,14 @@ color:#fff;
 <div id="guida" class="page active">
 
   <div class="dash-card">
-    <div style="font-size:12px; color:#aaa;">VELOCITÀ</div>
-    <div class="speed" id="speedometer">0</div>
-    <div style="font-size:12px; color:#888; margin-bottom:10px;">KM/H</div>
+    <div class="speed-wrap">
+  <div class="speed" id="speedometer">0</div>
+
+  <div class="speed-corner">
+    <span id="gps-badge" class="gps-badge gps-off">GPS OFF</span>
+    <div class="speed-unit">km/h</div>
+  </div>
+</div>
 
     <!-- mini: ALT / AUT / TRIP -->
     <div class="guida-mini">
@@ -2676,7 +2710,7 @@ aggiornaTestoModaliSerbatoio();
   aggiornaGuidaButtonsUI();
 }
 
-let modalitaGuida = 'TAPPA'; // 'TAPPA' | 'TURISMO'
+let modalitaGuida = 'TAPPA'; // 'TAPPA' | 'GIRI'
 let pendingFuelKind = null; // 'tappa' | 'turismo'
 
 
@@ -2686,72 +2720,51 @@ function aggiornaModalitaUI() {
   const b = document.getElementById('btn-modalita');
   if (!b) return;
 
-  const isTur = (modalitaGuida === 'TURISMO');
+  const isGiri = (modalitaGuida === 'GIRI');
 
-  if (isTur) {
-    // ✅ icona turismo “fissa” (stessa box, niente sobbalzi)
-    b.innerHTML = `<span class="ico-fixed" aria-hidden="true">🏛️</span>`;
+  if (isGiri) {
+    // ✅ GIRI: icona "reload" sobria
+    b.innerHTML = `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M20 12a8 8 0 1 1-2.34-5.66"
+              fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M20 4v6h-6"
+              fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    `;
   } else {
-    // ✅ icona tappa: due punti (verde/rosso) + linea ondulata
+    // ✅ TAPPA: A e B con linea ondulata
     b.innerHTML = `
       <svg viewBox="0 0 64 24" aria-hidden="true">
-        <circle cx="10" cy="12" r="5" fill="#4caf50"></circle>
-        <path d="M16 12 C 24 2, 34 22, 44 12 S 54 2, 58 12"
-              stroke="#ffffff" stroke-width="3" fill="none" stroke-linecap="round"></path>
-        <circle cx="54" cy="12" r="5" fill="#f44336"></circle>
+        <circle cx="10" cy="12" r="7" fill="none" stroke="#ffffff" stroke-width="2.4"></circle>
+        <text x="10" y="16" text-anchor="middle" font-size="11" font-weight="900" fill="#ffffff">A</text>
+
+        <path d="M18 12 C 26 2, 36 22, 46 12 S 56 2, 58 12"
+              stroke="#ffffff" stroke-width="2.8" fill="none" stroke-linecap="round"></path>
+
+        <circle cx="54" cy="12" r="7" fill="none" stroke="#ffffff" stroke-width="2.4"></circle>
+        <text x="54" y="16" text-anchor="middle" font-size="11" font-weight="900" fill="#ffffff">B</text>
       </svg>
     `;
   }
 
-  b.classList.remove('tappa','turismo');
-  b.classList.add(isTur ? 'turismo' : 'tappa');
+  b.classList.remove('tappa','giri');
+  b.classList.add(isGiri ? 'giri' : 'tappa');
 }
-
-
-  function aggiornaGuidaButtonsUI() {
-  const startBtn = document.getElementById('btn-start-stop');
-  const endBtn   = document.getElementById('btn-concludi');
-
-  // START / PAUSA
-  if (startBtn) {
-    if (inViaggio) {
-      startBtn.classList.remove('play');
-      startBtn.classList.add('stop');
-      startBtn.innerText = '⏸';
-    } else {
-      startBtn.classList.remove('stop');
-      startBtn.classList.add('play');
-      startBtn.innerText = '▶';
-    }
-  }
-
-  // CONCLUDI: attivo se ho km percorsi nella tappa/giro
-  const kmTrip = Number(tappaAttuale?.kmPercorsi || 0);
-  const canEnd = kmTrip >= 0.1;
-
-  if (endBtn) {
-    endBtn.disabled = !canEnd;
-
-    endBtn.classList.remove('active','ready');
-    endBtn.classList.add(canEnd ? 'active' : 'ready');
-
-    endBtn.innerText = '🏁';
-  }
-}
-
   
 
 function toggleModalitaGuida() {
   if (inViaggio) { showToast('⚠️ Ferma la guida prima di cambiare modalità'); return; }
-  modalitaGuida = (modalitaGuida === 'TAPPA') ? 'TURISMO' : 'TAPPA';
+  modalitaGuida = (modalitaGuida === 'TAPPA') ? 'GIRI' : 'TAPPA';
   salva('vt_modalitaGuida', modalitaGuida);
   aggiornaModalitaUI();
   showToast('Modalità: ' + modalitaGuida);
 }
 
 function concludiPercorso() {
-  if (modalitaGuida === 'TURISMO') concludiTurismo();
-  else concludiTappa();
+  if (modalitaGuida === 'GIRI') concludiTurismo();
+else concludiTappa();
+
 }
 
 
@@ -2761,7 +2774,8 @@ function concludiTurismo() {
     showToast('⚠️ Nessun km registrato in questo giro');
     return;
   }
-  if (!confirm(`Salvare TURISMO? ${(tappaAttuale.kmPercorsi || 0).toFixed(1)} km`)) return;
+ 
+  if (!confirm(`Salvare GIRI? ${(tappaAttuale.kmPercorsi || 0).toFixed(1)} km`)) return;
 
   if (inViaggio) toggleTracking();
 
@@ -4263,7 +4277,7 @@ form.appendChild(inp5);
         driveUploadPending = null;
         try { rej(new Error('Upload timeout')); } catch (e) {}
       }
-    }, 45000);
+    }, 120000);
 
     form.submit();
 
@@ -7530,6 +7544,8 @@ if (g <= 0.0001) ricostruisciSpeseGlobaliDaPaesi();
 
   // modalità guida
   modalitaGuida = carica('vt_modalitaGuida', 'TAPPA');
+  // migrazione vecchi dati
+if (modalitaGuida === 'TURISMO') modalitaGuida = 'GIRI';
 
   await setLoadingProgress(30, '🗺️ Mappa...');
   if (coordinateTracciato.length > 0) {
