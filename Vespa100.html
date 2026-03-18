@@ -2945,6 +2945,12 @@ function apriModal(id) {
   if (id === 'modalCarb') {
     renderStoricoCarbur();
   }
+
+    if (id === 'modalMapFull') {
+    setTimeout(() => {
+      try { if (mapFullInstance) mapFullInstance.invalidateSize(true); } catch {}
+    }, 350);
+  }
 }
 
 function chiudiModal(id) {
@@ -3090,8 +3096,17 @@ function apriMappaFull(coordsOverride = null, ctx = null) {
     const el = document.getElementById('mapFull');
     if (!el) return;
 
+    // ✅ se per qualche motivo Leaflet pensa che il container sia già inizializzato male
+    // (capita con modali / refresh), resetta l'id interno
+    try {
+      if (!mapFullInstance && el._leaflet_id) {
+        el._leaflet_id = null;
+      }
+    } catch {}
+
     if (!mapFullInstance) {
       mapFullInstance = L.map(el, { zoomControl:true, attributionControl:false });
+
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         maxZoom: 19,
         crossOrigin: true
@@ -3111,7 +3126,7 @@ function apriMappaFull(coordsOverride = null, ctx = null) {
       const last = coords[coords.length - 1];
       mapFullMarker.setLatLng(last);
     } else {
-      mapFullMarker.setLatLng(marker.getLatLng());
+      try { mapFullMarker.setLatLng(marker.getLatLng()); } catch {}
     }
 
     const pts = mapFullPolyline.getLatLngs();
@@ -3121,11 +3136,17 @@ function apriMappaFull(coordsOverride = null, ctx = null) {
       mapFullInstance.setView(mapFullMarker.getLatLng(), 13);
     }
 
-    // ✅ aggiungi marker foto per quel contesto (tappa/turismo)
+    // ✅ marker foto per quel contesto (tappa/turismo)
     renderMapFullPhotoMarkersForContext(ctx);
 
-    mapFullInstance.invalidateSize();
-  }, 120);
+    // ✅ ridisegna: nei modali spesso serve doppio invalidate
+    try { mapFullInstance.invalidateSize(true); } catch {}
+
+    setTimeout(() => {
+      try { mapFullInstance.invalidateSize(true); } catch {}
+    }, 250);
+
+  }, 300);
 }
 
 
