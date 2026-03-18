@@ -1299,9 +1299,24 @@ color:#fff;
         <button class="btn-azione" style="background:#607d8b;" onclick="esportaDati()">⬇️ ESPORTA BACKUP JSON</button>
        
 
-        <button class="btn-azione" style="background:#009688;" onclick="esportaDatiPubblici()">
-        📤 ESPORTA JSON PUBBLICO (foto + tracce)
+                <button class="btn-azione" style="background:#009688;" onclick="esportaDatiPubblici('download')">
+        📥 SCARICA JSON PUBBLICO NEL TELEFONO
         </button>
+
+        <button class="btn-azione" style="background:#24292e; color:white; margin-top:10px; border:2px solid #fff;" onclick="esportaDatiPubblici('github')">
+        🚀 PUBBLICA DIRETTAMENTE SU GITHUB
+        </button>
+
+        <div style="background:#111; padding:10px; margin-top:10px; border-radius:10px; border:1px solid #333;">
+          <h4 style="margin-top:0; color:#fff;">🐙 Sincronizzazione GitHub</h4>
+          <label class="inp-label">GitHub Token (inizia con ghp_...)</label>
+          <input type="password" id="set-gh-token" placeholder="Incolla qui il token">
+          <label class="inp-label">Utente / Repository</label>
+          <input type="text" id="set-gh-repo" placeholder="es. davidegangale/MientrasHayaCaminos">
+          <label class="inp-label">Percorso del file nel repository</label>
+          <input type="text" id="set-gh-path" placeholder="es. public/vespatrek_public.json">
+          <button class="btn-secondary" onclick="salvaGitHubSettings()">💾 Salva Impostazioni GitHub</button>
+        </div>
 
         <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importaDati(this)">
         <button class="btn-secondary" onclick="document.getElementById('import-file').click()">⬆️ IMPORTA BACKUP</button> </div>
@@ -2965,6 +2980,9 @@ caricaDriveAutoSyncUI();
 updateDriveSyncInfo();
 caricaDriveSettingsUI();
 
+  caricaGitHubSettingsUI();
+
+  
 // ✅ quando torno su GUIDA ridisegno la mappa (Leaflet)
 if (id === 'guida') {
   setTimeout(() => {
@@ -5220,6 +5238,25 @@ function salvaFxDaSettings() {
   showToast('✅ Impostazioni Drive salvate');
 }
 
+
+function salvaGitHubSettings() {
+  salva('vt_gh_token', (document.getElementById('set-gh-token').value || '').trim());
+  salva('vt_gh_repo', (document.getElementById('set-gh-repo').value || '').trim());
+  salva('vt_gh_path', (document.getElementById('set-gh-path').value || '').trim());
+  showToast('✅ Impostazioni GitHub salvate');
+}
+
+function caricaGitHubSettingsUI() {
+  const t = document.getElementById('set-gh-token');
+  const r = document.getElementById('set-gh-repo');
+  const p = document.getElementById('set-gh-path');
+  if (t) t.value = carica('vt_gh_token', '');
+  if (r) r.value = carica('vt_gh_repo', '');
+  if (p) p.value = carica('vt_gh_path', '');
+}
+
+
+  
 function caricaDriveSettingsUI(){
   const url = carica('vt_driveUploadUrl','');
   const folder = carica('vt_driveFolderId','');
@@ -7274,7 +7311,7 @@ function simplifyTrace(trace, step = 3) {
   return (simple.length > 0) ? simple : trace;
 }
 
-async function esportaDatiPubblici() {
+async function esportaDatiPubblici(azione = 'download') {
   try {
     const MAX_FOTO_DIARIO = 30;
     const FOTO_MAX_W = 900;
@@ -7402,7 +7439,14 @@ return {
       carburazioni: carburazione   
     };
 
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
+       const jsonString = JSON.stringify(payload, null, 2);
+
+    if (azione === 'github') {
+      await pubblicaJSONSuGitHub(jsonString);
+      return;
+    }
+
+    const blob = new Blob([jsonString], { type:'application/json' });
     const url  = URL.createObjectURL(blob);
 
     const a = document.createElement('a');
@@ -7422,7 +7466,61 @@ return {
 
 
 
+function utf8_to_b64(str) {
+  return btoa(unescape(encodeURIComponent(str)));
+}
 
+async function pubblicaJSONSuGitHub(jsonString) {
+  const token = carica('vt_gh_token', '');
+  const repo = carica('vt_gh_repo', '');
+  const path = carica('vt_gh_path', '');
+
+  if (!token || !repo || !path) {
+    showToast('⚠️ Configura i dati di GitHub (Token, Repo e Path) nei Settings prima di pubblicare!');
+    return;
+  }
+
+  showToast('🐙 Contattando GitHub...', 3000);
+  const apiUrl = `https://api.github.com/repos/${repo}/contents/${path}`;
+  const headers = {
+    'Authorization': `token ${token}`,
+    'Accept': 'application/vnd.github.v3+json',
+    'Content-Type': 'application/json'
+  };
+
+  try {
+    // 1. Chiediamo a GitHub l'ID (SHA) del file vecchio (serve per sovrascriverlo)
+    let sha = null;
+    const getRes = await fetch(apiUrl, { method: 'GET', headers });
+    if (getRes.ok) {
+      const getData = await getRes.json();
+      sha = getData.sha;
+    }
+
+    // 2. Prepariamo e inviamo il nuovo file
+    const body = {
+      message: `Aggiornamento VespaTrek Live App: ${new Date().toLocaleString('it-IT')}`,
+      content: utf8_to_b64(jsonString)
+    };
+    if (sha) body.sha = sha;
+
+    const putRes = await fetch(apiUrl, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(body)
+    });
+
+    if (!putRes.ok) {
+      const err = await putRes.json();
+      throw new Error(err.message || 'Errore API GitHub');
+    }
+
+    showToast('🚀 JSON Pubblicato con successo su GitHub!', 4000);
+  } catch(e) {
+    console.error('GitHub API Error:', e);
+    showToast('❌ Errore GitHub: ' + e.message, 5000);
+  }
+}
 
 
 
