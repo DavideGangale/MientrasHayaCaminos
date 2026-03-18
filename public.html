@@ -57,45 +57,45 @@
       align-items: center;
     }
 
-    .filters {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding-bottom: 5px;
-    }
-    .filters::-webkit-scrollbar { display: none; }
+   .top-controls {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 8px;
+margin-top: 5px;
+}
 
-    .btn-filter {
-      background: #333;
-      border: 1px solid #555;
-      color: #ccc;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: bold;
-      white-space: nowrap;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn-filter.active {
-      background: var(--accent);
-      color: #000;
-      border-color: var(--accent);
-    }
-    .btn-filter.active-blue {
-      background: var(--brand);
-      color: #fff;
-      border-color: var(--brand);
-    }
+select.btn-filter {
+background: #333;
+color: #fff;
+border: 1px solid #555;
+padding: 10px;
+border-radius: 8px;
+font-size: 14px;
+font-weight: bold;
+width: 100%;
+outline: none;
+}
 
-    /* ===== MAPPA ===== */
-    #mapPub {
-      position: absolute;
-      top: 130px; /* Spazio per la topbar con due righe di bottoni */
-      bottom: 0;
-      width: 100%;
-      z-index: 1;
-    }
+button.btn-filter {
+background: var(--accent);
+color: #000;
+border: none;
+padding: 10px;
+border-radius: 8px;
+font-size: 14px;
+font-weight: bold;
+cursor: pointer;
+grid-column: span 2;
+}
+
+/* ===== MAPPA ===== */
+#mapPub {
+position: absolute;
+top: 160px;
+bottom: 0;
+width: 100%;
+z-index: 1;
+}
 
     /* ===== MARKERS PERSONALIZZATI ===== */
     .custom-marker {
@@ -160,9 +160,32 @@
     
     <div class="filters">
       <!-- Filtri Tracciati -->
-      <button class="btn-filter active-blue" id="btnFilterTutto" onclick="setMode('TUTTO')">Tutte le Tracce</button>
-      <button class="btn-filter" id="btnFilterTappe" onclick="setMode('TAPPE')">Solo Tappe</button>
-      <button class="btn-filter" id="btnFilterGiri" onclick="setMode('GIRI')">Solo Giri</button>
+          <div class="top-controls">
+      <!-- Tracce -->
+      <select class="btn-filter" onchange="setMode(this.value)">
+        <option value="TUTTO">🛣️ Tutte le tracce</option>
+        <option value="TAPPE">🏁 Solo Tappe</option>
+        <option value="GIRI">🛵 Solo Giri</option>
+      </select>
+      
+      <!-- Paese Mappa -->
+      <select id="selectCountry" class="btn-filter" onchange="setCountry(this.value)">
+        <option value="">🌎 Globale</option>
+      </select>
+
+      <!-- Markers -->
+      <select class="btn-filter" onchange="setMarkerFilter(this.value)">
+        <option value="ALL">📍 Tutti i Marker</option>
+        <option value="FOTO">📷 Foto</option>
+        <option value="VIDEO">▶️ Video</option>
+        <option value="MAINT">🔧 Officina</option>
+        <option value="FUEL">⛽ Rifornimenti</option>
+        <option value="CARB">🌬️ Carburazione</option>
+      </select>
+
+      <!-- Bottone Statistiche -->
+      <button class="btn-filter" onclick="apriStats()">📊 Statistiche</button>
+    </div>
       
       <div style="width:1px; background:#555; margin:0 5px;"></div>
       
@@ -187,6 +210,27 @@
   </div>
 
   <!-- MAPPA -->
+
+
+
+  <!-- MODALE STATISTICHE -->
+  <div id="statsModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:8000; align-items:center; justify-content:center; padding:15px;">
+    <div style="background:var(--card); width:100%; max-width:500px; border-radius:15px; border:2px solid var(--accent); padding:20px; position:relative; max-height: 90vh; overflow-y: auto;">
+      <button onclick="document.getElementById('statsModal').style.display='none'" style="position:absolute; top:10px; right:10px; background:#f44336; color:#fff; border:none; border-radius:50%; width:30px; height:30px; font-weight:bold; cursor:pointer;">×</button>
+      <h2 style="color:var(--accent); margin-top:0; text-align:center;">📊 Statistiche</h2>
+
+      <!-- Filtro Paese dentro le Stats -->
+      <select id="statsCountryFilter" class="btn-filter" style="margin-bottom:15px;" onchange="renderStatsDati()">
+        <option value="GLOBAL">🌎 Globali</option>
+      </select>
+
+      <div id="statsModalContent" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:10px; text-align:center;">
+      </div>
+    </div>
+  </div>
+
+
+  
   <div id="mapPub"></div>
 
 
@@ -396,60 +440,96 @@ $$
   }
 
   // Gestione Bottoni Filtro Tracce
+   // Funzioni per le Tendine (Dropdown)
   function setMode(mode) {
     currentMode = mode;
-    document.getElementById('btnFilterTutto').classList.remove('active-blue');
-    document.getElementById('btnFilterTappe').classList.remove('active-blue');
-    document.getElementById('btnFilterGiri').classList.remove('active-blue');
-    
-    if(mode === 'TUTTO') document.getElementById('btnFilterTutto').classList.add('active-blue');
-    if(mode === 'TAPPE') document.getElementById('btnFilterTappe').classList.add('active-blue');
-    if(mode === 'GIRI') document.getElementById('btnFilterGiri').classList.add('active-blue');
-    
     renderMap();
   }
 
-  // Gestione Filtri Paese
   function setCountry(country) {
     currentCountry = country;
-    const btnMondo = document.getElementById('btnFilterMondo');
-    const select = document.getElementById('selectCountry');
-
-    if (country === '') {
-      btnMondo.classList.add('active');
-      select.classList.remove('active');
-      select.value = "";
-    } else {
-      btnMondo.classList.remove('active');
-      select.classList.add('active');
-    }
-    
     renderMap();
   }
 
-  // Gestione Bottoni Filtro Marker
-  function setMarkerFilter(filterType, btnElement) {
+  function setMarkerFilter(filterType) {
     currentMarkerFilter = filterType;
-    
-    const btns = document.querySelectorAll('#markerFilters .btn-filter');
-    btns.forEach(b => b.classList.remove('active-blue'));
-    
-    btnElement.classList.add('active-blue');
-    
     renderMap();
   }
 
-  // Popola la select dei paesi
+  // Popola ENTRAMBE le tendine dei paesi (Mappa e Statistiche)
   function popolaPaesi() {
-    const select = document.getElementById('selectCountry');
+    const selectMap = document.getElementById('selectCountry');
+    const selectStats = document.getElementById('statsCountryFilter');
     if (!DATA || !DATA.datiPaesi) return;
     
-    Object.keys(DATA.datiPaesi).forEach(p => {
-      const opt = document.createElement('option');
-      opt.value = p;
-      opt.innerText = "📍 " + p;
-      select.appendChild(opt);
+    Object.keys(DATA.datiPaesi).sort().forEach(p => {
+      const optMap = document.createElement('option');
+      optMap.value = p;
+      optMap.innerText = "📍 " + p;
+      selectMap.appendChild(optMap);
+
+      const optStats = document.createElement('option');
+      optStats.value = p;
+      optStats.innerText = "📍 " + p;
+      selectStats.appendChild(optStats);
     });
+  }
+
+  // LOGICA STATISTICHE
+  function apriStats() {
+    document.getElementById('statsModal').style.display = 'flex';
+    document.getElementById('statsCountryFilter').value = 'GLOBAL';
+    renderStatsDati();
+  }
+
+  function renderStatsDati() {
+    if (!DATA) return;
+    const mode = document.getElementById('statsCountryFilter').value;
+    
+    let km = 0, benz = 0, spesaBenz = 0, spesaMaint = 0;
+
+    if (mode === 'GLOBAL') {
+      const s = DATA.stats;
+      km = s.kmTotali || 0;
+      benz = s.benzinaUsataLitri || 0;
+      spesaBenz = s.spesaBenzinaUsd || 0;
+      spesaMaint = (s.spesaRicambiUsd || 0) + (s.spesaManodoperaUsd || 0);
+    } else {
+      const dp = DATA.datiPaesi[mode] || {};
+      km = dp.km || 0;
+      benz = (dp.benzina || 0) + (dp.benzinaFuori || 0);
+      spesaBenz = dp.spesaBenzinaUsd || 0;
+      spesaMaint = (dp.spesaRicambiUsd || 0) + (dp.spesaManodoperaUsd || 0);
+    }
+
+    const cons = benz > 0 ? (km / benz).toFixed(1) : '--';
+
+    document.getElementById('statsModalContent').innerHTML = `
+      <div style="background:#333; padding:10px; border-radius:10px;">
+        <div style="font-size:11px; color:#aaa;">KM TOTALI</div>
+        <div style="font-size:18px; color:#4caf50; font-weight:bold;">${km.toFixed(1)}</div>
+      </div>
+      <div style="background:#333; padding:10px; border-radius:10px;">
+        <div style="font-size:11px; color:#aaa;">BENZINA USATA</div>
+        <div style="font-size:18px; color:#ff9800; font-weight:bold;">${benz.toFixed(1)} L</div>
+      </div>
+      <div style="background:#333; padding:10px; border-radius:10px;">
+        <div style="font-size:11px; color:#aaa;">SPESA BENZINA</div>
+        <div style="font-size:18px; color:#fff; font-weight:bold;">
+$$
+{spesaBenz.toFixed(2)}</div>
+      </div>
+      <div style="background:#333; padding:10px; border-radius:10px;">
+        <div style="font-size:11px; color:#aaa;">SPESA OFFICINA</div>
+        <div style="font-size:18px; color:var(--maint); font-weight:bold;">
+$$
+{spesaMaint.toFixed(2)}</div>
+      </div>
+      <div style="background:#333; padding:10px; border-radius:10px; grid-column: 1 / -1;">
+        <div style="font-size:11px; color:#aaa;">CONSUMO MEDIO</div>
+        <div style="font-size:20px; color:var(--brand); font-weight:bold;">${cons} km/L</div>
+      </div>
+    `;
   }
 
   // Lightbox Foto
