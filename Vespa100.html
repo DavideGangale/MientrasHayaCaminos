@@ -2751,6 +2751,36 @@ function aggiornaModalitaUI() {
   b.classList.remove('tappa','giri');
   b.classList.add(isGiri ? 'giri' : 'tappa');
 }
+
+
+
+function aggiornaGuidaButtonsUI() {
+  const startBtn = document.getElementById('btn-start-stop');
+  const endBtn   = document.getElementById('btn-concludi');
+
+  // START / PAUSA
+  if (startBtn) {
+    if (inViaggio) {
+      startBtn.classList.remove('play');
+      startBtn.classList.add('stop');
+      startBtn.innerText = '⏸';
+    } else {
+      startBtn.classList.remove('stop');
+      startBtn.classList.add('play');
+      startBtn.innerText = '▶';
+    }
+  }
+
+  // CONCLUDI: attivo se ho km percorsi nella tappa/giro
+  const kmTrip = Number(tappaAttuale?.kmPercorsi || 0);
+  const canEnd = kmTrip >= 0.1;
+
+  if (endBtn) {
+    endBtn.disabled = !canEnd;
+    endBtn.innerText = '🏁';
+  }
+}
+
   
 
 function toggleModalitaGuida() {
