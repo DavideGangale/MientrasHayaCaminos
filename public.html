@@ -533,23 +533,17 @@ document.getElementById('statsModalContent').innerHTML = `
 
   <div style="background:#333; padding:10px; border-radius:10px;">
     <div style="font-size:11px; color:#aaa;">SPESA BENZINA</div>
-    <div style="font-size:18px; color:#fff; font-weight:bold;">
-$$
-{Number(spesaBenz || 0).toFixed(2)}</div>
+    <div style="font-size:18px; color:#fff; font-weight:bold;">${Number(spesaBenz || 0).toFixed(2)}</div>
   </div>
 
   <div style="background:#333; padding:10px; border-radius:10px;">
     <div style="font-size:11px; color:#aaa;">SPESA OLIO 2T</div>
-    <div style="font-size:18px; color:#00bcd4; font-weight:bold;">
-$$
-{Number(spesaOlio || 0).toFixed(2)}</div>
+    <div style="font-size:18px; color:#00bcd4; font-weight:bold;">${Number(spesaOlio || 0).toFixed(2)}</div>
   </div>
 
   <div style="background:#333; padding:10px; border-radius:10px;">
     <div style="font-size:11px; color:#aaa;">SPESA OFFICINA</div>
-    <div style="font-size:18px; color:var(--maint); font-weight:bold;">
-$$
-{Number(spesaMaint || 0).toFixed(2)}</div>
+    <div style="font-size:18px; color:var(--maint); font-weight:bold;">${Number(spesaMaint || 0).toFixed(2)}</div>
   </div>
 
   ${mode === 'GLOBAL' ? `
