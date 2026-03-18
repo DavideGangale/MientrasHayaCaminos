@@ -218,6 +218,7 @@
   const iconCarb = L.divIcon({ className: 'custom-marker marker-carb', html: '🌬️' });
 
   // Disegna Tracce e Marcatori
+    // Disegna Tracce e Marcatori
   function renderMap() {
     layerTracce.clearLayers();
     layerMarkers.clearLayers();
@@ -236,18 +237,16 @@
     if (currentMode === 'TUTTO' || currentMode === 'GIRI') tracceDaMostrare.push(...turismo);
 
     tracceDaMostrare.forEach(t => {
-      // Filtro paese
       if (currentCountry && t.paese !== currentCountry) return;
       if (!t.traccia || t.traccia.length < 2) return;
 
       const latlngs = t.traccia.map(p => Array.isArray(p) ? [p[0], p[1]] : [p.lat, p.lon || p.lng]);
-      const color = t.tipo === 'Turismo' ? '#2196F3' : '#d32f2f'; // Blu per giri, Rosso per tappe
+      const color = t.tipo === 'Turismo' ? '#2196F3' : '#d32f2f';
 
       const poly = L.polyline(latlngs, { color: color, weight: 4, opacity: 0.8 }).addTo(layerTracce);
       bounds.extend(poly.getBounds());
       drawnLines++;
 
-      // Popup sulla linea
       poly.bindPopup(`
         <div class="popup-title">${t.tipo || 'Percorso'} - ${t.paese}</div>
         <div class="popup-meta">📅 ${t.data} | 📏 ${t.km} km</div>
@@ -255,36 +254,78 @@
       `);
     });
 
-    // 2. DISEGNA DIARIO (Foto e Video)
+    // --- FUNZIONE DI SUPPORTO PER CREARE I MARKER ---
+    function creaMarker(lat, lon, icona, popupHTML) {
+      if (!isFinite(lat) || !isFinite(lon)) return;
+      const m = L.marker([lat, lon], { icon: icona }).addTo(layerMarkers);
+      bounds.extend(m.getLatLng());
+      m.bindPopup(popupHTML, { minWidth: 250 });
+    }
+
+    // 2. DISEGNA DIARIO (Foto e Video YouTube)
     const diario = Array.isArray(DATA.diario) ? DATA.diario : [];
     diario.forEach(d => {
       if (currentCountry && d.paese !== currentCountry) return;
-      if (!d.geo || !isFinite(d.geo.lat) || !isFinite(d.geo.lon)) return;
+      if (!d.geo) return;
 
       const ytId = getYouTubeId(d.videoUrl);
       const fotoSrc = d.fotoUrl || d.foto;
-
-      let icon = ytId ? iconVideo : iconFoto;
-      
       let mediaHtml = '';
-      if (ytId) {
-        mediaHtml = `<div class="popup-video"><iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe></div>`;
-      } else if (fotoSrc) {
-        mediaHtml = `<img class="popup-img" src="${fotoSrc}" onclick="openLightbox('${fotoSrc}')">`;
-      }
+      
+      if (ytId) mediaHtml = `<div class="popup-video"><iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe></div>`;
+      else if (fotoSrc) mediaHtml = `<img class="popup-img" src="${fotoSrc}" onclick="openLightbox('${fotoSrc}')">`;
 
-      const m = L.marker([d.geo.lat, d.geo.lon], { icon: icon }).addTo(layerMarkers);
-      bounds.extend(m.getLatLng());
-
-      m.bindPopup(`
+      creaMarker(d.geo.lat, d.geo.lon, ytId ? iconVideo : iconFoto, `
         <div class="popup-title">📍 ${d.paese || ''}</div>
         <div class="popup-meta">📅 ${d.data} ${d.ora} | 📏 km ${d.km}</div>
         <div>${d.testo || ''}</div>
         ${mediaHtml}
-      `, { minWidth: 250 });
+      `);
     });
 
-    // Fit bounds se c'è qualcosa
+    // 3. DISEGNA OFFICINA
+    const manutenzioni = Array.isArray(DATA.manutenzioni) ? DATA.manutenzioni : [];
+    manutenzioni.forEach(m => {
+      if (currentCountry && m.paese !== currentCountry) return;
+      if (!m.geo) return;
+      creaMarker(m.geo.lat, m.geo.lon, iconMaint, `
+        <div class="popup-title" style="color:var(--maint)">🔧 Officina: ${m.nome}</div>
+        <div class="popup-meta">📅 ${m.data} | 📏 km ${m.km}</div>
+        <div>${m.desc || ''}</div>
+        ${m.costoUsd > 0 ? `<div style="margin-top:5px; color:#4caf50;">💰 Costo: 
+$$
+{m.costoUsd.toFixed(2)}</div>` : ''}
+      `);
+    });
+
+    // 4. DISEGNA RIFORNIMENTI
+    const rifornimenti = Array.isArray(DATA.rifornimenti) ? DATA.rifornimenti : [];
+    rifornimenti.forEach(r => {
+      if (currentCountry && r.paese !== currentCountry) return;
+      if (!r.geo) return;
+      creaMarker(r.geo.lat, r.geo.lon, iconFuel, `
+        <div class="popup-title" style="color:var(--fuel)">⛽ Rifornimento</div>
+        <div class="popup-meta">📅 ${r.data} | 📏 km ${r.km}</div>
+        <div>📦 <b>${r.qta} L</b> (Destinazione: ${r.dest})</div>
+        ${r.costoBenzUsd > 0 ? `<div style="margin-top:5px; color:#4caf50;">💰 Pagato:
+$$
+{Number(r.costoBenzUsd).toFixed(2)}</div>` : ''}
+      `);
+    });
+
+    // 5. DISEGNA CARBURAZIONI
+    const carburazioni = Array.isArray(DATA.carburazioni) ? DATA.carburazioni : [];
+    carburazioni.forEach(c => {
+      if (!c.geo) return;
+      creaMarker(c.geo.lat, c.geo.lon, iconCarb, `
+        <div class="popup-title" style="color:var(--carb)">🌬️ Setup Carburatore</div>
+        <div class="popup-meta">📅 ${c.data} | ⛰️ Altitudine: ${c.alt}m</div>
+        <div>Max: <b>${c.chicMax}</b> | Min: <b>${c.chicMin}</b></div>
+        ${c.nota ? `<div style="margin-top:5px; font-style:italic;">"${c.nota}"</div>` : ''}
+      `);
+    });
+
+    // Adatta la vista
     if (drawnLines > 0 || layerMarkers.getLayers().length > 0) {
       map.fitBounds(bounds.pad(0.1));
     }
