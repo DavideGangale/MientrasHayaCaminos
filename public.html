@@ -174,7 +174,9 @@
     </div>
 
     <!-- Filtri Marker -->
+        
     <div class="filters" id="markerFilters">
+      <button class="btn-filter" style="background:#ff9800; color:#000;" onclick="apriStats()">📊 Statistiche</button>
       <button class="btn-filter active-blue" onclick="setMarkerFilter('ALL', this)">Tutti i Marker</button>
       <button class="btn-filter" onclick="setMarkerFilter('FOTO', this)">📷 Foto</button>
       <button class="btn-filter" onclick="setMarkerFilter('VIDEO', this)">▶️ Video</button>
@@ -187,6 +189,17 @@
   <!-- MAPPA -->
   <div id="mapPub"></div>
 
+
+  <!-- MODALE STATISTICHE -->
+  <div id="statsModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:8000; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:var(--card); width:100%; max-width:500px; border-radius:15px; border:2px solid var(--accent); padding:20px; position:relative;">
+      <button onclick="document.getElementById('statsModal').style.display='none'" style="position:absolute; top:10px; right:10px; background:#f44336; color:#fff; border:none; border-radius:50%; width:30px; height:30px; font-weight:bold; cursor:pointer;">×</button>
+      <h2 style="color:var(--accent); margin-top:0; text-align:center;">📊 Statistiche Viaggio</h2>
+      <div id="statsModalContent" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; text-align:center;"></div>
+    </div>
+  </div>
+
+  
   <!-- LIGHTBOX FOTO -->
   <div id="lightbox" onclick="closeLightbox()">
     <button id="lightboxClose" onclick="event.stopPropagation(); closeLightbox()">×</button>
@@ -206,7 +219,7 @@
   // Inizializza Mappa
   function initMap() {
     map = L.map('mapPub', { zoomControl: false }).setView([4.7, -74.1], 5);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
+       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
     L.control.zoom({ position: 'bottomright' }).addTo(map);
     
     layerTracce = L.layerGroup().addTo(map);
@@ -253,15 +266,40 @@
       const latlngs = t.traccia.map(p => Array.isArray(p) ? [p[0], p[1]] : [p.lat, p.lon || p.lng]);
       const color = t.tipo === 'Turismo' ? '#2196F3' : '#d32f2f';
 
-      const poly = L.polyline(latlngs, { color: color, weight: 4, opacity: 0.8 }).addTo(layerTracce);
+      // Linea visibile
+      const poly = L.polyline(latlngs, { color: color, weight: 4, opacity: 0.8, interactive: false }).addTo(layerTracce);
+      
+      // Linea spessa e invisibile sopra quella vera, fa da "calamita" per il dito sul telefono!
+      const clickPoly = L.polyline(latlngs, { color: 'transparent', weight: 30, opacity: 0 }).addTo(layerTracce);
       bounds.extend(poly.getBounds());
       drawnLines++;
 
-      poly.bindPopup(`
-        <div class="popup-title">${t.tipo || 'Percorso'} - ${t.paese}</div>
-        <div class="popup-meta">📅 ${t.data} | 📏 ${t.km} km</div>
-        <div>${t.note || ''}</div>
-      `);
+      // Calcolo ore e consumo
+      const h = Math.floor((t.durata || 0) / 3600);
+      const m = Math.floor(((t.durata || 0) % 3600) / 60);
+      const consHtml = (t.benzinaStimataLitri > 0) ? `<div>⛽ Consumo: <b>${(t.km / t.benzinaStimataLitri).toFixed(1)} km/L</b></div>` : '';
+
+      const infoEstesa = `
+        <div class="popup-title">${t.tipo === 'Turismo' ? '🛵' : '🏁'} ${t.tipo || 'Percorso'} - ${t.paese}</div>
+        <div class="popup-meta">📅 ${t.data} ${t.ora || ''} | 📏 <b>${t.km} km</b></div>
+        <div style="font-size:13px; margin-bottom:8px; line-height:1.4;">
+          <div>⏱️ Tempo: ${h}h ${m}m</div>
+          <div>⛰️ Altitudine: ${t.altMin || 0}m → ${t.altMax || 0}m</div>
+          <div>🏎️ Vel. Max: ${t.velMax || 0} km/h ${t.velMedia ? `(Media: ${t.velMedia})` : ''}</div>
+          ${consHtml}
+        </div>
+        ${t.titolo ? `<div style="font-weight:bold; margin-bottom:4px; color:var(--accent);">📍 ${t.titolo}</div>` : ''}
+        ${t.note ? `<div style="color:#bbb; font-style:italic;">${t.note}</div>` : ''}
+      `;
+
+      clickPoly.bindPopup(infoEstesa);
+
+      // Aggiunge un marker a bandierina alla fine della tappa, facilissimo da cliccare
+      const lastPoint = latlngs[latlngs.length - 1];
+      const markerFine = L.marker(lastPoint, { 
+        icon: L.divIcon({ className: 'custom-marker', html: t.tipo === 'Turismo' ? '🛵' : '🏁', iconSize:[30,30] }) 
+      }).addTo(layerTracce);
+      markerFine.bindPopup(infoEstesa);
     });
 
     // --- FUNZIONE SUPPORTO MARKER ---
@@ -424,6 +462,46 @@ $$
     document.getElementById('lightboxImg').src = '';
   }
 
+
+  function apriStats() {
+    if (!DATA || !DATA.stats) return;
+    const s = DATA.stats;
+    const cons = s.benzinaUsataLitri > 0 ? (s.kmTotali / s.benzinaUsataLitri).toFixed(1) : '--';
+    const box = document.getElementById('statsModalContent');
+    box.innerHTML = `
+      <div style="background:#333; padding:10px; border-radius:10px;">
+        <div style="font-size:12px; color:#aaa;">KM TOTALI</div>
+        <div style="font-size:20px; color:#4caf50; font-weight:bold;">${s.kmTotali.toFixed(1)}</div>
+      </div>
+      <div style="background:#333; padding:10px; border-radius:10px;">
+        <div style="font-size:12px; color:#aaa;">BENZINA USATA</div>
+        <div style="font-size:20px; color:#ff9800; font-weight:bold;">${s.benzinaUsataLitri.toFixed(1)} L</div>
+      </div>
+      <div style="background:#333; padding:10px; border-radius:10px;">
+        <div style="font-size:12px; color:#aaa;">OLIO 2T USATO</div>
+        <div style="font-size:20px; color:#00bcd4; font-weight:bold;">${s.olioTotaleLitri.toFixed(2)} L</div>
+      </div>
+      <div style="background:#333; padding:10px; border-radius:10px;">
+        <div style="font-size:12px; color:#aaa;">SPESA BENZINA</div>
+        <div style="font-size:20px; color:#fff; font-weight:bold;">
+$$
+{s.spesaBenzinaUsd.toFixed(2)}</div>
+      </div>
+      <div style="background:#333; padding:10px; border-radius:10px;">
+        <div style="font-size:12px; color:#aaa;">SPESA OFFICINA</div>
+        <div style="font-size:20px; color:var(--maint); font-weight:bold;">
+$$
+{(s.spesaRicambiUsd + s.spesaManodoperaUsd).toFixed(2)}</div>
+      </div>
+      <div style="background:#333; padding:10px; border-radius:10px;">
+        <div style="font-size:12px; color:#aaa;">CONSUMO MEDIO</div>
+        <div style="font-size:20px; color:var(--brand); font-weight:bold;">${cons} km/L</div>
+      </div>
+    `;
+    document.getElementById('statsModal').style.display = 'flex';
+  }
+
+  
   // Caricamento Dati
   async function loadData() {
     initMap();
