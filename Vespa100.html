@@ -74,7 +74,7 @@
 
     /* SPEED */
     .speed{
-  font-size: clamp(108px, 20vw, 150px);
+  font-size: clamp(140px, 26vw, 210px);
   font-weight:1000;
   color:var(--verde);
   margin:0;
@@ -162,7 +162,13 @@
     .btn-secondary:active{opacity:0.8;}
 
     /* MAPPA */
-    #map{height:180px;border-radius:10px;width:100%;border:2px solid #444;margin-bottom:10px;}
+   #map{
+  height: clamp(240px, 42vh, 420px);
+  border-radius:10px;
+  width:100%;
+  border:2px solid #444;
+  margin-bottom:10px;
+}
 
     /* SELECT E INPUT */
     select.country-select{
@@ -2900,6 +2906,12 @@ if (id === 'settings') {
 caricaDriveAutoSyncUI();
 updateDriveSyncInfo();
   caricaDriveSettingsUI();
+}
+
+  if (id === 'guida') {
+  setTimeout(() => {
+    try { map.invalidateSize(); } catch {}
+  }, 200);
 }
 
 /* ============================================================
