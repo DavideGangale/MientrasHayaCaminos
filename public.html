@@ -28,17 +28,23 @@
 
 
 
-    body, html {
+       html {
+      height: 100%;
+    }
+    body {
       margin: 0; padding: 0;
       font-family: system-ui, -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text);
       height: 100%;
+      height: 100dvh; /* Usa tutta l'altezza reale dello schermo anche su mobile */
       overflow: hidden;
       display: flex;
-      flex-direction: column; /* Incolonna gli elementi uno sotto l'altro in automatico */
+      flex-direction: column;
     }
 
+
+    
     /* ===== HEADER E CONTROLLI ===== */
     #topBar {
       position: relative; /* Non fluttua più, occupa il suo spazio reale */
@@ -98,13 +104,14 @@ cursor: pointer;
 grid-column: span 2;
 }
 
-    /* ===== MAPPA ===== */
+      /* ===== MAPPA ===== */
     #mapPub {
-      position: relative;
-      flex-grow: 1; /* Prende tutto lo spazio rimanente dallo schermo in automatico */
+      flex: 1 1 auto; /* Si espande e si restringe fluidamente */
       width: 100%;
+      height: 100%; /* Obbliga la mappa ad aprirsi del tutto */
+      min-height: 0; /* Previene un bug dei browser sullo scorrimento */
       z-index: 1;
-    }
+    }}
 
     /* ===== MARKERS PERSONALIZZATI ===== */
     .custom-marker {
