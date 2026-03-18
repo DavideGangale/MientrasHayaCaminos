@@ -983,13 +983,7 @@ window.apriGraficoPercorsoPublic = function(id) {
 document.getElementById('appTitle').innerText = DATA.titolo || T('live');
       
       document.getElementById('appTitle').innerText = DATA.titolo || T('live');
-      if (DATA.stats) {
-        document.getElementById('statsMini').innerText =
-  (I18N[LANG] || I18N.it).totalMini(
-    Number(DATA.stats.kmTotali || 0).toFixed(1),
-    Number(DATA.stats.benzinaUsataLitri || 0).toFixed(1)
-  );
-      }
+     
 
       popolaPaesi();
       renderMap();
