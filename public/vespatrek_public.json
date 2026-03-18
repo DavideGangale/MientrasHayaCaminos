@@ -1,6 +1,6 @@
 {
   "_version": "public-1.0",
-  "_exportDate": "2026-03-18T18:40:23.779Z",
+  "_exportDate": "2026-03-18T18:41:42.983Z",
   "titolo": "VespaTrek PX150",
   "diarioTagsPreset": [
     "Paesaggi",
@@ -27,24 +27,24 @@
   "paeseAttuale": "Colombia",
   "stats": {
     "kmTotali": 6.3578,
-    "benzinaUsataLitri": 37.0961,
+    "benzinaUsataLitri": 44.51592,
     "benzinaFuoriTappaLitri": 0,
-    "olioTotaleLitri": 0.758,
+    "olioTotaleLitri": 0.909,
     "spesaBenzinaUsd": 16.564721308387693,
-    "spesaOlioUsd": 11.908888730900616,
+    "spesaOlioUsd": 14.281211044950203,
     "spesaRicambiUsd": 145.987,
     "spesaManodoperaUsd": 7.842546774056432
   },
   "datiPaesi": {
     "Colombia": {
       "km": 6.3581260808865885,
-      "benzina": 37.0961,
+      "benzina": 44.51592,
       "spesaBenzina": 0,
       "spesaOlio": 0,
       "spesaRicambiUsd": 145.9871332169285,
       "valuta": "COP",
       "spesaManodoperaUsd": 7.842210348914231,
-      "spesaOlioUsd": 11.908888730900616,
+      "spesaOlioUsd": 14.281211044950203,
       "spesaBenzinaUsd": 16.564721308387693,
       "spesaBenzinaLocal": 61150
     }
@@ -622,6 +622,20 @@
   ],
   "manutenzioni": [
     {
+      "id": 1773859287747,
+      "data": "18/03/2026",
+      "ora": "13:41",
+      "paese": "Colombia",
+      "km": "6.4",
+      "nome": "Limpieza carb",
+      "desc": "Jsjdjdjfjf",
+      "costoLocal": 0,
+      "valuta": "COP",
+      "costoUsd": 0,
+      "fotoUrl": null,
+      "geo": null
+    },
+    {
       "id": 1773859199592,
       "data": "18/03/2026",
       "ora": "13:39",
@@ -707,6 +721,24 @@
     }
   ],
   "rifornimenti": [
+    {
+      "id": 1773859270511,
+      "data": "18/03/2026",
+      "ora": "13:41",
+      "paese": "Colombia",
+      "qta": "7.57",
+      "dest": "Vespa",
+      "mix": "2%",
+      "prezzoUnit": null,
+      "valuta": "COP",
+      "fxToUsd": 0.0002708866935141078,
+      "costoBenzLocal": null,
+      "costoBenzUsd": null,
+      "costoBenz": null,
+      "costoOlio": "2.37",
+      "luogo": "N/D",
+      "km": "6.4"
+    },
     {
       "id": 1773859170956,
       "data": "18/03/2026",
