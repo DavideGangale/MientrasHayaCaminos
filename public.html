@@ -24,6 +24,10 @@
     }
 
     * { box-sizing: border-box; }
+   
+
+
+
     body, html {
       margin: 0; padding: 0;
       font-family: system-ui, -apple-system, sans-serif;
@@ -31,12 +35,14 @@
       color: var(--text);
       height: 100%;
       overflow: hidden;
+      display: flex;
+      flex-direction: column; /* Incolonna gli elementi uno sotto l'altro in automatico */
     }
 
     /* ===== HEADER E CONTROLLI ===== */
     #topBar {
-      position: absolute;
-      top: 0; left: 0; width: 100%;
+      position: relative; /* Non fluttua più, occupa il suo spazio reale */
+      width: 100%;
       background: rgba(18, 18, 18, 0.9);
       backdrop-filter: blur(10px);
       z-index: 1000;
@@ -44,8 +50,12 @@
       border-bottom: 1px solid var(--border);
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      flex-shrink: 0;
     }
+
+
+
+    
 
     .header-title {
       font-size: 20px;
@@ -88,14 +98,13 @@ cursor: pointer;
 grid-column: span 2;
 }
 
-/* ===== MAPPA ===== */
-#mapPub {
-position: absolute;
-top: 160px;
-bottom: 0;
-width: 100%;
-z-index: 1;
-}
+    /* ===== MAPPA ===== */
+    #mapPub {
+      position: relative;
+      flex-grow: 1; /* Prende tutto lo spazio rimanente dallo schermo in automatico */
+      width: 100%;
+      z-index: 1;
+    }
 
     /* ===== MARKERS PERSONALIZZATI ===== */
     .custom-marker {
@@ -292,7 +301,7 @@ z-index: 1;
       const poly = L.polyline(latlngs, { color: color, weight: 4, opacity: 0.8, interactive: false }).addTo(layerTracce);
       
       // Linea spessa e invisibile sopra quella vera, fa da "calamita" per il dito sul telefono!
-      const clickPoly = L.polyline(latlngs, { color: 'transparent', weight: 30, opacity: 0 }).addTo(layerTracce);
+      const clickPoly = L.polyline(latlngs, { color: 'transparent', weight: 30, opacity: 0.01 }).addTo(layerTracce);
       bounds.extend(poly.getBounds());
       drawnLines++;
 
