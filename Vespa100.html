@@ -7382,6 +7382,25 @@ function simplifyTrace(trace, step = 3) {
   return (simple.length > 0) ? simple : trace;
 }
 
+
+
+function simplifyTelemetry(telem, step = 2, maxPts = 260) {
+  if (!Array.isArray(telem) || telem.length === 0) return [];
+  let out = telem.filter((_, i) => i % step === 0);
+  if (out.length > maxPts) {
+    const s = Math.ceil(out.length / maxPts);
+    out = out.filter((_, i) => i % s === 0);
+  }
+  // tieni solo campi necessari
+  return out.map(p => ({
+    km: Number(p.km || 0),
+    alt: Number(p.alt || 0),
+    sp: Number(p.sp || 0),
+    ts: Number(p.ts || 0)
+  }));
+}
+
+  
 async function esportaDatiPubblici(azione = 'download') {
   try {
     const MAX_FOTO_DIARIO = 30;
@@ -7414,7 +7433,7 @@ async function esportaDatiPubblici(azione = 'download') {
 
       titolo: t.titolo || '',
       note: t.note || '',
-
+telemetry: simplifyTelemetry(t.telemetry, 2, 260),
       traccia: simplifyTrace(t.traccia, 3)
     }));
 
@@ -7435,7 +7454,7 @@ async function esportaDatiPubblici(azione = 'download') {
 
       titolo: t.titolo || '',
       note: t.note || '',
-
+telemetry: simplifyTelemetry(t.telemetry, 2, 260),
       traccia: simplifyTrace(t.traccia, 3)
     }));
 
