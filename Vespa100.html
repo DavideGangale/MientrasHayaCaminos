@@ -2949,14 +2949,16 @@ if (id === 'settings') {
   aggiornaFxSettingsUI(); }
 caricaDriveAutoSyncUI();
 updateDriveSyncInfo();
-  caricaDriveSettingsUI();
-}
+caricaDriveSettingsUI();
 
-  if (id === 'guida') {
+// ✅ quando torno su GUIDA ridisegno la mappa (Leaflet)
+if (id === 'guida') {
   setTimeout(() => {
     try { map.invalidateSize(); } catch {}
   }, 200);
 }
+}
+
 
 
   
