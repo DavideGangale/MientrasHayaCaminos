@@ -88,7 +88,14 @@
 .social-link.ig{ border-color:#6a1b9a; }
 .social-link.yt{ border-color:#ff0000; color:#ff0000; }
 
-
+.stats-mini{
+  font-size:12px;
+  color:#aaa;
+  font-weight:600;
+  text-align:right;
+  line-height:1.15;
+  white-space:nowrap;
+}
 
     .top-controls {
       display: grid;
@@ -690,7 +697,7 @@ const infoEstesa = `
       creaMarker(m.geo.lat, m.geo.lon, iconMaint, `
   <div class="popup-title" style="color:var(--maint)">${T('workshop')}: ${m.nome}</div>
   <div class="popup-meta">📅 ${m.data} | 📏 km ${m.km}</div>
-  <div>${m.desc || '}</div>
+  <div>${m.desc || ''}</div>
   ${Number(m.costoUsd || 0) > 0 ? `<div style="margin-top:5px; color:#4caf50;">💰 ${T('cost')}: <b>$${Number(m.costoUsd).toFixed(2)}</b></div>` : ''}
 
 
@@ -959,113 +966,6 @@ window.apriGraficoPercorsoPublic = function(id) {
 };
 
 
-
-function drawSeriesPub(canvasId, points, color, valueKey) {
-  const cv = document.getElementById(canvasId);
-  if (!cv) return;
-
-  const rect = cv.getBoundingClientRect();
-  const W = Math.max(320, Math.floor(rect.width));
-  const H = Math.max(150, Math.floor(rect.height));
-  cv.width = W;
-  cv.height = H;
-
-  const ctx = cv.getContext('2d');
-  ctx.clearRect(0, 0, W, H);
-
-  if (!Array.isArray(points) || points.length < 2) {
-    ctx.fillStyle = '#888';
-    ctx.font = '14px system-ui';
-    ctx.fillText('Dati insufficienti', 12, 28);
-    return;
-  }
-
-  const xs = points.map(p => Number(p.km || 0));
-  const ys = points.map(p => Number(p[valueKey] || 0));
-
-  const xMin = Math.min(...xs), xMax = Math.max(...xs);
-  let yMin = Math.min(...ys), yMax = Math.max(...ys);
-
-  if (!isFinite(xMin) || !isFinite(xMax) || xMax <= xMin) return;
-  if (!isFinite(yMin) || !isFinite(yMax)) return;
-  if (yMax === yMin) yMax = yMin + 1;
-
-  const padL = 36, padR = 10, padT = 10, padB = 22;
-  const plotW = W - padL - padR;
-  const plotH = H - padT - padB;
-
-  // griglia
-  ctx.strokeStyle = '#222';
-  ctx.lineWidth = 1;
-  for (let i = 0; i <= 4; i++) {
-    const y = padT + (plotH * i / 4);
-    ctx.beginPath();
-    ctx.moveTo(padL, y);
-    ctx.lineTo(W - padR, y);
-    ctx.stroke();
-  }
-
-  function X(x) { return padL + ((x - xMin) / (xMax - xMin)) * plotW; }
-  function Y(y) { return padT + (1 - ((y - yMin) / (yMax - yMin))) * plotH; }
-
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(X(xs[0]), Y(ys[0]));
-  for (let i = 1; i < points.length; i++) ctx.lineTo(X(xs[i]), Y(ys[i]));
-  ctx.stroke();
-
-  // etichette
-  ctx.fillStyle = '#aaa';
-  ctx.font = '12px system-ui';
-  ctx.fillText(String(Math.round(yMax)), 6, padT + 12);
-  ctx.fillText(String(Math.round(yMin)), 6, padT + plotH);
-
-  ctx.fillStyle = '#666';
-  ctx.fillText(`${xMax.toFixed(1)} km`, W - 72, H - 8);
-}
-
-// Serve perché il popup Leaflet chiama una funzione globale
-window.apriGraficoPercorsoPublic = function (id) {
-  if (!DATA) return;
-
-  const tappe = Array.isArray(DATA.tappe) ? DATA.tappe : [];
-  const tur   = Array.isArray(DATA.turismo) ? DATA.turismo : [];
-  const all   = tappe.concat(tur);
-
-  const t = all.find(x => String(x.id) === String(id));
-  if (!t) { alert('Percorso non trovato'); return; }
-
-  const telem = Array.isArray(t.telemetry) ? t.telemetry : [];
-  if (telem.length < 3) { alert('Telemetria insufficiente per il grafico'); return; }
-
-  const title = document.getElementById('graphTitle');
-  if (title) {
-    title.innerText = `📈 ${t.tipo || 'Percorso'} — ${t.data || ''} ${t.ora || ''} — ${t.paese || ''}`;
-  }
-
-  const altMin = Math.min(...telem.map(p => Number(p.alt || 0)));
-  const altMax = Math.max(...telem.map(p => Number(p.alt || 0)));
-  const spMax  = Math.max(...telem.map(p => Number(p.sp || 0)));
-
-  const info = document.getElementById('graphInfo');
-  if (info) {
-    info.innerHTML = `
-      <div>📏 Km: <b>${Number(t.km || 0).toFixed(1)}</b></div>
-      <div>⛰️ Altitudine: <b>${Math.round(altMin)}</b> → <b>${Math.round(altMax)}</b> m</div>
-      <div>🏎️ Vel max (telemetria): <b>${Math.round(spMax)}</b> km/h</div>
-    `;
-  }
-
-  const modal = document.getElementById('graphModal');
-  if (modal) modal.style.display = 'flex';
-
-  // disegna dopo apertura (per avere width giusta)
-  setTimeout(() => {
-    drawSeriesPub('cvAltPub', telem, '#2196F3', 'alt');
-    drawSeriesPub('cvSpdPub', telem, '#d32f2f', 'sp');
-  }, 120);
-};
 
 
   
