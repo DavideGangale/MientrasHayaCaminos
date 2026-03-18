@@ -963,76 +963,22 @@ color:#fff;
 
   
   <!-- ==================== PAGINA 2: VIAGGIO ==================== -->
-  <div id="viaggio" class="page">
-    <div class="dash-card">
-     <div style="margin-top:0; text-align:center; font-weight:bold; color:#bbb; margin-bottom:10px;">
-  Statistiche: <span id="titolo-stat-paese" style="color:var(--giallo);">Globali</span>
-</div>
 
-<div class="toggle-container" style="margin-bottom:10px;">
-  <button id="btn-stats-global" class="toggle-btn stats" onclick="setStatsMode('Globali')">🌍 Globali</button>
-  <button id="btn-stats-paese" class="toggle-btn stats" onclick="setStatsMode('Paese')">📍 Paese attuale</button>
-  <button id="btn-stats-scegli" class="toggle-btn stats" onclick="setStatsMode('Scegli')">🧭 Scegli paese</button>
-</div>
-
-<select id="stats-paese-select" class="inp-select" style="display:none;" onchange="onStatsPaeseSelect(this.value)">
-  <!-- opzioni generate via JS -->
-</select>
-
-      <div class="stats-grid">
-        <div class="stat-box">
-          <div style="font-size:11px; color:#aaa;">KM PERCORSI</div>
-          <div class="stat-num" id="statKm">0.0</div>
-        </div>
-        <div class="stat-box">
-          <div style="font-size:11px; color:#aaa;">CONSUMO</div>
-          <div class="stat-num" id="statConsumo" style="color:#00bcd4;">-- <span style="font-size:12px;">km/L</span></div>
-        </div>
-        <div class="stat-box">
-          <div style="font-size:11px; color:#aaa;">BENZINA BRUCIATA</div>
-          <div class="stat-num" id="statBenzina" style="color:#f44336;">0.0 <span class="txt-unita" style="font-size:12px;">L</span></div>
-        </div>
-        <div class="stat-box">
-          <div style="font-size:11px; color:#aaa;">OLIO 2T USATO</div>
-          <div class="stat-num" id="statOlio">0.00 <span style="font-size:12px;">L</span></div>
-        </div>
-
-
-<div class="stat-box">
-  <div style="font-size:11px; color:#aaa;">SPESA BENZINA</div>
-  <div class="stat-num" id="statSpesaBenzina" style="color:var(--giallo);">--</div>
-  <div style="font-size:11px; color:#777;">USD</div>
-</div>
-
-<div class="stat-box">
-  <div style="font-size:11px; color:#aaa;">SPESA OLIO</div>
-  <div class="stat-num" id="statSpesaOlio" style="color:#00bcd4;">--</div>
-  <div style="font-size:11px; color:#777;">USD</div>
-</div>
-
-<div class="stat-box">
-  <div style="font-size:11px; color:#aaa;">SPESA RICAMBI</div>
-  <div class="stat-num" id="statSpesaRicambi" style="color:#ff9800;">--</div>
-  <div style="font-size:11px; color:#777;">USD</div>
-</div>
-
-<div class="stat-box">
-  <div style="font-size:11px; color:#aaa;">SPESA MANODOPERA</div>
-  <div class="stat-num" id="statSpesaManodopera" style="color:var(--verde);">--</div>
-  <div style="font-size:11px; color:#777;">USD</div>
-</div>
-
-        
-        <div class="stat-box" style="grid-column:span 2; border-color:var(--giallo);">
-          <div style="font-size:12px; color:#aaa;">SCORTA NELLE TANICHE</div>
-          <div class="stat-num" id="statScorta" style="color:var(--giallo); font-size:28px;">
-            0.0 <span class="txt-unita" style="font-size:14px;">L</span>
-          </div>
-        </div>
-      </div>
 
       <button class="btn-azione" style="background:#9c27b0;" onclick="apriModal('modalTappe')">🗺️ APRI DIARIO TAPPE</button>
       <button class="btn-azione" style="background:#2196F3;" onclick="apriModalPaesi()">🌎 STATISTICHE PER PAESE</button>
+
+  <button class="btn-azione" style="background:#ff9800; color:black;" onclick="apriModal('modalStats'); aggiornaUI();">
+  📊 STATISTICHE
+</button>
+
+  <button class="btn-azione" style="background:#795548;" onclick="apriModal('modalLogCarburanti')">
+  ⛽ LOG RIFORNIMENTI
+</button>
+
+<button class="btn-azione" style="background:#ff9800; color:black;" onclick="apriModal('modalRegistro')">
+  🔧 LOG MANUTENZIONI
+</button>
 
       <!-- ===== CONDIVIDI MOMENTO (FIX: elementi esistono davvero) ===== -->
       
@@ -1068,25 +1014,7 @@ color:#fff;
 
       </div>
 
-      <!-- EXPORT / IMPORT -->
-      <div class="dash-card" style="border:2px solid #555; margin-top:10px;">
-        <h3 style="margin-top:0; color:#aaa;">💾 Backup Dati</h3>
-        <button class="btn-azione" style="background:#607d8b;" onclick="esportaDati()">⬇️ ESPORTA BACKUP JSON</button>
-       
-
-        <button class="btn-azione" style="background:#009688;" onclick="esportaDatiPubblici()">
-        📤 ESPORTA JSON PUBBLICO (foto + tracce)
-        </button>
-
-        <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importaDati(this)">
-        <button class="btn-secondary" onclick="document.getElementById('import-file').click()">⬆️ IMPORTA BACKUP</button>
-      </div>
-       
-      <button class="btn-secondary" style="background:#8b0000; margin-top:20px;" onclick="resetTutto()">⚠️ RESET COMPLETO APP</button>
-
-      <button class="btn-secondary" style="background:#263238; margin-top:10px;" onclick="testAddKm()">🧪 TEST: +1 km (finto)</button>
-      
-    </div>
+   
   </div>
 
   <!-- ==================== PAGINA 3: BENZINA ==================== -->
@@ -1187,13 +1115,13 @@ color:#fff;
       <div id="autonomia-info" style="font-size:15px; line-height:1.8; text-align:left;">Calcolo in corso...</div>
     </div>
 
-    <button class="btn-azione" style="background:#795548;" onclick="apriModal('modalLogCarburanti')">📊 LOG RIFORNIMENTI</button>
-  </div>
 
 
  <!-- ==================== PAGINA 4: OFFICINA ==================== -->
 <div id="officina" class="page">
 
+
+  
   <!-- STOCK RICAMBI -->
   <button class="btn-azione" style="background:#ff9800;color:black;"
           onclick="apriModal('modalRicambi'); renderInventario(); renderChecklist();">
@@ -1206,6 +1134,12 @@ color:#fff;
     🌬️ CARBURAZIONE (SETUP)
   </button>
 
+<button class="btn-azione" style="background:#ff9800; color:black;"
+        onclick="apriModal('modalLogDettaglio')">
+  🔧 NUOVO INTERVENTO
+</button>
+
+  
   <!-- CHECKLIST OFFICINA -->
   <div class="dash-card" style="border:2px solid #ff9800; margin-top:12px;">
     <h2 style="margin:0 0 10px 0; color:#ff9800;">✅ Checklist Officina</h2>
@@ -1331,6 +1265,9 @@ color:#fff;
   🏷️ Gestisci hashtag (aggiungi/rimuovi)
 </button>
 <hr style="border:0;border-top:1px solid #333; margin:18px 0;">
+
+
+    
     
 <h3 style="margin:0 0 10px 0; color:#90a4ae;">🧰 Parametri viaggio</h3>
 
@@ -1357,7 +1294,24 @@ color:#fff;
 <hr style="border:0;border-top:1px solid #333; margin:15px 0;">
 
 
+   <!-- EXPORT / IMPORT -->
+      <div class="dash-card" style="border:2px solid #555; margin-top:10px;">
+        <h3 style="margin-top:0; color:#aaa;">💾 Backup Dati</h3>
+        <button class="btn-azione" style="background:#607d8b;" onclick="esportaDati()">⬇️ ESPORTA BACKUP JSON</button>
+       
 
+        <button class="btn-azione" style="background:#009688;" onclick="esportaDatiPubblici()">
+        📤 ESPORTA JSON PUBBLICO (foto + tracce)
+        </button>
+
+        <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importaDati(this)">
+        <button class="btn-secondary" onclick="document.getElementById('import-file').click()">⬆️ IMPORTA BACKUP</button> </div>
+       
+      <button class="btn-secondary" style="background:#8b0000; margin-top:20px;" onclick="resetTutto()">⚠️ RESET COMPLETO APP</button>
+
+      <button class="btn-secondary" style="background:#263238; margin-top:10px;" onclick="testAddKm()">🧪 TEST: +1 km (finto)</button>
+      
+    </div>
     
   </div>
 </div>
@@ -1389,11 +1343,101 @@ color:#fff;
 </button>
       </div>
 
-      <button class="btn-azione" style="background:#2196F3;" onclick="apriModal('modalRegistro')">📄 LOG MANUTENZIONE</button>
-      <button class="btn-secondary" onclick="apriModal('modalLogDettaglio')">🔧 NUOVO INTERVENTO</button>
+      
+      
     </div>
   </div>
 </div>
+
+
+  
+  <div id="modalStats" class="modal-overlay">
+  <div class="modal-content" style="border-color:#ff9800; max-width:900px;">
+    <button class="close-modal" onclick="chiudiModal('modalStats')">×</button>
+    <h2 style="color:#ff9800; text-align:center; margin-top:0;">📊 Statistiche</h2>
+    
+
+
+ 
+<div id="statsModalBody">
+
+ <div id="viaggio" class="page">
+    <div class="dash-card">
+     <div style="margin-top:0; text-align:center; font-weight:bold; color:#bbb; margin-bottom:10px;">
+  Statistiche: <span id="titolo-stat-paese" style="color:var(--giallo);">Globali</span>
+</div>
+
+<div class="toggle-container" style="margin-bottom:10px;">
+  <button id="btn-stats-global" class="toggle-btn stats" onclick="setStatsMode('Globali')">🌍 Globali</button>
+  <button id="btn-stats-paese" class="toggle-btn stats" onclick="setStatsMode('Paese')">📍 Paese attuale</button>
+  <button id="btn-stats-scegli" class="toggle-btn stats" onclick="setStatsMode('Scegli')">🧭 Scegli paese</button>
+</div>
+
+<select id="stats-paese-select" class="inp-select" style="display:none;" onchange="onStatsPaeseSelect(this.value)">
+  <!-- opzioni generate via JS -->
+</select>
+
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div style="font-size:11px; color:#aaa;">KM PERCORSI</div>
+          <div class="stat-num" id="statKm">0.0</div>
+        </div>
+        <div class="stat-box">
+          <div style="font-size:11px; color:#aaa;">CONSUMO</div>
+          <div class="stat-num" id="statConsumo" style="color:#00bcd4;">-- <span style="font-size:12px;">km/L</span></div>
+        </div>
+        <div class="stat-box">
+          <div style="font-size:11px; color:#aaa;">BENZINA BRUCIATA</div>
+          <div class="stat-num" id="statBenzina" style="color:#f44336;">0.0 <span class="txt-unita" style="font-size:12px;">L</span></div>
+        </div>
+        <div class="stat-box">
+          <div style="font-size:11px; color:#aaa;">OLIO 2T USATO</div>
+          <div class="stat-num" id="statOlio">0.00 <span style="font-size:12px;">L</span></div>
+        </div>
+
+
+<div class="stat-box">
+  <div style="font-size:11px; color:#aaa;">SPESA BENZINA</div>
+  <div class="stat-num" id="statSpesaBenzina" style="color:var(--giallo);">--</div>
+  <div style="font-size:11px; color:#777;">USD</div>
+</div>
+
+<div class="stat-box">
+  <div style="font-size:11px; color:#aaa;">SPESA OLIO</div>
+  <div class="stat-num" id="statSpesaOlio" style="color:#00bcd4;">--</div>
+  <div style="font-size:11px; color:#777;">USD</div>
+</div>
+
+<div class="stat-box">
+  <div style="font-size:11px; color:#aaa;">SPESA RICAMBI</div>
+  <div class="stat-num" id="statSpesaRicambi" style="color:#ff9800;">--</div>
+  <div style="font-size:11px; color:#777;">USD</div>
+</div>
+
+<div class="stat-box">
+  <div style="font-size:11px; color:#aaa;">SPESA MANODOPERA</div>
+  <div class="stat-num" id="statSpesaManodopera" style="color:var(--verde);">--</div>
+  <div style="font-size:11px; color:#777;">USD</div>
+</div>
+
+        
+        <div class="stat-box" style="grid-column:span 2; border-color:var(--giallo);">
+          <div style="font-size:12px; color:#aaa;">SCORTA NELLE TANICHE</div>
+          <div class="stat-num" id="statScorta" style="color:var(--giallo); font-size:28px;">
+            0.0 <span class="txt-unita" style="font-size:14px;">L</span>
+          </div>
+        </div>
+      </div>
+
+
+</div>
+
+
+
+    
+  </div>
+</div>
+
 
   
 
@@ -4231,6 +4275,8 @@ if (fuelMini) {
 /* ============================================================
    CONDIVISIONE (FUNZIONE UNICA, FIX)
 ============================================================ */
+const PUBLIC_BLOG_URL = 'https://davidegangale.github.io/MientrasHayaCaminos/public.html?src=public/vespatrek_public.json';
+  
 function dataURLToFile(dataUrl, filename = 'foto.jpg') {
   const arr = dataUrl.split(',');
   const mimeMatch = arr[0].match(/:(.*?);/);
@@ -4496,9 +4542,11 @@ async function condividiEntryDiario(entry) {
       return;
     }
 
-    const caption =
+const caption =
 `🛵 VespaTrek PX150
 📍 ${entry.paese} — km ${entry.km}${entry.testo ? '\n' + entry.testo : ''}
+
+🌍 Blog: ${PUBLIC_BLOG_URL}
 
 #vespa #overland #sudamerica`;
 
@@ -4544,6 +4592,7 @@ async function condividiMomentoPreview() {
     const caption =
 `🛵 VespaTrek PX150
 📍 ${paese} — km ${km}${testo ? '\n' + testo : ''}
+🌍 Blog: ${PUBLIC_BLOG_URL}
 
 #vespa #overland #sudamerica`;
 
@@ -4661,6 +4710,20 @@ function getCustomDiarioTags() {
   return Array.isArray(arr) ? arr.map(x => String(x||'').trim()).filter(Boolean) : [];
 }
 
+function extractHashtagsFromText(text) {
+  const t = String(text || '');
+  // prende parole dopo # (evita solo # da solo). Include lettere accentate.
+  const re = /#([0-9A-Za-zÀ-ÖØ-öø-ÿ_]{2,40})/g;
+  const out = new Set();
+  let m;
+  while ((m = re.exec(t)) !== null) {
+    const tag = String(m[1] || '').trim();
+    if (tag) out.add(tag);
+  }
+  return Array.from(out);
+}
+
+  
 function setCustomDiarioTags(arr) {
   const clean = Array.isArray(arr)
     ? arr.map(x => String(x||'').trim()).filter(Boolean)
@@ -4772,6 +4835,9 @@ function salvaDiario() {
 
     const paese = carica('vt_paeseAttuale','Colombia');
     const now = new Date();
+
+    const tagsFromText = extractHashtagsFromText(testo);
+    const tagsFinal = Array.from(new Set([...(diarioTagsSelezionati || []), ...tagsFromText]));
 
     // geo: ultima posizione (se disponibile)
     let geo = null;
