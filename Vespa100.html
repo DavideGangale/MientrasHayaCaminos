@@ -7408,7 +7408,8 @@ return {
       costoLocal: e.costoLocal ?? e.costo ?? 0,
       valuta: e.valuta ?? carica('vt_valuta','USD'),
       costoUsd: e.costoUsd ?? 0,
-      fotoUrl: e.fotoUrl || null
+      fotoUrl: e.fotoUrl || null,
+      geo: e.geo || null  
     }));
 
     const payload = {
