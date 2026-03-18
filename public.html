@@ -55,6 +55,42 @@
     }
 
     .header-title {
+
+
+.title-left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+
+.social-link{
+  width:30px;
+  height:30px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid #444;
+  border-radius:10px;
+  background:#111;
+  color:#fff;
+  text-decoration:none;
+  flex:0 0 auto;
+}
+.social-link svg{ width:18px; height:18px; display:block; }
+
+.social-link.ig{ border-color:#6a1b9a; }
+.social-link.yt{ border-color:#ff0000; color:#ff0000; }
+
+.stats-mini{
+  font-size:12px;
+  color:#aaa;
+  font-weight:600;
+  text-align:right;
+  line-height:1.15;
+  white-space:nowrap; /* così resta su due righe solo dove diciamo noi */
+}
+      
       font-size: 20px;
       font-weight: 900;
       letter-spacing: 1px;
@@ -161,9 +197,28 @@
   <!-- HEADER & FILTRI -->
   <div id="topBar">
     <div class="header-title">
-      <span id="appTitle">VespaTrek Live 🌍</span>
-      <span id="statsMini" style="font-size:12px; color:#aaa; font-weight:normal;">Caricamento...</span>
-    </div>
+  <div class="title-left">
+    <span id="appTitle">VespaTrek Live 🌍</span>
+
+    <a class="social-link ig" href="https://www.instagram.com/lapizzadidavide?utm_source=qr&igsh=cDU0ZXBhYTNpb3dr" target="_blank" rel="noopener"
+       aria-label="Instagram">
+      <!-- icona IG -->
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="currentColor" d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm10 2H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3Zm-5 4.2A3.8 3.8 0 1 1 8.2 12 3.8 3.8 0 0 1 12 8.2Zm0 2A1.8 1.8 0 1 0 13.8 12 1.8 1.8 0 0 0 12 10.2ZM17.6 6.7a.9.9 0 1 1-.9.9.9.9 0 0 1 .9-.9Z"/>
+      </svg>
+    </a>
+
+    <a class="social-link yt" href="https://youtube.com/@davidegangale?si=L5182Vj_sBj9rTxY" target="_blank" rel="noopener"
+       aria-label="YouTube">
+      <!-- icona YT -->
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="currentColor" d="M21.6 7.2a3 3 0 0 0-2.1-2.1C17.7 4.6 12 4.6 12 4.6s-5.7 0-7.5.5A3 3 0 0 0 2.4 7.2 31.6 31.6 0 0 0 2 12a31.6 31.6 0 0 0 .4 4.8 3 3 0 0 0 2.1 2.1c1.8.5 7.5.5 7.5.5s5.7 0 7.5-.5a3 3 0 0 0 2.1-2.1A31.6 31.6 0 0 0 22 12a31.6 31.6 0 0 0-.4-4.8ZM10 15.5v-7l6 3.5-6 3.5Z"/>
+      </svg>
+    </a>
+  </div>
+
+  <div id="statsMini" class="stats-mini">Caricamento...</div>
+</div>
     
     <div class="top-controls">
       <select id="modeSelect" class="btn-filter" onchange="setMode(this.value)">
@@ -300,6 +355,9 @@ const I18N = {
     totalMini: (km, l) => `Totale: ${km} km | ${l} L Benzina`,
     loading: 'Caricamento...',
 
+    totalLbl: 'Totale',
+fuelLbl: 'Benzina',
+
 tappa: 'TAPPA',
 giri: 'GIRI',
 time: '⏱️ Tempo',
@@ -363,8 +421,9 @@ workshop: '🔧 Workshop',
 cost: 'Cost',
 
 carbSetup: '🌬️ Carb setup',
-altitude: 'Altitude'
-
+altitude: 'Altitude',
+totalLbl: 'Total',
+fuelLbl: 'Fuel'
     
   },
 
@@ -407,7 +466,9 @@ workshop: '🔧 Taller',
 cost: 'Costo',
 
 carbSetup: '🌬️ Carburación',
-altitude: 'Altitud'
+altitude: 'Altitud',
+    totalLbl: 'Total',
+fuelLbl: 'Gasolina'
 
     
   }
@@ -422,6 +483,7 @@ function setLang(l) {
   LANG = l || 'it';
   localStorage.setItem('vt_pub_lang', LANG);
   applyLang();
+  updateStatsMini();
   renderMap();           // aggiorna testi che dipendono dai filtri
   if (document.getElementById('statsModal')?.style.display === 'flex') {
     renderStatsDati();   // aggiorna modal se è aperto
@@ -482,7 +544,23 @@ function applyLang() {
   }
 }
 
+function updateStatsMini() {
+  const el = document.getElementById('statsMini');
+  if (!el) return;
 
+  if (!DATA || !DATA.stats) {
+    el.innerText = T('loading');
+    return;
+  }
+
+  const km = Number(DATA.stats.kmTotali || 0).toFixed(1);
+  const l  = Number(DATA.stats.benzinaUsataLitri || 0).toFixed(1);
+
+  // ✅ 2 righe fisse
+  el.innerHTML = `${T('totalLbl')}: ${km} km<br>${T('fuelLbl')}: ${l} L`;
+}
+
+  
   
   function initMap() {
     map = L.map('mapPub', { zoomControl: false }).setView([4.7, -74.1], 5);
@@ -1032,6 +1110,7 @@ window.apriGraficoPercorsoPublic = function (id) {
       const res = await fetch(src);
       DATA = await res.json();
       applyLang();
+      updateStatsMini();
       
 document.getElementById('appTitle').innerText = DATA.titolo || T('live');
       
