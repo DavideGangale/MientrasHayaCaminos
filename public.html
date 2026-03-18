@@ -513,38 +513,61 @@ $$
 
     const cons = benz > 0 ? (km / benz).toFixed(1) : '--';
 
-    document.getElementById('statsModalContent').innerHTML = `
-      <div style="background:#333; padding:10px; border-radius:10px;">
-        <div style="font-size:11px; color:#aaa;">KM TOTALI</div>
-        <div style="font-size:18px; color:#4caf50; font-weight:bold;">${km.toFixed(1)}</div>
-      </div>
-      <div style="background:#333; padding:10px; border-radius:10px;">
-        <div style="font-size:11px; color:#aaa;">BENZINA USATA</div>
-        <div style="font-size:18px; color:#ff9800; font-weight:bold;">${benz.toFixed(1)} L</div>
-      </div>
-      <div style="background:#333; padding:10px; border-radius:10px;">
-        <div style="font-size:11px; color:#aaa;">SPESA BENZINA</div>
-        <div style="font-size:18px; color:#fff; font-weight:bold;">
+
+
+
+    const spesaOlio = (mode === 'GLOBAL')
+  ? Number((DATA.stats || {}).spesaOlioUsd || 0)
+  : Number((DATA.datiPaesi && DATA.datiPaesi[mode] ? DATA.datiPaesi[mode].spesaOlioUsd : 0) || 0);
+
+document.getElementById('statsModalContent').innerHTML = `
+  <div style="background:#333; padding:10px; border-radius:10px;">
+    <div style="font-size:11px; color:#aaa;">KM TOTALI</div>
+    <div style="font-size:18px; color:#4caf50; font-weight:bold;">${Number(km || 0).toFixed(1)}</div>
+  </div>
+
+  <div style="background:#333; padding:10px; border-radius:10px;">
+    <div style="font-size:11px; color:#aaa;">BENZINA USATA</div>
+    <div style="font-size:18px; color:#ff9800; font-weight:bold;">${Number(benz || 0).toFixed(1)} L</div>
+  </div>
+
+  <div style="background:#333; padding:10px; border-radius:10px;">
+    <div style="font-size:11px; color:#aaa;">SPESA BENZINA</div>
+    <div style="font-size:18px; color:#fff; font-weight:bold;">
 $$
-{spesaBenz.toFixed(2)}</div>
-      </div>
-      <div style="background:#333; padding:10px; border-radius:10px;">
-        <div style="font-size:11px; color:#aaa;">SPESA OFFICINA</div>
-        <div style="font-size:18px; color:var(--maint); font-weight:bold;">
+{Number(spesaBenz || 0).toFixed(2)}</div>
+  </div>
+
+  <div style="background:#333; padding:10px; border-radius:10px;">
+    <div style="font-size:11px; color:#aaa;">SPESA OLIO 2T</div>
+    <div style="font-size:18px; color:#00bcd4; font-weight:bold;">
 $$
-{spesaMaint.toFixed(2)}</div>
-      </div>
-      ${mode === 'GLOBAL' ? `
-      <div style="background:#333; padding:10px; border-radius:10px;">
-        <div style="font-size:11px; color:#aaa;">OLIO 2T USATO</div>
-        <div style="font-size:18px; color:#00bcd4; font-weight:bold;">${olio.toFixed(2)} L</div>
-      </div>
-      ` : ''}
-      <div style="background:#333; padding:10px; border-radius:10px; grid-column: 1 / -1;">
-        <div style="font-size:11px; color:#aaa;">CONSUMO MEDIO</div>
-        <div style="font-size:20px; color:var(--brand); font-weight:bold;">${cons} km/L</div>
-      </div>
-    `;
+{Number(spesaOlio || 0).toFixed(2)}</div>
+  </div>
+
+  <div style="background:#333; padding:10px; border-radius:10px;">
+    <div style="font-size:11px; color:#aaa;">SPESA OFFICINA</div>
+    <div style="font-size:18px; color:var(--maint); font-weight:bold;">
+$$
+{Number(spesaMaint || 0).toFixed(2)}</div>
+  </div>
+
+  ${mode === 'GLOBAL' ? `
+    <div style="background:#333; padding:10px; border-radius:10px;">
+      <div style="font-size:11px; color:#aaa;">OLIO 2T USATO</div>
+      <div style="font-size:18px; color:#00bcd4; font-weight:bold;">${Number(olio || 0).toFixed(2)} L</div>
+    </div>
+  ` : ''}
+
+  <div style="background:#333; padding:10px; border-radius:10px; grid-column: 1 / -1;">
+    <div style="font-size:11px; color:#aaa;">CONSUMO MEDIO</div>
+    <div style="font-size:20px; color:var(--brand); font-weight:bold;">${cons} km/L</div>
+  </div>
+`;
+
+
+    
+    
   }
 
   function openLightbox(src) {
