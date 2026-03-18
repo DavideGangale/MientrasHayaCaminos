@@ -1,6 +1,6 @@
 {
   "_version": "public-1.0",
-  "_exportDate": "2026-03-18T18:44:44.325Z",
+  "_exportDate": "2026-03-18T19:47:20.015Z",
   "titolo": "VespaTrek PX150",
   "diarioTagsPreset": [
     "Paesaggi",
@@ -27,24 +27,24 @@
   "paeseAttuale": "Colombia",
   "stats": {
     "kmTotali": 6.3578,
-    "benzinaUsataLitri": 44.51592,
+    "benzinaUsataLitri": 45.49592,
     "benzinaFuoriTappaLitri": 0,
-    "olioTotaleLitri": 0.909,
+    "olioTotaleLitri": 0.929,
     "spesaBenzinaUsd": 16.564721308387693,
-    "spesaOlioUsd": 14.281211044950203,
+    "spesaOlioUsd": 14.595496759235917,
     "spesaRicambiUsd": 145.987,
-    "spesaManodoperaUsd": 7.848777168007256
+    "spesaManodoperaUsd": 7.990450908715134
   },
   "datiPaesi": {
     "Colombia": {
       "km": 6.3581260808865885,
-      "benzina": 44.51592,
+      "benzina": 45.49592,
       "spesaBenzina": 0,
       "spesaOlio": 0,
       "spesaRicambiUsd": 145.9871332169285,
       "valuta": "COP",
-      "spesaManodoperaUsd": 7.848440742865056,
-      "spesaOlioUsd": 14.281211044950203,
+      "spesaManodoperaUsd": 7.990114483572934,
+      "spesaOlioUsd": 14.595496759235917,
       "spesaBenzinaUsd": 16.564721308387693,
       "spesaBenzinaLocal": 61150
     }
@@ -622,6 +622,20 @@
   ],
   "manutenzioni": [
     {
+      "id": 1773862501731,
+      "data": "18/03/2026",
+      "ora": "14:35",
+      "paese": "Colombia",
+      "km": "6.4",
+      "nome": "Llorfb",
+      "desc": "Cvnhg",
+      "costoLocal": 523,
+      "valuta": "COP",
+      "costoUsd": 0.1416737407078784,
+      "fotoUrl": null,
+      "geo": null
+    },
+    {
       "id": 1773859475308,
       "data": "18/03/2026",
       "ora": "13:44",
@@ -736,6 +750,24 @@
   ],
   "rifornimenti": [
     {
+      "id": 1773862490302,
+      "data": "18/03/2026",
+      "ora": "14:34",
+      "paese": "Colombia",
+      "qta": "1.00",
+      "dest": "Vespa",
+      "mix": "2%",
+      "prezzoUnit": null,
+      "valuta": "COP",
+      "fxToUsd": 0.0002708866935141078,
+      "costoBenzLocal": null,
+      "costoBenzUsd": null,
+      "costoBenz": null,
+      "costoOlio": "0.31",
+      "luogo": "N/D",
+      "km": "6.4"
+    },
+    {
       "id": 1773859270511,
       "data": "18/03/2026",
       "ora": "13:41",
@@ -827,6 +859,14 @@
     }
   ],
   "carburazioni": [
+    {
+      "id": 1773862512163,
+      "data": "18/03/2026",
+      "alt": 2674,
+      "chicMax": 120,
+      "chicMin": 85,
+      "nota": "Cbhhhfgght"
+    },
     {
       "id": 1773859462765,
       "data": "18/03/2026",
