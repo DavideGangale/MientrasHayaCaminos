@@ -1429,7 +1429,9 @@ color:#fff;
     <div class="modal-content" style="border-color:#2196F3; max-width:900px;">
       <button class="close-modal" onclick="chiudiModal('modalMapFull')">×</button>
       <h2 style="color:#2196F3; text-align:center; margin-top:0;">🗺️ Mappa (Full)</h2>
-      <div id="mapFull" style="height:70vh; border-radius:10px; border:2px solid #444;"></div>
+      
+<div id="mapFull" style="height:70vh; min-height:320px; border-radius:10px; border:2px solid #444;"></div>
+      
     </div>
   </div>
 
@@ -3092,21 +3094,31 @@ m.on('popupopen', (ev) => {
 function apriMappaFull(coordsOverride = null, ctx = null) {
   apriModal('modalMapFull');
 
-  setTimeout(() => {
+  const tryOpen = (attempt = 0) => {
     const el = document.getElementById('mapFull');
     if (!el) return;
 
-    // ✅ se per qualche motivo Leaflet pensa che il container sia già inizializzato male
-    // (capita con modali / refresh), resetta l'id interno
+    // ✅ su mobile a volte vh fa scherzi dentro i modali: imposta anche un'altezza px
     try {
-      if (!mapFullInstance && el._leaflet_id) {
-        el._leaflet_id = null;
-      }
+      const h = Math.max(320, Math.round(window.innerHeight * 0.70));
+      el.style.height = h + 'px';
+    } catch {}
+
+    const wOk = el.offsetWidth > 50;
+    const hOk = el.offsetHeight > 50;
+
+    // aspetta finché il container ha dimensione reale
+    if ((!wOk || !hOk) && attempt < 12) {
+      return setTimeout(() => tryOpen(attempt + 1), 120);
+    }
+
+    // reset id interno se Leaflet ha lasciato "sporco"
+    try {
+      if (!mapFullInstance && el._leaflet_id) el._leaflet_id = null;
     } catch {}
 
     if (!mapFullInstance) {
       mapFullInstance = L.map(el, { zoomControl:true, attributionControl:false });
-
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         maxZoom: 19,
         crossOrigin: true
@@ -3114,8 +3126,6 @@ function apriMappaFull(coordsOverride = null, ctx = null) {
 
       mapFullMarker = L.marker([4.7, -74.1]).addTo(mapFullInstance);
       mapFullPolyline = L.polyline([], { color:'#d32f2f', weight:4, opacity:0.9 }).addTo(mapFullInstance);
-
-      // layer foto
       mapFullPhotoLayer = L.layerGroup().addTo(mapFullInstance);
     }
 
@@ -3123,8 +3133,7 @@ function apriMappaFull(coordsOverride = null, ctx = null) {
     mapFullPolyline.setLatLngs(coords);
 
     if (coords && coords.length) {
-      const last = coords[coords.length - 1];
-      mapFullMarker.setLatLng(last);
+      mapFullMarker.setLatLng(coords[coords.length - 1]);
     } else {
       try { mapFullMarker.setLatLng(marker.getLatLng()); } catch {}
     }
@@ -3136,19 +3145,17 @@ function apriMappaFull(coordsOverride = null, ctx = null) {
       mapFullInstance.setView(mapFullMarker.getLatLng(), 13);
     }
 
-    // ✅ marker foto per quel contesto (tappa/turismo)
     renderMapFullPhotoMarkersForContext(ctx);
 
-    // ✅ ridisegna: nei modali spesso serve doppio invalidate
+    // invalidate multiplo (mobile)
     try { mapFullInstance.invalidateSize(true); } catch {}
+    setTimeout(() => { try { mapFullInstance.invalidateSize(true); } catch {} }, 250);
+    setTimeout(() => { try { mapFullInstance.invalidateSize(true); } catch {} }, 800);
+  };
 
-    setTimeout(() => {
-      try { mapFullInstance.invalidateSize(true); } catch {}
-    }, 250);
-
-  }, 300);
+  // avvia dopo un attimo
+  setTimeout(() => tryOpen(0), 80);
 }
-
 
 function apriMappaFullDaPercorso(tipo, id) {
   // tipo: 'tappa' | 'turismo'
