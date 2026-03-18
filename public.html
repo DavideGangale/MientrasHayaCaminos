@@ -166,7 +166,7 @@
     </div>
     
     <div class="top-controls">
-      <select class="btn-filter" onchange="setMode(this.value)">
+      <select id="modeSelect" class="btn-filter" onchange="setMode(this.value)">
         <option value="TUTTO">🛣️ Tutte le tracce</option>
         <option value="TAPPE">🏁 Solo Tappe</option>
         <option value="GIRI">🛵 Solo Giri</option>
@@ -176,7 +176,7 @@
         <option value="">🌎 Globale</option>
       </select>
 
-      <select class="btn-filter" onchange="setMarkerFilter(this.value)">
+     <select id="markerSelect" class="btn-filter" onchange="setMarkerFilter(this.value)">
         <option value="ALL">📍 Tutti i Marker</option>
         <option value="FOTO">📷 Foto</option>
         <option value="VIDEO">▶️ Video</option>
@@ -185,7 +185,14 @@
         <option value="CARB">🌬️ Carburazione</option>
       </select>
 
-      <button class="btn-filter" onclick="apriStats()">📊 Statistiche</button>
+
+<select id="langSelect" class="btn-filter" onchange="setLang(this.value)">
+  <option value="it">🇮🇹 Italiano</option>
+  <option value="en">🇬🇧 English</option>
+  <option value="es">🇪🇸 Español</option>
+</select>
+      
+      <<button id="btnStats" class="btn-filter" onclick="apriStats()">📊 Statistiche</button>
     </div>
   </div>
 
@@ -268,6 +275,144 @@
   let currentCountry = '';
   let currentMarkerFilter = 'ALL';
 
+
+
+  // ===== LINGUA (i18n) =====
+let LANG = localStorage.getItem('vt_pub_lang') || 'it';
+
+const I18N = {
+  it: {
+    live: 'VespaTrek Live 🌍',
+    allTracks: '🛣️ Tutte le tracce',
+    onlyTappe: '🏁 Solo Tappe',
+    onlyGiri: '🛵 Solo Giri',
+
+    allMarkers: '📍 Tutti i Marker',
+    foto: '📷 Foto',
+    video: '▶️ Video',
+    maint: '🔧 Officina',
+    fuel: '⛽ Rifornimenti',
+    carb: '🌬️ Carburazione',
+
+    statsBtn: '📊 Statistiche',
+    statsTitle: '📊 Statistiche',
+    global: '🌎 Globali',
+    totalMini: (km, l) => `Totale: ${km} km | ${l} L Benzina`,
+    loading: 'Caricamento...'
+  },
+
+  en: {
+    live: 'VespaTrek Live 🌍',
+    allTracks: '🛣️ All tracks',
+    onlyTappe: '🏁 Trips only',
+    onlyGiri: '🛵 Rides only',
+
+    allMarkers: '📍 All markers',
+    foto: '📷 Photos',
+    video: '▶️ Videos',
+    maint: '🔧 Workshop',
+    fuel: '⛽ Fuel stops',
+    carb: '🌬️ Carb setup',
+
+    statsBtn: '📊 Stats',
+    statsTitle: '📊 Stats',
+    global: '🌎 Global',
+    totalMini: (km, l) => `Total: ${km} km | ${l} L Fuel`,
+    loading: 'Loading...'
+  },
+
+  es: {
+    live: 'VespaTrek Live 🌍',
+    allTracks: '🛣️ Todas las rutas',
+    onlyTappe: '🏁 Solo Etapas',
+    onlyGiri: '🛵 Solo Paseos',
+
+    allMarkers: '📍 Todos los marcadores',
+    foto: '📷 Fotos',
+    video: '▶️ Videos',
+    maint: '🔧 Taller',
+    fuel: '⛽ Repostajes',
+    carb: '🌬️ Carburación',
+
+    statsBtn: '📊 Estadísticas',
+    statsTitle: '📊 Estadísticas',
+    global: '🌎 Global',
+    totalMini: (km, l) => `Total: ${km} km | ${l} L Gasolina`,
+    loading: 'Cargando...'
+  }
+};
+
+function T(key) {
+  const d = I18N[LANG] || I18N.it;
+  return d[key] ?? (I18N.it[key] ?? key);
+}
+
+function setLang(l) {
+  LANG = l || 'it';
+  localStorage.setItem('vt_pub_lang', LANG);
+  applyLang();
+  renderMap();           // aggiorna testi che dipendono dai filtri
+  if (document.getElementById('statsModal')?.style.display === 'flex') {
+    renderStatsDati();   // aggiorna modal se è aperto
+  }
+}
+
+function applyLang() {
+  // select lingua
+  const langSel = document.getElementById('langSelect');
+  if (langSel) langSel.value = LANG;
+
+  // titolo in alto (mantieni eventuale DATA.titolo, ma se è vuoto usa traduzione)
+  const titleEl = document.getElementById('appTitle');
+  if (titleEl) titleEl.innerText = (DATA && DATA.titolo) ? DATA.titolo : T('live');
+
+  // bottone statistiche e titolo modal
+  const btnStats = document.getElementById('btnStats');
+  if (btnStats) btnStats.innerText = T('statsBtn');
+
+  // titolo dentro modal
+  const h2 = document.querySelector('#statsModal h2');
+  if (h2) h2.innerText = T('statsTitle');
+
+  // MODO TRACCE
+  const modeSel = document.getElementById('modeSelect');
+  if (modeSel) {
+    const v = modeSel.value || 'TUTTO';
+    modeSel.innerHTML = `
+      <option value="TUTTO">${T('allTracks')}</option>
+      <option value="TAPPE">${T('onlyTappe')}</option>
+      <option value="GIRI">${T('onlyGiri')}</option>
+    `;
+    modeSel.value = v;
+  }
+
+  // MARKER FILTER
+  const markerSel = document.getElementById('markerSelect');
+  if (markerSel) {
+    const v = markerSel.value || 'ALL';
+    markerSel.innerHTML = `
+      <option value="ALL">${T('allMarkers')}</option>
+      <option value="FOTO">${T('foto')}</option>
+      <option value="VIDEO">${T('video')}</option>
+      <option value="MAINT">${T('maint')}</option>
+      <option value="FUEL">${T('fuel')}</option>
+      <option value="CARB">${T('carb')}</option>
+    `;
+    markerSel.value = v;
+  }
+
+  // stats filter: cambia solo la label "Globali"
+  const statsSel = document.getElementById('statsCountryFilter');
+  if (statsSel) {
+    const v = statsSel.value || 'GLOBAL';
+    const firstOpt = statsSel.querySelector('option[value="GLOBAL"]');
+    if (firstOpt) firstOpt.innerText = T('global');
+    statsSel.value = v;
+  }
+}
+
+
+  
   function initMap() {
     map = L.map('mapPub', { zoomControl: false }).setView([4.7, -74.1], 5);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
@@ -811,10 +956,17 @@ window.apriGraficoPercorsoPublic = function (id) {
       
       const res = await fetch(src);
       DATA = await res.json();
-
-      document.getElementById('appTitle').innerText = DATA.titolo || 'VespaTrek Live 🌍';
+      applyLang();
+      
+document.getElementById('appTitle').innerText = DATA.titolo || T('live');
+      
+      document.getElementById('appTitle').innerText = DATA.titolo || T('live');
       if (DATA.stats) {
-        document.getElementById('statsMini').innerText = `Totale: ${DATA.stats.kmTotali.toFixed(1)} km | ${DATA.stats.benzinaUsataLitri.toFixed(1)} L Benzina`;
+        document.getElementById('statsMini').innerText =
+  (I18N[LANG] || I18N.it).totalMini(
+    Number(DATA.stats.kmTotali || 0).toFixed(1),
+    Number(DATA.stats.benzinaUsataLitri || 0).toFixed(1)
+  );
       }
 
       popolaPaesi();
