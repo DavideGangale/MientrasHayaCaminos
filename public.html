@@ -54,8 +54,15 @@
       flex-shrink: 0;
     }
 
-    .header-title {
-
+   .header-title {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  color: var(--text);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
 .title-left{
   display:flex;
@@ -78,27 +85,10 @@
   flex:0 0 auto;
 }
 .social-link svg{ width:18px; height:18px; display:block; }
-
 .social-link.ig{ border-color:#6a1b9a; }
 .social-link.yt{ border-color:#ff0000; color:#ff0000; }
 
-.stats-mini{
-  font-size:12px;
-  color:#aaa;
-  font-weight:600;
-  text-align:right;
-  line-height:1.15;
-  white-space:nowrap; /* così resta su due righe solo dove diciamo noi */
-}
-      
-      font-size: 20px;
-      font-weight: 900;
-      letter-spacing: 1px;
-      color: var(--text);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+
 
     .top-controls {
       display: grid;
@@ -247,7 +237,7 @@
   <option value="es">🇪🇸 Español</option>
 </select>
       
-      <<button id="btnStats" class="btn-filter" onclick="apriStats()">📊 Statistiche</button>
+      <button id="btnStats" class="btn-filter" onclick="apriStats()">📊 Statistiche</button>
     </div>
   </div>
 
@@ -270,27 +260,7 @@
   </div>
 
 
-<!-- MODALE GRAFICO -->
-<div id="graphModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:8500; align-items:center; justify-content:center; padding:15px;">
-  <div style="background:var(--card); width:100%; max-width:820px; border-radius:15px; border:2px solid var(--brand); padding:16px; position:relative; max-height: 90vh; overflow-y:auto;">
-    <button onclick="closeGraphModal()"
-            style="position:absolute; top:10px; right:10px; background:#f44336; color:#fff; border:none; border-radius:50%; width:30px; height:30px; font-weight:bold; cursor:pointer;">×</button>
 
-    <h2 id="graphTitle" style="color:var(--brand); margin-top:0; text-align:center;">📈 Grafico</h2>
-
-    <div style="background:#111; border:1px solid #333; border-radius:12px; padding:10px;">
-      <div style="font-size:12px;color:#aaa;margin-bottom:6px;">Altitudine</div>
-      <canvas id="cvAltPub" style="width:100%; height:160px; display:block;"></canvas>
-    </div>
-
-    <div style="background:#111; border:1px solid #333; border-radius:12px; padding:10px; margin-top:10px;">
-      <div style="font-size:12px;color:#aaa;margin-bottom:6px;">Velocità</div>
-      <canvas id="cvSpdPub" style="width:100%; height:160px; display:block;"></canvas>
-    </div>
-
-    <div id="graphInfo" style="font-size:12px;color:#888;text-align:left;margin-top:10px;"></div>
-  </div>
-</div>
 
 <!-- MODALE GRAFICO -->
 <div id="graphModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:8500; align-items:center; justify-content:center; padding:15px;">
@@ -720,10 +690,13 @@ const infoEstesa = `
       creaMarker(m.geo.lat, m.geo.lon, iconMaint, `
   <div class="popup-title" style="color:var(--maint)">${T('workshop')}: ${m.nome}</div>
   <div class="popup-meta">📅 ${m.data} | 📏 km ${m.km}</div>
-  <div>${m.desc || ''}</div>
-  ${Number(m.costoUsd || 0) > 0 ? `<div style="margin-top:5px; color:#4caf50;">💰 ${T('cost')}: <b>
-$$
-{Number(m.costoUsd).toFixed(2)}</b></div>` : ''}
+  <div>${m.desc || '}</div>
+  ${Number(m.costoUsd || 0) > 0 ? `<div style="margin-top:5px; color:#4caf50;">💰 ${T('cost')}: <b>${Number(m.costoUsd).toFixed(2)}</b></div>` : ''}
+
+
+
+
+
 `);
     });
 
@@ -737,9 +710,7 @@ $$
   <div class="popup-title" style="color:var(--fuel)">${T('refuel')}</div>
   <div class="popup-meta">📅 ${r.data} | 📏 km ${r.km}</div>
   <div>📦 <b>${r.qta} L</b> (${T('destination')}: ${r.dest})</div>
-  ${Number(r.costoBenzUsd || 0) > 0 ? `<div style="margin-top:5px; color:#4caf50;">💰 ${T('paid')}: <b>
-$$
-{Number(r.costoBenzUsd).toFixed(2)}</b></div>` : ''}
+  ${Number(r.costoBenzUsd || 0) > 0 ? `<div style="margin-top:5px; color:#4caf50;">💰 ${T('paid')}: <b>${Number(r.costoBenzUsd).toFixed(2)}</b></div>` : ''}
 `);
 
       
@@ -987,10 +958,7 @@ window.apriGraficoPercorsoPublic = function(id) {
   }, 120);
 };
 
-  function closeGraphModal() {
-  const m = document.getElementById('graphModal');
-  if (m) m.style.display = 'none';
-}
+
 
 function drawSeriesPub(canvasId, points, color, valueKey) {
   const cv = document.getElementById(canvasId);
