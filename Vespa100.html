@@ -259,12 +259,6 @@ color:#fff;
     .odo-value.trip{color:var(--blu);}
 
 
-.guida-mini{
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  gap:8px;
-  margin-top:10px;
-}
 .guida-mini .mini-box{
   background:#111;
   border:1px solid #333;
@@ -1829,6 +1823,21 @@ function syncWakeLock() {
   else releaseWakeLock();
 }
 
+
+
+document.addEventListener('visibilitychange', () => {
+  try { syncWakeLock(); } catch {}
+});
+window.addEventListener('focus', () => {
+  try { syncWakeLock(); } catch {}
+});
+window.addEventListener('blur', () => {
+  try { syncWakeLock(); } catch {}
+});
+
+
+  
+
 /* ============================================================
    STORAGE SICURO
 ============================================================ */
@@ -2324,14 +2333,13 @@ function updatePosition(pos) {
         const kmTot = (parseFloat(carica('vt_kmTotali','0')) || 0) + dist;
         salva('vt_kmTotali', kmTot.toFixed(4));
 
-        tappaAttuale.kmPercorsi += dist;
-        salva('vt_tappaAttuale', tappaAttuale);
-
+       tappaAttuale.kmPercorsi += dist;
 
 // ✅ salva telemetria (altitudine + velocità) per grafici
 pushTelemetryPoint(pos, speed);
-salva('vt_tappaAttuale', tappaAttuale);
 
+// salva UNA volta sola
+salva('vt_tappaAttuale', tappaAttuale);
 
         
 
@@ -4196,7 +4204,7 @@ window.addEventListener('message', (ev) => {
 });
 
 
-function uploadViaFormIframe(dataUrl, filename, folderId, endpoint) {
+function uploadViaFormIframe(dataUrl, filename, folderId, endpoint, clientKey = '') {
   return new Promise((resolve, reject) => {
     if (driveUploadPending) {
       return reject(new Error('Upload in corso'));
@@ -4232,15 +4240,20 @@ function uploadViaFormIframe(dataUrl, filename, folderId, endpoint) {
     inp3.value = folderId || '';
 
     const inp4 = document.createElement('input');
-    inp4.type = 'hidden';
-    inp4.name = 'reqId';
-    inp4.value = reqId;
+inp4.type = 'hidden';
+inp4.name = 'reqId';
+inp4.value = reqId;
 
-    form.appendChild(inp1);
-    form.appendChild(inp2);
-    form.appendChild(inp3);
-    form.appendChild(inp4);
+const inp5 = document.createElement('input');
+inp5.type = 'hidden';
+inp5.name = 'clientKey';
+inp5.value = clientKey || '';
 
+form.appendChild(inp1);
+form.appendChild(inp2);
+form.appendChild(inp3);
+form.appendChild(inp4);
+form.appendChild(inp5);
     document.body.appendChild(form);
 
     // ✅ timeout vero: se non arriva postMessage, sblocca tutto
@@ -4261,7 +4274,7 @@ function uploadViaFormIframe(dataUrl, filename, folderId, endpoint) {
   });
 }
 
-function uploadFotoToDrive(dataUrl, filenameBase='foto') {
+function uploadFotoToDrive(dataUrl, filenameBase='foto', clientKey='') {
   const endpoint = (carica('vt_driveUploadUrl','') || '').trim();
   if (!endpoint) return Promise.resolve(null);
 
@@ -4271,7 +4284,7 @@ function uploadFotoToDrive(dataUrl, filenameBase='foto') {
   // ✅ serializza: una richiesta alla volta, in ordine
   driveUploadChain = driveUploadChain
     .catch(() => {}) // se una fallisce, non blocca la chain
-    .then(() => uploadViaFormIframe(dataUrl, filename, folderId, endpoint))
+   .then(() => uploadViaFormIframe(dataUrl, filename, folderId, endpoint, clientKey))
     .then((out) => {
       if (!out || !out.ok || !out.url) throw new Error(out?.error || 'Upload failed');
       return out.url;
@@ -4337,7 +4350,7 @@ lastErrMsg = '';
         if (entry.fotoUrl) continue;
         if (!entry.foto) { continue; } // non ho base64: impossibile caricare
 
-        const url = await uploadFotoToDrive(entry.foto, 'diario');
+        const url = await uploadFotoToDrive(entry.foto, 'diario', 'diario_' + entry.id);
         if (url) {
           entry.fotoUrl = url;
           entry.foto = null; // ✅ alleggerisce
@@ -4358,7 +4371,7 @@ lastErrMsg = '';
         if (entry.fotoUrl) continue;
         if (!entry.foto) { continue; }
 
-        const url = await uploadFotoToDrive(entry.foto, 'logbook');
+        const url = await uploadFotoToDrive(entry.foto, 'logbook', 'logbook_' + entry.id);
         if (url) {
           entry.fotoUrl = url;
           entry.foto = null;
@@ -6665,7 +6678,7 @@ function getUsuraWarningsInventario() {
 
     // scegli livello: 100 > 250 > 500
     let level = 500;
-    if (remaining <= 10) level = 100;
+    if (remaining <= 100) level = 100;
     else if (remaining <= 250) level = 250;
     else level = 500;
 
@@ -6853,7 +6866,12 @@ function renderChecklist() {
     html += `<div style="color:#ff9800;font-weight:900;margin:6px 0 10px 0;">🔧 Avvisi manutenzione</div>`;
 
     html += manutWarns.map(w => {
-      const col = (w.remaining <= 0) ? '#f44336' : (w.level === 10 ? '#f44336' : (w.level === 250 ? '#ff9800' : '#4caf50'));
+    
+const col =
+  (w.remaining <= 0) ? '#f44336' :
+  (w.level === 100) ? '#f44336' :
+  (w.level === 250) ? '#ff9800' :
+  '#4caf50';
       const msg = (w.remaining <= 0)
         ? `SCADUTO di ${Math.abs(Math.round(w.remaining))} km`
         : `mancano ~${Math.round(w.remaining)} km (soglia ${w.level})`;
