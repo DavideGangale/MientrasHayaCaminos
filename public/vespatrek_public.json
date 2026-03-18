@@ -1,6 +1,6 @@
 {
   "_version": "public-1.0",
-  "_exportDate": "2026-03-18T18:41:42.983Z",
+  "_exportDate": "2026-03-18T18:44:44.325Z",
   "titolo": "VespaTrek PX150",
   "diarioTagsPreset": [
     "Paesaggi",
@@ -33,7 +33,7 @@
     "spesaBenzinaUsd": 16.564721308387693,
     "spesaOlioUsd": 14.281211044950203,
     "spesaRicambiUsd": 145.987,
-    "spesaManodoperaUsd": 7.842546774056432
+    "spesaManodoperaUsd": 7.848777168007256
   },
   "datiPaesi": {
     "Colombia": {
@@ -43,7 +43,7 @@
       "spesaOlio": 0,
       "spesaRicambiUsd": 145.9871332169285,
       "valuta": "COP",
-      "spesaManodoperaUsd": 7.842210348914231,
+      "spesaManodoperaUsd": 7.848440742865056,
       "spesaOlioUsd": 14.281211044950203,
       "spesaBenzinaUsd": 16.564721308387693,
       "spesaBenzinaLocal": 61150
@@ -622,6 +622,20 @@
   ],
   "manutenzioni": [
     {
+      "id": 1773859475308,
+      "data": "18/03/2026",
+      "ora": "13:44",
+      "paese": "Colombia",
+      "km": "6.4",
+      "nome": "Pulizzzziaaa",
+      "desc": "Jñcjfjf",
+      "costoLocal": 23,
+      "valuta": "COP",
+      "costoUsd": 0.00623039395082448,
+      "fotoUrl": null,
+      "geo": null
+    },
+    {
       "id": 1773859287747,
       "data": "18/03/2026",
       "ora": "13:41",
@@ -813,6 +827,14 @@
     }
   ],
   "carburazioni": [
+    {
+      "id": 1773859462765,
+      "data": "18/03/2026",
+      "alt": 2674,
+      "chicMax": 120,
+      "chicMin": 80,
+      "nota": "Greassas"
+    },
     {
       "id": 1773705658026,
       "data": "16/03/2026",
