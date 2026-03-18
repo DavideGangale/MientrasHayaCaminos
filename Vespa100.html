@@ -4893,7 +4893,7 @@ function salvaDiario() {
       }
     } catch {}
 
-   let geo = null;
+   //let geo = null;
   try {
     if (typeof lastLat !== 'undefined' && lastLat != null) geo = { lat: lastLat, lon: lastLon };
     else if (typeof marker !== 'undefined' && marker.getLatLng) {
