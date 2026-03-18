@@ -1803,6 +1803,21 @@ color:#fff;
 /* ============================================================
    VARIABILI GLOBALI
 ============================================================ */
+
+/* ============================================================
+   HELPERS
+============================================================ */
+function setText(id, txt) {
+  const el = document.getElementById(id);
+  if (el) el.innerText = txt;
+}
+function setHTML(id, html) {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = html;
+}
+
+
+  
 let inViaggio = false;
 
 let lastLowFuelWarnAt = 0; // timestamp ultimo avviso
@@ -4862,7 +4877,7 @@ function salvaDiario() {
       testo,
       tags: Array.from(diarioTagsSelezionati || []),
       foto: fotoSrc,     // fallback locale
-      fotoUrl: null      // verrà popolato dalla sync Drive
+      fotoUrl: null,      // verrà popolato dalla sync Drive
       videoUrl: videoUrl // NUOVO LINK YOUTUBE
     };
 
