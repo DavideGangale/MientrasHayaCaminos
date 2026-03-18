@@ -3961,24 +3961,22 @@ salva('vt_scortaLitri', nuovaScorta);
           : '');
     }
 
-    salva('vt_datiPaesi', datiPaesi);
+        salva('vt_datiPaesi', datiPaesi);
 
-      // Log carburanti
-    // --- INIZIO NUOVO CODICE GPS ---
-    let geo = null;
+    // Log carburanti
+    let geoFuel = null;
     try {
-      if (typeof lastLat !== 'undefined' && lastLat != null) geo = { lat: lastLat, lon: lastLon };
+      if (typeof lastLat !== 'undefined' && lastLat != null) geoFuel = { lat: lastLat, lon: lastLon };
       else if (typeof marker !== 'undefined' && marker.getLatLng) {
         const ll = marker.getLatLng();
-        if (ll && isFinite(ll.lat)) geo = { lat: ll.lat, lon: ll.lng };
+        if (ll && isFinite(ll.lat)) geoFuel = { lat: ll.lat, lon: ll.lng };
       }
     } catch(e) {}
-    // --- FINE NUOVO CODICE GPS ---
 
     const logCarb = caricaJSON('vt_logCarburanti', []);
     logCarb.unshift({
       id: Date.now(),
-      geo: geo,
+      geo: geoFuel,
       data: now.toLocaleDateString('it-IT'),
       ora: now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }),
       qta: qtaLitri.toFixed(2),
@@ -6618,25 +6616,23 @@ function salvaCarburazione() {
   const chicMin = validaInput('carbChiclerMin', 1, 999);
   if (!chicMax || !chicMin) { showToast('⚠️ Inserisci i valori chicler'); return; }
 
-  const notaEl = document.getElementById('carbNote');
+   const notaEl = document.getElementById('carbNote');
   const nota = notaEl ? notaEl.value.trim() : '';
 
-    const now = new Date();
+  const now = new Date();
 
-  // --- INIZIO NUOVO CODICE GPS ---
-  let geo = null;
+  let geoCarb = null;
   try {
-    if (typeof lastLat !== 'undefined' && lastLat != null) geo = { lat: lastLat, lon: lastLon };
+    if (typeof lastLat !== 'undefined' && lastLat != null) geoCarb = { lat: lastLat, lon: lastLon };
     else if (typeof marker !== 'undefined' && marker.getLatLng) {
       const ll = marker.getLatLng();
-      if (ll && isFinite(ll.lat)) geo = { lat: ll.lat, lon: ll.lng };
+      if (ll && isFinite(ll.lat)) geoCarb = { lat: ll.lat, lon: ll.lng };
     }
   } catch(e) {}
-  // --- FINE NUOVO CODICE GPS ---
 
   const entry = {
     id: Date.now(),
-    geo: geo,
+    geo: geoCarb,
     data: now.toLocaleDateString('it-IT'),
     alt: altitudineAttuale,
     chicMax,
@@ -6690,27 +6686,25 @@ function salvaIntervento() {
 const cur = valutaAttuale || 'USD';
 const costoUsd = (costoLocal > 0) ? convertLocalToUsd(costoLocal, cur) : 0;
 
-  const ante = document.getElementById('anteprima-log-foto');
+    const ante = document.getElementById('anteprima-log-foto');
   const foto = (ante && ante.dataset) ? (ante.dataset.src || null) : null;
 
-   const now = new Date();
+  const now = new Date();
 
-  // --- INIZIO NUOVO CODICE GPS ---
-  let geo = null;
+  let geoMaint = null;
   try {
-    if (typeof lastLat !== 'undefined' && lastLat != null) geo = { lat: lastLat, lon: lastLon };
+    if (typeof lastLat !== 'undefined' && lastLat != null) geoMaint = { lat: lastLat, lon: lastLon };
     else if (typeof marker !== 'undefined' && marker.getLatLng) {
       const ll = marker.getLatLng();
-      if (ll && isFinite(ll.lat)) geo = { lat: ll.lat, lon: ll.lng };
+      if (ll && isFinite(ll.lat)) geoMaint = { lat: ll.lat, lon: ll.lng };
     }
   } catch(e) {}
-  // --- FINE NUOVO CODICE GPS ---
 
- const entry = {
-  id: Date.now(),
-  geo: geo,
-  data: now.toLocaleDateString('it-IT'),
-  ora: now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
+  const entry = {
+    id: Date.now(),
+    geo: geoMaint,
+    data: now.toLocaleDateString('it-IT'),
+    ora: now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
   paese: carica('vt_paeseAttuale','Colombia'),
   km: (parseFloat(carica('vt_kmTotali','0')) || 0).toFixed(1),
 
