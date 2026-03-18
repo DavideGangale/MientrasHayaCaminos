@@ -988,7 +988,7 @@ color:#fff;
       <div class="dash-card" style="margin-top:15px;">
         <h3 style="margin-top:0; color:#e91e63;">📖 Diario di Viaggio</h3>
         <textarea id="diario-testo" placeholder="Scrivi un pensiero, un incontro, un'esperienza..." rows="3"></textarea>
-
+<input type="text" id="diario-video" placeholder="📺 Link YouTube (opzionale)" style="margin-top:5px; background:#222; border-color:#ff0000; color:white;">
         
 <div style="margin-top:10px; font-size:12px; color:#aaa; text-align:left;">
   Tag:
@@ -4838,6 +4838,9 @@ function salvaDiario() {
     const tagsFromText = extractHashtagsFromText(testo);
     const tagsFinal = Array.from(new Set([...(diarioTagsSelezionati || []), ...tagsFromText]));
 
+    const videoEl = document.getElementById('diario-video');
+    const videoUrl = videoEl ? videoEl.value.trim() : null;
+    
     // geo: ultima posizione (se disponibile)
     let geo = null;
     try {
@@ -4860,6 +4863,7 @@ function salvaDiario() {
       tags: Array.from(diarioTagsSelezionati || []),
       foto: fotoSrc,     // fallback locale
       fotoUrl: null      // verrà popolato dalla sync Drive
+      videoUrl: videoUrl // NUOVO LINK YOUTUBE
     };
 
     // salva subito
@@ -4869,7 +4873,7 @@ function salvaDiario() {
 
     // ✅ reset UI immediato (così non clicchi 10 volte)
     if (testoEl) testoEl.value = '';
-
+    if (videoEl) videoEl.value = '';
     if (anteprimaDiv) {
       anteprimaDiv.style.display = 'none';
       anteprimaDiv.dataset.src = '';
@@ -7266,6 +7270,8 @@ async function esportaDatiPubblici() {
     const diario = caricaJSON('vt_diario', []) || [];
     const logbook = caricaJSON('vt_logbook', []) || [];
     const datiPaesi = caricaJSON('vt_datiPaesi', {}) || {};
+    const logCarburanti = caricaJSON('vt_logCarburanti', []) || [];
+    const carburazione = caricaJSON('vt_carburazione', []) || [];
 
     // TAPPE + TRACCE (semplificate)
     const tappePub = tappe.map(t => ({
@@ -7331,7 +7337,7 @@ return {
   testo: d.testo,
   tags: Array.isArray(d.tags) ? d.tags : [],
   geo: d.geo || null,
-
+ videoUrl: d.videoUrl || null, 
   fotoUrl: fotoUrl,
 
   // fallback: include base64 solo se NON ho fotoUrl e se rientra nel limite keepFoto
@@ -7376,7 +7382,9 @@ return {
       tappe: tappePub,
       turismo: turismoPub,
       diario: diarioPub,
-      manutenzioni: logbookPub
+      manutenzioni: logbookPub,
+        rifornimenti: logCarburanti, 
+      carburazioni: carburazione   
     };
 
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
