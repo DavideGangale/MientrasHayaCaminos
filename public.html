@@ -230,7 +230,27 @@
   </div>
 </div>
 
+<!-- MODALE GRAFICO -->
+<div id="graphModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:8500; align-items:center; justify-content:center; padding:15px;">
+  <div style="background:var(--card); width:100%; max-width:820px; border-radius:15px; border:2px solid var(--brand); padding:16px; position:relative; max-height: 90vh; overflow-y:auto;">
+    <button onclick="closeGraphModal()"
+            style="position:absolute; top:10px; right:10px; background:#f44336; color:#fff; border:none; border-radius:50%; width:30px; height:30px; font-weight:bold; cursor:pointer;">×</button>
 
+    <h2 id="graphTitle" style="color:var(--brand); margin-top:0; text-align:center;">📈 Grafico</h2>
+
+    <div style="background:#111; border:1px solid #333; border-radius:12px; padding:10px;">
+      <div style="font-size:12px;color:#aaa;margin-bottom:6px;">Altitudine</div>
+      <canvas id="cvAltPub" style="width:100%; height:160px; display:block;"></canvas>
+    </div>
+
+    <div style="background:#111; border:1px solid #333; border-radius:12px; padding:10px; margin-top:10px;">
+      <div style="font-size:12px;color:#aaa;margin-bottom:6px;">Velocità</div>
+      <canvas id="cvSpdPub" style="width:100%; height:160px; display:block;"></canvas>
+    </div>
+
+    <div id="graphInfo" style="font-size:12px;color:#888;text-align:left;margin-top:10px;"></div>
+  </div>
+</div>
   
   <!-- LIGHTBOX FOTO -->
   <div id="lightbox" onclick="closeLightbox()">
@@ -314,17 +334,28 @@ const consReal = (benzReal > 0) ? (t.km / benzReal).toFixed(2) : '--';
 
 const hasGraph = Array.isArray(t.telemetry) && t.telemetry.length >= 3;
 
+const tipo = t.tipo || 'Tappa';
+const isGiro = (tipo === 'Turismo');
+
+const benzStim = Number(t.benzinaStimataLitri ?? t.benzina ?? 0);
+const benzReal = Number(t.benzinaRealeLitri ?? 0);
+
+const consStim = (benzStim > 0) ? (t.km / benzStim).toFixed(2) : '--';
+const consReal = (benzReal > 0) ? (t.km / benzReal).toFixed(2) : '--';
+
+const hasGraph = Array.isArray(t.telemetry) && t.telemetry.length >= 3;
+
 const infoEstesa = `
-  <div class="popup-title">${isGiro ? '🛵' : '🏁'} ${isGiro ? 'GIRI' : 'TAPPA'} — ${t.data} ${t.ora || ''}</div>
-  <div class="popup-meta">${t.paese} — 📏 <b>${Number(t.km||0).toFixed(1)} km</b></div>
+  <div class="popup-title">${isGiro ? '🛵' : '🏁'} ${isGiro ? 'GIRI' : 'TAPPA'} — ${t.paese}</div>
+  <div class="popup-meta">📅 ${t.data} ${t.ora || ''} | 📏 <b>${Number(t.km || 0).toFixed(1)} km</b></div>
 
   <div style="font-size:13px; margin-bottom:8px; line-height:1.45;">
-    <div>⏱️ Durata: ${h}h ${m}m</div>
+    <div>⏱️ Tempo: ${h}h ${m}m</div>
     <div>⛰️ Alt: ${t.altMin || 0}m → ${t.altMax || 0}m</div>
-    <div>🏎️ Vel max: <b>${t.velMax || 0}</b> km/h ${t.velMedia ? `| Vel media: <b>${t.velMedia}</b>` : ''}</div>
+    <div>🏎️ Vel. Max: <b>${t.velMax || 0}</b> km/h ${t.velMedia ? ` (Media: <b>${t.velMedia}</b>)` : ''}</div>
 
     <div style="margin-top:6px;">
-      ⛽ Benzina stimata: <b>${benzStim ? benzStim.toFixed(2) : '0.00'} L</b> — <b style="color:var(--accent)">${consStim} km/L</b>
+      ⛽ Benzina stimata: <b>${benzStim.toFixed(2)} L</b> — <b style="color:var(--accent)">${consStim} km/L</b>
     </div>
 
     ${benzReal > 0 ? `
@@ -337,20 +368,14 @@ const infoEstesa = `
   ${t.titolo ? `<div style="font-weight:900; margin-bottom:4px; color:var(--accent);">📍 ${t.titolo}</div>` : ''}
   ${t.note ? `<div style="color:#bbb; font-style:italic; margin-bottom:10px;">${t.note}</div>` : ''}
 
-  <div style="display:flex; gap:8px; flex-wrap:wrap;">
-    <button
-      style="background:var(--brand); border:none; color:white; padding:8px 10px; border-radius:8px; font-size:12px; cursor:pointer;"
-      onclick="window.apriGraficoPercorsoPublic('${t.id}')"
-      ${hasGraph ? '' : 'disabled'}
-      title="${hasGraph ? 'Apri grafico' : 'Telemetria non disponibile nel JSON'}"
-    >
-      📈 Grafico
-    </button>
-  </div>
-
-  ${!hasGraph ? `<div style="margin-top:8px; font-size:11px; color:#777;">
-    (Grafico disponibile quando esporti anche <b>telemetry</b> nel JSON pubblico)
-  </div>` : ''}
+  <button
+    style="background:var(--brand); border:none; color:white; padding:8px 10px; border-radius:8px; font-size:12px; cursor:pointer; width:100%;"
+    onclick="window.apriGraficoPercorsoPublic(${t.id})"
+    ${hasGraph ? '' : 'disabled'}
+    title="${hasGraph ? 'Apri grafico' : 'Telemetria non disponibile'}"
+  >
+    📈 Grafico
+  </button>
 `;
       clickPoly.bindPopup(infoEstesa);
 
@@ -673,6 +698,119 @@ window.apriGraficoPercorsoPublic = function(id) {
     drawSeriesPub('cvSpdPub', telem, '#d32f2f', 'sp');
   }, 120);
 };
+
+  function closeGraphModal() {
+  const m = document.getElementById('graphModal');
+  if (m) m.style.display = 'none';
+}
+
+function drawSeriesPub(canvasId, points, color, valueKey) {
+  const cv = document.getElementById(canvasId);
+  if (!cv) return;
+
+  const rect = cv.getBoundingClientRect();
+  const W = Math.max(320, Math.floor(rect.width));
+  const H = Math.max(150, Math.floor(rect.height));
+  cv.width = W;
+  cv.height = H;
+
+  const ctx = cv.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+
+  if (!Array.isArray(points) || points.length < 2) {
+    ctx.fillStyle = '#888';
+    ctx.font = '14px system-ui';
+    ctx.fillText('Dati insufficienti', 12, 28);
+    return;
+  }
+
+  const xs = points.map(p => Number(p.km || 0));
+  const ys = points.map(p => Number(p[valueKey] || 0));
+
+  const xMin = Math.min(...xs), xMax = Math.max(...xs);
+  let yMin = Math.min(...ys), yMax = Math.max(...ys);
+
+  if (!isFinite(xMin) || !isFinite(xMax) || xMax <= xMin) return;
+  if (!isFinite(yMin) || !isFinite(yMax)) return;
+  if (yMax === yMin) yMax = yMin + 1;
+
+  const padL = 36, padR = 10, padT = 10, padB = 22;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+
+  // griglia
+  ctx.strokeStyle = '#222';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = padT + (plotH * i / 4);
+    ctx.beginPath();
+    ctx.moveTo(padL, y);
+    ctx.lineTo(W - padR, y);
+    ctx.stroke();
+  }
+
+  function X(x) { return padL + ((x - xMin) / (xMax - xMin)) * plotW; }
+  function Y(y) { return padT + (1 - ((y - yMin) / (yMax - yMin))) * plotH; }
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(X(xs[0]), Y(ys[0]));
+  for (let i = 1; i < points.length; i++) ctx.lineTo(X(xs[i]), Y(ys[i]));
+  ctx.stroke();
+
+  // etichette
+  ctx.fillStyle = '#aaa';
+  ctx.font = '12px system-ui';
+  ctx.fillText(String(Math.round(yMax)), 6, padT + 12);
+  ctx.fillText(String(Math.round(yMin)), 6, padT + plotH);
+
+  ctx.fillStyle = '#666';
+  ctx.fillText(`${xMax.toFixed(1)} km`, W - 72, H - 8);
+}
+
+// Serve perché il popup Leaflet chiama una funzione globale
+window.apriGraficoPercorsoPublic = function (id) {
+  if (!DATA) return;
+
+  const tappe = Array.isArray(DATA.tappe) ? DATA.tappe : [];
+  const tur   = Array.isArray(DATA.turismo) ? DATA.turismo : [];
+  const all   = tappe.concat(tur);
+
+  const t = all.find(x => String(x.id) === String(id));
+  if (!t) { alert('Percorso non trovato'); return; }
+
+  const telem = Array.isArray(t.telemetry) ? t.telemetry : [];
+  if (telem.length < 3) { alert('Telemetria insufficiente per il grafico'); return; }
+
+  const title = document.getElementById('graphTitle');
+  if (title) {
+    title.innerText = `📈 ${t.tipo || 'Percorso'} — ${t.data || ''} ${t.ora || ''} — ${t.paese || ''}`;
+  }
+
+  const altMin = Math.min(...telem.map(p => Number(p.alt || 0)));
+  const altMax = Math.max(...telem.map(p => Number(p.alt || 0)));
+  const spMax  = Math.max(...telem.map(p => Number(p.sp || 0)));
+
+  const info = document.getElementById('graphInfo');
+  if (info) {
+    info.innerHTML = `
+      <div>📏 Km: <b>${Number(t.km || 0).toFixed(1)}</b></div>
+      <div>⛰️ Altitudine: <b>${Math.round(altMin)}</b> → <b>${Math.round(altMax)}</b> m</div>
+      <div>🏎️ Vel max (telemetria): <b>${Math.round(spMax)}</b> km/h</div>
+    `;
+  }
+
+  const modal = document.getElementById('graphModal');
+  if (modal) modal.style.display = 'flex';
+
+  // disegna dopo apertura (per avere width giusta)
+  setTimeout(() => {
+    drawSeriesPub('cvAltPub', telem, '#2196F3', 'alt');
+    drawSeriesPub('cvSpdPub', telem, '#d32f2f', 'sp');
+  }, 120);
+};
+
 
   
   async function loadData() {
