@@ -7570,9 +7570,9 @@ if (modalitaGuida === 'TURISMO') modalitaGuida = 'GIRI';
   setText('lbl-paese-benzina', paese);
 
   // aggiorna UI settings e guida
-  aggiornaSettingsUI?.();
-  aggiornaModalitaUI?.();
-aggiornaGuidaButtonsUI?.();
+if (typeof aggiornaSettingsUI === 'function') aggiornaSettingsUI();
+if (typeof aggiornaModalitaUI === 'function') aggiornaModalitaUI();
+if (typeof aggiornaGuidaButtonsUI === 'function') aggiornaGuidaButtonsUI();
   await setLoadingProgress(85, '⚙️ Componenti...');
 
 
