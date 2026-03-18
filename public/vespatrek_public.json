@@ -1,6 +1,6 @@
 {
   "_version": "public-1.0",
-  "_exportDate": "2026-03-18T19:47:20.015Z",
+  "_exportDate": "2026-03-18T19:49:23.674Z",
   "titolo": "VespaTrek PX150",
   "diarioTagsPreset": [
     "Paesaggi",
@@ -27,24 +27,24 @@
   "paeseAttuale": "Colombia",
   "stats": {
     "kmTotali": 6.3578,
-    "benzinaUsataLitri": 45.49592,
+    "benzinaUsataLitri": 47.45591999999999,
     "benzinaFuoriTappaLitri": 0,
-    "olioTotaleLitri": 0.929,
+    "olioTotaleLitri": 0.969,
     "spesaBenzinaUsd": 16.564721308387693,
-    "spesaOlioUsd": 14.595496759235917,
+    "spesaOlioUsd": 15.224372760340584,
     "spesaRicambiUsd": 145.987,
-    "spesaManodoperaUsd": 7.990450908715134
+    "spesaManodoperaUsd": 8.089324551847783
   },
   "datiPaesi": {
     "Colombia": {
       "km": 6.3581260808865885,
-      "benzina": 45.49592,
+      "benzina": 47.45591999999999,
       "spesaBenzina": 0,
       "spesaOlio": 0,
       "spesaRicambiUsd": 145.9871332169285,
       "valuta": "COP",
-      "spesaManodoperaUsd": 7.990114483572934,
-      "spesaOlioUsd": 14.595496759235917,
+      "spesaManodoperaUsd": 8.088988126705583,
+      "spesaOlioUsd": 15.224372760340584,
       "spesaBenzinaUsd": 16.564721308387693,
       "spesaBenzinaLocal": 61150
     }
@@ -622,6 +622,23 @@
   ],
   "manutenzioni": [
     {
+      "id": 1773863345697,
+      "data": "18/03/2026",
+      "ora": "14:49",
+      "paese": "Colombia",
+      "km": "6.4",
+      "nome": "Montaggio Cavo Frizione",
+      "desc": "Cjchfyfuguguucyc",
+      "costoLocal": 365,
+      "valuta": "COP",
+      "costoUsd": 0.09887364313264935,
+      "fotoUrl": null,
+      "geo": {
+        "lat": 4.8059033,
+        "lon": -74.3606902
+      }
+    },
+    {
       "id": 1773862501731,
       "data": "18/03/2026",
       "ora": "14:35",
@@ -749,6 +766,41 @@
     }
   ],
   "rifornimenti": [
+    {
+      "id": 1773863330164,
+      "geo": {
+        "lat": 4.8059495,
+        "lon": -74.3606721
+      },
+      "data": "18/03/2026",
+      "ora": "14:48",
+      "qta": "1.00",
+      "dest": "Vespa",
+      "mix": "2%",
+      "prezzoUnit": null,
+      "valuta": "COP",
+      "fxToUsd": 0.0002708866935141078,
+      "costoBenzLocal": null,
+      "costoBenzUsd": null,
+      "costoBenz": null,
+      "costoOlio": "0.31",
+      "luogo": "N/D",
+      "km": "6.4"
+    },
+    {
+      "id": 1773863324435,
+      "data": "18/03/2026",
+      "ora": "14:48",
+      "paese": "Colombia",
+      "qta": "1.00",
+      "dest": "Tanica→Vespa",
+      "mix": "2%",
+      "prezzoUnit": null,
+      "costoBenz": null,
+      "costoOlio": "0.31",
+      "luogo": "Scorta personale",
+      "km": "6.4"
+    },
     {
       "id": 1773862490302,
       "data": "18/03/2026",
