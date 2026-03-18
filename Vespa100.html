@@ -2916,6 +2916,16 @@ updateDriveSyncInfo();
   }, 200);
 }
 
+
+  
+/* ============================================================
+   MAPPA FULL (modal)
+============================================================ */
+var mapFullInstance = null;
+var mapFullMarker = null;
+var mapFullPolyline = null;
+var mapFullPhotoLayer = null;
+  
 /* ============================================================
    MODALI
 ============================================================ */
@@ -2974,13 +2984,7 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
 
 
 
-  
-/* ============================================================
-   MAPPA FULL (modal)
-============================================================ */
-let mapFullInstance = null;
-let mapFullMarker = null;
-let mapFullPolyline = null;
+
 
 // ===== FOTO MARKERS su mappa FULL =====
 let mapFullPhotoLayer = null;
