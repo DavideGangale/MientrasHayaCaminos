@@ -530,8 +530,10 @@ function updateStatsMini() {
     return;
   }
 
-  const km = Number(DATA.stats.kmTotali || 0).toFixed(1);
-  const l  = Number(DATA.stats.benzinaUsataLitri || 0).toFixed(1);
+   // ✅ coerente con stats: calcolo da tappe/giri (reale > stimata)
+  const fb = calcFuelBurnedFromPercorsi(null); // null = globale
+  const km = Number(fb.km || 0).toFixed(1);
+  const l  = Number(fb.litri || 0).toFixed(1);
 
   // ✅ 2 righe fisse
   el.innerHTML = `${T('totalLbl')}: ${km} km<br>${T('fuelLbl')}: ${l} L`;
@@ -780,27 +782,92 @@ const infoEstesa = `
     renderStatsDati();
   }
 
+
+  const CONSUMO_FALLBACK_KM_L = 28; // fallback se manca benzina reale/stimata nelle tappe
+
+function getAllPercorsiPublic() {
+  const tappe = Array.isArray(DATA?.tappe) ? DATA.tappe : [];
+  const tur   = Array.isArray(DATA?.turismo) ? DATA.turismo : [];
+  return tappe.concat(tur);
+}
+
+function calcFuelBurnedFromPercorsi(countryOrNull) {
+  const all = getAllPercorsiPublic();
+
+  let kmSum = 0;
+  let litriSum = 0;
+
+  for (const p of all) {
+    if (!p) continue;
+    if (countryOrNull && p.paese !== countryOrNull) continue;
+
+    const km = Number(p.km || 0);
+    if (!isFinite(km) || km <= 0) continue;
+
+    kmSum += km;
+
+    const realL = Number(p.benzinaRealeLitri);
+    const stimL = Number(p.benzinaStimataLitri ?? p.benzina ?? 0);
+
+    if (isFinite(realL) && realL > 0) {
+      litriSum += realL;
+    } else if (isFinite(stimL) && stimL > 0) {
+      litriSum += stimL;
+    } else {
+      // fallback: stima da km
+      litriSum += km / CONSUMO_FALLBACK_KM_L;
+    }
+  }
+
+  return { km: kmSum, litri: litriSum };
+}
+
+function getOlioUsatoLitriPublic(countryOrNull) {
+  if (!DATA) return null;
+
+  // globale: già presente nel JSON pubblico
+  if (!countryOrNull) {
+    return Number(DATA?.stats?.olioTotaleLitri || 0);
+  }
+
+  // per paese: richiede che dalla privata esporti datiPaesi[paese].olioMl
+  const dp = (DATA.datiPaesi && DATA.datiPaesi[countryOrNull]) ? DATA.datiPaesi[countryOrNull] : null;
+  if (!dp) return null;
+
+  if (dp.olioTotaleLitri != null) return Number(dp.olioTotaleLitri || 0); // se in futuro lo metti già in litri
+  if (dp.olioMl != null) return Number(dp.olioMl || 0) / 1000;
+
+  return null; // non disponibile nei vecchi export
+}
+
+  
   function renderStatsDati() {
     if (!DATA) return;
     const mode = document.getElementById('statsCountryFilter').value;
     
     let km = 0, benz = 0, spesaBenz = 0, spesaMaint = 0, olio = 0;
 
-    if (mode === 'GLOBAL') {
-      const s = DATA.stats || {};
-      km = s.kmTotali || 0;
-      benz = s.benzinaUsataLitri || 0;
-      olio = s.olioTotaleLitri || 0;
-      spesaBenz = s.spesaBenzinaUsd || 0;
-      spesaMaint = (s.spesaRicambiUsd || 0) + (s.spesaManodoperaUsd || 0);
-    } else {
-      const dp = DATA.datiPaesi[mode] || {};
-      km = dp.km || 0;
-      benz = (dp.benzina || 0) + (dp.benzinaFuori || 0);
-      olio = 0; 
-      spesaBenz = dp.spesaBenzinaUsd || 0;
-      spesaMaint = (dp.spesaRicambiUsd || 0) + (dp.spesaManodoperaUsd || 0);
-    }
+const country = (mode === 'GLOBAL') ? null : mode;
+
+// ✅ KM + BENZINA BRUCIATA calcolati dalle tappe/giri (reale > stimata > fallback)
+const fb = calcFuelBurnedFromPercorsi(country);
+km = fb.km || 0;
+benz = fb.litri || 0;
+
+// ✅ OLIO USATO (globale dal JSON, per paese da dp.olioMl)
+const ol = getOlioUsatoLitriPublic(country);
+olio = (ol == null) ? 0 : ol;
+
+// Spese (USD): come prima
+if (mode === 'GLOBAL') {
+  const s = DATA.stats || {};
+  spesaBenz = s.spesaBenzinaUsd || 0;
+  spesaMaint = (s.spesaRicambiUsd || 0) + (s.spesaManodoperaUsd || 0);
+} else {
+  const dp = (DATA.datiPaesi && DATA.datiPaesi[mode]) ? DATA.datiPaesi[mode] : {};
+  spesaBenz = dp.spesaBenzinaUsd || 0;
+  spesaMaint = (dp.spesaRicambiUsd || 0) + (dp.spesaManodoperaUsd || 0);
+}
 
     const cons = benz > 0 ? (km / benz).toFixed(1) : '--';
 
