@@ -4429,6 +4429,7 @@ window.addEventListener('message', (ev) => {
     if (driveUploadPending.timer) clearTimeout(driveUploadPending.timer);
   } catch (e) {}
 
+  console.log('[DRIVE UPLOAD RESULT]', data);
   driveUploadPending.resolve(data);
   driveUploadPending = null;
 });
@@ -4578,7 +4579,7 @@ lastErrMsg = '';
 
       if (job.kind === 'diario') {
         const diario = caricaJSON('vt_diario', []);
-        const idx = diario.findIndex(x => x.id === job.id);
+        const idx = diario.findIndex(x => String(x.id) === String(job.id));
         if (idx === -1) continue; // entry sparita
         const entry = diario[idx];
 
