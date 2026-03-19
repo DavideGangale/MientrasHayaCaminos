@@ -1,6 +1,6 @@
 {
   "_version": "public-1.0",
-  "_exportDate": "2026-03-19T23:05:44.415Z",
+  "_exportDate": "2026-03-19T23:09:26.122Z",
   "titolo": "VespaTrek PX150",
   "diarioTagsPreset": [
     "Paesaggi",
@@ -26,7 +26,7 @@
   ],
   "paeseAttuale": "Colombia",
   "stats": {
-    "kmTotali": 57.2996,
+    "kmTotali": 155.2996,
     "benzinaUsataLitri": 47.45591999999999,
     "benzinaFuoriTappaLitri": 0.946,
     "olioTotaleLitri": 0.969,
@@ -37,7 +37,7 @@
   },
   "datiPaesi": {
     "Colombia": {
-      "km": 57.29944576464268,
+      "km": 155.29944576464268,
       "benzina": 47.45591999999999,
       "spesaBenzina": 0,
       "spesaOlio": 0,
@@ -1215,6 +1215,32 @@
     }
   ],
   "turismo": [
+    {
+      "id": 1773961699247,
+      "tipo": "Turismo",
+      "data": "19/03/2026",
+      "ora": "18:08",
+      "paese": "Colombia",
+      "km": 98,
+      "durata": 17673,
+      "altMin": 0,
+      "altMax": 0,
+      "velMax": 0,
+      "velMedia": 20,
+      "benzinaStimataLitri": 3.92,
+      "benzinaRealeLitri": null,
+      "consumoStimatoKmL": null,
+      "consumoRealeKmL": null,
+      "titolo": "",
+      "note": "",
+      "telemetry": [],
+      "traccia": [
+        [
+          4.8058817,
+          -74.3606183
+        ]
+      ]
+    },
     {
       "id": 1773634202757,
       "tipo": "Turismo",
