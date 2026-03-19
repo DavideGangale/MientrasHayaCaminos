@@ -4509,7 +4509,7 @@ function uploadFotoToDrive(dataUrl, filenameBase='foto', clientKey='') {
   if (!endpoint) return Promise.resolve(null);
 
   const folderId = (carica('vt_driveFolderId','') || '').trim();
-  const filename = `${filenameBase}_${Date.now()}.jpg`;
+  const filename = `${filenameBase}.jpg`;
 
   // ✅ serializza: una richiesta alla volta, in ordine
   driveUploadChain = driveUploadChain
@@ -4586,7 +4586,8 @@ lastErrMsg = '';
         if (entry.fotoUrl) continue;
         if (!entry.foto) { continue; } // non ho base64: impossibile caricare
 
-        const url = await uploadFotoToDrive(entry.foto, 'diario', 'diario_' + entry.id);
+        const key = 'diario_' + entry.id;
+const url = await uploadFotoToDrive(entry.foto, key, key);
         if (url) {
           entry.fotoUrl = url;
           entry.foto = null; // ✅ alleggerisce
@@ -4607,7 +4608,8 @@ lastErrMsg = '';
         if (entry.fotoUrl) continue;
         if (!entry.foto) { continue; }
 
-        const url = await uploadFotoToDrive(entry.foto, 'logbook', 'logbook_' + entry.id);
+        const key = 'logbook_' + entry.id;
+const url = await uploadFotoToDrive(entry.foto, key, key);;
         if (url) {
           entry.fotoUrl = url;
           entry.foto = null;
