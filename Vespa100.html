@@ -3719,95 +3719,66 @@ setOlioStock(st.ml + ml, st.usd + usd);
   
   
   function aggiornaUI() {
-  const kmTot = parseFloat(carica('vt_kmTotali','0')) || 0;
-  const scorta = parseFloat(carica('vt_scortaLitri','0')) || 0;
-  const benzUsata = parseFloat(carica('vt_benzinaUsata','0')) || 0;
-  const benzFuori = parseFloat(carica('vt_benzinaFuoriTappaLitri','0')) || 0;
-  const olioMl = parseFloat(carica('vt_olioTotaleMl','0')) || 0;
-  const paese = carica('vt_paeseAttuale','Colombia');
+  const kmTot   = parseFloat(carica('vt_kmTotali','0')) || 0;
+  const scortaL = parseFloat(carica('vt_scortaLitri','0')) || 0;        // taniche (L)
+  const olioMl  = parseFloat(carica('vt_olioTotaleMl','0')) || 0;
+  const paese   = carica('vt_paeseAttuale','Colombia');
+
+  // ✅ scope stats: null = globali, altrimenti paese specifico
+  let paeseScope = null;
+  if (visualizzazioneStats === 'Paese')  paeseScope = paese;
+  if (visualizzazioneStats === 'Scegli') paeseScope = statsPaeseSelezionato || paese;
 
   // =========================
   // ODOMETRI (KM o MIGLIA)
   // =========================
   const kmTotShow = (distAttuale === 'MI') ? (kmTot * MI_PER_KM) : kmTot;
-  const tripKm = (tappaAttuale.kmPercorsi || 0);
-  const tripShow = (distAttuale === 'MI') ? (tripKm * MI_PER_KM) : tripKm;
+  const tripKm    = Number(tappaAttuale?.kmPercorsi || 0);
+  const tripShow  = (distAttuale === 'MI') ? (tripKm * MI_PER_KM) : tripKm;
 
   setText('ui-odo-tot', kmTotShow.toFixed(1));
   setText('ui-odo-trip', tripShow.toFixed(1));
-setText('ui-trip-mini', tripShow.toFixed(1));
+  setText('ui-trip-mini', tripShow.toFixed(1));
 
-  
   // =========================
-  // SCORTA (L o GAL)
+  // SCORTA (L o GAL) - UI
   // =========================
-  const unitaLabel = unitaAttuale === 'L' ? 'L' : 'gal';
+  const unitaLabel = (unitaAttuale === 'L') ? 'L' : 'gal';
   setText('ui-unita-volume', unitaLabel);
-  const scortaVis = unitaAttuale === 'L' ? scorta : (scorta / FAT_GAL);
 
-  setText('ui-scorta-rapida', scortaVis.toFixed(1));
-  setText('scorta-ui', scortaVis.toFixed(1));
+  const scortaVisUI = (unitaAttuale === 'L') ? scortaL : (scortaL / FAT_GAL);
+  setText('ui-scorta-rapida', scortaVisUI.toFixed(1));
+  setText('scorta-ui', scortaVisUI.toFixed(1));
 
- // =========================
-// STATS (Globali / Paese)
-// =========================
-let kmVis = kmTot;       // sempre in KM internamente
-let scortaVis2 = scorta; // in L internamente
+  // =========================
+  // STATS (Globali / Paese)
+  // =========================
+  let kmVisKM = kmTot; // sempre km internamente
 
-let paeseScope = null;
-    if (visualizzazioneStats === 'Paese') paeseScope = paese;
-if (visualizzazioneStats === 'Scegli') paeseScope = statsPaeseSelezionato || paese;
+  if (paeseScope) {
+    const datiPaesi = caricaJSON('vt_datiPaesi', {});
+    const dp = datiPaesi[paeseScope] || { km: 0 };
+    kmVisKM = Number(dp.km || 0);
+    setText('titolo-stat-paese', paeseScope);
+  } else {
+    setText('titolo-stat-paese', 'Globali');
+  }
 
-if (paeseScope) {
-  const datiPaesi = caricaJSON('vt_datiPaesi', {});
-  const dp = datiPaesi[paeseScope] || { km:0 };
-  kmVis = Number(dp.km || 0);
-  setText('titolo-stat-paese', paeseScope);
-} else {
-  setText('titolo-stat-paese', 'Globali');
-}
+  // ✅ benzina BRUCIATA (reale/stimata), SEMPRE in litri
+  const benzBruciataL = calcBenzinaBruciataLitri(paeseScope, kmVisKM);
 
-// ✅ benzina “bruciata” (reale se c’è, stimata altrimenti), SEMPRE in litri
-let benzVis = calcBenzinaBruciataLitri(paeseScope, kmVis);
+  // Conversioni per visualizzazione
+  const distLabel = (distAttuale === 'MI') ? 'mi' : 'km';
+  const kmVisShow = (distAttuale === 'MI') ? (kmVisKM * MI_PER_KM) : kmVisKM;
 
-//  let paeseScope = null;
-//  if (visualizzazioneStats === 'Paese') paeseScope = paese;
-//  if (visualizzazioneStats === 'Scegli') paeseScope = statsPaeseSelezionato || paese;
+  let benzVis = benzBruciataL; // L
+  let scortaVis2 = scortaL;    // L
 
-if (paeseScope) {
-  const datiPaesi = caricaJSON('vt_datiPaesi', {});
-  const dp = datiPaesi[paeseScope] || { km:0, benzina:0, benzinaFuori:0 };
-
-  kmVis = dp.km || 0;
-  benzVis = (dp.benzina || 0) + (dp.benzinaFuori || 0);
-
-  setText('titolo-stat-paese', paeseScope);
-} else {
-  setText('titolo-stat-paese', 'Globali');
-}
-
-  // conversione carburante visualizzato (L -> gal)
   if (unitaAttuale === 'G') {
     benzVis = benzVis / FAT_GAL;
     scortaVis2 = scortaVis2 / FAT_GAL;
   }
 
-  // conversione km visualizzati (km -> mi)
-  const kmVisShow = (distAttuale === 'MI') ? (kmVis * MI_PER_KM) : kmVis;
-  const distLabel = (distAttuale === 'MI') ? 'mi' : 'km';
-
-
-
-    // ✅ Totale viaggio sotto i bottoni in GUIDA
-  const totMini = document.getElementById('ui-km-tot-mini');
-  if (totMini) totMini.innerText = `${kmTotShow.toFixed(1)} ${distLabel}`;
-
-  const tripUnit = document.getElementById('ui-trip-unit-mini');
-  if (tripUnit) tripUnit.innerText = distLabel;
-
-
-
-  
   // Consumo: (km o mi) / (L o gal)
   const consumo = benzVis > 0 ? (kmVisShow / benzVis).toFixed(1) : '--';
 
@@ -3820,20 +3791,20 @@ if (paeseScope) {
   // Aggiorna tutte le label unità volume (L/gal)
   document.querySelectorAll('.txt-unita').forEach(el => el.innerText = unitaLabel);
 
-  // Paese (se la select esiste ancora in guida)
+  // Totale viaggio sotto i bottoni in GUIDA
+  const totMini = document.getElementById('ui-km-tot-mini');
+  if (totMini) totMini.innerText = `${kmTotShow.toFixed(1)} ${distLabel}`;
+
+  const tripUnit = document.getElementById('ui-trip-unit-mini');
+  if (tripUnit) tripUnit.innerText = distLabel;
+
+  // Paese UI
   const sel = document.getElementById('selectPaese');
   if (sel) sel.value = paese;
   setText('lbl-paese-benzina', paese);
 
-
-
   // ===== SPESE (sempre in USD) =====
   let spB = 0, spO = 0, spR = 0, spM = 0;
-
-  // determina paeseScope come in stats (Globali = null)
-  //let paeseScope = null;
-  if (visualizzazioneStats === 'Paese') paeseScope = paese;
-  if (visualizzazioneStats === 'Scegli') paeseScope = statsPaeseSelezionato || paese;
 
   if (paeseScope) {
     const datiPaesi = caricaJSON('vt_datiPaesi', {});
@@ -3854,16 +3825,12 @@ if (paeseScope) {
   setText('statSpesaRicambi', '$' + spR.toFixed(2));
   setText('statSpesaManodopera', '$' + spM.toFixed(2));
 
-
-  
   aggiornaTempoGuidaUI();
   aggiornaAutonomia();
   aggiornaUIOlioStock();
   aggiornaGuidaButtonsUI();
-  // ✅ avvisi manutenzione (500/250/100 + urgente)
-checkManutToasts();
+  checkManutToasts();
 }
-
 /* ============================================================
    PAESE (select manuale)
 ============================================================ */
