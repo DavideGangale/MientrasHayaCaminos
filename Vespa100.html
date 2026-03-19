@@ -161,6 +161,13 @@
     }
     .btn-secondary:active{opacity:0.8;}
 
+    /* Bottoni gialli (stile unico) */
+.btn-yellow{
+  background: var(--giallo) !important;
+  color: #000 !important;
+  border: none;
+}
+
     /* MAPPA */
    #map{
   height: clamp(240px, 42vh, 420px);
@@ -966,55 +973,67 @@ color:#fff;
 <div id="viaggio" class="page">
   <div class="dash-card">
     
-      <button class="btn-azione" style="background:#9c27b0;" onclick="apriModal('modalTappe')">🗺️ APRI DIARIO TAPPE</button>
-      <button class="btn-azione" style="background:#2196F3;" onclick="apriModalPaesi()">🌎 STATISTICHE PER PAESE</button>
+      <button class="btn-azione btn-yellow" onclick="apriModal('modalTappe')">🗺️ APRI DIARIO TAPPE</button>
+      <button class="btn-azione btn-yellow" onclick="apriModalPaesi()">🌎 STATISTICHE PER PAESE</button>
 
-  <button class="btn-azione" style="background:#ff9800; color:black;" onclick="apriModal('modalStats'); aggiornaUI();">
+  <button class="btn-azione btn-yellow" color:black;" onclick="apriModal('modalStats'); aggiornaUI();">
   📊 STATISTICHE
 </button>
 
-  <button class="btn-azione" style="background:#795548;" onclick="apriModal('modalLogCarburanti')">
+  <button class="btn-azione btn-yellow" onclick="apriModal('modalLogCarburanti')">
   ⛽ LOG RIFORNIMENTI
 </button>
 
-<button class="btn-azione" style="background:#ff9800; color:black;" onclick="apriModal('modalRegistro')">
+<button class="btn-azione btn-yellow" color:black;" onclick="apriModal('modalRegistro')">
   🔧 LOG MANUTENZIONI
 </button>
 
       <!-- ===== CONDIVIDI MOMENTO (FIX: elementi esistono davvero) ===== -->
       
 
-      <!-- DIARIO -->
-      <div class="dash-card" style="margin-top:15px;">
-        <h3 style="margin-top:0; color:#e91e63;">📖 Diario di Viaggio</h3>
-        <textarea id="diario-testo" placeholder="Scrivi un pensiero, un incontro, un'esperienza..." rows="3"></textarea>
-<input type="text" id="diario-video" placeholder="📺 Link YouTube (opzionale)" style="margin-top:5px; background:#222; border-color:#ff0000; color:white;">
-        
-<div style="margin-top:10px; font-size:12px; color:#aaa; text-align:left;">
-  Tag:
+    <!-- DIARIO -->
+<div class="dash-card" style="margin-top:15px;">
+  <h3 style="margin-top:0; color:#e91e63;">📖 Diario di Viaggio</h3>
+
+  <!-- 1) APRI DIARIO -->
+  <button class="btn-azione btn-yellow" onclick="apriModal('modalDiario'); renderDiarioFull();">
+    📖 Apri Diario (tutti i post)
+  </button>
+
+  <!-- 2) SALVA -->
+  <button id="btn-salva-diario" class="btn-azione btn-yellow" onclick="salvaDiario()">
+    💾 Salva nel Diario
+  </button>
+
+  <!-- (input file deve restare presente, anche se “nascosto”) -->
+  <input type="file" id="foto-input" accept="image/*" capture="environment" style="display:none;"
+         onchange="anteprima('foto-input','anteprima-foto')">
+
+  <!-- 3) FOTO -->
+  <button class="btn-azione btn-yellow" onclick="document.getElementById('foto-input').click()">
+    📷 Aggiungi Foto
+  </button>
+
+  <div id="anteprima-foto" style="margin-top:10px; display:none;"></div>
+
+  <!-- 4) HASHTAG -->
+  <button class="btn-azione btn-yellow" onclick="apriModal('modalTagPicker'); renderTagPicker();">
+    🏷️ Seleziona hashtag (multi)
+  </button>
+
+  <div id="diario-tags-selected-inline" class="tag-grid" style="margin-top:8px;"></div>
+
+  <!-- 5) YOUTUBE -->
+  <input type="text" id="diario-video"
+         placeholder="📺 Link YouTube (opzionale)"
+         style="margin-top:8px; background:#222; border-color:#444; color:white;">
+
+  <!-- 6) TESTO (alla fine, come vuoi tu) -->
+  <textarea id="diario-testo"
+            placeholder="Scrivi un pensiero, un incontro, un'esperienza..."
+            rows="4"
+            style="margin-top:10px;"></textarea>
 </div>
-
-<button class="btn-secondary" style="margin-top:8px;" onclick="apriModal('modalTagPicker'); renderTagPicker();">
-  🏷️ Seleziona hashtag (multi)
-</button>
-
-<div id="diario-tags-selected-inline" class="tag-grid" style="margin-top:8px;"></div>
-
-        
-        <input type="file" id="foto-input" accept="image/*" capture="environment" style="display:none;"
-               onchange="anteprima('foto-input','anteprima-foto')">
-
-        <button class="btn-secondary" style="margin-top:0;" onclick="document.getElementById('foto-input').click()">📷 Aggiungi Foto</button>
-        <div id="anteprima-foto" style="margin-top:10px; display:none;"></div>
-  
-        <button id="btn-salva-diario" class="btn-azione" style="background:#e91e63;" onclick="salvaDiario()">💾 Salva nel Diario</button>
-        <button class="btn-secondary" style="margin-top:12px;" onclick="apriModal('modalDiario'); renderDiarioFull();">
-  📖 Apri Diario (tutti i post)
-</button>
-
-  </div>
-      </div>
-    </div>
 
   <!-- ==================== PAGINA 3: BENZINA ==================== -->
   <div id="miscela" class="page">
