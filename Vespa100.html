@@ -4054,6 +4054,9 @@ function registraAcquisto() {
       datiPaesi[paese].spesaOlioUsd =
         (datiPaesi[paese].spesaOlioUsd || 0) + costoOlioUsatoUsd;
 
+      // ✅ Olio usato per paese (ml)
+datiPaesi[paese].olioMl = (Number(datiPaesi[paese].olioMl || 0) + Number(olioMl || 0));
+
       // benzina netta
       const benzPura = qtaLitri - (olioMl / 1000);
 
@@ -4230,6 +4233,8 @@ if (!datiPaesi[paese]) datiPaesi[paese] = { km:0, benzina:0, benzinaFuori:0, spe
 // spesa olio (USD): qui il costo lo hai in "costoOlioUsato"
 salva('vt_spesaOlioUsd', (parseFloat(carica('vt_spesaOlioUsd', '0')) || 0) + costoOlioUsato);
 datiPaesi[paese].spesaOlioUsd = (datiPaesi[paese].spesaOlioUsd || 0) + costoOlioUsato;
+  // ✅ Olio usato per paese (ml)
+datiPaesi[paese].olioMl = (Number(datiPaesi[paese].olioMl || 0) + Number(olioMl || 0));
 salva('vt_datiPaesi', datiPaesi);
 
   datiPaesi[paese].benzina = (datiPaesi[paese].benzina || 0) + benzPura;
