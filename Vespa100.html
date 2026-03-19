@@ -3754,9 +3754,9 @@ setText('ui-trip-mini', tripShow.toFixed(1));
 let kmVis = kmTot;       // sempre in KM internamente
 let scortaVis2 = scorta; // in L internamente
 
-//let paeseScope = null;
-//if (visualizzazioneStats === 'Paese') paeseScope = paese;
-//if (visualizzazioneStats === 'Scegli') paeseScope = statsPaeseSelezionato || paese;
+let paeseScope = null;
+    if (visualizzazioneStats === 'Paese') paeseScope = paese;
+if (visualizzazioneStats === 'Scegli') paeseScope = statsPaeseSelezionato || paese;
 
 if (paeseScope) {
   const datiPaesi = caricaJSON('vt_datiPaesi', {});
@@ -3770,9 +3770,9 @@ if (paeseScope) {
 // ✅ benzina “bruciata” (reale se c’è, stimata altrimenti), SEMPRE in litri
 let benzVis = calcBenzinaBruciataLitri(paeseScope, kmVis);
 
-  let paeseScope = null;
-if (visualizzazioneStats === 'Paese') paeseScope = paese;
-if (visualizzazioneStats === 'Scegli') paeseScope = statsPaeseSelezionato || paese;
+//  let paeseScope = null;
+//  if (visualizzazioneStats === 'Paese') paeseScope = paese;
+//  if (visualizzazioneStats === 'Scegli') paeseScope = statsPaeseSelezionato || paese;
 
 if (paeseScope) {
   const datiPaesi = caricaJSON('vt_datiPaesi', {});
