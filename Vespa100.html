@@ -430,18 +430,22 @@ color:#fff;
       border:2px solid var(--rosso);
       position:relative;
     }
-    .close-modal{
-      position:absolute;
-      top:10px;right:10px;
-      font-size:24px;
-      color:#fff;
-      background:#f44336;
-      border:none;
-      width:35px;height:35px;
-      border-radius:50%;
-      font-weight:bold;
-      cursor:pointer;
-      z-index:10;
+   .close-modal{
+  position: sticky;     /* ✅ resta visibile mentre scrolli */
+  top: 10px;
+  margin-left: auto;    /* lo spinge a destra */
+  display: block;
+
+  font-size:24px;
+  color:#fff;
+  background:#f44336;
+  border:none;
+  width:35px;height:35px;
+  border-radius:50%;
+  font-weight:bold;
+  cursor:pointer;
+  z-index:9999;
+}
     }
     .log-entry-full{
       background:#2a2a2a;
@@ -1054,8 +1058,8 @@ color:#fff;
     </div>
 
     <!-- DAL BENZINAIO -->
-    <div class="dash-card" style="border:2px solid #555;">
-      <h2 style="margin-top:0; color:#4285F4;">⛽ Dal Benzinaio</h2>
+      <div class="dash-card" style="border:2px solid var(--rosso);">
+      <h2 style="margin-top:0; color:var(--rosso);">⛽ Dal Benzinaio</h2>
       <div style="font-size:13px; color:#aaa; margin-bottom:5px;">Dove finisce la benzina?</div>
 
       <div class="toggle-container">
@@ -1149,10 +1153,10 @@ color:#fff;
   </button>
 
   <!-- CARBURAZIONE (apre modal dedicato) -->
-  <button class="btn-azione" style="background:#00bcd4; color:black;"
+ <button class="btn-azione btn-yellow"
           onclick="apriModal('modalCarbSetup')">
     🌬️ CARBURAZIONE (SETUP)
-  </button>
+</button>
 
 <button class="btn-azione" style="background:#ff9800; color:black;"
         onclick="apriModal('modalLogDettaglio')">
@@ -1787,6 +1791,21 @@ color:#fff;
       </div>
 
       <div id="tag-picker-list" style="margin-top:10px;"></div>
+
+      <hr style="border:0;border-top:1px solid #333; margin:12px 0;">
+
+<div style="font-size:12px;color:#aaa;text-align:left;margin-bottom:8px;">
+  Aggiungi al volo un hashtag (verrà salvato in lista):
+</div>
+
+<div style="display:flex; gap:10px;">
+  <input id="tag-quick-new" type="text" placeholder="Es. Frontiera / Officina / Pioggia..."
+         style="margin:0; text-align:left; flex:1;">
+  <button class="btn-secondary" style="margin:0; width:120px;"
+          onclick="addTagQuickFromPicker()">
+    ➕ Salva
+  </button>
+</div>
 
       <div style="margin-top:10px; font-size:12px; color:#aaa; text-align:left;">Selezionati:</div>
       <div id="diario-tags-selected" class="tag-grid" style="margin-top:8px;"></div>
@@ -2727,6 +2746,35 @@ function addTagFromSettings() {
   renderSelectedTagsInline();
   showToast('✅ Hashtag aggiunto: #' + tag);
 }
+
+
+function addTagQuickFromPicker() {
+  const inp = document.getElementById('tag-quick-new');
+  const raw = (inp?.value || '').trim();
+  if (!raw) { showToast('⚠️ Scrivi un hashtag'); return; }
+
+  const tag = raw.replace(/^#/,'').trim();
+  if (!tag) { showToast('⚠️ Tag non valido'); return; }
+
+  const custom = getCustomDiarioTags();
+  if (!custom.includes(tag)) {
+    custom.push(tag);
+    setCustomDiarioTags(custom);
+  }
+
+  // selezionalo subito
+  if (!diarioTagsSelezionati) diarioTagsSelezionati = new Set();
+  diarioTagsSelezionati.add(tag);
+
+  if (inp) inp.value = '';
+
+  // aggiorna UI picker + inline
+  renderTagPicker();
+  renderSelectedTagsInline();
+  showToast('✅ Hashtag salvato: #' + tag);
+}
+
+    
 
 function removeTagFromSettings(tag) {
   const custom = getCustomDiarioTags().filter(x => x !== tag);
