@@ -107,11 +107,16 @@ html, body{
 }
 
 .speed-unit{
-  font-size:14px;
+  font-size:18px;          /* ✅ più grande (da 14 a 18) */
   font-weight:1000;
-  color:#9a9a9a;
+  color:var(--verde);      /* ✅ verde */
   letter-spacing:1px;
   text-transform:uppercase;
+
+  display:inline-block;    /* ✅ permette width */
+  width:72px;              /* ✅ “circa il doppio” e simile al badge GPS */
+  text-align:right;        /* allineato a destra come prima */
+  text-shadow:0 0 12px rgba(76,175,80,0.25);
 }
     
     .altitude{font-size:30px;color:var(--blu);font-weight:bold;margin-bottom:5px;text-shadow:0 0 10px rgba(33,150,243,0.3);}
