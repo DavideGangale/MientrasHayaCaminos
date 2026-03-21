@@ -597,16 +597,7 @@ function updateStatsMini() {
       const consHtml = (t.benzinaStimataLitri > 0) ? `<div>⛽ Consumo: <b>${(t.km / t.benzinaStimataLitri).toFixed(1)} km/L</b></div>` : '';
 
  
-const tipo = t.tipo || 'Tappa';
-const isGiro = (tipo === 'Turismo');
 
-const benzStim = Number(t.benzinaStimataLitri ?? t.benzina ?? 0);
-const benzReal = Number(t.benzinaRealeLitri ?? 0);
-
-const consStim = (benzStim > 0) ? (t.km / benzStim).toFixed(2) : '--';
-const consReal = (benzReal > 0) ? (t.km / benzReal).toFixed(2) : '--';
-
-const hasGraph = Array.isArray(t.telemetry) && t.telemetry.length >= 3;
 
 const tipo = t.tipo || 'Tappa';
 const isGiro = (tipo === 'Turismo');
@@ -620,6 +611,10 @@ const consReal = (benzReal > 0) ? (t.km / benzReal).toFixed(2) : '--';
 const hasGraph = Array.isArray(t.telemetry) && t.telemetry.length >= 3;
 
 // ✅ TITOLO IN ALTO (se manca, fallback su Etapa/Paseo)
+const titoloTop = (t.titolo && String(t.titolo).trim())
+  ? `📍 ${t.titolo}`
+  : `${isGiro ? '🛵 ' + T('giri') : '🏁 ' + T('tappa')}`;
+
 const titoloTop = (t.titolo && String(t.titolo).trim())
   ? `📍 ${t.titolo}`
   : `${isGiro ? '🛵 ' + T('giri') : '🏁 ' + T('tappa')}`;
