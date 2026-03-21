@@ -5230,6 +5230,10 @@ function renderTappe() {
         <div>📏 <b>${t.km} km</b> &nbsp;|&nbsp; ⏱️ ${h}h ${m}m</div>
         <div>⛰️ Alt: ${t.altMin}m → ${t.altMax}m</div>
         <div>⛽ Benzina stimata: ${Number(t.benzinaStimataLitri ?? t.benzina ?? 0).toFixed(2)} L</div>
+        ${(t.benzinaRealeLitri != null && Number(t.benzinaRealeLitri) > 0)
+  ? `<div>🔥 Benzina reale: <b>${Number(t.benzinaRealeLitri).toFixed(2)} L</b> (${t.consumoRealeKmL ? t.consumoRealeKmL + ' km/L' : '--'})</div>`
+  : `<div style="color:#777;">🔥 Benzina reale: --</div>`
+}
         <div>🏎️ Vel max: <b>${t.velMax || 0}</b> km/h</div>
         ${velMediaTxt}
         ${(t.fuelEndGal != null) ? `<div>⛽ Serbatoio fine: <b>${t.fuelEndGal}</b> gal</div>` : ''}
