@@ -608,11 +608,31 @@ const consReal = (benzReal > 0) ? (t.km / benzReal).toFixed(2) : '--';
 
 const hasGraph = Array.isArray(t.telemetry) && t.telemetry.length >= 3;
 
+const tipo = t.tipo || 'Tappa';
+const isGiro = (tipo === 'Turismo');
+
+const benzStim = Number(t.benzinaStimataLitri ?? t.benzina ?? 0);
+const benzReal = Number(t.benzinaRealeLitri ?? 0);
+
+const consStim = (benzStim > 0) ? (t.km / benzStim).toFixed(2) : '--';
+const consReal = (benzReal > 0) ? (t.km / benzReal).toFixed(2) : '--';
+
+const hasGraph = Array.isArray(t.telemetry) && t.telemetry.length >= 3;
+
+// ✅ TITOLO IN ALTO (se manca, fallback su Etapa/Paseo)
+const titoloTop = (t.titolo && String(t.titolo).trim())
+  ? `📍 ${t.titolo}`
+  : `${isGiro ? '🛵 ' + T('giri') : '🏁 ' + T('tappa')}`;
+
 const infoEstesa = `
   <div class="popup-title">
-    ${isGiro ? '🛵' : '🏁'} ${isGiro ? T('giri') : T('tappa')} — ${t.paese}
+    ${titoloTop}
   </div>
-  <div class="popup-meta">📅 ${t.data} ${t.ora || ''} | 📏 <b>${Number(t.km || 0).toFixed(1)} km</b></div>
+
+  <div class="popup-meta">
+    🌎 <b>${t.paese || ''}</b><br>
+    📅 ${t.data} ${t.ora || ''} &nbsp;|&nbsp; 📏 <b>${Number(t.km || 0).toFixed(1)} km</b>
+  </div>
 
   <div style="font-size:13px; margin-bottom:8px; line-height:1.45;">
     <div>${T('time')}: ${h}h ${m}m</div>
@@ -622,20 +642,19 @@ const infoEstesa = `
       ${t.velMedia ? ` (${T('speedAvg')}: <b>${t.velMedia}</b>)` : ''}
     </div>
 
-    <div style="margin-top:6px;">
+    <div style="margin-top:8px;">
       ${T('fuelEst')}: <b>${benzStim.toFixed(2)} L</b> —
       <b style="color:var(--accent)">${consStim} km/L</b>
     </div>
 
     ${benzReal > 0 ? `
-      <div>
+      <div style="margin-top:4px;">
         ${T('fuelReal')}: <b>${benzReal.toFixed(2)} L</b> —
         <b style="color:#4caf50">${consReal} km/L</b>
       </div>
-    ` : ``}
+    ` : `<div style="margin-top:4px;color:#777;">${T('fuelReal')}: --</div>`}
   </div>
 
-  ${t.titolo ? `<div style="font-weight:900; margin-bottom:4px; color:var(--accent);">📍 ${t.titolo}</div>` : ''}
   ${t.note ? `<div style="color:#bbb; font-style:italic; margin-bottom:10px;">${t.note}</div>` : ''}
 
   <button
