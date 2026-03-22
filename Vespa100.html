@@ -973,6 +973,16 @@ color:#fff;
       </button>
     </div>
 
+
+<!-- NAVIGAZIONE -->
+<div class="dash-card" style="margin-top:12px;">
+  <button class="btn-azione" style="background:#2196F3;color:white;"
+          onclick="openNavMenu()">
+    🧭 NAVIGA (Google Maps / Waze)
+  </button>
+</div>
+
+    
     <!-- info piccole sotto i bottoni -->
   <div style="font-size:14px; color:#bbb; margin-top:10px; display:flex; justify-content:space-between; gap:10px;">
   <div>TOT KM: <b id="ui-km-tot-mini" style="color:#fff;">0.0 km</b></div>
@@ -2068,6 +2078,81 @@ function showToast(msg, durata = 2500) {
 }
 
 
+function getCurrentLatLon() {
+  // usa GPS recente se disponibile, altrimenti marker Leaflet
+  try {
+    if (lastLat != null && lastLon != null) return { lat: lastLat, lon: lastLon };
+    if (typeof marker !== 'undefined' && marker?.getLatLng) {
+      const ll = marker.getLatLng();
+      if (ll && isFinite(ll.lat) && isFinite(ll.lng)) return { lat: ll.lat, lon: ll.lng };
+    }
+  } catch {}
+  return null;
+}
+
+// salva una destinazione "testo" (può essere indirizzo o "lat,lon")
+function setNavDest(raw) {
+  salva('vt_nav_dest', String(raw || '').trim());
+}
+function getNavDest() {
+  return (carica('vt_nav_dest', '') || '').trim();
+}
+
+function openGoogleMapsNavigation(dest) {
+  const cur = getCurrentLatLon();
+  if (!cur) { showToast('⚠️ Posizione non disponibile'); return; }
+
+  // Web universal link (funziona ovunque; poi il telefono spesso apre l’app)
+  // dest può essere "lat,lon" oppure "Bogotá" o un indirizzo.
+  const url = `https://www.google.com/maps/dir/?api=1&origin=${cur.lat},${cur.lon}&destination=${encodeURIComponent(dest)}&travelmode=driving`;
+  window.location.href = url;
+}
+
+function openWazeNavigation(dest) {
+  // Waze vuole lat/lon (meglio)
+  // Se l’utente mette un indirizzo, Waze a volte non lo risolve bene: consigliato "lat,lon"
+  const d = String(dest || '').trim();
+  const m = d.match(/^\s*(-?\d+(\.\d+)?)\s*,\s*(-?\d+(\.\d+)?)\s*$/);
+  if (!m) {
+    showToast('⚠️ Per Waze usa formato: lat,lon (es. -12.04,-77.03)');
+    return;
+  }
+  const lat = m[1], lon = m[3];
+
+  // prova schema app, poi fallback web
+  const appUrl = `waze://?ll=${lat},${lon}&navigate=yes`;
+  const webUrl = `https://waze.com/ul?ll=${lat},${lon}&navigate=yes`;
+
+  // Tentativo di aprire app (alcuni browser bloccano; fallback dopo 800ms)
+  window.location.href = appUrl;
+  setTimeout(() => {
+    window.location.href = webUrl;
+  }, 800);
+}
+
+function openNavMenu() {
+  // destinazione salvata o chiedi
+  let dest = getNavDest();
+
+  if (!dest) {
+    dest = prompt(
+      'Destinazione:\n- Incolla "lat,lon" (consigliato, es. -12.0464,-77.0428)\noppure\n- Scrivi un indirizzo/città (solo Google Maps)\n\nLa salvo per la prossima volta.',
+      ''
+    );
+    if (!dest) return;
+    setNavDest(dest);
+  }
+
+  // scegli app
+  const useWaze = confirm(
+    'Vuoi aprire Waze?\n\nOK = Waze\nAnnulla = Google Maps'
+  );
+
+  if (useWaze) openWazeNavigation(dest);
+  else openGoogleMapsNavigation(dest);
+}
+
+  
 
 let preRideTimer = null;
 
@@ -2363,7 +2448,7 @@ function annullaCambioPaese() {
    MAPPA LEAFLET
 ============================================================ */
 const map = L.map('map', { zoomControl:true, attributionControl:false }).setView([4.7, -74.1], 5);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom:19 }).addTo(map);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19 }).addTo(map);
 const marker = L.marker([4.7, -74.1]).addTo(map);
 const polyline = L.polyline([], { color:'#d32f2f', weight:4, opacity:0.8 }).addTo(map);
 
