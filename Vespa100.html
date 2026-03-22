@@ -1881,7 +1881,10 @@ color:#fff;
 /* ============================================================
    HELPERS
 ============================================================ */
-
+function setText(id, txt) {
+  const el = document.getElementById(id);
+  if (el) el.innerText = txt;
+}
 function setHTML(id, html) {
   const el = document.getElementById(id);
   if (el) el.innerHTML = html;
