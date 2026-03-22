@@ -435,8 +435,9 @@ color:#fff;
       border:2px solid var(--rosso);
       position:relative;
     }
-   .close-modal{
-  position: sticky;     /* ✅ resta visibile mentre scrolli */
+    
+ .close-modal{
+  position: sticky;     /* resta visibile mentre scrolli */
   top: 10px;
   margin-left: auto;    /* lo spinge a destra */
   display: block;
@@ -445,13 +446,14 @@ color:#fff;
   color:#fff;
   background:#f44336;
   border:none;
-  width:35px;height:35px;
+  width:35px;
+  height:35px;
   border-radius:50%;
   font-weight:bold;
   cursor:pointer;
   z-index:9999;
 }
-    }
+    
     .log-entry-full{
       background:#2a2a2a;
       border-left:4px solid var(--verde);
@@ -2038,6 +2040,20 @@ function caricaJSON(key, fallback) {
   }
 }
 
+
+// ================================
+// SALVATAGGIO TAPPA "THROTTLED"
+// (riduce scritture su localStorage)
+// ================================
+let lastTappaSaveAt = 0;
+function salvaTappaThrottled(minMs = 10000) { // 10s
+  const now = Date.now();
+  if (now - lastTappaSaveAt < minMs) return;
+  lastTappaSaveAt = now;
+  salva('vt_tappaAttuale', tappaAttuale);
+}
+
+  
 /* ============================================================
    TOAST
 ============================================================ */
@@ -2577,10 +2593,10 @@ salva('vt_tappaAttuale', tappaAttuale);
 
   if (timerGuida) clearInterval(timerGuida);
   timerGuida = setInterval(() => {
-    tappaAttuale.secondiGuida++;
-    salva('vt_tappaAttuale', tappaAttuale);
-    aggiornaTempoGuidaUI();
-  }, 1000);
+  tappaAttuale.secondiGuida++;
+  salvaTappaThrottled(10000);   // salva ogni ~10s
+  aggiornaTempoGuidaUI();
+}, 1000);
 
   showToast('▶ Tracking avviato');
   aggiornaGuidaButtonsUI();
@@ -2675,6 +2691,7 @@ function toggleTracking() {
     const btn = document.getElementById('btn-start-stop');
 
     inViaggio = false;
+    salva('vt_tappaAttuale', tappaAttuale); // salva subito in pausa
     aggiornaGuidaButtonsUI();
     if (btn) {
   btn.classList.remove('stop');
@@ -3505,11 +3522,7 @@ function mostraConfrontoConsumoTappa(t) {
 function setText(id, txt) {
   const el = document.getElementById(id);
   if (el) el.innerText = txt;
-}
-function setHTML(id, html) {
-  const el = document.getElementById(id);
-  if (el) el.innerHTML = html;
-}
+
 
 
 
