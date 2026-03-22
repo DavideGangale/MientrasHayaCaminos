@@ -974,13 +974,7 @@ color:#fff;
     </div>
 
 
-<!-- NAVIGAZIONE -->
-<div class="dash-card" style="margin-top:12px;">
-  <button class="btn-azione" style="background:#2196F3;color:white;"
-          onclick="openNavMenu()">
-    🧭 NAVIGA (Google Maps / Waze)
-  </button>
-</div>
+
 
     
     <!-- info piccole sotto i bottoni -->
@@ -2162,27 +2156,7 @@ function openWazeNavigation(dest) {
   }, 800);
 }
 
-function openNavMenu() {
-  // destinazione salvata o chiedi
-  let dest = getNavDest();
 
-  if (!dest) {
-    dest = prompt(
-      'Destinazione:\n- Incolla "lat,lon" (consigliato, es. -12.0464,-77.0428)\noppure\n- Scrivi un indirizzo/città (solo Google Maps)\n\nLa salvo per la prossima volta.',
-      ''
-    );
-    if (!dest) return;
-    setNavDest(dest);
-  }
-
-  // scegli app
-  const useWaze = confirm(
-    'Vuoi aprire Waze?\n\nOK = Waze\nAnnulla = Google Maps'
-  );
-
-  if (useWaze) openWazeNavigation(dest);
-  else openGoogleMapsNavigation(dest);
-}
 
   
 
@@ -3433,7 +3407,9 @@ function apriMappaFull(coordsOverride = null, ctx = null) {
 
       mapFullInstance = L.map(el, { zoomControl:true, attributionControl:false });
        const tileCfg2 = getTileLayerConfig();
-  L.tileLayer(tileCfg2.url, tileCfg2.opts).addTo(mapFullInstance);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, crossOrigin: true}).addTo(mapFullInstance);
+ // L.tileLayer(tileCfg2.url, tileCfg2.opts).addTo(mapFullInstance);
 
       mapFullMarker = L.marker([4.7, -74.1]).addTo(mapFullInstance);
       mapFullPolyline = L.polyline([], { color:'#d32f2f', weight:4, opacity:0.9 }).addTo(mapFullInstance);
@@ -5299,29 +5275,43 @@ function renderDiarioList(containerId, limit = null) {
     return;
   }
 
-  container.innerHTML = list.map(e => `
-    <div class="diario-entry">
-      <div class="diario-header">
-        <span class="diario-data">📅 ${e.data} ${e.ora} — ${e.km} km</span>
-        <span class="diario-paese">${e.paese}</span>
+  let html = '';
+
+  for (const e of list) {
+    const tagsHtml = (Array.isArray(e.tags) && e.tags.length)
+      ? `<div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:6px;">
+          ${e.tags.map(t =>
+            `<span style="font-size:11px; padding:4px 8px; border-radius:999px; background:#222; border:1px solid #444; color:var(--giallo); font-weight:bold;">#${t}</span>`
+          ).join('')}
+         </div>`
+      : '';
+
+    const fotoSrc = (e.fotoUrl || e.foto) ? (e.fotoUrl || e.foto) : null;
+    const fotoHtml = fotoSrc
+      ? `<img src="${fotoSrc}" class="diario-foto" loading="lazy">`
+      : '';
+
+    html += `
+      <div class="diario-entry">
+        <div class="diario-header">
+          <span class="diario-data">📅 ${e.data || ''} ${e.ora || ''} — ${e.km || '--'} km</span>
+          <span class="diario-paese">${e.paese || ''}</span>
+        </div>
+
+        <div class="diario-testo">${e.testo || ''}</div>
+        ${tagsHtml}
+        ${fotoHtml}
+
+        <button onclick="eliminaDiario(${e.id})"
+          style="background:none; border:none; color:#666; font-size:12px; cursor:pointer; margin-top:5px;">
+          🗑️ Elimina
+        </button>
       </div>
+    `;
+  }
 
-      <div class="diario-testo">${e.testo}</div>
-
-      ${Array.isArray(e.tags) && e.tags.length
-        ? `<div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:6px;">
-            ${e.tags.map(t => `<span style="font-size:11px; padding:4px 8px; border-radius:999px; background:#222; border:1px solid #444; color:var(--giallo); font-weight:bold;">#${t}</span>`).join('')}
-           </div>`
-        : ''}
-
-      ${(e.fotoUrl || e.foto) ? `<img src="${e.fotoUrl || e.foto}" class="diario-foto" loading="lazy">` : ''}
-
-      <button onclick="eliminaDiario(${e.id})"
-        style="background:none; border:none; color:#666; font-size:12px; cursor:pointer; margin-top:5px;">
-        🗑️ Elimina
-      </button>
-    </div>
-  }`).join('');
+  // ✅ IMPORTANTE: nessun carattere extra viene aggiunto tra i post
+  container.innerHTML = html;
 }
 
 function renderDiario() {
