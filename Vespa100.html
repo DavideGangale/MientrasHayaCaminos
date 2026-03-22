@@ -2480,7 +2480,19 @@ function annullaCambioPaese() {
    MAPPA LEAFLET
 ============================================================ */
 const map = L.map('map', { zoomControl:true, attributionControl:false }).setView([4.7, -74.1], 5);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19 }).addTo(map);
+
+// ===== TILE LAYER (stesso stile per mappa piccola e FULL) =====
+function getTileLayerConfig() {
+  // OpenStreetMap standard (più “Google-like”)
+  return {
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    opts: { maxZoom: 19, crossOrigin: true }
+  };
+}
+
+  
+const tileCfg = getTileLayerConfig();
+L.tileLayer(tileCfg.url, tileCfg.opts).addTo(map);
 const marker = L.marker([4.7, -74.1]).addTo(map);
 const polyline = L.polyline([], { color:'#d32f2f', weight:4, opacity:0.8 }).addTo(map);
 
@@ -3420,10 +3432,8 @@ function apriMappaFull(coordsOverride = null, ctx = null) {
       try { el._leaflet_id = null; } catch {}
 
       mapFullInstance = L.map(el, { zoomControl:true, attributionControl:false });
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        maxZoom: 19,
-        crossOrigin: true
-      }).addTo(mapFullInstance);
+       const tileCfg2 = getTileLayerConfig();
+  L.tileLayer(tileCfg2.url, tileCfg2.opts).addTo(mapFullInstance);
 
       mapFullMarker = L.marker([4.7, -74.1]).addTo(mapFullInstance);
       mapFullPolyline = L.polyline([], { color:'#d32f2f', weight:4, opacity:0.9 }).addTo(mapFullInstance);
