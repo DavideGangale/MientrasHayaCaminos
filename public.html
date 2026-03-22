@@ -718,9 +718,7 @@
         <div class="popup-title" style="color:var(--maint)">${T('workshop')}: ${m.nome}</div>
         <div class="popup-meta">📅 ${m.data} | 📏 km ${m.km}</div>
         <div>${m.desc || ''}</div>
-        ${Number(m.costoUsd || 0) > 0 ? `<div style="margin-top:5px; color:#4caf50;">💰 ${T('cost')}: <b>
-$$
-{Number(m.costoUsd).toFixed(2)}</b></div>` : ''}
+        ${Number(m.costoUsd || 0) > 0 ? `<div style="margin-top:5px; color:#4caf50;">💰 ${T('cost')}: <b>$${Number(m.costoUsd).toFixed(2)}</b></div>` : ''}
       `);
     });
 
@@ -734,9 +732,8 @@ $$
         <div class="popup-title" style="color:var(--fuel)">${T('refuel')}</div>
         <div class="popup-meta">📅 ${r.data} | 📏 km ${r.km}</div>
         <div>📦 <b>${r.qta} L</b> (${T('destination')}: ${r.dest})</div>
-        ${Number(r.costoBenzUsd || 0) > 0 ? `<div style="margin-top:5px; color:#4caf50;">💰 ${T('paid')}: <b>
-$$
-{Number(r.costoBenzUsd).toFixed(2)}</b></div>` : ''}
+       ${Number(r.costoBenzUsd || 0) > 0 ? `<div style="margin-top:5px; color:#4caf50;">💰 ${T('paid')}: <b>$${Number(r.costoBenzUsd).toFixed(2)}</b></div>` : ''}
+
       `);
     });
 
