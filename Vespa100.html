@@ -1945,8 +1945,25 @@ const SERBATOIO_GAL = 2.0;
 const SERBATOIO_LITRI = SERBATOIO_GAL * FAT_GAL; // ~7.57 L
 
 const CONSUMO_MEDIO = 28;      // km/L stimato PX150
-const MAX_PUNTI_MAPPA = 500;
+const MAX_PUNTI_MAPPA = 1500;
 
+
+
+function compressTrace(points, maxPts = 1200) {
+  const arr = Array.isArray(points) ? points : [];
+  if (arr.length <= maxPts) return arr;
+
+  const step = Math.ceil(arr.length / maxPts);
+  const out = [];
+  for (let i = 0; i < arr.length; i += step) out.push(arr[i]);
+  // assicura ultimo punto
+  if (out[out.length - 1] !== arr[arr.length - 1]) out.push(arr[arr.length - 1]);
+  return out;
+}
+
+
+
+  
 function nuovaTappa(kmInizio) {
   return {
     kmInizio: kmInizio || 0,
@@ -2589,7 +2606,7 @@ function updatePosition(pos) {
   }
 
   // Tracking
-  if (inViaggio && (pos.coords.accuracy || 999) < 50 && speed > 2) {
+  if (inViaggio && (pos.coords.accuracy || 999) < 80) {
     if (speed > (tappaAttuale.velMax || 0)) {
       tappaAttuale.velMax = speed;
       salva('vt_tappaAttuale', tappaAttuale);
@@ -2617,6 +2634,15 @@ function updatePosition(pos) {
     if (lastLat !== null) {
       const dist = calcolaDistanza(lastLat, lastLon, lat, lon);
 
+
+
+  // ignora micro-movimenti (rumore GPS)
+if (dist < 0.008) { // 8 metri
+  lastLat = lat; lastLon = lon; lastTimestamp = pos.timestamp;
+  return;
+}
+
+      
       // filtro “salti” GPS
       if (dist < 0.5 && dist > 0) {
         const kmTot = (parseFloat(carica('vt_kmTotali','0')) || 0) + dist;
@@ -2965,7 +2991,7 @@ function concludiTappa() {
     velMax: tappaAttuale.velMax || 0,
 
     // ✅ qui usiamo traceRaw (anche se 1 solo punto)
-    traccia: traceRaw.filter((_, i) => i % 3 === 0),
+    traccia: compressTrace(traceRaw, 1200),
     telemetry: Array.isArray(tappaAttuale.telemetry) ? tappaAttuale.telemetry : [],
     tipo: 'Tappa',
 
@@ -3151,7 +3177,7 @@ endTs: Date.now(),
     velMedia: velMedia ? parseFloat(velMedia.toFixed(1)) : null,
 
     // ✅ qui usiamo traceRaw
-    traccia: traceRaw.filter((_, i) => i % 3 === 0)
+    traccia: compressTrace(traceRaw, 1200)
   };
 
   const tur = caricaJSON('vt_turismo', []);
@@ -3419,18 +3445,15 @@ function apriMappaFull(coordsOverride = null, ctx = null) {
       // ✅ TAP SULLA MAPPA FULL = NAVIGA QUI (una sola volta)
 if (!mapFullInstance._vtNavBound) {
   mapFullInstance.on('click', (ev) => {
-    try {
-      const ll = ev?.latlng;
-      if (!ll || !isFinite(ll.lat) || !isFinite(ll.lng)) return;
+  const ll = ev?.latlng;
+  if (!ll || !isFinite(ll.lat) || !isFinite(ll.lng)) return;
 
-      const ok = confirm(`Navigare verso questo punto?\n${ll.lat.toFixed(6)}, ${ll.lng.toFixed(6)}`);
-      if (!ok) return;
+  // opzionale: conferma (se vuoi zero conferme, dimmelo)
+  const ok = confirm(`Aprire Google Maps verso:\n${ll.lat.toFixed(6)}, ${ll.lng.toFixed(6)} ?`);
+  if (!ok) return;
 
-      scegliNavigatorePerPunto(ll.lat, ll.lng);
-    } catch (e) {
-      console.warn('nav click error', e);
-    }
-  });
+  openGoogleMapsToLatLon(ll.lat, ll.lng);
+});
 
   mapFullInstance._vtNavBound = true;
 }
