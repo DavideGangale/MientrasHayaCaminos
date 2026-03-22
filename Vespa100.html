@@ -2081,6 +2081,35 @@ function showToast(msg, durata = 2500) {
 }
 
 
+  function getCurrentLatLon() {
+  try {
+    if (lastLat != null && lastLon != null) return { lat: lastLat, lon: lastLon };
+    const ll = marker?.getLatLng?.();
+    if (ll && isFinite(ll.lat) && isFinite(ll.lng)) return { lat: ll.lat, lon: ll.lng };
+  } catch {}
+  return null;
+}
+
+function openGoogleMapsToLatLon(lat, lon) {
+  const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}&travelmode=driving`;
+  window.location.href = url;
+}
+
+function openWazeToLatLon(lat, lon) {
+  const appUrl = `waze://?ll=${lat},${lon}&navigate=yes`;
+  const webUrl = `https://waze.com/ul?ll=${lat},${lon}&navigate=yes`;
+  window.location.href = appUrl;
+  setTimeout(() => { window.location.href = webUrl; }, 800);
+}
+
+function scegliNavigatorePerPunto(lat, lon) {
+  const useWaze = confirm(
+    `Navigare verso:\n${lat.toFixed(6)}, ${lon.toFixed(6)}\n\nOK = Waze\nAnnulla = Google Maps`
+  );
+  if (useWaze) openWazeToLatLon(lat, lon);
+  else openGoogleMapsToLatLon(lat, lon);
+}
+
 function getCurrentLatLon() {
   // usa GPS recente se disponibile, altrimenti marker Leaflet
   try {
@@ -3399,6 +3428,29 @@ function apriMappaFull(coordsOverride = null, ctx = null) {
       mapFullMarker = L.marker([4.7, -74.1]).addTo(mapFullInstance);
       mapFullPolyline = L.polyline([], { color:'#d32f2f', weight:4, opacity:0.9 }).addTo(mapFullInstance);
       mapFullPhotoLayer = L.layerGroup().addTo(mapFullInstance);
+
+
+      // ✅ TAP SULLA MAPPA FULL = NAVIGA QUI (una sola volta)
+if (!mapFullInstance._vtNavBound) {
+  mapFullInstance.on('click', (ev) => {
+    try {
+      const ll = ev?.latlng;
+      if (!ll || !isFinite(ll.lat) || !isFinite(ll.lng)) return;
+
+      const ok = confirm(`Navigare verso questo punto?\n${ll.lat.toFixed(6)}, ${ll.lng.toFixed(6)}`);
+      if (!ok) return;
+
+      scegliNavigatorePerPunto(ll.lat, ll.lng);
+    } catch (e) {
+      console.warn('nav click error', e);
+    }
+  });
+
+  mapFullInstance._vtNavBound = true;
+}
+
+
+      
     }
 
     const coords = coordsOverride || polyline.getLatLngs();
@@ -3604,12 +3656,7 @@ function mostraConfrontoConsumoTappa(t) {
 
 
 <script>
-/* ============================================================
-   HELPERS
-============================================================ */
-function setText(id, txt) {
-  const el = document.getElementById(id);
-  if (el) el.innerText = txt;
+
 
 
 
@@ -5264,7 +5311,7 @@ function renderDiarioList(containerId, limit = null) {
         🗑️ Elimina
       </button>
     </div>
-  `).join('');
+  }`).join('');
 }
 
 function renderDiario() {
