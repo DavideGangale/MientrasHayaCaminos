@@ -828,6 +828,24 @@ color:#fff;
   box-shadow: 0 6px 18px rgba(0,0,0,0.5);
 }
 
+
+    .video-marker {
+  background: rgba(33,150,243,0.95);
+  border: 2px solid #000;
+  border-radius: 999px;
+  width: 30px;
+  height: 30px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+}
+.video-marker.planned{
+  background: rgba(255,152,0,0.95);
+}
+
+    
 /* ===== LIGHTBOX FOTO ===== */
 #photoLightbox.modal-overlay { z-index: 9000; }
 #photoLightbox .modal-content{
@@ -3367,6 +3385,23 @@ const cameraIcon = L.divIcon({
   iconAnchor: [15, 30]
 });
 
+
+  const videoIcon = L.divIcon({
+  className: 'video-marker',
+  html: '🎥',
+  iconSize: [30, 30],
+  iconAnchor: [15, 30]
+});
+
+const videoPlannedIcon = L.divIcon({
+  className: 'video-marker planned',
+  html: '🎥',
+  iconSize: [30, 30],
+  iconAnchor: [15, 30]
+});
+
+  
+
 function openPhotoLightbox(src, caption = '') {
   const img = document.getElementById('lightbox-img');
   const cap = document.getElementById('lightbox-caption');
@@ -3375,11 +3410,10 @@ function openPhotoLightbox(src, caption = '') {
   apriModal('photoLightbox');
 }
 
-function getDiarioFotoEntriesByRange(startTs, endTs) {
+function getDiarioMediaEntriesByRange(startTs, endTs) {
   const diario = caricaJSON('vt_diario', []);
   if (!Array.isArray(diario) || !startTs || !endTs) return [];
 
-  // piccolo margine per includere foto scattate “un attimo prima/dopo”
   const margin = 15 * 60 * 1000; // 15 min
   const a = Number(startTs) - margin;
   const b = Number(endTs) + margin;
@@ -3388,8 +3422,8 @@ function getDiarioFotoEntriesByRange(startTs, endTs) {
     const ts = Number(e.ts || 0);
     if (!(ts >= a && ts <= b)) return false;
 
-    const hasPhoto = !!(e.fotoUrl || e.foto);
-    if (!hasPhoto) return false;
+    const hasMedia = !!(e.fotoUrl || e.foto || e.videoUrl || e.videoPlanned);
+    if (!hasMedia) return false;
 
     const g = e.geo;
     if (!g || !isFinite(g.lat) || !isFinite(g.lon)) return false;
@@ -3405,7 +3439,6 @@ function clearMapFullPhotoMarkers() {
 }
 
 function renderMapFullPhotoMarkersForContext(ctx) {
-  // ctx può essere una tappa/turismo o null
   if (!mapFullInstance) return;
 
   if (!mapFullPhotoLayer) {
@@ -3415,51 +3448,94 @@ function renderMapFullPhotoMarkersForContext(ctx) {
 
   if (!ctx || !ctx.startTs || !ctx.endTs) return;
 
-  const fotos = getDiarioFotoEntriesByRange(ctx.startTs, ctx.endTs);
+  const entries = getDiarioMediaEntriesByRange(ctx.startTs, ctx.endTs);
 
-  for (const e of fotos) {
-    const src = e.fotoUrl || e.foto;
+  for (const e of entries) {
+    const isPhoto = !!(e.fotoUrl || e.foto);
+    const isVideo = !!(e.videoUrl || e.videoPlanned);
+
+    const icon =
+      isPhoto ? cameraIcon :
+      (e.videoUrl ? videoIcon : videoPlannedIcon);
+
     const caption = `
       <div style="font-weight:700;color:#ff9800;">📍 ${e.paese || ''}</div>
       <div style="color:#bbb;">${e.data || ''} ${e.ora || ''} — km ${e.km || '--'}</div>
       <div style="margin-top:6px;color:#ddd;">${(e.testo || '').slice(0, 140)}${(e.testo||'').length > 140 ? '…' : ''}</div>
     `;
 
-    const m = L.marker([e.geo.lat, e.geo.lon], { icon: cameraIcon });
+    const m = L.marker([e.geo.lat, e.geo.lon], { icon });
 
-    // click marker => lightbox diretto
-   m.on('click', (ev) => {
-  // prova a bloccare l’apertura automatica del popup Leaflet
-  try { L.DomEvent.stop(ev); } catch {}
-  openPhotoLightbox(src, caption);
-});
+    if (isPhoto) {
+      const src = e.fotoUrl || e.foto;
 
-    // popup “mini preview” (opzionale ma comodo)
-    const popupHtml = `
-  <div style="width:180px;">
-    <div style="font-size:12px;color:#aaa;margin-bottom:6px;">📷 Foto</div>
-    <img src="${src}" style="width:100%;border-radius:10px;max-height:120px;object-fit:cover;display:block;cursor:pointer;">
-    <button class="btn-secondary" style="margin-top:8px;width:100%;">
-      Apri
-    </button>
-  </div>
-`;
+      m.on('click', (ev) => {
+        try { L.DomEvent.stop(ev); } catch {}
+        openPhotoLightbox(src, caption);
+      });
 
-m.bindPopup(popupHtml);
+    } else if (isVideo) {
+      m.on('click', (ev) => {
+        try { L.DomEvent.stop(ev); } catch {}
 
-// quando apro il popup, aggancio i click in modo sicuro
-m.on('popupopen', (ev) => {
-  const node = ev && ev.popup ? ev.popup.getElement() : null;
-  if (!node) return;
+        if (e.videoUrl) {
+          // apre YouTube
+          window.open(e.videoUrl, '_blank', 'noopener');
+        } else {
+          showToast('🎬 Video in arrivo: aggiungi il link dal Diario');
+        }
+      });
+    }
 
-  const img = node.querySelector('img');
-  const btn = node.querySelector('button');
+    // popup mini (opzionale)
+    let popupHtml = `
+      <div style="width:200px;">
+        ${caption}
+    `;
 
-  const open = () => openPhotoLightbox(src, caption);
+    if (isPhoto) {
+      const src = e.fotoUrl || e.foto;
+      popupHtml += `
+        <div style="margin-top:8px;">
+          <img src="${src}" style="width:100%;border-radius:10px;max-height:120px;object-fit:cover;display:block;cursor:pointer;">
+          <button class="btn-secondary" style="margin-top:8px;width:100%;">Apri foto</button>
+        </div>
+      `;
+    } else {
+      popupHtml += `
+        <div style="margin-top:10px;">
+          <button class="btn-secondary" style="margin-top:8px;width:100%;">
+            ${e.videoUrl ? 'Apri video 🎥' : 'Video in arrivo 🎬'}
+          </button>
+        </div>
+      `;
+    }
 
-  if (img) img.onclick = open;
-  if (btn) btn.onclick = open;
-});
+    popupHtml += `</div>`;
+
+    m.bindPopup(popupHtml);
+
+    m.on('popupopen', (ev) => {
+      const node = ev && ev.popup ? ev.popup.getElement() : null;
+      if (!node) return;
+
+      const btn = node.querySelector('button');
+      const img = node.querySelector('img');
+
+      if (isPhoto) {
+        const src = e.fotoUrl || e.foto;
+        const open = () => openPhotoLightbox(src, caption);
+        if (img) img.onclick = open;
+        if (btn) btn.onclick = open;
+      } else {
+        if (btn) {
+          btn.onclick = () => {
+            if (e.videoUrl) window.open(e.videoUrl, '_blank', 'noopener');
+            else showToast('🎬 Video in arrivo: aggiungi il link dal Diario');
+          };
+        }
+      }
+    });
 
     m.addTo(mapFullPhotoLayer);
   }
