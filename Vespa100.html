@@ -1334,6 +1334,10 @@ color:#fff;
 <button class="btn-secondary" onclick="salvaInboxSettings()">💾 Salva Inbox</button>
 <button class="btn-secondary" onclick="syncInboxNowJSONP()">🔄 Sync Inbox (importa nuovi post)</button>
 
+    <button class="btn-secondary" onclick="resetInboxCursor()">
+  🧹 Reset Inbox (re-importa da zero)
+</button>
+
 <div style="font-size:12px;color:#777;text-align:left;margin-top:8px;">
   Suggerimento: fai Sync quando hai internet (hotel/ristorante).
 </div>
@@ -6108,6 +6112,12 @@ async function syncInboxNowJSONP() {
 }
 
 
+function resetInboxCursor() {
+  salva('vt_inboxLastTs', '0');
+  showToast('✅ Inbox resettata (vt_inboxLastTs = 0)');
+}
+
+  
 async function syncInboxNow() {
   const url = (carica('vt_inboxUrl','') || '').trim();
   if (!url) { showToast('⚠️ Inserisci URL Inbox in Settings'); return; }
