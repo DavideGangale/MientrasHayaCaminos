@@ -5927,6 +5927,29 @@ function jsonpRequest(url, timeoutMs = 20000) {
   });
 }
 
+
+  function buildInboxListUrl(baseUrl, since) {
+  const raw = String(baseUrl || '').trim();
+  if (!raw) return null;
+
+  // prova con URL API (se disponibile)
+  try {
+    const u = new URL(raw);
+    u.searchParams.set('mode', 'list');
+    u.searchParams.set('since', String(Number(since || 0)));
+    u.searchParams.set('t', String(Date.now()));
+    // NON metto callback qui: la aggiunge jsonpRequest()
+    u.searchParams.delete('callback');
+    return u.toString();
+  } catch (e) {
+    // fallback manuale (se URL() non funziona in qualche contesto)
+    const sep = raw.includes('?') ? '&' : '?';
+    // aggiungo parametri senza distruggere la query esistente
+    return raw + sep + 'mode=list&since=' + encodeURIComponent(Number(since || 0)) + '&t=' + Date.now();
+  }
+}
+
+  
 function normalizeInboxDiarioEntry(e) {
   const id = Number(e.id || e.ts || Date.now());
   const rawPlanned = (e && e.videoPlanned != null) ? e.videoPlanned : false;
@@ -6010,9 +6033,10 @@ async function syncInboxNowJSONP() {
     const since = Number(carica('vt_inboxLastTs','0') || 0);
 
     // API list: ?mode=list&since=...
-const baseExec = base.trim().split('?')[0];   // ✅ usa SOLO /exec
-const url = baseExec + '?mode=list&since=' + encodeURIComponent(since) + '&t=' + Date.now();
-    console.log('[SYNC INBOX] JSONP URL:', url);
+const url = buildInboxListUrl(base, since);
+if (!url) { showToast('⚠️ Inbox URL non valida'); return; }
+
+console.log('[SYNC INBOX] URL:', url);
 const data = await jsonpRequest(url, 25000);
 
     const entries = (data && Array.isArray(data.entries)) ? data.entries : [];
