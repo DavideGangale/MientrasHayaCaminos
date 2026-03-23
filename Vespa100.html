@@ -2222,6 +2222,19 @@ function salvaTappaThrottled(minMs = 10000) { // 10s
   salva('vt_tappaAttuale', tappaAttuale);
 }
 
+
+// ================================
+// SALVATAGGIO DATI PAESI THROTTLED
+// (riduce scritture di oggetti grandi)
+// ================================
+let lastPaesiSaveAt = 0;
+function salvaDatiPaesiThrottled(datiPaesi, minMs = 15000) { // 15s
+  const now = Date.now();
+  if (now - lastPaesiSaveAt < minMs) return;
+  lastPaesiSaveAt = now;
+  salva('vt_datiPaesi', datiPaesi);
+}
+  
   
 /* ============================================================
    TOAST
@@ -2754,7 +2767,7 @@ function updatePosition(pos) {
   if (inViaggio && (pos.coords.accuracy || 999) < 80) {
     if (speed > (tappaAttuale.velMax || 0)) {
       tappaAttuale.velMax = speed;
-      salva('vt_tappaAttuale', tappaAttuale);
+      salvaTappaThrottled(5000);
     }
 
     // Altitudine min/max tappa
@@ -2798,8 +2811,7 @@ if (dist < 0.008) { // 8 metri
 // ✅ salva telemetria (altitudine + velocità) per grafici
 pushTelemetryPoint(pos, speed);
 
-// salva UNA volta sola
-salva('vt_tappaAttuale', tappaAttuale);
+salvaTappaThrottled(10000); // salva max ogni ~10s
 
         
 
@@ -2808,7 +2820,7 @@ salva('vt_tappaAttuale', tappaAttuale);
         const datiPaesi = caricaJSON('vt_datiPaesi', {});
         if (!datiPaesi[paese]) datiPaesi[paese] = { km:0, benzina:0, spesaBenzina:0, spesaOlio:0 };
         datiPaesi[paese].km = (datiPaesi[paese].km || 0) + dist;
-        salva('vt_datiPaesi', datiPaesi);
+        salvaDatiPaesiThrottled(datiPaesi, 15000);
 
 
         // ✅ SCALA STIMA SERBATOIO IN BASE AI KM PERCORSI
@@ -3669,7 +3681,7 @@ function apriMappaFull(coordsOverride = null, ctx = null) {
       mapFullInstance = L.map(el, { zoomControl:true, attributionControl:false });
        const tileCfg2 = getTileLayerConfig();
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, crossOrigin: true}).addTo(mapFullInstance);
+ L.tileLayer(tileCfg2.url, tileCfg2.opts).addTo(mapFullInstance);
  // L.tileLayer(tileCfg2.url, tileCfg2.opts).addTo(mapFullInstance);
 
       mapFullMarker = L.marker([4.7, -74.1]).addTo(mapFullInstance);
@@ -3823,6 +3835,7 @@ if (idx !== -1) {
   }
 
   pendingFuelTappaId = null;
+  pendingFuelKind = null;
 
   chiudiModal('modalFuelEnd');
   aggiornaUI();
