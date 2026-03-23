@@ -536,6 +536,10 @@ color:#fff;
 #modalDettagli { z-index: 6600; }
 #modalConsumo  { z-index: 6500; }
 #modalMapFull  { z-index: 7000; }
+
+#modalDiarioEditVideo { z-index: 9200; }
+#modalDiario          { z-index: 9100; } /* opzionale ma utile */
+    
     #modalAddRicambio { z-index: 6700; }
     #modalCarbSetup { z-index: 6750; }
     #modalCarb      { z-index: 6900; }
@@ -3474,18 +3478,30 @@ function renderMapFullPhotoMarkersForContext(ctx) {
         openPhotoLightbox(src, caption);
       });
 
-    } else if (isVideo) {
-      m.on('click', (ev) => {
-        try { L.DomEvent.stop(ev); } catch {}
+  } else if (isVideo) {
+  m.on('click', (ev) => {
+    try { L.DomEvent.stop(ev); } catch {}
 
-        if (e.videoUrl) {
-          // apre YouTube
-          window.open(e.videoUrl, '_blank', 'noopener');
-        } else {
-          showToast('🎬 Video in arrivo: aggiungi il link dal Diario');
-        }
-      });
+    if (e.videoUrl) {
+      window.open(e.videoUrl, '_blank', 'noopener');
+      return;
     }
+
+    // ✅ planned: toast + apri subito editor link
+    showToast('🎬 Video in arrivo: inserisci ora il link YouTube');
+    setTimeout(() => {
+      try {
+        if (typeof apriModificaVideoDiario === 'function') {
+          apriModificaVideoDiario(e.id);
+        } else {
+          showToast('⚠️ Funzione apriModificaVideoDiario non trovata');
+        }
+      } catch (err) {
+        console.warn('apriModificaVideoDiario error:', err);
+      }
+    }, 120);
+  });
+}
 
     // popup mini (opzionale)
     let popupHtml = `
@@ -5876,20 +5892,37 @@ function jsonpRequest(url, timeoutMs = 20000) {
 
 function normalizeInboxDiarioEntry(e) {
   const id = Number(e.id || e.ts || Date.now());
-  return {
-    id,
-    ts: Number(e.ts || id),
-    data: e.data || '',
-    ora: e.ora || '',
-    paese: e.paese || carica('vt_paeseAttuale','Colombia'),
-    km: (e.km != null) ? String(e.km) : (parseFloat(carica('vt_kmTotali','0')) || 0).toFixed(1),
-    testo: String(e.testo || '').trim(),
-    tags: Array.isArray(e.tags) ? e.tags : [],
-    geo: (e.geo && isFinite(e.geo.lat) && isFinite(e.geo.lon)) ? e.geo : null,
-    fotoUrl: e.fotoUrl || null,
-    foto: e.foto || null,
-    videoUrl: e.videoUrl || null
-  };
+  const rawPlanned = (e && e.videoPlanned != null) ? e.videoPlanned : false;
+
+// accetta true/false, "true"/"false", "1"/"0"
+const plannedBool =
+  (rawPlanned === true) ||
+  (String(rawPlanned).toLowerCase() === 'true') ||
+  (String(rawPlanned) === '1');
+
+const url = e.videoUrl ? String(e.videoUrl).trim() : '';
+
+return {
+  id,
+  ts: Number(e.ts || id),
+
+  data: e.data || '',
+  ora: e.ora || '',
+
+  paese: e.paese || carica('vt_paeseAttuale','Colombia'),
+  km: (e.km != null) ? String(e.km) : (parseFloat(carica('vt_kmTotali','0')) || 0).toFixed(1),
+
+  testo: String(e.testo || '').trim(),
+  tags: Array.isArray(e.tags) ? e.tags : [],
+  geo: (e.geo && isFinite(e.geo.lat) && isFinite(e.geo.lon)) ? e.geo : null,
+
+  fotoUrl: e.fotoUrl || null,
+  foto: e.foto || null,
+
+  // ✅ VIDEO
+  videoUrl: url || null,
+  videoPlanned: (!!plannedBool && !url) // se c’è url, planned diventa false
+};
 }
 
 async function syncInboxNow() {
@@ -5918,7 +5951,7 @@ async function syncInboxNow() {
 
     for (const raw of entries) {
       const e = normalizeInboxDiarioEntry(raw);
-      if (!e.testo && !(e.fotoUrl || e.foto) && !e.videoUrl) continue;
+      if (!e.testo && !(e.fotoUrl || e.foto) && !e.videoUrl && !e.videoPlanned) continue;
       if (existing.has(String(e.id))) continue;
 
       list.unshift(e);
