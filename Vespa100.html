@@ -6012,6 +6012,7 @@ async function syncInboxNowJSONP() {
     // API list: ?mode=list&since=...
 const baseExec = base.trim().split('?')[0];   // ✅ usa SOLO /exec
 const url = baseExec + '?mode=list&since=' + encodeURIComponent(since) + '&t=' + Date.now();
+    console.log('[SYNC INBOX] JSONP URL:', url);
 const data = await jsonpRequest(url, 25000);
 
     const entries = (data && Array.isArray(data.entries)) ? data.entries : [];
