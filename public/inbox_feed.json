@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-03-23T17:30:15.961Z",
+  "exportedAt": "2026-03-23T20:19:56.258Z",
   "entries": [
     {
       "ts": 1774269858706,
@@ -290,6 +290,23 @@
         "lon": -74.36049397314858
       },
       "fotoUrl": "https://drive.google.com/file/d/1bRSHsNq6s7jKSXQDPTtKnXIpLWDmWoc5/view?usp=drivesdk"
+    },
+    {
+      "ts": 1774297186036,
+      "id": 1774297186036,
+      "paese": "",
+      "km": "",
+      "testo": "Blu blu desde iphone",
+      "tags": [
+        "Iphone"
+      ],
+      "videoUrl": null,
+      "videoPlanned": true,
+      "geo": {
+        "lat": 4.806219126561494,
+        "lon": -74.36040627608838
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=10WDst0EFM7FdpRRxcXuuYuP6-vgfUsqi"
     }
   ]
 }
