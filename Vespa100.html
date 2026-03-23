@@ -388,6 +388,39 @@ color:#fff;
     .pct-btn.active{background:var(--rosso);border-color:var(--rosso);color:white;}
 
     /* INVENTARIO */
+
+
+.inv-actions{
+  display:flex;
+  gap:6px;
+  align-items:center;
+  margin-left:8px;
+}
+
+.inv-act{
+  border:none;
+  border-radius:10px;
+  padding:8px 10px;
+  font-weight:900;
+  font-size:12px;
+  cursor:pointer;
+  background:#222;
+  color:#fff;
+  border:1px solid #444;
+}
+
+.inv-act.buy{ background:#ff9800; color:#000; border-color:#ff9800; }
+.inv-act.use{ background:#4caf50; color:#000; border-color:#4caf50; }
+.inv-act.edit{ background:#333; color:#ff9800; border-color:#555; }
+
+.inv-act:disabled{
+  opacity:0.35;
+  cursor:not-allowed;
+  filter:grayscale(1);
+}
+
+
+    
     .inv-item{
       display:flex;
       justify-content:space-between;
@@ -2625,31 +2658,41 @@ if (carica('vt_mig_checklist_preride_v1', '') !== '1') {
   
 
 initDB('vt_inventario', JSON.stringify([
-  { nome:'Cavi Cambio',         qta:4, wear:'interval', manutKey:'cavoCambio',          lastKm:0 },
-  { nome:'Cavo Frizione',       qta:2, wear:'interval', manutKey:'cavoFrizione',          lastKm:0 },
-  { nome:'Cavo Freno Anteriore',       qta:2, wear:'interval', manutKey:'cavoFrenoAnt',          lastKm:0 },
-  { nome:'Cavo Freno Posteriore',       qta:2, wear:'interval', manutKey:'cavoFrenoPos',          lastKm:0 },
-  { nome:'Cavo Accelleratore',       qta:2, wear:'interval', manutKey:'cavoAccelleratore',          lastKm:0 },
+  // ===== CAVI (USURA) =====
+  { nome:'Cavi Cambio',           qta:4, wear:'interval', intervalKm:6000,  lastKm:0 },
+  { nome:'Cavo Frizione',         qta:2, wear:'interval', intervalKm:5000,  lastKm:0 },
+  { nome:'Cavo Freno Anteriore',  qta:2, wear:'interval', intervalKm:8000,  lastKm:0 },
+  { nome:'Cavo Freno Posteriore', qta:2, wear:'interval', intervalKm:8000,  lastKm:0 },
+  { nome:'Cavo Acceleratore',     qta:2, wear:'interval', intervalKm:6000,  lastKm:0 },
 
-  { nome:'Ganasce freno ant.',  qta:2, wear:'interval', manutKey:'ganasceAnt',    lastKm:0 },
-  { nome:'Ganasce freno post.', qta:2, wear:'interval', manutKey:'ganascePost',   lastKm:0 },
-  
-  { nome:'Neumatico', qta:3, wear:'interval', manutKey:'neumatico',   lastKm:0 },
-  { nome:'Kit Moneta, Bronzo e Unghia Frizione', qta:1, wear:'interval', manutKey:'kitFrizione',   lastKm:0 },
-  { nome:'CDI', qta:1, wear:'interval', manutKey:'cdi',   lastKm:0 },
-  { nome:'Piatto Bobbine', qta:1, wear:'interval', manutKey:'piattoBobbine',   lastKm:0 },
-  { nome:'Piste Direzione', qta:1, wear:'interval', manutKey:'pisteDirezione',   lastKm:0 },
-  { nome:'Supporto Ammortizzatore Posteriore', qta:1, wear:'interval', manutKey:'supportoAmmortizzatore',   lastKm:0 },
-  { nome:'Collettore carburatore', qta:1, wear:'interval', manutKey:'collettoreCarb',   lastKm:0 },
-  { nome:'Eje Balancin', qta:1, wear:'interval', manutKey:'ejeBalancin',   lastKm:0 },
-  
-  { nome:'Maniglia Freno', qta:1, wear:'interval', manutKey:'manigliaFreno',   lastKm:0 },
-  { nome:'Maniglia Frizione', qta:1, wear:'interval', manutKey:'manigliaFrizione',   lastKm:0 },
+  // ===== FRENI (USURA) =====
+  { nome:'Ganasce freno ant.',    qta:2, wear:'interval', intervalKm:5000,  lastKm:0 },
+  { nome:'Ganasce freno post.',   qta:2, wear:'interval', intervalKm:3000,  lastKm:0 },
 
-  { nome:'Cambio Olio 300ml', qta:1, wear:'interval', manutKey:'cambioOlio',   lastKm:0 },
-  
-  { nome:'Candela',             qta:2, wear:'interval', manutKey:'candela',       lastKm:0 },
-  { nome:'Dischi frizione',     qta:1, wear:'interval', manutKey:'dischiFrizione',lastKm:0 }
+  // ===== GOMME (USURA) =====
+  { nome:'Pneumatico',            qta:3, wear:'interval', intervalKm:10000, lastKm:0 },
+
+  // ===== FRIZIONE (USURA) =====
+  { nome:'Kit frizione',          qta:1, wear:'interval', intervalKm:12000, lastKm:0 },
+  { nome:'Dischi frizione',       qta:1, wear:'interval', intervalKm:10000, lastKm:0 },
+
+  // ===== MOTORE / SERVICE (se vuoi avviso) =====
+  // Se vuoi trattarlo come “promemoria cambio olio”, lascia intervalKm (es. 5000).
+  // Se NON vuoi avvisi, metti wear:'na' e intervalKm:0
+  { nome:'Cambio Olio 300ml',     qta:1, wear:'interval', intervalKm:2000,  lastKm:0 },
+
+  // ===== CANDELA (USURA) =====
+  { nome:'Candela',               qta:2, wear:'interval', intervalKm:6000,  lastKm:0 },
+
+  // ===== ELETTRICO / VARI: N/A (NO AVVISI) =====
+  { nome:'CDI',                   qta:1, wear:'na', intervalKm:0, lastKm:0 },
+  { nome:'Piatto Bobbine',        qta:1, wear:'na', intervalKm:0, lastKm:0 },
+  { nome:'Piste Direzione',       qta:1, wear:'na', intervalKm:0, lastKm:0 },
+  { nome:'Supporto Ammortizzatore Posteriore', qta:1, wear:'na', intervalKm:0, lastKm:0 },
+  { nome:'Collettore carburatore',qta:1, wear:'na', intervalKm:0, lastKm:0 },
+  { nome:'Eje Balancin',          qta:1, wear:'na', intervalKm:0, lastKm:0 },
+  { nome:'Maniglia Freno',        qta:1, wear:'na', intervalKm:0, lastKm:0 },
+  { nome:'Maniglia Frizione',     qta:1, wear:'na', intervalKm:0, lastKm:0 }
 ]));
 
   // Carica tappa salvata
@@ -7116,16 +7159,12 @@ function getCatalogIntervalKm(key) {
 
 function getDurataEffettivaKmPerItem(item) {
   if (!item) return 0;
-
-  // N/A = nessuna usura
   if (item.wear === 'na') return 0;
 
-  // nuovo campo (consigliato)
-  const v1 = Number(item.intervalKm || 0);
+  const v1 = Number(item.intervalKm || 0); // nuovo campo
   if (isFinite(v1) && v1 > 0) return v1;
 
-  // compatibilità vecchia
-  const v2 = Number(item.durata || 0);
+  const v2 = Number(item.durata || 0); // compatibilità vecchia
   if (isFinite(v2) && v2 > 0) return v2;
 
   return 0;
@@ -7469,9 +7508,9 @@ function renderInventario() {
   }
 
   container.innerHTML = inv.map((item, i) => {
+    const qta = Number(item.qta || 0);
     const kmDaUltimo = kmTot - (Number(item.lastKm || 0));
-
-    const durataEff = getDurataEffettivaKmPerItem(item); // da catalogo o durata manuale
+    const durataEff = getDurataEffettivaKmPerItem(item);
 
     let usuraHtml = '';
     let warnIcon = '';
@@ -7479,17 +7518,14 @@ function renderInventario() {
     if (durataEff > 0) {
       const pctUsura = Math.min(100, Math.round((kmDaUltimo / durataEff) * 100));
       const coloreUsura = (pctUsura >= 80) ? '#f44336' : (pctUsura >= 60) ? '#ff9800' : '#4caf50';
-
       warnIcon = (pctUsura >= 80) ? ' ⚠️' : '';
 
       usuraHtml = `
-        Usura: <span style="color:${coloreUsura}; font-weight:bold;">${pctUsura}%</span>
-        (${Math.round(kmDaUltimo)}/${durataEff} km)
+        Usura: <span style="color:${coloreUsura}; font-weight:900;">${pctUsura}%</span>
+        <span style="color:#888;">(${Math.round(kmDaUltimo)}/${durataEff} km)</span>
       `;
     } else {
-      // N/A: nessuna usura programmata
-      usuraHtml = `Usura: <span style="color:#888; font-weight:bold;">N/A</span>`;
-      warnIcon = '';
+      usuraHtml = `Usura: <span style="color:#888; font-weight:900;">N/A</span>`;
     }
 
     return `
@@ -7499,23 +7535,17 @@ function renderInventario() {
           <div class="inv-durabilita">${usuraHtml}</div>
         </div>
 
-        <button class="inv-btn minus" onclick="cambiaQta(${i},-1)">−</button>
-        <span class="inv-qta ${Number(item.qta||0)===0?'zero':''}">${Number(item.qta||0)}</span>
-        <button class="inv-btn plus" onclick="cambiaQta(${i},+1)">+</button>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div class="inv-qta ${qta===0?'zero':''}" style="min-width:34px; font-size:20px; font-weight:1000;">
+            ${qta}
+          </div>
 
-
-
-<button onclick="apriLinkRicambio(${i})"
-  style="background:#333; border:1px solid #555; color:#ff9800; padding:5px 8px; border-radius:5px; font-size:11px; cursor:pointer; margin-left:5px;">
-  🔗
-</button>
-
-<button onclick="apriEditRicambio(${i})"
-  style="background:#333; border:1px solid #555; color:#ff9800; padding:6px 10px; border-radius:10px; font-size:12px; cursor:pointer; margin-left:6px;">
-  ✏️
-</button>
-
-       
+          <div class="inv-actions">
+            <button class="inv-act buy" onclick="compraRicambio(${i})">COMPRA</button>
+            <button class="inv-act use" onclick="usaRicambio(${i})" ${qta>0 ? '' : 'disabled'}>USA</button>
+            <button class="inv-act edit" onclick="apriEditRicambio(${i})">✏️</button>
+          </div>
+        </div>
       </div>
     `;
   }).join('');
@@ -7523,6 +7553,107 @@ function renderInventario() {
 
 
 
+
+  function compraRicambio(i){
+  const inv = caricaJSON('vt_inventario', []);
+  if (!Array.isArray(inv) || !inv[i]) return;
+
+  const it = inv[i];
+  if (!it.id) it.id = String(Date.now()) + '_' + Math.random().toString(16).slice(2);
+
+  const nome = it.nome || 'Ricambio';
+  const cur = valutaAttuale || 'USD';
+
+  const qStr = prompt(`Quanti pezzi vuoi aggiungere a "${nome}"?`, '1');
+  if (qStr === null) return;
+  const qtaAdd = parseInt(qStr, 10);
+  if (!isFinite(qtaAdd) || qtaAdd <= 0) { showToast('⚠️ Quantità non valida'); return; }
+
+  const s = prompt(`Quanto hai pagato 1 pezzo "${nome}"? (in ${cur})\n(0 o vuoto = regalo / già pagato)`, '');
+  if (s === null) return;
+
+  const costoUnitLocal = (String(s).trim() === '') ? 0 : Number(s);
+  if (!isFinite(costoUnitLocal) || costoUnitLocal < 0) { showToast('⚠️ Costo non valido'); return; }
+
+  const totLocal = costoUnitLocal * qtaAdd;
+
+  let totUsd = 0;
+  if (totLocal > 0) {
+    totUsd = convertLocalToUsd(totLocal, cur);
+    if (!totUsd || totUsd <= 0) {
+      showToast(`⚠️ Cambio mancante per ${cur}: stock aggiornato, spesa NON registrata`, 4500);
+      totUsd = 0;
+    }
+  }
+
+  it.qta = Math.max(0, Number(it.qta || 0) + qtaAdd);
+
+  // memorizza costi sul ricambio (opzionale)
+  it.costoLocal = Number(it.costoLocal || 0) + totLocal;
+  it.costoUsd   = Number(it.costoUsd   || 0) + totUsd;
+  it.valuta = cur;
+  it.fxToUsd = (typeof getFxToUsd === 'function') ? getFxToUsd(cur) : null;
+
+  // spesa ricambi globale + per paese
+  if (totUsd > 0) {
+    salva('vt_spesaRicambiUsd', (parseFloat(carica('vt_spesaRicambiUsd','0')) || 0) + totUsd);
+
+    const paese = carica('vt_paeseAttuale','Colombia');
+    const datiPaesi = caricaJSON('vt_datiPaesi', {});
+    if (!datiPaesi[paese]) datiPaesi[paese] = {};
+    datiPaesi[paese].spesaRicambiUsd = (datiPaesi[paese].spesaRicambiUsd || 0) + totUsd;
+    datiPaesi[paese].valuta = cur;
+    salva('vt_datiPaesi', datiPaesi);
+  }
+
+  salva('vt_inventario', inv);
+  renderInventario();
+  renderChecklist();
+  aggiornaUI();
+
+  showToast(`✅ Comprato: ${nome} (+${qtaAdd})`);
+}
+
+function usaRicambio(i){
+  const inv = caricaJSON('vt_inventario', []);
+  if (!Array.isArray(inv) || !inv[i]) return;
+
+  const it = inv[i];
+  if (!it.id) it.id = String(Date.now()) + '_' + Math.random().toString(16).slice(2);
+
+  const q = Number(it.qta || 0);
+  if (q <= 0) { showToast('⚠️ Stock già a 0'); return; }
+
+  // scala 1
+  it.qta = Math.max(0, q - 1);
+  salva('vt_inventario', inv);
+
+  renderInventario();
+  renderChecklist();
+
+  const ok = confirm(`Stai montando adesso 1 pezzo: "${it.nome}" ?\n\nOK = sì (apro log intervento)\nAnnulla = no (solo stock -1)`);
+  if (!ok) {
+    showToast('📦 Stock scalato: -1');
+    return;
+  }
+
+  // prepara montaggio + apri log
+  pendingMount = {
+    invId: it.id,
+    nome: it.nome,
+    manutKey: null // catalogo rimosso -> non usiamo chiavi manutenzione
+  };
+
+  const n = document.getElementById('log-nome');
+  const d = document.getElementById('log-descrizione');
+  const c = document.getElementById('log-costo');
+
+  if (n) n.value = `Montaggio ${it.nome}`;
+  if (d) d.value = '';
+  if (c) c.value = '';
+
+  apriModal('modalLogDettaglio');
+}
 
   
 
@@ -8341,7 +8472,46 @@ function usaRicambioDaAvvisoManut(manutKey, nomeVoce) {
   showToast('📦 Stock scalato: -1 ' + (inv[idx].nome || 'ricambio'));
 }
 
+const MONTATI_WARN_THRESHOLDS = [500, 250, 100];
 
+function getMountedWarningsFromInventario() {
+  const inv = caricaJSON('vt_inventario', []);
+  const kmTot = parseFloat(carica('vt_kmTotali','0')) || 0;
+
+  if (!Array.isArray(inv) || inv.length === 0) return [];
+
+  const out = [];
+
+  for (const it of inv) {
+    if (!it) continue;
+
+    // solo pezzi "con usura"
+    if (it.wear === 'na') continue;
+
+    const intervalKm = Number(it.intervalKm || it.durata || 0);
+    if (!isFinite(intervalKm) || intervalKm <= 0) continue;
+
+    const lastKm = Number(it.lastKm || 0);
+    const kmDaUltimo = Math.max(0, kmTot - lastKm);
+    const remaining = intervalKm - kmDaUltimo;
+
+    // mostra solo se entro 500km o scaduto
+    if (remaining > MONTATI_WARN_THRESHOLDS[0]) continue;
+
+    let level = 500;
+    if (remaining <= 100) level = 100;
+    else if (remaining <= 250) level = 250;
+
+    out.push({
+      nome: it.nome || 'Ricambio',
+      remaining,
+      level
+    });
+  }
+
+  out.sort((a,b) => a.remaining - b.remaining);
+  return out;
+}
   
   
 function renderChecklist() {
@@ -8351,59 +8521,35 @@ function renderChecklist() {
 
   let html = '';
 
-  // ===== AVVISI MANUTENZIONE (catalogo) =====
-  const manutWarns = getCatalogWarnings();
-  if (manutWarns.length) {
-    html += `<div style="color:#ff9800;font-weight:900;margin:6px 0 10px 0;">🔧 Avvisi manutenzione</div>`;
+// ===== AVVISI (solo pezzi montati) =====
+const warn = getMountedWarningsFromInventario();
+if (warn.length) {
+  html += `<div style="color:#ff9800;font-weight:900;margin:6px 0 10px 0;">🔧 Avvisi (pezzi montati)</div>`;
 
-    html += manutWarns.map(w => {
-    
-const col =
-  (w.remaining <= 0) ? '#f44336' :
-  (w.level === 100) ? '#f44336' :
-  (w.level === 250) ? '#ff9800' :
-  '#4caf50';
-      const msg = (w.remaining <= 0)
-        ? `SCADUTO di ${Math.abs(Math.round(w.remaining))} km`
-        : `mancano ~${Math.round(w.remaining)} km (soglia ${w.level})`;
+  html += warn.map(w => {
+    const col =
+      (w.remaining <= 0) ? '#f44336' :
+      (w.level === 100) ? '#f44336' :
+      (w.level === 250) ? '#ff9800' :
+      '#4caf50';
 
-const stock = getStockQtyForManutKey(w.key);
-const stockTxt = `Stock: <b style="color:${stock>0?'var(--verde)':'#f44336'}">${stock}</b>`;
-const canUse = stock > 0;
-      
-      return `
-        <div class="checklist-item" style="border-left:5px solid ${col}; cursor:default;" onclick="event.stopPropagation();">
-          <input type="checkbox" disabled>
-         
+    const msg = (w.remaining <= 0)
+      ? `SCADUTO di ${Math.abs(Math.round(w.remaining))} km`
+      : `mancano ~${Math.round(w.remaining)} km`;
 
-<span class="checklist-text">
-  <b>${w.nome}</b> — <span style="color:${col};font-weight:900;">${msg}</span>
-  <div style="margin-top:4px; font-size:12px; color:#bbb;">${stockTxt}</div>
-</span>
+    return `
+      <div class="checklist-item" style="border-left:5px solid ${col}; cursor:default;" onclick="event.stopPropagation();">
+        <input type="checkbox" disabled>
+        <span class="checklist-text">
+          <b>${w.nome}</b> — <span style="color:${col};font-weight:900;">${msg}</span>
+        </span>
+        <div class="checklist-actions"></div>
+      </div>
+    `;
+  }).join('');
 
-          
-        <div class="checklist-actions">
-<button class="chk-btn"
-        ${canUse ? '' : 'disabled'}
-        onclick="usaRicambioDaAvvisoManut('${w.key}', '${String(w.nome).replace(/'/g,"\\'")}')"
-        title="Scala 1 ricambio dallo stock + apri intervento">
-  📦
-</button>
-
-
-  <button class="chk-btn"
-          onclick="apriInterventoDaAvvisoManut('${w.key}', '${String(w.nome).replace(/'/g,"\\'")}')"
-          title="Apri intervento (senza scalare stock)">
-    ✅
-  </button>
-</div>
-
-        </div>
-      `;
-    }).join('');
-
-    html += `<hr style="border:0;border-top:1px solid #333; margin:12px 0;">`;
-  }
+  html += `<hr style="border:0;border-top:1px solid #333; margin:12px 0;">`;
+}
 
   // ===== AVVISI USURA (inventario) =====
   //const usuraWarns = getUsuraWarningsInventario(); // <-- questi sono i ricambi con lastKm/durata
@@ -8452,6 +8598,10 @@ const canUse = stock > 0;
 
   container.innerHTML = html;
 }
+
+
+
+  
 function toggleCheck(i) {
   const lista = caricaJSON('vt_checklist', []);
   if (!lista[i]) return;
