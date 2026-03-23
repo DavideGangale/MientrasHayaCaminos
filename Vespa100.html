@@ -1288,9 +1288,11 @@ color:#fff;
     <div class="dash-card" style="padding:15px;">
       <h2 style="margin:0 0 10px 0; color:#ff9800;">⚙️ Ricambi Disponibili</h2>
 
-      <button class="btn-secondary" style="margin-top:0;" onclick="apriModal('modalManutCatalog'); renderManutCatalog();">
-        📏 Catalogo manutenzione
-      </button>
+  <!--
+<button class="btn-secondary" style="margin-top:0;" onclick="apriModal('modalManutCatalog'); renderManutCatalog();">
+  📏 Catalogo manutenzione
+</button>
+-->
 
       <div id="listaRicambi" style="margin-top:10px;"></div>
 
@@ -1545,6 +1547,45 @@ color:#fff;
 </div>
 
 
+
+  <!-- EDIT RICAMBIO (modal) -->
+<div id="modalEditRicambio" class="modal-overlay">
+  <div class="modal-content" style="border-color:#ff9800; max-width:560px;">
+    <button class="close-modal" onclick="chiudiModal('modalEditRicambio')">×</button>
+    <h2 style="color:#ff9800; text-align:center; margin-top:0;">✏️ Modifica ricambio</h2>
+
+    <div class="dash-card" style="padding:12px;">
+      <div class="inp-label">Nome ricambio</div>
+      <input id="edit-ricambio-nome" type="text" placeholder="Nome" style="text-align:left;">
+
+      <div style="display:flex; gap:10px;">
+        <div style="flex:1;">
+          <div class="inp-label">Km utili (vita)</div>
+          <input id="edit-ricambio-interval" type="number" min="0" step="50" placeholder="Es. 5000">
+        </div>
+
+        <div style="flex:1;">
+          <div class="inp-label">Quantità (stock)</div>
+          <input id="edit-ricambio-qta" type="number" min="0" step="1" placeholder="Es. 2">
+        </div>
+      </div>
+
+      <div class="inp-label">Km già fatti da questo pezzo (montato attuale)</div>
+      <input id="edit-ricambio-usedkm" type="number" min="0" step="10" placeholder="Es. 1200">
+
+      <div style="font-size:12px;color:#777;text-align:left;margin-top:8px;">
+        Nota: “Km già fatti” serve per impostare l’usura del pezzo che è già montato sulla Vespa.
+      </div>
+
+      <button class="btn-azione" style="background:#ff9800;color:black;" onclick="salvaEditRicambio()">
+        ✅ Salva
+      </button>
+    </div>
+  </div>
+</div>
+
+
+  
   
 <div id="modalAddRicambio" class="modal-overlay">
   <div class="modal-content" style="border-color:#ff9800; max-width:560px;">
@@ -7076,21 +7117,19 @@ function getCatalogIntervalKm(key) {
 function getDurataEffettivaKmPerItem(item) {
   if (!item) return 0;
 
-  // se è N/A → nessuna usura
+  // N/A = nessuna usura
   if (item.wear === 'na') return 0;
 
-  // se è collegato a una voce manutenzione
-  const key = item.manutKey || inferManutKeyFromNome(item.nome);
-  if (key) {
-    const v = getCatalogIntervalKm(key);
-    if (v > 0) return v;
-  }
+  // nuovo campo (consigliato)
+  const v1 = Number(item.intervalKm || 0);
+  if (isFinite(v1) && v1 > 0) return v1;
 
-  // fallback: durata salvata nel ricambio (vecchio sistema)
-  const d = Number(item.durata || 0);
-  return (isFinite(d) && d > 0) ? d : 0;
+  // compatibilità vecchia
+  const v2 = Number(item.durata || 0);
+  if (isFinite(v2) && v2 > 0) return v2;
+
+  return 0;
 }
-
 
 
 function slugKey(s) {
@@ -7346,7 +7385,76 @@ function salvaLinkRicambio() {
 
 
 
-  
+  let editRicambioIndex = null;
+
+function apriEditRicambio(i) {
+  const inv = caricaJSON('vt_inventario', []);
+  if (!Array.isArray(inv) || !inv[i]) return;
+
+  editRicambioIndex = i;
+
+  const kmTot = parseFloat(carica('vt_kmTotali','0')) || 0;
+  const it = inv[i];
+
+  const nomeEl = document.getElementById('edit-ricambio-nome');
+  const intEl  = document.getElementById('edit-ricambio-interval');
+  const qtaEl  = document.getElementById('edit-ricambio-qta');
+  const usedEl = document.getElementById('edit-ricambio-usedkm');
+
+  if (nomeEl) nomeEl.value = it.nome || '';
+  if (intEl)  intEl.value  = Number(it.intervalKm || it.durata || 0) || 0;
+  if (qtaEl)  qtaEl.value  = Number(it.qta || 0);
+
+  const lastKm = Number(it.lastKm || 0);
+  const usedKm = Math.max(0, kmTot - lastKm);
+  if (usedEl) usedEl.value = Math.round(usedKm);
+
+  apriModal('modalEditRicambio');
+}
+
+function salvaEditRicambio() {
+  if (editRicambioIndex == null) return;
+
+  const inv = caricaJSON('vt_inventario', []);
+  if (!Array.isArray(inv) || !inv[editRicambioIndex]) return;
+
+  const kmTot = parseFloat(carica('vt_kmTotali','0')) || 0;
+
+  const nome = (document.getElementById('edit-ricambio-nome')?.value || '').trim();
+  const intervalKm = Number(document.getElementById('edit-ricambio-interval')?.value || 0);
+  const qta = Number(document.getElementById('edit-ricambio-qta')?.value || 0);
+  const usedKm = Number(document.getElementById('edit-ricambio-usedkm')?.value || 0);
+
+  if (!nome) { showToast('⚠️ Nome non valido'); return; }
+  if (!isFinite(intervalKm) || intervalKm < 0) { showToast('⚠️ Km utili non validi'); return; }
+  if (!isFinite(qta) || qta < 0) { showToast('⚠️ Quantità non valida'); return; }
+  if (!isFinite(usedKm) || usedKm < 0) { showToast('⚠️ Km già fatti non validi'); return; }
+
+  const it = inv[editRicambioIndex];
+  it.nome = nome;
+
+  // vita utile
+  it.intervalKm = Math.round(intervalKm);
+  it.durata = 0; // opzionale: azzera il vecchio campo per non confondere
+
+  // stock
+  it.qta = Math.round(qta);
+
+  // imposta usura attuale: lastKm = kmTot - usedKm
+  it.lastKm = Math.max(0, kmTot - usedKm);
+
+  // se intervalKm = 0 => consideralo N/A
+  it.wear = (it.intervalKm > 0) ? 'interval' : 'na';
+
+  salva('vt_inventario', inv);
+
+  editRicambioIndex = null;
+  chiudiModal('modalEditRicambio');
+
+  renderInventario();
+  renderChecklist();
+  showToast('✅ Ricambio aggiornato');
+}
 
 
 function renderInventario() {
@@ -7401,15 +7509,13 @@ function renderInventario() {
   style="background:#333; border:1px solid #555; color:#ff9800; padding:5px 8px; border-radius:5px; font-size:11px; cursor:pointer; margin-left:5px;">
   🔗
 </button>
-        <button onclick="resetUsura(${i})"
-          style="background:#00bcd4; border:none; color:white; padding:5px 8px; border-radius:5px; font-size:11px; cursor:pointer; margin-left:5px;">
-          Reset
-        </button>
 
-        <button onclick="eliminaRicambio(${i})"
-          style="background:#555; border:none; color:white; padding:5px 8px; border-radius:5px; font-size:11px; cursor:pointer; margin-left:3px;">
-          🗑️
-        </button>
+<button onclick="apriEditRicambio(${i})"
+  style="background:#333; border:1px solid #555; color:#ff9800; padding:6px 10px; border-radius:10px; font-size:12px; cursor:pointer; margin-left:6px;">
+  ✏️
+</button>
+
+       
       </div>
     `;
   }).join('');
