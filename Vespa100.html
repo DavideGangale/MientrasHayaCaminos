@@ -681,6 +681,17 @@ color:#fff;
   cursor:pointer;
 }
 
+
+    /* Checkbox “video planned”: testo più piccolo e usa tutta la larghezza */
+.planned-video .checklist-text{
+  font-size:12px;
+  line-height:1.2;
+}
+
+.planned-video{
+  padding:8px 10px; /* un filo più compatto */
+}
+
 /* Tag picker: più spazio al testo (niente colonna azioni) */
 .checklist-item.tagpick{
   grid-template-columns: 44px minmax(0, 1fr) !important;
@@ -1056,10 +1067,9 @@ color:#fff;
            placeholder="📺 Link YouTube (opzionale)"
            style="margin-top:8px; background:#222; border-color:#444; color:white;">
 
-<label class="checklist-item" style="margin-top:8px;">
+<label class="checklist-item tagpick planned-video" style="margin-top:8px;">
   <input type="checkbox" id="diario-video-planned">
   <span class="checklist-text">🎬 Video da aggiungere dopo (link non ancora disponibile)</span>
-  <span></span>
 </label>
 
 
@@ -1747,11 +1757,10 @@ color:#fff;
 
     <input id="edit-diario-video" type="text" placeholder="📺 Incolla link YouTube">
 
-    <label class="checklist-item" style="margin-top:10px;">
-      <input type="checkbox" id="edit-diario-video-planned">
-      <span class="checklist-text">Video in arrivo (nessun link ancora)</span>
-      <span></span>
-    </label>
+<label class="checklist-item tagpick planned-video" style="margin-top:10px;">
+  <input type="checkbox" id="edit-diario-video-planned">
+  <span class="checklist-text">Video in arrivo (nessun link ancora)</span>
+</label>
 
     <button class="btn-azione btn-yellow" onclick="salvaModificaVideoDiario()">
       💾 Salva
