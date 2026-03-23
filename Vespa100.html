@@ -3425,15 +3425,15 @@ function driveToDirectImageUrl(url){
   const s = String(url || '').trim();
   if (!s) return s;
 
-  // caso: https://drive.google.com/file/d/FILEID/view?...
+  // Estrai FILE ID da vari formati Drive
   let m = s.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
-  if (m) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
+  if (!m) m = s.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (!m) return s;
 
-  // caso: ...?id=FILEID
-  m = s.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-  if (m) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
+  const id = m[1];
 
-  return s; // già ok (o non-Drive)
+  // ✅ più affidabile per <img>
+  return `https://drive.google.com/thumbnail?id=${id}&sz=w1200`;
 }
 
   
