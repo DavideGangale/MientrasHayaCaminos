@@ -1338,7 +1338,7 @@ color:#fff;
   Suggerimento: fai Sync quando hai internet (hotel/ristorante).
 </div>
 
-</button>
+
     
 
 <label class="inp-label">URL Feed Inbox (GitHub RAW)</label>
@@ -6107,42 +6107,6 @@ async function syncInboxNowJSONP() {
   }
 }
 
-function caricaInboxSettingsUI() {
-  const el = document.getElementById('set-inbox-url');
-  if (el) el.value = carica('vt_inboxUrl', '');
-}
-
-function salvaInboxSettings() {
-  const url = (document.getElementById('set-inbox-url')?.value || '').trim();
-  salva('vt_inboxUrl', url);
-  showToast('✅ Inbox salvata');
-}
-
-// Normalizza entry che arriva dall’inbox (evita crash se manca qualcosa)
-function normalizeInboxDiarioEntry(e) {
-  const id = Number(e.id || e.ts || Date.now());
-  return {
-    id,
-    ts: Number(e.ts || id),
-
-    data: e.data || '',
-    ora: e.ora || '',
-
-    paese: e.paese || carica('vt_paeseAttuale','Colombia'),
-    km: (e.km != null) ? String(e.km) : (parseFloat(carica('vt_kmTotali','0')) || 0).toFixed(1),
-
-    testo: String(e.testo || '').trim(),
-    tags: Array.isArray(e.tags) ? e.tags : [],
-    geo: (e.geo && isFinite(e.geo.lat) && isFinite(e.geo.lon)) ? e.geo : null,
-
-    // supporta: fotoUrl (Drive) oppure base64 (foto)
-    fotoUrl: e.fotoUrl || null,
-    foto: e.foto || null,
-
-    videoUrl: e.videoUrl || null,
-    videoPlanned: (!!plannedBool && !url)
-  };
-}
 
 async function syncInboxNow() {
   const url = (carica('vt_inboxUrl','') || '').trim();
@@ -8858,7 +8822,15 @@ window.addEventListener('online', () => {
   const auto = carica('vt_driveAutoSync','1') === '1';
   if (auto) processUploadQueue(4); // carica poche alla volta
     // prova anche a importare eventuali post da iPhone
-  setTimeout(() => { try { syncInboxNow(); } catch {} }, 1200);
+  setTimeout(() => {
+  try {
+    const feed = (carica('vt_inboxFeedUrl','') || '').trim();
+    const exec = (carica('vt_inboxUrl','') || '').trim();
+
+    if (feed) syncInboxNowJSONP();
+    else if (exec) syncInboxNow();
+  } catch (e) {}
+}, 1200);
 });
 
   
