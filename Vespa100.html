@@ -1339,6 +1339,12 @@ color:#fff;
 </div>
 
 
+<label class="inp-label">URL Feed Inbox (GitHub RAW)</label>
+<input type="text" id="set-inbox-feed" placeholder="https://raw.githubusercontent.com/.../public/inbox_feed.json">
+<button class="btn-secondary" onclick="salvaInboxFeedSettings()">💾 Salva Feed</button>
+
+
+    
 <label class="inp-label">clientKey Inbox</label>
 <input type="text" id="set-inbox-key" placeholder="es. vespa123">
 
@@ -3271,7 +3277,16 @@ aggiornaTestoModaliSerbatoio();
 }
 
 
+function salvaInboxFeedSettings(){
+  const url = (document.getElementById('set-inbox-feed')?.value || '').trim();
+  salva('vt_inboxFeedUrl', url);
+  showToast('✅ Feed Inbox salvato');
+}
 
+function caricaInboxFeedSettingsUI(){
+  const el = document.getElementById('set-inbox-feed');
+  if (el) el.value = carica('vt_inboxFeedUrl','');
+}
   
   
 /* ============================================================
@@ -3295,7 +3310,7 @@ caricaDriveAutoSyncUI();
 updateDriveSyncInfo();
 caricaDriveSettingsUI();
   caricaInboxSettingsUI();  
-
+caricaInboxFeedSettingsUI();
   caricaGitHubSettingsUI();
 
 
