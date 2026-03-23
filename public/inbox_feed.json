@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-03-23T21:18:44.861Z",
+  "exportedAt": "2026-03-23T21:20:53.198Z",
   "entries": [
     {
       "ts": 1774269858706,
@@ -341,6 +341,23 @@
         "lon": -74.36039879725254
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1rS3sPSs-3gUD_oXGg41vUz_3clW95vjP"
+    },
+    {
+      "ts": 1774300841999,
+      "id": 1774300841999,
+      "paese": "",
+      "km": "",
+      "testo": "Oooo",
+      "tags": [
+        "Oooo"
+      ],
+      "videoUrl": null,
+      "videoPlanned": true,
+      "geo": {
+        "lat": 4.806206909531603,
+        "lon": -74.36041576933589
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1fKSeQaA06YgAhXBwTWjGVk30XKNw139P"
     }
   ]
 }
