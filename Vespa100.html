@@ -4788,6 +4788,8 @@ window.addEventListener('message', (ev) => {
     return;
   }
 
+  
+
   try {
     if (driveUploadPending.timer) clearTimeout(driveUploadPending.timer);
   } catch (e) {}
@@ -4797,6 +4799,24 @@ window.addEventListener('message', (ev) => {
   driveUploadPending = null;
 });
 
+
+
+let inboxBridgePending = null;
+
+window.addEventListener('message', (ev) => {
+  const msg = ev && ev.data;
+  if (!msg || msg.type !== 'VESPA_INBOX_RESULT') return;
+  if (!inboxBridgePending) return;
+
+  const data = msg.data || {};
+  if (!data.reqId || data.reqId !== inboxBridgePending.reqId) return;
+
+  try { if (inboxBridgePending.timer) clearTimeout(inboxBridgePending.timer); } catch {}
+  inboxBridgePending.resolve(data);
+  inboxBridgePending = null;
+});
+
+  
 
 function uploadViaFormIframe(dataUrl, filename, folderId, endpoint, clientKey = '') {
   return new Promise((resolve, reject) => {
@@ -5873,7 +5893,6 @@ function salvaInboxSettings() {
   showToast('✅ Inbox salvata');
 }
 
-// JSONP (no CORS)
 function jsonpRequest(url, timeoutMs = 20000) {
   return new Promise((resolve, reject) => {
     const cb = 'vt_cb_' + Date.now() + '_' + Math.random().toString(16).slice(2);
@@ -5895,8 +5914,14 @@ function jsonpRequest(url, timeoutMs = 20000) {
       resolve(data);
     };
 
-    script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + encodeURIComponent(cb);
-    script.onerror = () => { cleanup(); reject(new Error('JSONP load error')); };
+    // ✅ aggiunge callback “nostro”
+    const src = url + (url.includes('?') ? '&' : '?') + 'callback=' + encodeURIComponent(cb);
+    script.src = src;
+
+    script.onerror = () => {
+      cleanup();
+      reject(new Error('JSONP load error'));
+    };
 
     document.body.appendChild(script);
   });
@@ -5937,6 +5962,41 @@ return {
 };
 }
 
+
+
+  function inboxBridgeList(baseExecUrl, since, timeoutMs = 25000) {
+  return new Promise((resolve, reject) => {
+    if (inboxBridgePending) return reject(new Error('Inbox bridge già in corso'));
+
+    const reqId = 'inb_' + Date.now() + '_' + Math.random().toString(16).slice(2);
+    inboxBridgePending = { resolve, reject, reqId, timer: null };
+
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.name = 'inboxBridgeFrame';
+
+    const base = String(baseExecUrl || '').trim().split('?')[0];
+    const src = base + `?mode=bridgeList&since=${encodeURIComponent(since)}&reqId=${encodeURIComponent(reqId)}&t=${Date.now()}`;
+
+    iframe.src = src;
+    document.body.appendChild(iframe);
+
+    inboxBridgePending.timer = setTimeout(() => {
+      try { iframe.remove(); } catch {}
+      if (inboxBridgePending) {
+        const r = inboxBridgePending.reject;
+        inboxBridgePending = null;
+        try { r(new Error('Inbox bridge timeout')); } catch {}
+      }
+    }, timeoutMs);
+
+    // pulizia iframe dopo un po’ (anche se ok)
+    setTimeout(() => { try { iframe.remove(); } catch {} }, timeoutMs + 2000);
+  });
+}
+
+
+  
 async function syncInboxNow() {
   const base = (carica('vt_inboxUrl','') || '').trim();
   if (!base) { showToast('⚠️ Inserisci URL Inbox in Settings'); return; }
@@ -5948,8 +6008,8 @@ async function syncInboxNow() {
     const since = Number(carica('vt_inboxLastTs','0') || 0);
 
     // API list: ?mode=list&since=...
-    const url = base + (base.includes('?') ? '&' : '?') + 'mode=list&since=' + encodeURIComponent(since) + '&t=' + Date.now();
-    const data = await jsonpRequest(url, 25000);
+  const baseExec = base.split('?')[0];
+const data = await inboxBridgeList(baseExec, since, 25000);
 
     const entries = (data && Array.isArray(data.entries)) ? data.entries : [];
     if (!entries.length) { showToast('✅ Inbox: nessun nuovo post'); return; }
