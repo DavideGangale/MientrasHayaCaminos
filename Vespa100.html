@@ -1034,6 +1034,14 @@ color:#fff;
            placeholder="📺 Link YouTube (opzionale)"
            style="margin-top:8px; background:#222; border-color:#444; color:white;">
 
+<label class="checklist-item" style="margin-top:8px;">
+  <input type="checkbox" id="diario-video-planned">
+  <span class="checklist-text">🎬 Video da aggiungere dopo (link non ancora disponibile)</span>
+  <span></span>
+</label>
+
+
+    
     <!-- 6) TESTO (alla fine) -->
     <textarea id="diario-testo"
               placeholder="Scrivi un pensiero, un incontro, un'esperienza..."
@@ -1047,7 +1055,7 @@ color:#fff;
     </button>
 
 </div>
-<!-- ==================== /PAGINA 2: VIAGGIO ==================== -->
+
 
 
 
@@ -1293,6 +1301,26 @@ color:#fff;
 </div>
 
 
+
+<hr style="border:0;border-top:1px solid #333; margin:15px 0;">
+
+<h3 style="margin:0 0 10px 0; color:#90a4ae;">📲 Sync da iPhone (Inbox)</h3>
+
+<label class="inp-label">URL Inbox (Apps Script)</label>
+<input type="text" id="set-inbox-url" placeholder="https://script.google.com/macros/s/.../exec">
+
+<button class="btn-secondary" onclick="salvaInboxSettings()">💾 Salva Inbox</button>
+<button class="btn-secondary" onclick="syncInboxNow()">🔄 Sync Inbox (importa nuovi post)</button>
+
+<div style="font-size:12px;color:#777;text-align:left;margin-top:8px;">
+  Suggerimento: fai Sync quando hai internet (hotel/ristorante).
+</div>
+
+
+<label class="inp-label">clientKey Inbox</label>
+<input type="text" id="set-inbox-key" placeholder="es. vespa123">
+
+    
 <hr style="border:0;border-top:1px solid #333; margin:15px 0;">
 
 <h3 style="margin:0 0 10px 0; color:#90a4ae;">🏷️ Hashtag Diario</h3>
@@ -1844,7 +1872,25 @@ color:#fff;
 </div>
 
 
+<!-- DIARIO EDIT VIDEO (modal) -->
+<div id="modalDiarioEditVideo" class="modal-overlay">
+  <div class="modal-content" style="border-color:#e91e63; max-width:560px;">
+    <button class="close-modal" onclick="chiudiModal('modalDiarioEditVideo')">×</button>
+    <h2 style="color:#e91e63; text-align:center; margin-top:0;">🎬 Modifica video (Diario)</h2>
 
+    <input id="edit-diario-video" type="text" placeholder="📺 Incolla link YouTube">
+
+    <label class="checklist-item" style="margin-top:10px;">
+      <input type="checkbox" id="edit-diario-video-planned">
+      <span class="checklist-text">Video in arrivo (nessun link ancora)</span>
+      <span></span>
+    </label>
+
+    <button class="btn-azione btn-yellow" onclick="salvaModificaVideoDiario()">
+      💾 Salva
+    </button>
+  </div>
+</div>
 
   
   
@@ -2092,14 +2138,7 @@ function showToast(msg, durata = 2500) {
 }
 
 
-  function getCurrentLatLon() {
-  try {
-    if (lastLat != null && lastLon != null) return { lat: lastLat, lon: lastLon };
-    const ll = marker?.getLatLng?.();
-    if (ll && isFinite(ll.lat) && isFinite(ll.lng)) return { lat: ll.lat, lon: ll.lng };
-  } catch {}
-  return null;
-}
+ 
 
 function openGoogleMapsToLatLon(lat, lon) {
   const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}&travelmode=driving`;
@@ -2236,6 +2275,11 @@ initDB('vt_diarioTagsCustom', JSON.stringify([])); // hashtag aggiunti da Settin
 
 initDB('vt_uploadQueue', JSON.stringify([]));   // coda foto da caricare su Drive
 initDB('vt_driveAutoSync', '1');               // 1 = auto sync quando torna online
+
+    // ===== INBOX iPhone Sync =====
+  initDB('vt_inboxUrl', '');            // URL endpoint inbox (Apps Script)
+  initDB('vt_inboxLastTs', '0');        // ultimo timestamp importato
+  initDB('vt_inboxClientKey', 'vespa123'); // stessa di Code.gs (puoi cambiarla)
   
   initDB('vt_scortaLitri', '0.0');
   initDB('vt_olioTotaleMl', '0');
@@ -3228,8 +3272,10 @@ if (id === 'settings') {
 caricaDriveAutoSyncUI();
 updateDriveSyncInfo();
 caricaDriveSettingsUI();
+  caricaInboxSettingsUI();  
 
   caricaGitHubSettingsUI();
+
 
   
 // ✅ quando torno su GUIDA ridisegno la mappa (Leaflet)
@@ -5198,6 +5244,9 @@ function salvaDiario() {
 
     const videoEl = document.getElementById('diario-video');
     const videoUrl = videoEl ? videoEl.value.trim() : null;
+
+    const plannedEl = document.getElementById('diario-video-planned');
+const videoPlanned = plannedEl ? plannedEl.checked : false;
     
     // geo: ultima posizione (se disponibile)
     let geo = null;
@@ -5230,7 +5279,8 @@ function salvaDiario() {
 
   foto: fotoSrc,      // base64 locale (se c’è)
   fotoUrl: null,      // verrà riempito dalla sync Drive
-  videoUrl: videoUrl  // link YouTube opzionale
+  videoUrl: videoUrl,           // link YouTube (può essere null)
+videoPlanned: !!videoPlanned  // ✅ true = "in arrivo"
 };
 
     // salva subito
@@ -5241,6 +5291,7 @@ function salvaDiario() {
     // ✅ reset UI immediato (così non clicchi 10 volte)
     if (testoEl) testoEl.value = '';
     if (videoEl) videoEl.value = '';
+    if (plannedEl) plannedEl.checked = false;
     if (anteprimaDiv) {
       anteprimaDiv.style.display = 'none';
       anteprimaDiv.dataset.src = '';
@@ -5310,6 +5361,19 @@ function renderDiarioList(containerId, limit = null) {
       : '';
 
     const fotoSrc = (e.fotoUrl || e.foto) ? (e.fotoUrl || e.foto) : null;
+    const videoHtml = e.videoUrl
+  ? `<div style="margin-top:10px;">
+       <a href="${e.videoUrl}" target="_blank" rel="noopener"
+          style="display:inline-block;padding:10px 12px;border-radius:12px;
+                 background:#c62828;color:#fff;text-decoration:none;font-weight:900;">
+         ▶ Guarda Video YouTube
+       </a>
+     </div>`
+  : (e.videoPlanned
+      ? `<div style="margin-top:10px;color:#ff9800;font-weight:900;">
+           🎬 Video in arrivo (aggiungerai il link dopo)
+         </div>`
+      : '');
     const fotoHtml = fotoSrc
       ? `<img src="${fotoSrc}" class="diario-foto" loading="lazy">`
       : '';
@@ -5323,7 +5387,16 @@ function renderDiarioList(containerId, limit = null) {
 
         <div class="diario-testo">${e.testo || ''}</div>
         ${tagsHtml}
-        ${fotoHtml}
+${videoHtml}
+${fotoHtml}
+
+
+<button onclick="apriModificaVideoDiario(${e.id})"
+  style="background:none; border:none; color:#ff9800; font-size:12px; cursor:pointer; margin-top:10px;">
+  🎬 Modifica Video
+</button>
+
+
 
         <button onclick="eliminaDiario(${e.id})"
           style="background:none; border:none; color:#666; font-size:12px; cursor:pointer; margin-top:5px;">
@@ -5347,6 +5420,51 @@ function renderDiarioFull() {
   renderDiarioList('lista-diario-modal', null);
 }
 
+
+let editDiarioId = null;
+
+function apriModificaVideoDiario(id) {
+  const diario = caricaJSON('vt_diario', []);
+  const idx = Array.isArray(diario) ? diario.findIndex(x => String(x.id) === String(id)) : -1;
+  if (idx === -1) { showToast('⚠️ Voce diario non trovata'); return; }
+
+  editDiarioId = id;
+
+  const e = diario[idx];
+  const inp = document.getElementById('edit-diario-video');
+  const chk = document.getElementById('edit-diario-video-planned');
+
+  if (inp) inp.value = e.videoUrl || '';
+  if (chk) chk.checked = !!e.videoPlanned;
+
+  apriModal('modalDiarioEditVideo');
+}
+
+function salvaModificaVideoDiario() {
+  if (!editDiarioId) return;
+
+  const diario = caricaJSON('vt_diario', []);
+  const idx = Array.isArray(diario) ? diario.findIndex(x => String(x.id) === String(editDiarioId)) : -1;
+  if (idx === -1) { showToast('⚠️ Voce diario non trovata'); return; }
+
+  const inp = document.getElementById('edit-diario-video');
+  const chk = document.getElementById('edit-diario-video-planned');
+
+  const url = (inp?.value || '').trim();
+  const planned = chk ? chk.checked : false;
+
+  diario[idx].videoUrl = url || null;
+  diario[idx].videoPlanned = (!!planned && !url); // ✅ se hai link, planned diventa false
+
+  salva('vt_diario', diario);
+
+  chiudiModal('modalDiarioEditVideo');
+  renderDiarioFull();
+  showToast('✅ Video aggiornato');
+}
+
+
+  
 function eliminaDiario(id) {
   if (!confirm('Eliminare questa voce?')) return;
   const diario = caricaJSON('vt_diario', []).filter(e => e.id !== id);
@@ -5636,6 +5754,205 @@ function caricaDriveSettingsUI(){
   if (b) b.value = folder;
 }
 
+function caricaInboxSettingsUI() {
+  const a = document.getElementById('set-inbox-url');
+  const b = document.getElementById('set-inbox-key');
+  if (a) a.value = carica('vt_inboxUrl','');
+  if (b) b.value = carica('vt_inboxClientKey','');
+}
+
+function salvaInboxSettings() {
+  const url = (document.getElementById('set-inbox-url')?.value || '').trim();
+  const key = (document.getElementById('set-inbox-key')?.value || '').trim();
+  salva('vt_inboxUrl', url);
+  salva('vt_inboxClientKey', key);
+  showToast('✅ Inbox salvata');
+}
+
+// JSONP (no CORS)
+function jsonpRequest(url, timeoutMs = 20000) {
+  return new Promise((resolve, reject) => {
+    const cb = 'vt_cb_' + Date.now() + '_' + Math.random().toString(16).slice(2);
+    const script = document.createElement('script');
+
+    const t = setTimeout(() => {
+      cleanup();
+      reject(new Error('JSONP timeout'));
+    }, timeoutMs);
+
+    function cleanup() {
+      try { clearTimeout(t); } catch {}
+      try { delete window[cb]; } catch {}
+      try { script.remove(); } catch {}
+    }
+
+    window[cb] = (data) => {
+      cleanup();
+      resolve(data);
+    };
+
+    script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + encodeURIComponent(cb);
+    script.onerror = () => { cleanup(); reject(new Error('JSONP load error')); };
+
+    document.body.appendChild(script);
+  });
+}
+
+function normalizeInboxDiarioEntry(e) {
+  const id = Number(e.id || e.ts || Date.now());
+  return {
+    id,
+    ts: Number(e.ts || id),
+    data: e.data || '',
+    ora: e.ora || '',
+    paese: e.paese || carica('vt_paeseAttuale','Colombia'),
+    km: (e.km != null) ? String(e.km) : (parseFloat(carica('vt_kmTotali','0')) || 0).toFixed(1),
+    testo: String(e.testo || '').trim(),
+    tags: Array.isArray(e.tags) ? e.tags : [],
+    geo: (e.geo && isFinite(e.geo.lat) && isFinite(e.geo.lon)) ? e.geo : null,
+    fotoUrl: e.fotoUrl || null,
+    foto: e.foto || null,
+    videoUrl: e.videoUrl || null
+  };
+}
+
+async function syncInboxNow() {
+  const base = (carica('vt_inboxUrl','') || '').trim();
+  if (!base) { showToast('⚠️ Inserisci URL Inbox in Settings'); return; }
+  if (!navigator.onLine) { showToast('📴 Offline: sync impossibile'); return; }
+
+  try {
+    showToast('📲 Sync Inbox...', 2000);
+
+    const since = Number(carica('vt_inboxLastTs','0') || 0);
+
+    // API list: ?mode=list&since=...
+    const url = base + (base.includes('?') ? '&' : '?') + 'mode=list&since=' + encodeURIComponent(since) + '&t=' + Date.now();
+    const data = await jsonpRequest(url, 25000);
+
+    const entries = (data && Array.isArray(data.entries)) ? data.entries : [];
+    if (!entries.length) { showToast('✅ Inbox: nessun nuovo post'); return; }
+
+    const diario = caricaJSON('vt_diario', []);
+    const list = Array.isArray(diario) ? diario : [];
+    const existing = new Set(list.map(x => String(x.id)));
+
+    let added = 0;
+    let maxTs = since;
+
+    for (const raw of entries) {
+      const e = normalizeInboxDiarioEntry(raw);
+      if (!e.testo && !(e.fotoUrl || e.foto) && !e.videoUrl) continue;
+      if (existing.has(String(e.id))) continue;
+
+      list.unshift(e);
+      existing.add(String(e.id));
+      added++;
+      if (e.ts > maxTs) maxTs = e.ts;
+    }
+
+    salva('vt_diario', list);
+    salva('vt_inboxLastTs', String(maxTs));
+
+    renderDiarioFull?.();
+    showToast(`✅ Importati ${added} post da iPhone`);
+  } catch (e) {
+    console.warn('syncInboxNow error:', e);
+    showToast('❌ Sync Inbox fallito: ' + (e?.message || e));
+  }
+}
+
+function caricaInboxSettingsUI() {
+  const el = document.getElementById('set-inbox-url');
+  if (el) el.value = carica('vt_inboxUrl', '');
+}
+
+function salvaInboxSettings() {
+  const url = (document.getElementById('set-inbox-url')?.value || '').trim();
+  salva('vt_inboxUrl', url);
+  showToast('✅ Inbox salvata');
+}
+
+// Normalizza entry che arriva dall’inbox (evita crash se manca qualcosa)
+function normalizeInboxDiarioEntry(e) {
+  const id = Number(e.id || e.ts || Date.now());
+  return {
+    id,
+    ts: Number(e.ts || id),
+
+    data: e.data || '',
+    ora: e.ora || '',
+
+    paese: e.paese || carica('vt_paeseAttuale','Colombia'),
+    km: (e.km != null) ? String(e.km) : (parseFloat(carica('vt_kmTotali','0')) || 0).toFixed(1),
+
+    testo: String(e.testo || '').trim(),
+    tags: Array.isArray(e.tags) ? e.tags : [],
+    geo: (e.geo && isFinite(e.geo.lat) && isFinite(e.geo.lon)) ? e.geo : null,
+
+    // supporta: fotoUrl (Drive) oppure base64 (foto)
+    fotoUrl: e.fotoUrl || null,
+    foto: e.foto || null,
+
+    videoUrl: e.videoUrl || null
+  };
+}
+
+async function syncInboxNow() {
+  const url = (carica('vt_inboxUrl','') || '').trim();
+  if (!url) { showToast('⚠️ Inserisci URL Inbox in Settings'); return; }
+  if (!navigator.onLine) { showToast('📴 Offline: sync impossibile'); return; }
+
+  try {
+    showToast('📲 Sync Inbox in corso...', 2500);
+
+    const lastTs = Number(carica('vt_inboxLastTs','0') || 0);
+    const res = await fetch(url + (url.includes('?') ? '&' : '?') + 'since=' + encodeURIComponent(lastTs) + '&t=' + Date.now(), {
+      cache: 'no-store'
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+
+    const data = await res.json();
+
+    // supporta due formati:
+    // A) { entries:[...] }
+    // B) [ ... ]
+    const entries = Array.isArray(data) ? data : (Array.isArray(data.entries) ? data.entries : []);
+    if (!entries.length) { showToast('✅ Inbox: nessun nuovo post'); return; }
+
+    const diario = caricaJSON('vt_diario', []);
+    const list = Array.isArray(diario) ? diario : [];
+    const existing = new Set(list.map(x => String(x.id)));
+
+    let added = 0;
+    let maxTs = lastTs;
+
+    for (const raw of entries) {
+      const e = normalizeInboxDiarioEntry(raw);
+      if (!e.testo && !(e.fotoUrl || e.foto) && !e.videoUrl) continue; // entry vuota -> skip
+      if (existing.has(String(e.id))) continue;
+
+      list.unshift(e);
+      existing.add(String(e.id));
+      added++;
+
+      if (e.ts > maxTs) maxTs = e.ts;
+    }
+
+    salva('vt_diario', list);
+    salva('vt_inboxLastTs', String(maxTs));
+
+    renderDiarioFull?.();
+    renderSelectedTagsInline?.();
+
+    showToast(`✅ Importati ${added} post da iPhone`);
+  } catch (e) {
+    console.warn('syncInboxNow error:', e);
+    showToast('❌ Sync Inbox fallito: ' + (e?.message || e));
+  }
+}
+
+  
 function getUploadQueue() {
   return caricaJSON('vt_uploadQueue', []) || [];
 }
@@ -7815,6 +8132,7 @@ return {
   tags: Array.isArray(d.tags) ? d.tags : [],
   geo: d.geo || null,
  videoUrl: d.videoUrl || null, 
+  videoPlanned: !!d.videoPlanned,
   fotoUrl: fotoUrl,
 
   // fallback: include base64 solo se NON ho fotoUrl e se rientra nel limite keepFoto
@@ -8293,6 +8611,8 @@ window.addEventListener('load', inizializzaApp);
 window.addEventListener('online', () => {
   const auto = carica('vt_driveAutoSync','1') === '1';
   if (auto) processUploadQueue(4); // carica poche alla volta
+    // prova anche a importare eventuali post da iPhone
+  setTimeout(() => { try { syncInboxNow(); } catch {} }, 1200);
 });
 
   
