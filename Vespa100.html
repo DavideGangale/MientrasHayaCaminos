@@ -1516,6 +1516,36 @@ color:#fff;
 
 
 <!-- AGGIUNGI RICAMBIO (modal) -->
+
+
+
+
+
+  
+<!-- COLLEGA RICAMBIO A CATALOGO (modal) -->
+<div id="modalLinkRicambio" class="modal-overlay">
+  <div class="modal-content" style="border-color:#ff9800; max-width:560px;">
+    <button class="close-modal" onclick="chiudiModal('modalLinkRicambio')">×</button>
+    <h2 style="color:#ff9800; text-align:center; margin-top:0;">🔗 Collega ricambio al catalogo</h2>
+
+    <div class="dash-card" style="padding:12px;">
+      <div class="inp-label">Voce catalogo</div>
+      <select id="link-ricambio-select" class="inp-select"></select>
+
+      <label class="checklist-item tagpick planned-video" style="margin-top:10px;">
+        <input type="checkbox" id="link-ricambio-na">
+        <span class="checklist-text">N/A (nessuna usura / nessun avviso)</span>
+      </label>
+
+      <button class="btn-azione" style="background:#ff9800;color:black;" onclick="salvaLinkRicambio()">
+        ✅ Salva collegamento
+      </button>
+    </div>
+  </div>
+</div>
+
+
+  
 <div id="modalAddRicambio" class="modal-overlay">
   <div class="modal-content" style="border-color:#ff9800; max-width:560px;">
     <button class="close-modal" onclick="chiudiModal('modalAddRicambio')">×</button>
@@ -2409,13 +2439,39 @@ initDB('vt_valuta', 'USD');
 initDB('vt_manut_lastKm', JSON.stringify({}));
 initDB('vt_manut_warnState', JSON.stringify({}));
 initDB('vt_manutCatalog', JSON.stringify([
-  { key:'candela',        nome:'Candela',              intervalKm:4000, enabled:true },
-  { key:'olioCambio',     nome:'Olio cambio',          intervalKm:5000, enabled:true },
-  { key:'ganasceAnt',     nome:'Ganasce freno ant.',   intervalKm:5000, enabled:true },
-  { key:'ganascePost',    nome:'Ganasce freno post.',  intervalKm:3000, enabled:true },
-  { key:'dischiFrizione', nome:'Dischi frizione',      intervalKm:12000, enabled:true },
-  { key:'gomme',          nome:'Gomme',                intervalKm:10000, enabled:true },
-  { key:'cavi',           nome:'Cavi',                 intervalKm:6000, enabled:true }
+  // base
+  { key:'candela',        nome:'Candela',                    intervalKm:4000,  enabled:true },
+  { key:'olioCambio',     nome:'Olio cambio',                intervalKm:5000,  enabled:true },
+  { key:'ganasceAnt',     nome:'Ganasce freno ant.',         intervalKm:5000,  enabled:true },
+  { key:'ganascePost',    nome:'Ganasce freno post.',        intervalKm:3000,  enabled:true },
+  { key:'dischiFrizione', nome:'Dischi frizione',            intervalKm:12000, enabled:true },
+
+  // B) chiavi specifiche (cavi separati)
+  { key:'cavoCambio',         nome:'Cavo cambio',            intervalKm:6000,  enabled:true },
+  { key:'cavoFrizione',       nome:'Cavo frizione',          intervalKm:5000,  enabled:true },
+  { key:'cavoFrenoAnt',       nome:'Cavo freno anteriore',   intervalKm:8000,  enabled:true },
+  { key:'cavoFrenoPos',       nome:'Cavo freno posteriore',  intervalKm:8000,  enabled:true },
+  { key:'cavoAccelleratore',  nome:'Cavo acceleratore',      intervalKm:6000,  enabled:true },
+
+  // gomme / pneumatici
+  { key:'neumatico',          nome:'Pneumatico',             intervalKm:10000, enabled:true },
+
+  // frizione “kit”
+  { key:'kitFrizione',        nome:'Kit frizione',           intervalKm:12000, enabled:true },
+
+  // pezzi senza usura fissa: li lasciamo N/A di default (puoi attivarli tu)
+  { key:'cdi',                    nome:'CDI',                               intervalKm:0, enabled:false },
+  { key:'piattoBobbine',          nome:'Piatto bobbine',                    intervalKm:0, enabled:false },
+  { key:'pisteDirezione',         nome:'Piste direzione',                   intervalKm:0, enabled:false },
+  { key:'supportoAmmortizzatore', nome:'Supporto ammortizzatore post.',     intervalKm:0, enabled:false },
+  { key:'collettoreCarb',         nome:'Collettore carburatore',            intervalKm:0, enabled:false },
+  { key:'ejeBalancin',            nome:'Eje balancin',                      intervalKm:0, enabled:false },
+  { key:'manigliaFreno',          nome:'Maniglia freno',                    intervalKm:0, enabled:false },
+  { key:'manigliaFrizione',       nome:'Maniglia frizione',                 intervalKm:0, enabled:false },
+
+  // attenzione: “Cambio Olio 300ml” secondo me è CONSUMABILE, non “usura”.
+  // Se vuoi comunque trattarlo come intervallo, attivalo qui:
+  { key:'cambioOlio',             nome:'Cambio olio (300ml)',                intervalKm:0, enabled:false }
 ]));
 
   
@@ -2527,12 +2583,33 @@ if (carica('vt_mig_checklist_preride_v1', '') !== '1') {
 }
   
 
-  initDB('vt_inventario', JSON.stringify([
-    { nome:'Cavi Cambio', qta:4, durata:6000, lastKm:0 },
-    { nome:'Cavo Frizione', qta:2, durata:5000, lastKm:0 },
-    { nome:'Ganasce', qta:3, durata:7000, lastKm:0 },
-    { nome:'Candela', qta:2, durata:4000, lastKm:0 }
-  ]));
+initDB('vt_inventario', JSON.stringify([
+  { nome:'Cavi Cambio',         qta:4, wear:'interval', manutKey:'cavoCambio',          lastKm:0 },
+  { nome:'Cavo Frizione',       qta:2, wear:'interval', manutKey:'cavoFrizione',          lastKm:0 },
+  { nome:'Cavo Freno Anteriore',       qta:2, wear:'interval', manutKey:'cavoFrenoAnt',          lastKm:0 },
+  { nome:'Cavo Freno Posteriore',       qta:2, wear:'interval', manutKey:'cavoFrenoPos',          lastKm:0 },
+  { nome:'Cavo Accelleratore',       qta:2, wear:'interval', manutKey:'cavoAccelleratore',          lastKm:0 },
+
+  { nome:'Ganasce freno ant.',  qta:2, wear:'interval', manutKey:'ganasceAnt',    lastKm:0 },
+  { nome:'Ganasce freno post.', qta:2, wear:'interval', manutKey:'ganascePost',   lastKm:0 },
+  
+  { nome:'Neumatico', qta:3, wear:'interval', manutKey:'neumatico',   lastKm:0 },
+  { nome:'Kit Moneta, Bronzo e Unghia Frizione', qta:1, wear:'interval', manutKey:'kitFrizione',   lastKm:0 },
+  { nome:'CDI', qta:1, wear:'interval', manutKey:'cdi',   lastKm:0 },
+  { nome:'Piatto Bobbine', qta:1, wear:'interval', manutKey:'piattoBobbine',   lastKm:0 },
+  { nome:'Piste Direzione', qta:1, wear:'interval', manutKey:'pisteDirezione',   lastKm:0 },
+  { nome:'Supporto Ammortizzatore Posteriore', qta:1, wear:'interval', manutKey:'supportoAmmortizzatore',   lastKm:0 },
+  { nome:'Collettore carburatore', qta:1, wear:'interval', manutKey:'collettoreCarb',   lastKm:0 },
+  { nome:'Eje Balancin', qta:1, wear:'interval', manutKey:'ejeBalancin',   lastKm:0 },
+  
+  { nome:'Maniglia Freno', qta:1, wear:'interval', manutKey:'manigliaFreno',   lastKm:0 },
+  { nome:'Maniglia Frizione', qta:1, wear:'interval', manutKey:'manigliaFrizione',   lastKm:0 },
+
+  { nome:'Cambio Olio 300ml', qta:1, wear:'interval', manutKey:'cambioOlio',   lastKm:0 },
+  
+  { nome:'Candela',             qta:2, wear:'interval', manutKey:'candela',       lastKm:0 },
+  { nome:'Dischi frizione',     qta:1, wear:'interval', manutKey:'dischiFrizione',lastKm:0 }
+]));
 
   // Carica tappa salvata
   const st = localStorage.getItem('vt_tappaAttuale');
@@ -6937,13 +7014,38 @@ const consumo = litriBruciati > 0 ? ((Number(d.km || 0)) / litriBruciati).toFixe
 function inferManutKeyFromNome(nome) {
   const s = String(nome || '').toLowerCase();
 
+  // candela / olio cambio
   if (s.includes('candela')) return 'candela';
   if (s.includes('olio') && s.includes('cambio')) return 'olioCambio';
+  if (s.includes('cambio olio')) return 'cambioOlio';
+
+  // ganasce ant/post
   if (s.includes('ganasce') && (s.includes('ant') || s.includes('anter'))) return 'ganasceAnt';
   if (s.includes('ganasce') && (s.includes('post'))) return 'ganascePost';
-  if (s.includes('frizione') || s.includes('dischi frizione')) return 'dischiFrizione';
-  if (s.includes('gomme') || s.includes('gomma') || s.includes('pne')) return 'gomme';
-  if (s.includes('cavo')) return 'cavi';
+
+  // frizione
+  if (s.includes('kit') && s.includes('frizion')) return 'kitFrizione';
+  if (s.includes('frizion') || s.includes('dischi frizion')) return 'dischiFrizione';
+
+  // pneumatici
+  if (s.includes('neumatic') || s.includes('pneumatic') || s.includes('gomma') || s.includes('gomme')) return 'neumatico';
+
+  // cavi specifici
+  if (s.includes('cavo') && s.includes('cambio')) return 'cavoCambio';
+  if (s.includes('cavo') && s.includes('frizion')) return 'cavoFrizione';
+  if (s.includes('cavo') && s.includes('freno') && (s.includes('ant') || s.includes('anter'))) return 'cavoFrenoAnt';
+  if (s.includes('cavo') && s.includes('freno') && (s.includes('post'))) return 'cavoFrenoPos';
+  if (s.includes('cavo') && (s.includes('acceleratore') || s.includes('acelleratore'))) return 'cavoAccelleratore';
+
+  // elettrico / altri
+  if (s.includes('cdi')) return 'cdi';
+  if (s.includes('bobbin')) return 'piattoBobbine';
+  if (s.includes('direzion')) return 'pisteDirezione';
+  if (s.includes('ammort')) return 'supportoAmmortizzatore';
+  if (s.includes('collettor')) return 'collettoreCarb';
+  if (s.includes('balancin')) return 'ejeBalancin';
+  if (s.includes('maniglia') && s.includes('freno')) return 'manigliaFreno';
+  if (s.includes('maniglia') && s.includes('frizion')) return 'manigliaFrizione';
 
   return null;
 }
@@ -7181,6 +7283,72 @@ function manutDelete(key) {
 
 
 
+
+  let linkRicambioIndex = null;
+
+function apriLinkRicambio(i) {
+  const inv = caricaJSON('vt_inventario', []);
+  if (!Array.isArray(inv) || !inv[i]) return;
+
+  linkRicambioIndex = i;
+
+  const sel = document.getElementById('link-ricambio-select');
+  const chk = document.getElementById('link-ricambio-na');
+  if (!sel || !chk) { showToast('⚠️ Modal link ricambio non pronto'); return; }
+
+  const cat = getManutCatalog();
+  const items = Array.isArray(cat) ? cat : [];
+
+  const opt = [];
+  opt.push(`<option value="">(nessun collegamento)</option>`);
+  opt.push(`<option value="" disabled>──────────</option>`);
+
+  for (const it of items) {
+    if (!it || !it.key) continue;
+    const enabled = it.enabled !== false && Number(it.intervalKm || 0) > 0;
+    const label = `${it.nome || it.key}${enabled ? ` — ${Number(it.intervalKm||0)} km` : ' (N/A)'}`;
+    opt.push(`<option value="${it.key}">${label}</option>`);
+  }
+
+  sel.innerHTML = opt.join('');
+
+  // pre-seleziona valore attuale
+  sel.value = inv[i].manutKey || '';
+  chk.checked = (inv[i].wear === 'na');
+
+  apriModal('modalLinkRicambio');
+}
+
+function salvaLinkRicambio() {
+  if (linkRicambioIndex == null) return;
+
+  const sel = document.getElementById('link-ricambio-select');
+  const chk = document.getElementById('link-ricambio-na');
+  if (!sel || !chk) return;
+
+  const inv = caricaJSON('vt_inventario', []);
+  if (!Array.isArray(inv) || !inv[linkRicambioIndex]) return;
+
+  const na = !!chk.checked;
+  const key = (sel.value || '').trim();
+
+  inv[linkRicambioIndex].wear = na ? 'na' : 'interval';
+  inv[linkRicambioIndex].manutKey = na ? null : (key || null);
+
+  salva('vt_inventario', inv);
+
+  linkRicambioIndex = null;
+  chiudiModal('modalLinkRicambio');
+  renderInventario();
+  renderChecklist();
+  showToast('✅ Collegamento salvato');
+}
+
+
+
+  
+
+
 function renderInventario() {
   const inv = caricaJSON('vt_inventario', []);
   const kmTot = parseFloat(carica('vt_kmTotali','0')) || 0;
@@ -7227,6 +7395,12 @@ function renderInventario() {
         <span class="inv-qta ${Number(item.qta||0)===0?'zero':''}">${Number(item.qta||0)}</span>
         <button class="inv-btn plus" onclick="cambiaQta(${i},+1)">+</button>
 
+
+
+<button onclick="apriLinkRicambio(${i})"
+  style="background:#333; border:1px solid #555; color:#ff9800; padding:5px 8px; border-radius:5px; font-size:11px; cursor:pointer; margin-left:5px;">
+  🔗
+</button>
         <button onclick="resetUsura(${i})"
           style="background:#00bcd4; border:none; color:white; padding:5px 8px; border-radius:5px; font-size:11px; cursor:pointer; margin-left:5px;">
           Reset
@@ -7326,11 +7500,11 @@ function cambiaQta(i, delta) {
     const ok = confirm(`Stai montando adesso 1 pezzo: "${inv[i].nome}" ?`);
     if (!ok) return;
 
-    pendingMount = {
-      invId: inv[i].id,
-      nome: inv[i].nome,
-      manutKey: inferManutKeyFromNome(inv[i].nome)
-    };
+   pendingMount = {
+  invId: inv[i].id,
+  nome: inv[i].nome,
+  manutKey: inv[i].manutKey || inferManutKeyFromNome(inv[i].nome)
+};
 
     // precompila modal "Nuovo intervento"
     const n = document.getElementById('log-nome');
