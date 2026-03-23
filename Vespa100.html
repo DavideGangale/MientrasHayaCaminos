@@ -3420,6 +3420,22 @@ const videoPlannedIcon = L.divIcon({
   iconAnchor: [15, 30]
 });
 
+
+function driveToDirectImageUrl(url){
+  const s = String(url || '').trim();
+  if (!s) return s;
+
+  // caso: https://drive.google.com/file/d/FILEID/view?...
+  let m = s.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (m) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
+
+  // caso: ...?id=FILEID
+  m = s.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (m) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
+
+  return s; // già ok (o non-Drive)
+}
+
   
 
 function openPhotoLightbox(src, caption = '') {
@@ -5488,7 +5504,8 @@ function renderDiarioList(containerId, limit = null) {
          </div>`
       : '';
 
-    const fotoSrc = (e.fotoUrl || e.foto) ? (e.fotoUrl || e.foto) : null;
+    const fotoSrcRaw = (e.fotoUrl || e.foto) ? (e.fotoUrl || e.foto) : null;
+    const fotoSrc = fotoSrcRaw ? driveToDirectImageUrl(fotoSrcRaw) : null;
     const videoHtml = e.videoUrl
   ? `<div style="margin-top:10px;">
        <a href="${e.videoUrl}" target="_blank" rel="noopener"
