@@ -554,7 +554,9 @@
   }
 
   function initMap() {
+    let canvasRenderer = null;
     map = L.map('mapPub', { zoomControl: false }).setView([4.7, -74.1], 5);
+    canvasRenderer = L.canvas({ padding: 0.5 });
     //L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map); //la misma de la app privada
     //L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
@@ -601,8 +603,7 @@
       const latlngs = t.traccia.map(p => Array.isArray(p) ? [p[0], p[1]] : [p.lat, p.lon || p.lng]);
       const color = t.tipo === 'Turismo' ? '#2196F3' : '#d32f2f';
 
-      const poly = L.polyline(latlngs, { color: color, weight: 4, opacity: 0.8, interactive: false }).addTo(layerTracce);
-      const clickPoly = L.polyline(latlngs, { color: 'transparent', weight: 30, opacity: 0.01 }).addTo(layerTracce);
+     const poly = L.polyline(latlngs, { color, weight: 5, opacity: 0.85, interactive: true, renderer: canvasRenderer }).addTo(layerTracce);
 
       bounds.extend(poly.getBounds());
       drawnLines++;
@@ -665,7 +666,7 @@
         </button>
       `;
 
-      clickPoly.bindPopup(infoEstesa);
+      poly.bindPopup(infoEstesa);
 
       const lastPoint = latlngs[latlngs.length - 1];
       const markerFine = L.marker(lastPoint, {
