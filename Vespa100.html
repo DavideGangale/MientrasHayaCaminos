@@ -3318,6 +3318,7 @@ var mapFullInstance = null;
 var mapFullMarker = null;
 var mapFullPolyline = null;
 var mapFullPhotoLayer = null;
+var mapFullCtx = null; // ✅ ultima tappa/giro aperta in mappa full (per refresh marker)
   
 /* ============================================================
    MODALI
@@ -3560,7 +3561,7 @@ function renderMapFullPhotoMarkersForContext(ctx) {
   
 function apriMappaFull(coordsOverride = null, ctx = null) {
   apriModal('modalMapFull');
-
+  mapFullCtx = ctx || null; // ✅ ricorda contesto per refresh marker
   setTimeout(() => {
     const el = document.getElementById('mapFull');
     if (!el) return;
@@ -5553,6 +5554,17 @@ function salvaModificaVideoDiario() {
   chiudiModal('modalDiarioEditVideo');
   renderDiarioFull();
   showToast('✅ Video aggiornato');
+
+// ✅ se mappa full è aperta, aggiorna subito i marker (planned -> video)
+try {
+  const isOpen = document.getElementById('modalMapFull')?.classList.contains('open');
+  if (isOpen && typeof renderMapFullPhotoMarkersForContext === 'function') {
+    renderMapFullPhotoMarkersForContext(mapFullCtx);
+  }
+} catch (e) {
+  console.warn('refresh marker error:', e);
+}
+  
 }
 
 
@@ -6003,7 +6015,8 @@ function normalizeInboxDiarioEntry(e) {
     fotoUrl: e.fotoUrl || null,
     foto: e.foto || null,
 
-    videoUrl: e.videoUrl || null
+    videoUrl: e.videoUrl || null,
+    videoPlanned: (!!plannedBool && !url)
   };
 }
 
@@ -6038,7 +6051,7 @@ async function syncInboxNow() {
 
     for (const raw of entries) {
       const e = normalizeInboxDiarioEntry(raw);
-      if (!e.testo && !(e.fotoUrl || e.foto) && !e.videoUrl) continue; // entry vuota -> skip
+      if (!e.testo && !(e.fotoUrl || e.foto) && !e.videoUrl && !e.videoPlanned) continue;// entry vuota -> skip
       if (existing.has(String(e.id))) continue;
 
       list.unshift(e);
