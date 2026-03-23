@@ -1338,6 +1338,8 @@ color:#fff;
   Suggerimento: fai Sync quando hai internet (hotel/ristorante).
 </div>
 
+</button>
+    
 
 <label class="inp-label">URL Feed Inbox (GitHub RAW)</label>
 <input type="text" id="set-inbox-feed" placeholder="https://raw.githubusercontent.com/.../public/inbox_feed.json">
@@ -2300,7 +2302,9 @@ initDB('vt_diarioTagsCustom', JSON.stringify([])); // hashtag aggiunti da Settin
   initDB('vt_kmTotali', '0.0');
   initDB('vt_odoUltimoPieno', '0.0');
   initDB('vt_litriVespa', '0.0');
-
+  
+initDB('vt_inboxFeedUrl', '');
+  
 initDB('vt_uploadQueue', JSON.stringify([]));   // coda foto da caricare su Drive
 initDB('vt_driveAutoSync', '1');               // 1 = auto sync quando torna online
 
@@ -3277,16 +3281,7 @@ aggiornaTestoModaliSerbatoio();
 }
 
 
-function salvaInboxFeedSettings(){
-  const url = (document.getElementById('set-inbox-feed')?.value || '').trim();
-  salva('vt_inboxFeedUrl', url);
-  showToast('✅ Feed Inbox salvato');
-}
 
-function caricaInboxFeedSettingsUI(){
-  const el = document.getElementById('set-inbox-feed');
-  if (el) el.value = carica('vt_inboxFeedUrl','');
-}
   
   
 /* ============================================================
@@ -3311,6 +3306,7 @@ updateDriveSyncInfo();
 caricaDriveSettingsUI();
   caricaInboxSettingsUI();  
 caricaInboxFeedSettingsUI();
+
   caricaGitHubSettingsUI();
 
 
@@ -5908,6 +5904,21 @@ function salvaInboxSettings() {
   showToast('✅ Inbox salvata');
 }
 
+
+
+
+function salvaInboxFeedSettings(){
+  const url = (document.getElementById('set-inbox-feed')?.value || '').trim();
+  salva('vt_inboxFeedUrl', url);
+  showToast('✅ Feed Inbox salvato');
+}
+
+function caricaInboxFeedSettingsUI(){
+  const el = document.getElementById('set-inbox-feed');
+  if (el) el.value = carica('vt_inboxFeedUrl','');
+}
+
+  
 function jsonpRequest(url, timeoutMs = 20000) {
   return new Promise((resolve, reject) => {
     const cb = 'vt_cb_' + Date.now() + '_' + Math.random().toString(16).slice(2);
@@ -6036,25 +6047,24 @@ return {
 
   
 async function syncInboxNowJSONP() {
-  const base = (carica('vt_inboxUrl','') || '').trim();
-  if (!base) { showToast('⚠️ Inserisci URL Inbox in Settings'); return; }
+  const feedUrl = (carica('vt_inboxFeedUrl','') || '').trim();
+  if (!feedUrl) { showToast('⚠️ Inserisci URL Feed GitHub RAW in Settings'); return; }
   if (!navigator.onLine) { showToast('📴 Offline: sync impossibile'); return; }
 
   try {
-    console.log('[SYNC INBOX] funzione JSONP chiamata');
-    showToast('DEBUG: Sync Inbox JSONP avviato', 2000);
-    showToast('📲 Sync Inbox...', 2000);
+    showToast('📲 Sync Inbox (GitHub)...', 2000);
 
     const since = Number(carica('vt_inboxLastTs','0') || 0);
 
-    // API list: ?mode=list&since=...
-const url = buildInboxListUrl(base, since);
-if (!url) { showToast('⚠️ Inbox URL non valida'); return; }
+    // cache-buster
+    const url = feedUrl + (feedUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
 
-console.log('[SYNC INBOX] URL:', url);
-const data = await jsonpRequest(url, 25000);
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
 
+    const data = await res.json();
     const entries = (data && Array.isArray(data.entries)) ? data.entries : [];
+
     if (!entries.length) { showToast('✅ Inbox: nessun nuovo post'); return; }
 
     const diario = caricaJSON('vt_diario', []);
@@ -6065,6 +6075,10 @@ const data = await jsonpRequest(url, 25000);
     let maxTs = since;
 
     for (const raw of entries) {
+      // filtra solo nuovi (ts > since)
+      const ts = Number(raw?.ts || 0);
+      if (!ts || ts <= since) continue;
+
       const e = normalizeInboxDiarioEntry(raw);
       if (!e.testo && !(e.fotoUrl || e.foto) && !e.videoUrl && !e.videoPlanned) continue;
       if (existing.has(String(e.id))) continue;
@@ -6075,13 +6089,20 @@ const data = await jsonpRequest(url, 25000);
       if (e.ts > maxTs) maxTs = e.ts;
     }
 
+    if (added === 0) {
+      // anche se il feed è lungo, magari erano tutti già importati
+      salva('vt_inboxLastTs', String(Math.max(maxTs, since)));
+      showToast('✅ Inbox: nulla di nuovo');
+      return;
+    }
+
     salva('vt_diario', list);
     salva('vt_inboxLastTs', String(maxTs));
 
     renderDiarioFull?.();
     showToast(`✅ Importati ${added} post da iPhone`);
   } catch (e) {
-    console.warn('syncInboxNow error:', e);
+    console.warn('syncInboxNowJSONP(GitHub) error:', e);
     showToast('❌ Sync Inbox fallito: ' + (e?.message || e));
   }
 }
