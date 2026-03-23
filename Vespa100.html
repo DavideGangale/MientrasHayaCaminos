@@ -1223,210 +1223,43 @@ color:#fff;
 
   <div id="settings" class="page">
   <div class="dash-card">
-    <h2 style="margin-top:0; color:#cfd8dc;">⚙️ Impostazioni</h2>
+    <h2 style="margin-top:0; color:#cfd8dc;">⚙️ Settings</h2>
 
-    <div style="text-align:left; font-size:12px; color:#aaa;">Unità volume</div>
-    <div class="toggle-container">
-      <button id="set-litri" class="toggle-btn unita" onclick="setUnita('L')">LITRI</button>
-      <button id="set-galloni" class="toggle-btn unita" onclick="setUnita('G')">GALLONI</button>
-    </div>
+    <button class="btn-azione btn-yellow" onclick="apriModal('modalSetApp')">
+      🧩 Impostazioni APP (unità / paese / parametri viaggio)
+    </button>
 
-    <div style="text-align:left; font-size:12px; color:#aaa; margin-top:10px;">Unità distanza</div>
-    <div class="toggle-container">
-      <button id="set-km" class="toggle-btn unita" onclick="setDistanza('KM')">KM</button>
-      <button id="set-mi" class="toggle-btn unita" onclick="setDistanza('MI')">MIGLIA</button>
-    </div>
+    <button class="btn-azione btn-yellow" onclick="apriModal('modalSetMoneta'); aggiornaFxSettingsUI();">
+      💱 Moneta & Cambio
+    </button>
 
-    <div style="text-align:left; font-size:12px; color:#aaa; margin-top:10px;">Moneta</div>
-    <select id="set-valuta" class="inp-select" onchange="setValuta(this.value)">
-      <option value="USD">USD ($)</option>
-      <option value="EUR">EUR (€)</option>
-      <option value="COP">COP ($)</option>
-      <option value="PEN">PEN (S/)</option>
-      <option value="BOB">BOB (Bs)</option>
-      <option value="CLP">CLP ($)</option>
-      <option value="ARS">ARS ($)</option>
-    </select>
+    <button class="btn-azione btn-yellow" onclick="apriModal('modalSetDrive'); caricaDriveAutoSyncUI(); updateDriveSyncInfo(); caricaDriveSettingsUI();">
+      ☁️ Setup Drive (foto)
+    </button>
 
+    <button class="btn-azione btn-yellow" onclick="apriModal('modalSetInbox'); caricaInboxFeedSettingsUI();">
+      📲 Setup Sync iPhone (GitHub Inbox)
+    </button>
 
-    <div style="text-align:left; font-size:12px; color:#aaa; margin-top:10px;">
-  Cambio verso USD
-</div>
-
-<div style="display:flex; gap:10px; align-items:center;">
-  <div style="min-width:140px; font-size:12px; color:#bbb;">
-    1 <b id="set-fx-cur">COP</b> =
+    <button class="btn-azione btn-yellow" onclick="apriModal('modalSetBackup'); caricaGitHubSettingsUI();">
+      💾 Backup & Export
+    </button>
   </div>
 
-  <input type="number" id="set-fx" class="inp-select"
-         style="margin:0;"
-         placeholder="es. 0.00025"
-         step="0.000001" min="0">
+  <div class="dash-card" style="border:2px solid #8b0000;">
+    <h3 style="margin-top:0; color:#ffb3b3;">⚠️ Zona pericolosa</h3>
 
-  <div style="min-width:40px; font-size:12px; color:#bbb;">USD</div>
-</div>
+    <button class="btn-secondary" style="background:#8b0000;" onclick="resetTutto()">
+      ⚠️ RESET COMPLETO APP
+    </button>
 
-<button class="btn-secondary" style="margin-top:10px;" onclick="salvaFxDaSettings()">
-  💾 Salva cambio
-</button>
+    <button class="btn-secondary" onclick="location.reload()">
+      🔄 Ricarica App
+    </button>
 
-<button class="btn-secondary" style="margin-top:10px;" onclick="aggiornaFxOnline()">
-  🌐 Aggiorna cambio online
-</button>
-
-<div id="set-fx-info" style="font-size:12px; color:#777; text-align:left; margin-top:8px;">
-  Suggerimento: se sei offline, usa l’ultimo cambio salvato.
-</div>
-
-
-    
-    <div style="text-align:left; font-size:12px; color:#aaa; margin-top:10px;">Paese (manuale)</div>
-    <select id="set-paese" class="inp-select" onchange="cambiaPaeseDaSettings()">
-      <option value="Colombia">🇨🇴 Colombia</option>
-      <option value="Ecuador">🇪🇨 Ecuador</option>
-      <option value="Peru">🇵🇪 Perù</option>
-      <option value="Bolivia">🇧🇴 Bolivia</option>
-      <option value="Chile">🇨🇱 Cile</option>
-      <option value="Argentina">🇦🇷 Argentina</option>
-    </select>
-
-    <div style="font-size:12px;color:#777; text-align:left; margin-top:10px;">
-      Nota: il cambio paese automatico via GPS resta attivo (ti chiede conferma).
-    </div>
-
-
-<hr style="border:0;border-top:1px solid #333; margin:15px 0;">
-
-
-<hr style="border:0;border-top:1px solid #333; margin:15px 0;">
-
-<h3 style="margin:0 0 10px 0; color:#90a4ae;">☁️ Foto su Drive (opzionale)</h3>
-<button class="btn-secondary" style="margin-top:10px;" onclick="testDriveUpload()">🧪 Test upload Drive</button>
-<button class="btn-secondary" style="margin-top:10px;" onclick="syncFotoDriveNow()">☁️ Sync foto su Drive (ora)</button>
-
-    
-<label class="inp-label">URL upload Apps Script</label>
-<input type="text" id="set-drive-upload" placeholder="https://script.google.com/macros/s/.../exec">
-<label class="inp-label">Drive Folder ID (opzionale)</label>
-<input type="text" id="set-drive-folder" placeholder="ID cartella Drive (opzionale)">
-<button class="btn-secondary" onclick="salvaDriveSettings()">💾 Salva impostazioni Drive</button>
-
-    <label class="checklist-item" style="margin-top:10px;">
-  <input type="checkbox" id="set-drive-autosync" onchange="setDriveAutoSync(this.checked)">
-  <span>Auto-sync foto quando torna internet</span>
-</label>
-
-
-
-<div id="set-drive-sync-info" style="font-size:12px;color:#777;text-align:left;margin-top:8px;">
-  --
-</div>
-
-
-
-<hr style="border:0;border-top:1px solid #333; margin:15px 0;">
-
-<h3 style="margin:0 0 10px 0; color:#90a4ae;">📲 Sync da iPhone (Inbox)</h3>
-
-<label class="inp-label">URL Inbox (Apps Script)</label>
-<input type="text" id="set-inbox-url" placeholder="https://script.google.com/macros/s/.../exec">
-
-<button class="btn-secondary" onclick="salvaInboxSettings()">💾 Salva Inbox</button>
-<button class="btn-secondary" onclick="syncInboxNowJSONP()">🔄 Sync Inbox (importa nuovi post)</button>
-
-    <button class="btn-secondary" onclick="resetInboxCursor()">
-  🧹 Reset Inbox (re-importa da zero)
-</button>
-
-<div style="font-size:12px;color:#777;text-align:left;margin-top:8px;">
-  Suggerimento: fai Sync quando hai internet (hotel/ristorante).
-</div>
-
-
-    
-
-<label class="inp-label">URL Feed Inbox (GitHub RAW)</label>
-<input type="text" id="set-inbox-feed" placeholder="https://raw.githubusercontent.com/.../public/inbox_feed.json">
-<button class="btn-secondary" onclick="salvaInboxFeedSettings()">💾 Salva Feed</button>
-
-
-    
-<label class="inp-label">clientKey Inbox</label>
-<input type="text" id="set-inbox-key" placeholder="es. vespa123">
-
-    
-<hr style="border:0;border-top:1px solid #333; margin:15px 0;">
-
-<h3 style="margin:0 0 10px 0; color:#90a4ae;">🏷️ Hashtag Diario</h3>
-<button class="btn-secondary" onclick="apriModal('modalTagSettings'); renderTagSettings();">
-  🏷️ Gestisci hashtag (aggiungi/rimuovi)
-</button>
-<hr style="border:0;border-top:1px solid #333; margin:18px 0;">
-
-
-    
-    
-<h3 style="margin:0 0 10px 0; color:#90a4ae;">🧰 Parametri viaggio</h3>
-
-<label class="inp-label">Capacità serbatoio (L)</label>
-<input type="number" id="set-serbatoio-L" step="0.01" min="1" placeholder="Es. 7.57">
-
-<label class="inp-label">Capacità Tanica 1 (L)</label>
-<input type="number" id="set-tanica1-L" step="0.01" min="0" placeholder="Es. 5.68">
-
-<label class="inp-label">Capacità Tanica 2 (L)</label>
-<input type="number" id="set-tanica2-L" step="0.01" min="0" placeholder="Es. 5.68">
-
-<div style="font-size:12px;color:#777;text-align:left;margin-top:6px;">
-  Totale taniche: <b id="ui-taniche-tot">--</b> L
-</div>
-
-<label class="inp-label">Consumo medio manuale (km/L) (opzionale)</label>
-<input type="number" id="set-consumo-manuale" step="0.1" min="5" max="80" placeholder="Es. 28">
-
-<button class="btn-secondary" onclick="salvaSettingsAvanzati()">
-  💾 Salva parametri viaggio
-</button>
-
-<hr style="border:0;border-top:1px solid #333; margin:15px 0;">
-
-
-   <!-- EXPORT / IMPORT -->
-      <div class="dash-card" style="border:2px solid #555; margin-top:10px;">
-        <h3 style="margin-top:0; color:#aaa;">💾 Backup Dati</h3>
-        <button class="btn-azione" style="background:#607d8b;" onclick="esportaDati()">⬇️ ESPORTA BACKUP JSON</button>
-       
-
-                <button class="btn-azione" style="background:#009688;" onclick="esportaDatiPubblici('download')">
-        📥 SCARICA JSON PUBBLICO NEL TELEFONO
-        </button>
-
-        <button class="btn-azione" style="background:#24292e; color:white; margin-top:10px; border:2px solid #fff;" onclick="esportaDatiPubblici('github')">
-        🚀 PUBBLICA DIRETTAMENTE SU GITHUB
-        </button>
-
-        <div style="background:#111; padding:10px; margin-top:10px; border-radius:10px; border:1px solid #333;">
-          <h4 style="margin-top:0; color:#fff;">🐙 Sincronizzazione GitHub</h4>
-          <label class="inp-label">GitHub Token (inizia con ghp_...)</label>
-          <input type="password" id="set-gh-token" placeholder="Incolla qui il token">
-          <label class="inp-label">Utente / Repository</label>
-          <input type="text" id="set-gh-repo" placeholder="es. davidegangale/MientrasHayaCaminos">
-          <label class="inp-label">Percorso del file nel repository</label>
-          <input type="text" id="set-gh-path" placeholder="es. public/vespatrek_public.json">
-          <button class="btn-secondary" onclick="salvaGitHubSettings()">💾 Salva Impostazioni GitHub</button>
-        </div>
-
-        <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importaDati(this)">
-        <button class="btn-secondary" onclick="document.getElementById('import-file').click()">⬆️ IMPORTA BACKUP</button> </div>
-       
-      <button class="btn-secondary" style="background:#8b0000; margin-top:20px;" onclick="resetTutto()">⚠️ RESET COMPLETO APP</button>
-<button class="btn-secondary" style="margin-top:10px;" onclick="location.reload()">
-  🔄 Ricarica App
-</button>
-      <button class="btn-secondary" style="background:#263238; margin-top:10px;" onclick="testAddKm()">🧪 TEST: +1 km (finto)</button>
-      
-    </div>
-    
+    <button class="btn-secondary" style="background:#263238;" onclick="testAddKm()">
+      🧪 TEST: +1 km (finto)
+    </button>
   </div>
 </div>
 
@@ -1923,6 +1756,219 @@ color:#fff;
     <button class="btn-azione btn-yellow" onclick="salvaModificaVideoDiario()">
       💾 Salva
     </button>
+  </div>
+</div>
+
+
+<div id="modalSetApp" class="modal-overlay">
+  <div class="modal-content" style="border-color:#90a4ae; max-width:700px;">
+    <button class="close-modal" onclick="chiudiModal('modalSetApp')">×</button>
+    <h2 style="color:#90a4ae; text-align:center; margin-top:0;">🧩 Impostazioni APP</h2>
+
+    <div class="dash-card">
+      <div style="text-align:left; font-size:12px; color:#aaa;">Unità volume</div>
+      <div class="toggle-container">
+        <button id="set-litri" class="toggle-btn unita" onclick="setUnita('L')">LITRI</button>
+        <button id="set-galloni" class="toggle-btn unita" onclick="setUnita('G')">GALLONI</button>
+      </div>
+
+      <div style="text-align:left; font-size:12px; color:#aaa; margin-top:10px;">Unità distanza</div>
+      <div class="toggle-container">
+        <button id="set-km" class="toggle-btn unita" onclick="setDistanza('KM')">KM</button>
+        <button id="set-mi" class="toggle-btn unita" onclick="setDistanza('MI')">MIGLIA</button>
+      </div>
+
+      <div style="text-align:left; font-size:12px; color:#aaa; margin-top:10px;">Paese (manuale)</div>
+      <select id="set-paese" class="inp-select" onchange="cambiaPaeseDaSettings()">
+        <option value="Colombia">🇨🇴 Colombia</option>
+        <option value="Ecuador">🇪🇨 Ecuador</option>
+        <option value="Peru">🇵🇪 Perù</option>
+        <option value="Bolivia">🇧🇴 Bolivia</option>
+        <option value="Chile">🇨🇱 Cile</option>
+        <option value="Argentina">🇦🇷 Argentina</option>
+      </select>
+
+      <div style="font-size:12px;color:#777; text-align:left; margin-top:10px;">
+        Nota: il cambio paese automatico via GPS resta attivo (ti chiede conferma).
+      </div>
+
+      <hr style="border:0;border-top:1px solid #333; margin:15px 0;">
+
+      <h3 style="margin:0 0 10px 0; color:#90a4ae;">🧰 Parametri viaggio</h3>
+
+      <label class="inp-label">Capacità serbatoio (L)</label>
+      <input type="number" id="set-serbatoio-L" step="0.01" min="1" placeholder="Es. 7.57">
+
+      <label class="inp-label">Capacità Tanica 1 (L)</label>
+      <input type="number" id="set-tanica1-L" step="0.01" min="0" placeholder="Es. 5.68">
+
+      <label class="inp-label">Capacità Tanica 2 (L)</label>
+      <input type="number" id="set-tanica2-L" step="0.01" min="0" placeholder="Es. 5.68">
+
+      <div style="font-size:12px;color:#777;text-align:left;margin-top:6px;">
+        Totale taniche: <b id="ui-taniche-tot">--</b> L
+      </div>
+
+      <label class="inp-label">Consumo medio manuale (km/L) (opzionale)</label>
+      <input type="number" id="set-consumo-manuale" step="0.1" min="5" max="80" placeholder="Es. 28">
+
+      <button class="btn-secondary" onclick="salvaSettingsAvanzati()">
+        💾 Salva parametri viaggio
+      </button>
+
+      <hr style="border:0;border-top:1px solid #333; margin:15px 0;">
+
+      <h3 style="margin:0 0 10px 0; color:#90a4ae;">🏷️ Hashtag Diario</h3>
+      <button class="btn-secondary" onclick="apriModal('modalTagSettings'); renderTagSettings();">
+        🏷️ Gestisci hashtag
+      </button>
+    </div>
+  </div>
+</div>
+
+
+
+<div id="modalSetMoneta" class="modal-overlay">
+  <div class="modal-content" style="border-color:#ff9800; max-width:700px;">
+    <button class="close-modal" onclick="chiudiModal('modalSetMoneta')">×</button>
+    <h2 style="color:#ff9800; text-align:center; margin-top:0;">💱 Moneta & Cambio</h2>
+
+    <div class="dash-card">
+      <div style="text-align:left; font-size:12px; color:#aaa;">Moneta</div>
+      <select id="set-valuta" class="inp-select" onchange="setValuta(this.value)">
+        <option value="USD">USD ($)</option>
+        <option value="EUR">EUR (€)</option>
+        <option value="COP">COP ($)</option>
+        <option value="PEN">PEN (S/)</option>
+        <option value="BOB">BOB (Bs)</option>
+        <option value="CLP">CLP ($)</option>
+        <option value="ARS">ARS ($)</option>
+      </select>
+
+      <div style="text-align:left; font-size:12px; color:#aaa; margin-top:10px;">
+        Cambio verso USD
+      </div>
+
+      <div style="display:flex; gap:10px; align-items:center;">
+        <div style="min-width:140px; font-size:12px; color:#bbb;">
+          1 <b id="set-fx-cur">COP</b> =
+        </div>
+
+        <input type="number" id="set-fx" class="inp-select"
+               style="margin:0;"
+               placeholder="es. 0.00025"
+               step="0.000001" min="0">
+
+        <div style="min-width:40px; font-size:12px; color:#bbb;">USD</div>
+      </div>
+
+      <button class="btn-secondary" style="margin-top:10px;" onclick="salvaFxDaSettings()">
+        💾 Salva cambio
+      </button>
+
+      <button class="btn-secondary" style="margin-top:10px;" onclick="aggiornaFxOnline()">
+        🌐 Aggiorna cambio online
+      </button>
+
+      <div id="set-fx-info" style="font-size:12px; color:#777; text-align:left; margin-top:8px;">
+        Suggerimento: se sei offline, usa l’ultimo cambio salvato.
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+  <div id="modalSetDrive" class="modal-overlay">
+  <div class="modal-content" style="border-color:#90a4ae; max-width:700px;">
+    <button class="close-modal" onclick="chiudiModal('modalSetDrive')">×</button>
+    <h2 style="color:#90a4ae; text-align:center; margin-top:0;">☁️ Setup Drive (Foto)</h2>
+
+    <div class="dash-card">
+      <button class="btn-secondary" onclick="testDriveUpload()">🧪 Test upload Drive</button>
+      <button class="btn-secondary" onclick="syncFotoDriveNow()">☁️ Sync foto su Drive (ora)</button>
+
+      <label class="inp-label">URL upload Apps Script</label>
+      <input type="text" id="set-drive-upload" placeholder="https://script.google.com/macros/s/.../exec">
+
+      <label class="inp-label">Drive Folder ID (opzionale)</label>
+      <input type="text" id="set-drive-folder" placeholder="ID cartella Drive (opzionale)">
+
+      <button class="btn-secondary" onclick="salvaDriveSettings()">💾 Salva impostazioni Drive</button>
+
+      <label class="checklist-item" style="margin-top:10px;">
+        <input type="checkbox" id="set-drive-autosync" onchange="setDriveAutoSync(this.checked)">
+        <span>Auto-sync foto quando torna internet</span>
+      </label>
+
+      <div id="set-drive-sync-info" style="font-size:12px;color:#777;text-align:left;margin-top:8px;">
+        --
+      </div>
+    </div>
+  </div>
+</div>
+  
+
+  <div id="modalSetInbox" class="modal-overlay">
+  <div class="modal-content" style="border-color:#90a4ae; max-width:700px;">
+    <button class="close-modal" onclick="chiudiModal('modalSetInbox')">×</button>
+    <h2 style="color:#90a4ae; text-align:center; margin-top:0;">📲 Sync iPhone (GitHub Inbox)</h2>
+
+    <div class="dash-card">
+      <label class="inp-label">URL Feed Inbox (GitHub RAW)</label>
+      <input type="text" id="set-inbox-feed" placeholder="https://raw.githubusercontent.com/.../public/inbox_feed.json">
+
+      <button class="btn-secondary" onclick="salvaInboxFeedSettings()">💾 Salva Feed</button>
+      <button class="btn-secondary" onclick="syncInboxNowJSONP()">🔄 Sync Inbox (importa nuovi post)</button>
+
+      <button class="btn-secondary" onclick="debugInboxCursor()">🔎 Mostra Inbox cursor</button>
+      <button class="btn-secondary" onclick="resetInboxCursor()">🧹 Reset Inbox cursor</button>
+
+      <div style="font-size:12px;color:#777;text-align:left;margin-top:8px;">
+        Suggerimento: fai Sync quando hai internet (hotel/ristorante).
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+  <div id="modalSetBackup" class="modal-overlay">
+  <div class="modal-content" style="border-color:#607d8b; max-width:780px;">
+    <button class="close-modal" onclick="chiudiModal('modalSetBackup')">×</button>
+    <h2 style="color:#607d8b; text-align:center; margin-top:0;">💾 Backup & Export</h2>
+
+    <div class="dash-card" style="border:2px solid #555;">
+      <h3 style="margin-top:0; color:#aaa;">Backup Dati</h3>
+
+      <button class="btn-azione" style="background:#607d8b;" onclick="esportaDati()">⬇️ ESPORTA BACKUP JSON</button>
+
+      <button class="btn-azione" style="background:#009688;" onclick="esportaDatiPubblici('download')">
+        📥 SCARICA JSON PUBBLICO NEL TELEFONO
+      </button>
+
+      <button class="btn-azione" style="background:#24292e; color:white; border:2px solid #fff;" onclick="esportaDatiPubblici('github')">
+        🚀 PUBBLICA DIRETTAMENTE SU GITHUB
+      </button>
+
+      <div style="background:#111; padding:10px; margin-top:10px; border-radius:10px; border:1px solid #333;">
+        <h4 style="margin-top:0; color:#fff;">🐙 Sincronizzazione GitHub</h4>
+
+        <label class="inp-label">GitHub Token</label>
+        <input type="password" id="set-gh-token" placeholder="Incolla qui il token">
+
+        <label class="inp-label">Utente / Repository</label>
+        <input type="text" id="set-gh-repo" placeholder="es. davidegangale/MientrasHayaCaminos">
+
+        <label class="inp-label">Percorso del file nel repository</label>
+        <input type="text" id="set-gh-path" placeholder="es. public/vespatrek_public.json">
+
+        <button class="btn-secondary" onclick="salvaGitHubSettings()">💾 Salva Impostazioni GitHub</button>
+      </div>
+
+      <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importaDati(this)">
+      <button class="btn-secondary" onclick="document.getElementById('import-file').click()">⬆️ IMPORTA BACKUP</button>
+    </div>
   </div>
 </div>
 
@@ -6128,11 +6174,16 @@ async function syncInboxNowJSONP() {
   }
 }
 
-
-function resetInboxCursor() {
-  salva('vt_inboxLastTs', '0');
-  showToast('✅ Inbox resettata (vt_inboxLastTs = 0)');
+function debugInboxCursor(){
+  const since = Number(carica('vt_inboxLastTs','0') || 0);
+  showToast('vt_inboxLastTs = ' + since, 4500);
 }
+
+function resetInboxCursor(){
+  salva('vt_inboxLastTs','0');
+  showToast('✅ vt_inboxLastTs resettato a 0', 3500);
+}
+
 
   
 async function syncInboxNow() {
