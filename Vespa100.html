@@ -388,7 +388,53 @@ color:#fff;
     .pct-btn.active{background:var(--rosso);border-color:var(--rosso);color:white;}
 
     /* INVENTARIO */
+/* ===== INVENTARIO (STOCK) layout a 2 righe ===== */
+.inv-item.inv-stock{
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
 
+.inv-item.inv-stock .inv-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+}
+
+.inv-item.inv-stock .inv-nome{
+  font-size:15px;
+  font-weight:1000;
+  text-align:left;
+  line-height:1.15;
+  word-break:break-word;
+  flex:1;
+}
+
+/* riga 2: usura a sinistra, azioni a destra */
+.inv-item.inv-stock .inv-bottom{
+  display:grid;
+  grid-template-columns: 1fr auto;
+  gap:10px;
+  align-items:center;
+}
+
+.inv-item.inv-stock .inv-durabilita{
+  text-align:left;
+  font-size:12px;
+  color:#aaa;
+  line-height:1.2;
+}
+
+/* blocco a destra: quantità + bottoni */
+.inv-item.inv-stock .inv-right{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+  flex-wrap:wrap;     /* se lo schermo è stretto, i bottoni vanno a capo ma NON escono */
+  max-width: 60vw;    /* evita overflow su schermi piccoli */
+}
 
 .inv-actions{
   display:flex;
@@ -7528,26 +7574,29 @@ function renderInventario() {
       usuraHtml = `Usura: <span style="color:#888; font-weight:900;">N/A</span>`;
     }
 
-    return `
-      <div class="inv-item">
-        <div style="flex-grow:1;">
-          <div class="inv-nome">${item.nome || 'Ricambio'}${warnIcon}</div>
-          <div class="inv-durabilita">${usuraHtml}</div>
+   return `
+  <div class="inv-item inv-stock">
+    <div class="inv-top">
+      <div class="inv-nome">${item.nome || 'Ricambio'}${warnIcon}</div>
+    </div>
+
+    <div class="inv-bottom">
+      <div class="inv-durabilita">${usuraHtml}</div>
+
+      <div class="inv-right">
+        <div class="inv-qta ${qta===0?'zero':''}" style="min-width:32px; font-size:20px; font-weight:1000; text-align:center;">
+          ${qta}
         </div>
 
-        <div style="display:flex; align-items:center; gap:10px;">
-          <div class="inv-qta ${qta===0?'zero':''}" style="min-width:34px; font-size:20px; font-weight:1000;">
-            ${qta}
-          </div>
-
-          <div class="inv-actions">
-            <button class="inv-act buy" onclick="compraRicambio(${i})">COMPRA</button>
-            <button class="inv-act use" onclick="usaRicambio(${i})" ${qta>0 ? '' : 'disabled'}>USA</button>
-            <button class="inv-act edit" onclick="apriEditRicambio(${i})">✏️</button>
-          </div>
+        <div class="inv-actions">
+          <button class="inv-act buy" onclick="compraRicambio(${i})">COMPRA</button>
+          <button class="inv-act use" onclick="usaRicambio(${i})" ${qta>0 ? '' : 'disabled'}>USA</button>
+          <button class="inv-act edit" onclick="apriEditRicambio(${i})">✏️</button>
         </div>
       </div>
-    `;
+    </div>
+  </div>
+`;
   }).join('');
 }
 
