@@ -3825,124 +3825,107 @@ function renderMapFullPhotoMarkersForContext(ctx) {
   const entries = getDiarioMediaEntriesByRange(ctx.startTs, ctx.endTs);
 
   for (const e of entries) {
-   const hasVideo = !!e.videoUrl;
-const hasPhoto = !!(e.fotoUrl || e.foto);
-const hasPlanned = !!e.videoPlanned;
+    if (!e || !e.geo) continue;
 
-const icon =
-  hasVideo ? videoIcon :
-  hasPlanned ? videoPlannedIcon :
-  hasPhoto ? cameraIcon :
-  cameraIcon; // fallback
+    const lat = Number(e.geo.lat);
+    const lon = Number(e.geo.lon ?? e.geo.lng);
 
-    
+    if (!isFinite(lat) || !isFinite(lon)) continue;
+
+    const hasPhoto = !!(e.fotoUrl || e.foto);
+    const hasVideo = !!e.videoUrl;
+    const hasPlanned = !!e.videoPlanned;
+
+    // se per qualche motivo non ha né foto né video, skip
+    if (!hasPhoto && !hasVideo && !hasPlanned) continue;
+
+    const icon =
+      hasVideo ? videoIcon :
+      hasPlanned ? videoPlannedIcon :
+      cameraIcon;
 
     const caption = `
       <div style="font-weight:700;color:#ff9800;">📍 ${e.paese || ''}</div>
       <div style="color:#bbb;">${e.data || ''} ${e.ora || ''} — km ${e.km || '--'}</div>
-      <div style="margin-top:6px;color:#ddd;">${(e.testo || '').slice(0, 140)}${(e.testo||'').length > 140 ? '…' : ''}</div>
+      <div style="margin-top:6px;color:#ddd;">${(e.testo || '').slice(0, 140)}${(e.testo || '').length > 140 ? '…' : ''}</div>
     `;
 
-    const lon2 = e.geo.lon ?? e.geo.lng;
-const m = L.marker([e.geo.lat, lon2], { icon });
+    const m = L.marker([lat, lon], { icon });
 
-    if (isPhoto) {
-  const src = driveToDirectImageUrl(e.fotoUrl || e.foto); // ✅
-
+    // click sul marker: se c'è foto apro lightbox (comodo su mobile)
+    if (hasPhoto) {
+      const src = driveToDirectImageUrl(e.fotoUrl || e.foto);
       m.on('click', (ev) => {
         try { L.DomEvent.stop(ev); } catch {}
         openPhotoLightbox(src, caption);
       });
-
     }
-  
-    // popup mini (opzionale)
-   let popupHtml = `
-  <div style="width:200px;">
-    ${caption}
-`;
 
-if (hasPhoto) {
-  const src = driveToDirectImageUrl(e.fotoUrl || e.foto);
-  popupHtml += `
-    <div style="margin-top:8px;">
-      <img src="${src}" style="width:100%;border-radius:10px;max-height:120px;object-fit:cover;display:block;cursor:pointer;">
-      <button class="btn-secondary" style="margin-top:8px;width:100%;">Apri foto</button>
-    </div>
-  `;
-}
+    // popup
+    let popupHtml = `
+      <div style="width:200px;">
+        ${caption}
+    `;
 
-if (hasVideo) {
-  const emb = youtubeEmbedUrl(e.videoUrl);
-  popupHtml += `
-    <div style="margin-top:10px;">
-      ${emb ? `<iframe class="yt-embed" src="${emb}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>` : ''}
-      <div style="margin-top:8px;">
-        <a href="${e.videoUrl}" target="_blank" rel="noopener"
-          style="display:block;width:100%;text-align:center;padding:10px 12px;border-radius:12px;background:#2196F3;color:#000;text-decoration:none;font-weight:900;">
-          ▶ Apri su YouTube
-        </a>
-      </div>
-    </div>
-  `;
-}
-
-popupHtml += `</div>`;
-
-    
-      <div style="margin-top:10px;">
-        ${emb ? `<iframe class="yt-embed" src="${emb}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>` : ''}
+    if (hasPhoto) {
+      const src = driveToDirectImageUrl(e.fotoUrl || e.foto);
+      popupHtml += `
         <div style="margin-top:8px;">
-          <a href="${e.videoUrl}" target="_blank" rel="noopener"
-             style="display:block;width:100%;text-align:center;padding:10px 12px;border-radius:12px;background:#2196F3;color:#000;text-decoration:none;font-weight:900;">
-            ▶ Apri su YouTube
-          </a>
+          <img class="vt-open-photo" data-src="${src}"
+               src="${src}"
+               style="width:100%;border-radius:10px;max-height:120px;object-fit:cover;display:block;cursor:pointer;">
+          <button class="btn-secondary vt-open-photo" data-src="${src}"
+                  style="margin-top:8px;width:100%;">Apri foto</button>
         </div>
-      </div>
-    `;
-  } else {
-    popupHtml += `
-      <div style="margin-top:10px;">
-        <div style="color:#ff9800;font-weight:900;">🎬 Video in arrivo (nessun link)</div>
-        <button class="btn-secondary" style="margin-top:8px;width:100%;"
-                onclick="apriModificaVideoDiario(${e.id});">
-          🎬 Inserisci link
-        </button>
-      </div>
-    `;
-  }
-}
+      `;
+    }
+
+    if (hasVideo) {
+      const emb = youtubeEmbedUrl(e.videoUrl);
+      popupHtml += `
+        <div style="margin-top:10px;">
+          ${emb ? `<iframe class="yt-embed" src="${emb}"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen></iframe>` : ''}
+
+          <div style="margin-top:8px;">
+            <a href="${e.videoUrl}" target="_blank" rel="noopener"
+               style="display:block;width:100%;text-align:center;padding:10px 12px;border-radius:12px;background:#2196F3;color:#000;text-decoration:none;font-weight:900;">
+              ▶ Apri su YouTube
+            </a>
+          </div>
+        </div>
+      `;
+    } else if (hasPlanned) {
+      popupHtml += `
+        <div style="margin-top:10px;">
+          <div style="color:#ff9800;font-weight:900;">🎬 Video in arrivo (nessun link)</div>
+          <button class="btn-secondary" style="margin-top:8px;width:100%;"
+                  onclick="apriModificaVideoDiario(${e.id});">
+            🎬 Inserisci link
+          </button>
+        </div>
+      `;
+    }
+
     popupHtml += `</div>`;
 
     m.bindPopup(popupHtml);
 
+    // click su img/bottone "Apri foto" dentro il popup
     m.on('popupopen', (ev) => {
-      const node = ev && ev.popup ? ev.popup.getElement() : null;
+      const node = ev?.popup?.getElement();
       if (!node) return;
 
-      const btn = node.querySelector('button');
-      const img = node.querySelector('img');
-
-      if (isPhoto) {
-        const src = e.fotoUrl || e.foto;
-        const open = () => openPhotoLightbox(src, caption);
-        if (img) img.onclick = open;
-        if (btn) btn.onclick = open;
-      } else {
-        if (btn) {
-          btn.onclick = () => {
-            if (e.videoUrl) window.open(e.videoUrl, '_blank', 'noopener');
-            else showToast('🎬 Video in arrivo: aggiungi il link dal Diario');
-          };
-        }
-      }
+      node.querySelectorAll('.vt-open-photo').forEach(el => {
+        const src = el.getAttribute('data-src');
+        el.onclick = () => openPhotoLightbox(src, caption);
+      });
     });
 
     m.addTo(mapFullPhotoLayer);
   }
-}
-
-  
+}  
 function apriMappaFull(coordsOverride = null, ctx = null) {
   apriModal('modalMapFull');
   mapFullCtx = ctx || null; // ✅ ricorda contesto per refresh marker
