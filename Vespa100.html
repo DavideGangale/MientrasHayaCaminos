@@ -1671,34 +1671,34 @@ color:#fff;
     <button class="close-modal" onclick="chiudiModal('modalAddRicambio')">×</button>
     <h2 style="color:#ff9800; text-align:center; margin-top:0;">➕ Aggiungi ricambio</h2>
 
-    <div class="dash-card" style="padding:12px;">
-      <div class="inp-label">Scegli dal catalogo manutenzione</div>
-      <select id="add-ricambio-select" class="inp-select" onchange="onAddRicambioSelectChange()"></select>
 
-      <div id="add-ricambio-custom-box" style="display:none;">
-        <div class="inp-label">Nome ricambio (custom)</div>
-        <input id="add-ricambio-custom-name" type="text" placeholder="Es. CDI / Guarnizione / Leva..." style="text-align:left;">
-      </div>
+    
+   <div class="dash-card" style="padding:12px;">
+  <div class="inp-label">Nome ricambio</div>
+  <input id="add-ricambio-name" type="text" placeholder="Es. Cavo frizione / Ganasce post / Pneumatico"
+         style="text-align:left;">
 
-      <div style="display:flex; gap:10px;">
-        <div style="flex:1;">
-          <div class="inp-label">Quantità</div>
-          <input id="add-ricambio-qta" type="number" min="1" step="1" value="1">
-        </div>
-        <div style="flex:1;">
-          <div class="inp-label">Costo (valuta corrente, opzionale)</div>
-          <input id="add-ricambio-costo" type="number" min="0" step="0.01" placeholder="0">
-        </div>
-      </div>
-
-      <button class="btn-azione" style="background:#ff9800;color:black;" onclick="confermaAggiungiRicambio()">
-        ✅ Aggiungi allo stock
-      </button>
-
-      <div style="font-size:12px;color:#888;margin-top:8px;text-align:left;">
-        Suggerimento: se lo scegli dal catalogo, l’app lo collega automaticamente agli avvisi e all’usura.
-      </div>
+  <div style="display:flex; gap:10px;">
+    <div style="flex:1;">
+      <div class="inp-label">Quantità</div>
+      <input id="add-ricambio-qta" type="number" min="1" step="1" value="1">
     </div>
+    <div style="flex:1;">
+      <div class="inp-label">Costo totale (valuta corrente, opzionale)</div>
+      <input id="add-ricambio-costo" type="number" min="0" step="0.01" placeholder="0">
+    </div>
+  </div>
+
+  <button class="btn-azione" style="background:#ff9800;color:black;" onclick="confermaAggiungiRicambio()">
+    ✅ Aggiungi allo stock
+  </button>
+
+  <div style="font-size:12px;color:#888;margin-top:8px;text-align:left;">
+    Suggerimento: poi usa ✏️ per impostare km utili e km già fatti del pezzo montato.
+  </div>
+</div>
+
+    
   </div>
 </div>
 
@@ -7490,9 +7490,15 @@ function apriEditRicambio(i) {
   if (intEl)  intEl.value  = Number(it.intervalKm || it.durata || 0) || 0;
   if (qtaEl)  qtaEl.value  = Number(it.qta || 0);
 
-  const lastKm = Number(it.lastKm || 0);
-  const usedKm = Math.max(0, kmTot - lastKm);
-  if (usedEl) usedEl.value = Math.round(usedKm);
+ const lastKm = Number(it.lastKm || 0);
+
+// ✅ se esiste usedKm salvato, usa quello; altrimenti fallback su kmTot-lastKm
+const usedKm =
+  (it.usedKm != null && isFinite(Number(it.usedKm)))
+    ? Number(it.usedKm)
+    : Math.max(0, kmTot - lastKm);
+
+if (usedEl) usedEl.value = Math.round(usedKm);
 
   apriModal('modalEditRicambio');
 }
@@ -7526,7 +7532,11 @@ function salvaEditRicambio() {
   it.qta = Math.round(qta);
 
   // imposta usura attuale: lastKm = kmTot - usedKm
-  it.lastKm = Math.max(0, kmTot - usedKm);
+  // ✅ salva usura “esplicita”
+it.usedKm = Math.round(usedKm);
+
+// ✅ mantieni anche lastKm coerente (compatibilità)
+it.lastKm = kmTot - it.usedKm;
 
   // se intervalKm = 0 => consideralo N/A
   it.wear = (it.intervalKm > 0) ? 'interval' : 'na';
@@ -7555,7 +7565,10 @@ function renderInventario() {
 
   container.innerHTML = inv.map((item, i) => {
     const qta = Number(item.qta || 0);
-    const kmDaUltimo = kmTot - (Number(item.lastKm || 0));
+    const kmDaUltimo =
+  (item.usedKm != null && isFinite(Number(item.usedKm)))
+    ? Number(item.usedKm)
+    : (kmTot - (Number(item.lastKm || 0)));
     const durataEff = getDurataEffettivaKmPerItem(item);
 
     let usuraHtml = '';
@@ -7824,37 +7837,14 @@ function eliminaRicambio(i) {
 
 
 function apriAggiungiRicambio() {
-  // popola la select dal catalogo
-  const sel = document.getElementById('add-ricambio-select');
-  if (!sel) { showToast('⚠️ Select add-ricambio-select non trovata'); return; }
-
-  const cat = getManutCatalog(); // [{key,nome,intervalKm,enabled}, ...]
-  const items = Array.isArray(cat) ? cat : [];
-
-  // Mostro TUTTE le voci del catalogo (anche N/A) + custom
-  const opt = [];
-  opt.push(`<option value="__custom__">✍️ Custom (non in catalogo)</option>`);
-  opt.push(`<option value="" disabled>──────────</option>`);
-
-  for (const it of items) {
-    if (!it || !it.key) continue;
-    const enabled = it.enabled !== false && Number(it.intervalKm || 0) > 0;
-    const label = `${it.nome || it.key}${enabled ? '' : ' (N/A)'}`;
-    opt.push(`<option value="${it.key}">${label}</option>`);
-  }
-
-  sel.innerHTML = opt.join('');
-  sel.value = (items[0] && items[0].key) ? items[0].key : '__custom__';
-
-  // reset campi
-  const qta = document.getElementById('add-ricambio-qta');
+  const name = document.getElementById('add-ricambio-name');
+  const qta  = document.getElementById('add-ricambio-qta');
   const costo = document.getElementById('add-ricambio-costo');
-  const cname = document.getElementById('add-ricambio-custom-name');
+
+  if (name) name.value = '';
   if (qta) qta.value = 1;
   if (costo) costo.value = '';
-  if (cname) cname.value = '';
 
-  onAddRicambioSelectChange();
   apriModal('modalAddRicambio');
 }
 
@@ -7868,60 +7858,41 @@ function onAddRicambioSelectChange() {
 }
 
 function confermaAggiungiRicambio() {
-  const sel = document.getElementById('add-ricambio-select');
-  const qtaEl = document.getElementById('add-ricambio-qta');
+  const nameEl = document.getElementById('add-ricambio-name');
+  const qtaEl  = document.getElementById('add-ricambio-qta');
   const costoEl = document.getElementById('add-ricambio-costo');
-  const cnameEl = document.getElementById('add-ricambio-custom-name');
 
-  if (!sel || !qtaEl) return;
+  const nome = (nameEl?.value || '').trim();
+  if (!nome) { showToast('⚠️ Inserisci un nome ricambio'); return; }
 
-  const chosenKey = sel.value;
-  const qta = Math.max(1, parseInt(qtaEl.value || '1', 10) || 1);
+  const qta = Math.max(1, parseInt(qtaEl?.value || '1', 10) || 1);
   const costoLocal = parseFloat(costoEl?.value || '0') || 0;
 
   const cur = valutaAttuale || 'USD';
   const costoUsd = (costoLocal > 0) ? convertLocalToUsd(costoLocal, cur) : 0;
 
-  const cat = getManutCatalog();
-  const catItem = (chosenKey && chosenKey !== '__custom__')
-    ? (cat.find(x => x && x.key === chosenKey) || null)
-    : null;
-
-  let nome = '';
-  let manutKey = null;
-
-  if (catItem) {
-    nome = catItem.nome || catItem.key;
-    manutKey = catItem.key; // ✅ collegamento robusto (chiave, non nome)
-  } else {
-    nome = (cnameEl?.value || '').trim();
-    if (!nome) { showToast('⚠️ Inserisci un nome ricambio'); return; }
-    manutKey = null; // custom non collegato
-  }
-
   const inv = caricaJSON('vt_inventario', []);
   const list = Array.isArray(inv) ? inv : [];
 
-  // se esiste già stesso manutKey (o stesso nome per custom), somma quantità
-  const idx = manutKey
-    ? list.findIndex(x => x && x.manutKey === manutKey)
-    : list.findIndex(x => x && !x.manutKey && String(x.nome||'').toLowerCase() === nome.toLowerCase());
+  // se esiste già stesso nome (case-insensitive), somma quantità
+  const idx = list.findIndex(x => x && String(x.nome||'').toLowerCase() === nome.toLowerCase());
 
   if (idx !== -1) {
     list[idx].qta = Number(list[idx].qta || 0) + qta;
   } else {
+    const kmTot = parseFloat(carica('vt_kmTotali','0')) || 0;
+
     list.push({
       id: String(Date.now()) + '_' + Math.random().toString(16).slice(2),
       nome,
       qta,
 
-      // questo "lastKm" rappresenta il pezzo montato (ultimo cambio) → lo inizializziamo a quello attuale se non esiste
-      lastKm: (parseFloat(carica('vt_kmTotali','0')) || 0),
+      // di default: nessuna usura finché non la imposti con ✏️
+      wear: 'na',
+      intervalKm: 0,
+      usedKm: 0,
+      lastKm: kmTot,
 
-      // collegamento catalogo
-      manutKey: manutKey,
-
-      // costo
       costoLocal: costoLocal || 0,
       costoUsd: costoUsd || 0,
       valuta: cur,
@@ -7931,7 +7902,7 @@ function confermaAggiungiRicambio() {
 
   salva('vt_inventario', list);
 
-  // spesa ricambi (solo se costoUsd valido)
+  // spesa ricambi
   if (costoUsd > 0) {
     salva('vt_spesaRicambiUsd', (parseFloat(carica('vt_spesaRicambiUsd','0')) || 0) + costoUsd);
 
@@ -7949,7 +7920,6 @@ function confermaAggiungiRicambio() {
   renderChecklist();
   showToast(`✅ Aggiunto: ${nome} (x${qta})`);
 }
-
 
   
 function aggiungiRicambio() {
@@ -8205,6 +8175,7 @@ if (pendingMount && pendingMount.invId) {
   const idx = inv.findIndex(x => x && x.id === pendingMount.invId);
   if (idx !== -1) {
     inv[idx].lastKm = kmTot; // riparte usura da qui
+    inv[idx].usedKm = 0; // ✅ riparte da 0 km fatti
     salva('vt_inventario', inv);
   }
 
