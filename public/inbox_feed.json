@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-03-24T15:22:07.841Z",
+  "exportedAt": "2026-03-24T15:33:26.437Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -69,6 +69,40 @@
         "lon": -74.3593349633291
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1f-H_QB-auMzEUATxHJ0GUrNAW7rrsGjW"
+    },
+    {
+      "ts": 1774366088623,
+      "id": 1774366088623,
+      "paese": "",
+      "km": "",
+      "testo": "Gggggg",
+      "tags": [
+        "Ggg"
+      ],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 4.816470727363152,
+        "lon": -74.36152306828609
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1MZ4A5lrHpKSaRn8roM7tXbXbTKeZpLgp"
+    },
+    {
+      "ts": 1774366395798,
+      "id": 1774366395798,
+      "paese": "",
+      "km": "",
+      "testo": "Si carbone",
+      "tags": [
+        "DiCarbone"
+      ],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 4.806274708831456,
+        "lon": -74.36000029616595
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1YqYg_8qecwYwZGZVgKTsL_7TWMl79hWO"
     }
   ]
 }
