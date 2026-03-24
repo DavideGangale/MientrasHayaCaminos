@@ -988,7 +988,7 @@ function initMap() {
     initMap();
     try {
       const urlParams = new URLSearchParams(window.location.search);
-      const src = urlParams.get('src') || 'vespatrek_public.json';
+      const src = urlParams.get('src') || 'public/vespatrek_public.json';
 
       const res = await fetch(src);
       DATA = await res.json();
