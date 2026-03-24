@@ -591,12 +591,38 @@ function driveToDirectImageUrl(url){
 }
   
 
-  function getYouTubeId(url) {
-    if (!url) return null;
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-    const match = url.match(regExp);
-    return (match && match[2].length === 11) ? match[2] : null;
+function getYouTubeId(url) {
+  const s = String(url || '').trim();
+  if (!s) return null;
+
+  try {
+    const u = new URL(s);
+
+    // youtu.be/ID
+    if (u.hostname.includes('youtu.be')) {
+      const id = u.pathname.replace('/', '').trim();
+      return id.length === 11 ? id : null;
+    }
+
+    // youtube.com/watch?v=ID
+    const v = u.searchParams.get('v');
+    if (v && v.length === 11) return v;
+
+    // youtube.com/shorts/ID
+    let m = u.pathname.match(/\/shorts\/([a-zA-Z0-9_-]{11})/);
+    if (m) return m[1];
+
+    // youtube.com/embed/ID
+    m = u.pathname.match(/\/embed\/([a-zA-Z0-9_-]{11})/);
+    if (m) return m[1];
+
+    return null;
+  } catch {
+    // fallback regex
+    const m = s.match(/(?:v=|youtu\.be\/|\/shorts\/|\/embed\/)([a-zA-Z0-9_-]{11})/);
+    return m ? m[1] : null;
   }
+}
 
   const iconFoto = L.divIcon({ className: 'custom-marker marker-foto', html: '📷' });
   const iconVideo = L.divIcon({ className: 'custom-marker marker-video', html: '▶️' });
