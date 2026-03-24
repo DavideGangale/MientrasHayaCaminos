@@ -3775,7 +3775,10 @@ function driveToDirectImageUrl(url){
 function openPhotoLightbox(src, caption = '') {
   const img = document.getElementById('lightbox-img');
   const cap = document.getElementById('lightbox-caption');
-  if (img) img.src = src || '';
+
+  const fixed = driveToDirectImageUrl(src);   // ✅ conversione qui
+
+  if (img) img.src = fixed || '';
   if (cap) cap.innerHTML = caption || '';
   apriModal('photoLightbox');
 }
@@ -3837,7 +3840,7 @@ function renderMapFullPhotoMarkersForContext(ctx) {
     const m = L.marker([e.geo.lat, e.geo.lon], { icon });
 
     if (isPhoto) {
-      const src = e.fotoUrl || e.foto;
+  const src = driveToDirectImageUrl(e.fotoUrl || e.foto); // ✅
 
       m.on('click', (ev) => {
         try { L.DomEvent.stop(ev); } catch {}
