@@ -1,6 +1,6 @@
 {
   "_version": "public-1.0",
-  "_exportDate": "2026-03-24T17:46:56.203Z",
+  "_exportDate": "2026-03-24T17:57:18.165Z",
   "titolo": "VespaTrek PX150",
   "diarioTagsPreset": [
     "Paesaggi",
@@ -26,21 +26,26 @@
   ],
   "paeseAttuale": "Colombia",
   "stats": {
-    "kmTotali": 5.5575,
-    "benzinaUsataLitri": 0,
+    "kmTotali": 12.5575,
+    "benzinaUsataLitri": 3.70941,
     "benzinaFuoriTappaLitri": 0,
-    "olioTotaleLitri": 0,
-    "spesaBenzinaUsd": 0,
-    "spesaOlioUsd": 0,
+    "olioTotaleLitri": 0.076,
+    "spesaBenzinaUsd": 4.969058251810031,
+    "spesaOlioUsd": 1.2008759999999998,
     "spesaRicambiUsd": 0,
     "spesaManodoperaUsd": 0
   },
   "datiPaesi": {
     "Colombia": {
-      "km": 0.6625133612800126,
-      "benzina": 0,
+      "km": 7.662513361280013,
+      "benzina": 3.70941,
       "spesaBenzina": 0,
-      "spesaOlio": 0
+      "spesaOlio": 0,
+      "spesaBenzinaUsd": 4.969058251810031,
+      "spesaBenzinaLocal": 18240,
+      "valuta": "COP",
+      "spesaOlioUsd": 1.2008759999999998,
+      "olioMl": 76
     }
   },
   "tappe": [
@@ -2227,7 +2232,60 @@
       "foto": null
     }
   ],
-  "manutenzioni": [],
-  "rifornimenti": [],
-  "carburazioni": []
+  "manutenzioni": [
+    {
+      "id": 1774374949231,
+      "data": "24/03/2026",
+      "ora": "12:55",
+      "paese": "Colombia",
+      "km": "12.6",
+      "nome": "Montaggio Cavi Cambio",
+      "desc": "Cambio cavo cambio",
+      "costoLocal": 0,
+      "valuta": "COP",
+      "costoUsd": 0,
+      "fotoUrl": null,
+      "geo": {
+        "lat": 4.805925,
+        "lon": -74.360675
+      }
+    }
+  ],
+  "rifornimenti": [
+    {
+      "id": 1774375027428,
+      "geo": {
+        "lat": 4.805925,
+        "lon": -74.360675
+      },
+      "data": "24/03/2026",
+      "ora": "12:57",
+      "qta": "3.79",
+      "dest": "Vespa",
+      "mix": "2%",
+      "prezzoUnit": "4818.501",
+      "valuta": "COP",
+      "fxToUsd": 0.000272426439243971,
+      "costoBenzLocal": "18240.00",
+      "costoBenzUsd": "4.97",
+      "costoBenz": "4.97",
+      "costoOlio": "1.20",
+      "luogo": "N/D",
+      "km": "12.6"
+    }
+  ],
+  "carburazioni": [
+    {
+      "id": 1774374972484,
+      "geo": {
+        "lat": 4.805925,
+        "lon": -74.360675
+      },
+      "data": "24/03/2026",
+      "alt": 2674,
+      "chicMax": 120,
+      "chicMin": 95,
+      "nota": "Mucho humo"
+    }
+  ]
 }
