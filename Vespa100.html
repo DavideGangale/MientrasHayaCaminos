@@ -942,6 +942,16 @@ color:#fff;
   background: rgba(255,152,0,0.95);
 }
 
+
+
+    /* ===== EMBED YOUTUBE nei popup mappa ===== */
+.yt-embed{
+  width:100%;
+  aspect-ratio:16/9;
+  border:0;
+  border-radius:10px;
+  background:#000;
+}
     
 /* ===== LIGHTBOX FOTO ===== */
 #photoLightbox.modal-overlay { z-index: 9000; }
@@ -3732,7 +3742,35 @@ function driveToDirectImageUrl(url){
   return `https://drive.google.com/thumbnail?id=${id}&sz=w1200`;
 }
 
-  
+  function youtubeEmbedUrl(url){
+  const u = String(url || '').trim();
+  if (!u) return '';
+
+  // prende ID da vari formati:
+  // https://www.youtube.com/watch?v=ID
+  // https://youtu.be/ID
+  // https://www.youtube.com/shorts/ID
+  let id = '';
+
+  try {
+    const obj = new URL(u);
+    if (obj.hostname.includes('youtu.be')) {
+      id = obj.pathname.replace('/','').trim();
+    } else if (obj.searchParams.get('v')) {
+      id = obj.searchParams.get('v').trim();
+    } else {
+      const m = obj.pathname.match(/\/shorts\/([a-zA-Z0-9_-]+)/);
+      if (m) id = m[1];
+    }
+  } catch(e) {
+    // fallback regex se URL non è valido
+    const m = u.match(/(?:v=|youtu\.be\/|\/shorts\/)([a-zA-Z0-9_-]{6,})/);
+    if (m) id = m[1];
+  }
+
+  if (!id) return '';
+  return `https://www.youtube-nocookie.com/embed/${id}`;
+}
 
 function openPhotoLightbox(src, caption = '') {
   const img = document.getElementById('lightbox-img');
@@ -3806,31 +3844,8 @@ function renderMapFullPhotoMarkersForContext(ctx) {
         openPhotoLightbox(src, caption);
       });
 
-  } else if (isVideo) {
-  m.on('click', (ev) => {
-    try { L.DomEvent.stop(ev); } catch {}
 
-    if (e.videoUrl) {
-      window.open(e.videoUrl, '_blank', 'noopener');
-      return;
-    }
-
-    // ✅ planned: toast + apri subito editor link
-    showToast('🎬 Video in arrivo: inserisci ora il link YouTube');
-    setTimeout(() => {
-      try {
-        if (typeof apriModificaVideoDiario === 'function') {
-          apriModificaVideoDiario(e.id);
-        } else {
-          showToast('⚠️ Funzione apriModificaVideoDiario non trovata');
-        }
-      } catch (err) {
-        console.warn('apriModificaVideoDiario error:', err);
-      }
-    }, 120);
-  });
-}
-
+  
     // popup mini (opzionale)
     let popupHtml = `
       <div style="width:200px;">
@@ -3845,16 +3860,33 @@ function renderMapFullPhotoMarkersForContext(ctx) {
           <button class="btn-secondary" style="margin-top:8px;width:100%;">Apri foto</button>
         </div>
       `;
-    } else {
-      popupHtml += `
-        <div style="margin-top:10px;">
-          <button class="btn-secondary" style="margin-top:8px;width:100%;">
-            ${e.videoUrl ? 'Apri video 🎥' : 'Video in arrivo 🎬'}
-          </button>
-        </div>
-      `;
-    }
+  } else {
+  if (e.videoUrl) {
+    const emb = youtubeEmbedUrl(e.videoUrl);
 
+    popupHtml += `
+      <div style="margin-top:10px;">
+        ${emb ? `<iframe class="yt-embed" src="${emb}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>` : ''}
+        <div style="margin-top:8px;">
+          <a href="${e.videoUrl}" target="_blank" rel="noopener"
+             style="display:block;width:100%;text-align:center;padding:10px 12px;border-radius:12px;background:#2196F3;color:#000;text-decoration:none;font-weight:900;">
+            ▶ Apri su YouTube
+          </a>
+        </div>
+      </div>
+    `;
+  } else {
+    popupHtml += `
+      <div style="margin-top:10px;">
+        <div style="color:#ff9800;font-weight:900;">🎬 Video in arrivo (nessun link)</div>
+        <button class="btn-secondary" style="margin-top:8px;width:100%;"
+                onclick="apriModificaVideoDiario(${e.id});">
+          🎬 Inserisci link
+        </button>
+      </div>
+    `;
+  }
+}
     popupHtml += `</div>`;
 
     m.bindPopup(popupHtml);
