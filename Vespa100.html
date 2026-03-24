@@ -5092,6 +5092,16 @@ let driveUploadChain = Promise.resolve();
 
  
 
+ window.addEventListener('message', (ev) => {
+  const msg = ev && ev.data;
+  if (!msg || msg.type !== 'VESPA_UPLOAD_RESULT') return;
+  if (!driveUploadPending) return;
+
+  const data = msg.data || {};
+
+  // reqId deve combaciare (anti-messaggi “sporchi”)
+  if (!data.reqId || data.reqId !== driveUploadPending.reqId) return;
+
   try {
     if (driveUploadPending.timer) clearTimeout(driveUploadPending.timer);
   } catch (e) {}
@@ -5099,7 +5109,7 @@ let driveUploadChain = Promise.resolve();
   console.log('[DRIVE UPLOAD RESULT]', data);
   driveUploadPending.resolve(data);
   driveUploadPending = null;
-  });
+});
 
 
 
