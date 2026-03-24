@@ -735,32 +735,62 @@ function getYouTubeId(url) {
     }
 
     const diario = Array.isArray(DATA.diario) ? DATA.diario : [];
-    diario.forEach(d => {
-      if (currentCountry && d.paese !== currentCountry) return;
-      if (!d.geo) return;
+diario.forEach(d => {
+  if (currentCountry && d.paese !== currentCountry) return;
+  if (!d.geo) return;
 
-      const ytId = getYouTubeId(d.videoUrl);
-      const rawFoto = d.fotoUrl || d.foto;
-      const fotoSrc = driveToDirectImageUrl(rawFoto);
+  const lat = Number(d.geo.lat);
+  const lon = Number(d.geo.lon ?? d.geo.lng);
+  if (!isFinite(lat) || !isFinite(lon)) return;
 
-      const tipoMedia = ytId ? 'VIDEO' : 'FOTO';
-      if (currentMarkerFilter !== 'ALL' && currentMarkerFilter !== tipoMedia) return;
+  const ytId = getYouTubeId(d.videoUrl);
+  const hasVideo = !!ytId;
 
-      let mediaHtml = '';
-      if (ytId) {
-        mediaHtml = `<div class="popup-video"><iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe></div>`;
-    } else if (fotoSrc) {
-  const safe = String(fotoSrc).replace(/'/g, "\\'");
-  mediaHtml = `<img class="popup-img" src="${fotoSrc}" onclick="openLightbox('${safe}')">`;
-}
+  const rawFoto = d.fotoUrl || d.foto;
+  const fotoSrc = driveToDirectImageUrl(rawFoto);
+  const hasPhoto = !!fotoSrc;
 
-      creaMarker(d.geo.lat, d.geo.lon, ytId ? iconVideo : iconFoto, `
-        <div class="popup-title">📍 ${d.paese || ''}</div>
-        <div class="popup-meta">📅 ${d.data} ${d.ora || ''} | 📏 km ${d.km}</div>
-        <div>${d.testo || ''}</div>
-        ${mediaHtml}
-      `);
-    });
+  // filtro marker: se ALL mostra se ha almeno un media
+  if (currentMarkerFilter !== 'ALL') {
+    if (currentMarkerFilter === 'VIDEO' && !hasVideo) return;
+    if (currentMarkerFilter === 'FOTO'  && !hasPhoto) return;
+    // MAINT/FUEL/CARB vengono gestiti negli altri blocchi, qui skip
+    if (currentMarkerFilter !== 'VIDEO' && currentMarkerFilter !== 'FOTO') return;
+  } else {
+    if (!hasVideo && !hasPhoto) return;
+  }
+
+  let mediaHtml = '';
+
+  // ✅ foto (se c'è)
+  if (hasPhoto) {
+    const safe = String(fotoSrc).replace(/'/g, "\\'");
+    mediaHtml += `
+      <div style="margin-top:8px;">
+        <img class="popup-img" src="${fotoSrc}" onclick="openLightbox('${safe}')">
+      </div>
+    `;
+  }
+
+  // ✅ video (se c'è)
+  if (hasVideo) {
+    mediaHtml += `
+      <div class="popup-video" style="margin-top:10px;">
+        <iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe>
+      </div>
+    `;
+  }
+
+  // icona: se ha video metti play, altrimenti foto
+  const icon = hasVideo ? iconVideo : iconFoto;
+
+  creaMarker(lat, lon, icon, `
+    <div class="popup-title">📍 ${d.paese || ''}</div>
+    <div class="popup-meta">📅 ${d.data} ${d.ora || ''} | 📏 km ${d.km}</div>
+    <div>${d.testo || ''}</div>
+    ${mediaHtml}
+  `);
+});
 
     const manutenzioni = Array.isArray(DATA.manutenzioni) ? DATA.manutenzioni : [];
     manutenzioni.forEach(m => {
