@@ -290,7 +290,8 @@
   let map = null;
   let layerTracce = null;
   let layerMarkers = null;
-
+  let canvasRenderer = null; // ✅ aggiungi questo
+  
   let currentMode = 'TUTTO';
   let currentCountry = '';
   let currentMarkerFilter = 'ALL';
@@ -553,18 +554,24 @@
     el.innerHTML = `${T('totalLbl')}: ${km} km<br>${T('fuelLbl')}: ${l} L`;
   }
 
-  function initMap() {
-    let canvasRenderer = null;
-    map = L.map('mapPub', { zoomControl: false }).setView([4.7, -74.1], 5);
-    canvasRenderer = L.canvas({ padding: 0.5 });
-    //L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map); //la misma de la app privada
-    //L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
-    L.control.zoom({ position: 'bottomright' }).addTo(map);
+  
 
-    layerTracce = L.layerGroup().addTo(map);
-    layerMarkers = L.layerGroup().addTo(map);
-  }
+
+function initMap() {
+  map = L.map('mapPub', { zoomControl: false }).setView([4.7, -74.1], 5);
+
+  canvasRenderer = L.canvas({ padding: 0.5 }); // ✅ così è visibile anche in renderMap()
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+  L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+  layerTracce = L.layerGroup().addTo(map);
+  layerMarkers = L.layerGroup().addTo(map);
+}
+
+
+
+  
 
   function getYouTubeId(url) {
     if (!url) return null;
