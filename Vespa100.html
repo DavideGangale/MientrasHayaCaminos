@@ -5090,6 +5090,32 @@ function dataURLToFile(dataUrl, filename = 'foto.jpg') {
 let driveUploadPending = null;
 let driveUploadChain = Promise.resolve();
 
+ 
+
+ window.addEventListener('message', (ev) => {
+  const msg = ev && ev.data;
+  if (!msg || msg.type !== 'VESPA_UPLOAD_RESULT') return;
+  if (!driveUploadPending) return;
+
+  const data = msg.data || {};
+
+  // reqId deve combaciare (anti-messaggi “sporchi”)
+  if (!data.reqId || data.reqId !== driveUploadPending.reqId) return;
+
+  try {
+    if (driveUploadPending.timer) clearTimeout(driveUploadPending.timer);
+  } catch (e) {}
+
+  console.log('[DRIVE UPLOAD RESULT]', data);
+  driveUploadPending.resolve(data);
+  driveUploadPending = null;
+});
+
+
+
+
+  
+
 function uploadViaFormIframe(dataUrl, filename, folderId, endpoint, clientKey = '') {
   return new Promise((resolve, reject) => {
     if (driveUploadPending) {
