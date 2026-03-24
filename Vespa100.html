@@ -2541,9 +2541,7 @@ initDB('vt_uploadQueue', JSON.stringify([]));   // coda foto da caricare su Driv
 initDB('vt_driveAutoSync', '1');               // 1 = auto sync quando torna online
 
     // ===== INBOX iPhone Sync =====
-  initDB('vt_inboxUrl', '');            // URL endpoint inbox (Apps Script)
-  initDB('vt_inboxLastTs', '0');        // ultimo timestamp importato
-  initDB('vt_inboxClientKey', 'vespa123'); // stessa di Code.gs (puoi cambiarla)
+initDB('vt_inboxLastTs', '0');        // ultimo timestamp importato
   
   initDB('vt_scortaLitri', '0.0');
   initDB('vt_olioTotaleMl', '0');
@@ -3592,7 +3590,7 @@ if (id === 'settings') {
 caricaDriveAutoSyncUI();
 updateDriveSyncInfo();
 caricaDriveSettingsUI();
-  caricaInboxSettingsUI();  
+ 
 caricaInboxFeedSettingsUI();
 
   caricaGitHubSettingsUI();
@@ -5092,19 +5090,7 @@ function dataURLToFile(dataUrl, filename = 'foto.jpg') {
 let driveUploadPending = null;
 let driveUploadChain = Promise.resolve();
 
-window.addEventListener('message', (ev) => {
-  const msg = ev && ev.data;
-  if (!msg || msg.type !== 'VESPA_UPLOAD_RESULT') return;
-  if (!driveUploadPending) return;
-
-   const data = msg.data || {};
-
-  // ✅ OBBLIGATORIO: se manca reqId o è diverso, ignora
-  if (!data.reqId || data.reqId !== driveUploadPending.reqId) {
-    return;
-  }
-
-  
+ 
 
   try {
     if (driveUploadPending.timer) clearTimeout(driveUploadPending.timer);
@@ -6195,20 +6181,9 @@ function caricaDriveSettingsUI(){
   if (b) b.value = folder;
 }
 
-function caricaInboxSettingsUI() {
-  const a = document.getElementById('set-inbox-url');
-  const b = document.getElementById('set-inbox-key');
-  if (a) a.value = carica('vt_inboxUrl','');
-  if (b) b.value = carica('vt_inboxClientKey','');
-}
 
-function salvaInboxSettings() {
-  const url = (document.getElementById('set-inbox-url')?.value || '').trim();
-  const key = (document.getElementById('set-inbox-key')?.value || '').trim();
-  salva('vt_inboxUrl', url);
-  salva('vt_inboxClientKey', key);
-  showToast('✅ Inbox salvata');
-}
+
+
 
 
 
@@ -6224,62 +6199,9 @@ function caricaInboxFeedSettingsUI(){
   if (el) el.value = carica('vt_inboxFeedUrl','');
 }
 
-  
-function jsonpRequest(url, timeoutMs = 20000) {
-  return new Promise((resolve, reject) => {
-    const cb = 'vt_cb_' + Date.now() + '_' + Math.random().toString(16).slice(2);
-    const script = document.createElement('script');
-
-    const t = setTimeout(() => {
-      cleanup();
-      reject(new Error('JSONP timeout'));
-    }, timeoutMs);
-
-    function cleanup() {
-      try { clearTimeout(t); } catch {}
-      try { delete window[cb]; } catch {}
-      try { script.remove(); } catch {}
-    }
-
-    window[cb] = (data) => {
-      cleanup();
-      resolve(data);
-    };
-
-    // ✅ aggiunge callback “nostro”
-    const src = url + (url.includes('?') ? '&' : '?') + 'callback=' + encodeURIComponent(cb);
-    script.src = src;
-
-    script.onerror = () => {
-      cleanup();
-      reject(new Error('JSONP load error'));
-    };
-
-    document.body.appendChild(script);
-  });
-}
 
 
-  function buildInboxListUrl(baseUrl, since) {
-  const raw = String(baseUrl || '').trim();
-  if (!raw) return null;
 
-  // prova con URL API (se disponibile)
-  try {
-    const u = new URL(raw);
-    u.searchParams.set('mode', 'list');
-    u.searchParams.set('since', String(Number(since || 0)));
-    u.searchParams.set('t', String(Date.now()));
-    // NON metto callback qui: la aggiunge jsonpRequest()
-    u.searchParams.delete('callback');
-    return u.toString();
-  } catch (e) {
-    // fallback manuale (se URL() non funziona in qualche contesto)
-    const sep = raw.includes('?') ? '&' : '?';
-    // aggiungo parametri senza distruggere la query esistente
-    return raw + sep + 'mode=list&since=' + encodeURIComponent(Number(since || 0)) + '&t=' + Date.now();
-  }
-}
 
   
 function normalizeInboxDiarioEntry(e) {
@@ -6318,38 +6240,7 @@ return {
 }
 
 
-
-  function inboxBridgeList(baseExecUrl, since, timeoutMs = 25000) {
-  return new Promise((resolve, reject) => {
-    if (inboxBridgePending) return reject(new Error('Inbox bridge già in corso'));
-
-    const reqId = 'inb_' + Date.now() + '_' + Math.random().toString(16).slice(2);
-    inboxBridgePending = { resolve, reject, reqId, timer: null };
-
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.name = 'inboxBridgeFrame';
-
-    const base = String(baseExecUrl || '').trim().split('?')[0];
-    const src = base + `?mode=bridgeList&since=${encodeURIComponent(since)}&reqId=${encodeURIComponent(reqId)}&t=${Date.now()}`;
-
-    iframe.src = src;
-    document.body.appendChild(iframe);
-
-    inboxBridgePending.timer = setTimeout(() => {
-      try { iframe.remove(); } catch {}
-      if (inboxBridgePending) {
-        const r = inboxBridgePending.reject;
-        inboxBridgePending = null;
-        try { r(new Error('Inbox bridge timeout')); } catch {}
-      }
-    }, timeoutMs);
-
-    // pulizia iframe dopo un po’ (anche se ok)
-    setTimeout(() => { try { iframe.remove(); } catch {} }, timeoutMs + 2000);
-  });
-}
-
+  
 
   
 async function syncInboxNowJSONP() {
@@ -6424,60 +6315,6 @@ function resetInboxCursor(){
 }
 
 
-  
-async function syncInboxNow() {
-  const url = (carica('vt_inboxUrl','') || '').trim();
-  if (!url) { showToast('⚠️ Inserisci URL Inbox in Settings'); return; }
-  if (!navigator.onLine) { showToast('📴 Offline: sync impossibile'); return; }
-
-  try {
-    showToast('📲 Sync Inbox in corso...', 2500);
-
-    const lastTs = Number(carica('vt_inboxLastTs','0') || 0);
-    const res = await fetch(url + (url.includes('?') ? '&' : '?') + 'since=' + encodeURIComponent(lastTs) + '&t=' + Date.now(), {
-      cache: 'no-store'
-    });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-
-    const data = await res.json();
-
-    // supporta due formati:
-    // A) { entries:[...] }
-    // B) [ ... ]
-    const entries = Array.isArray(data) ? data : (Array.isArray(data.entries) ? data.entries : []);
-    if (!entries.length) { showToast('✅ Inbox: nessun nuovo post'); return; }
-
-    const diario = caricaJSON('vt_diario', []);
-    const list = Array.isArray(diario) ? diario : [];
-    const existing = new Set(list.map(x => String(x.id)));
-
-    let added = 0;
-    let maxTs = lastTs;
-
-    for (const raw of entries) {
-      const e = normalizeInboxDiarioEntry(raw);
-      if (!e.testo && !(e.fotoUrl || e.foto) && !e.videoUrl && !e.videoPlanned) continue;// entry vuota -> skip
-      if (existing.has(String(e.id))) continue;
-
-      list.unshift(e);
-      existing.add(String(e.id));
-      added++;
-
-      if (e.ts > maxTs) maxTs = e.ts;
-    }
-
-    salva('vt_diario', list);
-    salva('vt_inboxLastTs', String(maxTs));
-
-    renderDiarioFull?.();
-    renderSelectedTagsInline?.();
-
-    showToast(`✅ Importati ${added} post da iPhone`);
-  } catch (e) {
-    console.warn('syncInboxNow error:', e);
-    showToast('❌ Sync Inbox fallito: ' + (e?.message || e));
-  }
-}
 
   
 function getUploadQueue() {
@@ -9384,11 +9221,8 @@ window.addEventListener('online', () => {
     // prova anche a importare eventuali post da iPhone
   setTimeout(() => {
   try {
-    const feed = (carica('vt_inboxFeedUrl','') || '').trim();
-    const exec = (carica('vt_inboxUrl','') || '').trim();
-
-    if (feed) syncInboxNowJSONP();
-    else if (exec) syncInboxNow();
+const feed = (carica('vt_inboxFeedUrl','') || '').trim();
+if (feed) syncInboxNowJSONP();
   } catch (e) {}
 }, 1200);
 });
