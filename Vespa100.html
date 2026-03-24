@@ -1899,6 +1899,17 @@ color:#fff;
 </div>
 
 
+  <!-- MEDIA PERCORSO (modal) -->
+<div id="modalMediaPercorso" class="modal-overlay">
+  <div class="modal-content" style="border-color:#ff9800; max-width:900px;">
+    <button class="close-modal" onclick="chiudiModal('modalMediaPercorso')">×</button>
+    <h2 id="mediaPercorsoTitolo" style="color:#ff9800; text-align:center; margin-top:0;">
+      📸 Foto/Video del percorso
+    </h2>
+    <div id="media-percorso-list"></div>
+  </div>
+</div>
+
 <!-- DIARIO EDIT VIDEO (modal) -->
 <div id="modalDiarioEditVideo" class="modal-overlay">
   <div class="modal-content" style="border-color:#e91e63; max-width:560px;">
@@ -5977,6 +5988,12 @@ function renderTappe() {
           🗺️ Vedi traccia
         </button>
 
+<button onclick="apriMediaPercorso(${t.id})"
+  style="background:#ff9800;border:none;color:black;padding:8px 10px;border-radius:8px;font-size:12px;cursor:pointer;margin-top:8px;">
+  📸 Foto/Video
+</button>
+
+
         <button onclick="scaricaKML(${t.id})"
           style="background:#00bcd4;border:none;color:black;padding:8px 10px;border-radius:8px;font-size:12px;cursor:pointer;margin-top:8px;">
           ⬇️ KML
@@ -6004,6 +6021,96 @@ function renderTappe() {
   }).join('');
 }
 
+
+function apriMediaPercorso(id) {
+  // trova tappa/giro
+  const found = window.trovaPercorsoById ? window.trovaPercorsoById(id) : null;
+  if (!found || !found.item) { showToast('⚠️ Percorso non trovato'); return; }
+
+  const p = found.item;
+
+  if (!p.startTs || !p.endTs) {
+    showToast('⚠️ Questa tappa/giro non ha start/end timestamp (probabile voce vecchia).', 4500);
+    return;
+  }
+
+  const titolo = `${p.tipo || 'Percorso'} — ${p.data || ''} ${p.ora || ''} — ${p.paese || ''}`;
+  const titEl = document.getElementById('mediaPercorsoTitolo');
+  if (titEl) titEl.innerText = '📸 ' + titolo;
+
+  const listEl = document.getElementById('media-percorso-list');
+  if (!listEl) return;
+
+  const entries = getDiarioMediaEntriesByRange(p.startTs, p.endTs);
+
+  if (!entries.length) {
+    listEl.innerHTML = `<div style="color:#888;text-align:center;padding:20px;">
+      Nessuna foto/video trovata in questa tappa (serve media + geolocalizzazione + timestamp nel range).
+    </div>`;
+    apriModal('modalMediaPercorso');
+    return;
+  }
+
+  // render
+  listEl.innerHTML = entries.map(e => {
+    const when = `${e.data || ''} ${e.ora || ''}`.trim();
+    const testo = (e.testo || '').trim();
+    const testoShort = testo.length > 180 ? (testo.slice(0, 180) + '…') : testo;
+
+    const hasPhoto = !!(e.fotoUrl || e.foto);
+    const photoSrcRaw = hasPhoto ? (e.fotoUrl || e.foto) : '';
+    const photoSrc = photoSrcRaw ? driveToDirectImageUrl(photoSrcRaw) : '';
+
+    const hasVideo = !!(e.videoUrl || e.videoPlanned);
+
+    const photoHtml = hasPhoto ? `
+      <img src="${photoSrc}" style="width:100%;border-radius:12px;margin-top:10px;max-height:260px;object-fit:cover;cursor:pointer;"
+           onclick="openPhotoLightbox('${String(photoSrc).replace(/'/g, "\\'")}', '${String(testoShort).replace(/'/g, "\\'")}')">
+    ` : '';
+
+    const videoHtml = e.videoUrl ? `
+      <div style="margin-top:10px;">
+        <a href="${e.videoUrl}" target="_blank" rel="noopener"
+           style="display:inline-block;padding:10px 12px;border-radius:12px;background:#2196F3;color:#000;text-decoration:none;font-weight:900;">
+          ▶ Apri video YouTube
+        </a>
+      </div>
+    ` : (e.videoPlanned ? `
+      <div style="margin-top:10px;color:#ff9800;font-weight:900;">
+        🎬 Video in arrivo (senza link)
+      </div>
+      <button class="btn-secondary" style="margin-top:10px;"
+              onclick="apriModificaVideoDiario(${e.id});">
+        🎬 Inserisci link video
+      </button>
+    ` : '');
+
+    return `
+      <div class="diario-entry" style="border-left-color:#ff9800;">
+        <div class="diario-header">
+          <span class="diario-data">📅 ${when || ''} — ${e.km || '--'} km</span>
+          <span class="diario-paese">${e.paese || ''}</span>
+        </div>
+
+        ${testoShort ? `<div class="diario-testo">${testoShort}</div>` : ''}
+
+        ${videoHtml}
+        ${photoHtml}
+
+        ${e.geo && isFinite(e.geo.lat) && isFinite(e.geo.lon) ? `
+          <button class="btn-secondary" style="margin-top:10px;"
+                  onclick="apriMappaFull(null, null); setTimeout(()=>{ try{ openGoogleMapsToLatLon(${e.geo.lat}, ${e.geo.lon}); }catch(e){} }, 50);">
+            📍 Apri posizione in Maps
+          </button>
+        ` : ''}
+      </div>
+    `;
+  }).join('');
+
+  apriModal('modalMediaPercorso');
+}
+
+  
 function simboloValuta(code) {
   const map = { USD:'$', EUR:'€', COP:'$', PEN:'S/', BOB:'Bs', CLP:'$', ARS:'$' };
   return map[code] || code;
