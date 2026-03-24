@@ -3798,8 +3798,9 @@ function getDiarioMediaEntriesByRange(startTs, endTs) {
     const hasMedia = !!(e.fotoUrl || e.foto || e.videoUrl || e.videoPlanned);
     if (!hasMedia) return false;
 
-    const g = e.geo;
-    if (!g || !isFinite(g.lat) || !isFinite(g.lon)) return false;
+   const g = e.geo;
+const lon = g ? (g.lon ?? g.lng) : null;
+if (!g || !isFinite(g.lat) || !isFinite(lon)) return false;
 
     return true;
   });
@@ -3837,7 +3838,8 @@ function renderMapFullPhotoMarkersForContext(ctx) {
       <div style="margin-top:6px;color:#ddd;">${(e.testo || '').slice(0, 140)}${(e.testo||'').length > 140 ? '…' : ''}</div>
     `;
 
-    const m = L.marker([e.geo.lat, e.geo.lon], { icon });
+    const lon2 = e.geo.lon ?? e.geo.lng;
+const m = L.marker([e.geo.lat, lon2], { icon });
 
     if (isPhoto) {
   const src = driveToDirectImageUrl(e.fotoUrl || e.foto); // ✅
