@@ -1,6 +1,6 @@
 {
   "_version": "public-1.0",
-  "_exportDate": "2026-03-24T15:43:05.273Z",
+  "_exportDate": "2026-03-24T16:35:07.799Z",
   "titolo": "VespaTrek PX150",
   "diarioTagsPreset": [
     "Paesaggi",
@@ -2181,8 +2181,8 @@
         "lat": 4.809623887444269,
         "lon": -74.35631182487784
       },
-      "videoUrl": null,
-      "videoPlanned": true,
+      "videoUrl": "https://youtube.com/shorts/B0l8hiHNxas?si=rFQO7PfyFyMEWTRc",
+      "videoPlanned": false,
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1Iov4vmm-183XKH3wZ-SUmmionIQL73XY",
       "foto": null
     },
