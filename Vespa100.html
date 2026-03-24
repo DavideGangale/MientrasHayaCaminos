@@ -7179,28 +7179,6 @@ function inferManutKeyFromNome(nome) {
 
   return null;
 }
-
-function getManutCatalog() {
-  const c = caricaJSON('vt_manutCatalog', []);
-  return Array.isArray(c) ? c : [];
-}
-
-function getCatalogIntervalKm(key) {
-  const cat = getManutCatalog();
-  const it = cat.find(x => x && x.key === key);
-  if (!it || it.enabled === false) return 0;
-  const v = Number(it.intervalKm || 0);
-  return (isFinite(v) && v > 0) ? v : 0;
-}
-
-
-
-
-
-
-
-
-
   
 
 function getDurataEffettivaKmPerItem(item) {
@@ -7217,32 +7195,8 @@ function getDurataEffettivaKmPerItem(item) {
 }
 
 
-function slugKey(s) {
-  return String(s || '')
-    .toLowerCase()
-    .trim()
-    .replace(/à/g,'a').replace(/è/g,'e').replace(/é/g,'e').replace(/ì/g,'i').replace(/ò/g,'o').replace(/ù/g,'u')
-    .replace(/[^a-z0-9]+/g,'_')
-    .replace(/^_+|_+$/g,'')
-    .slice(0, 40) || ('k_' + Date.now());
-}
 
 
-
-function saveManutCatalog(list) {
-  salva('vt_manutCatalog', list);
-}
-
-function renderManutCatalog() {
-  const box = document.getElementById('contenutoManutCatalog');
-  if (!box) return;
-
-  const cat = getManutCatalog();
-
-  if (!cat.length) {
-    box.innerHTML = `<div style="color:#888;text-align:center;padding:10px;">Catalogo vuoto</div>`;
-    return;
-  }
 
   box.innerHTML = cat.map((it) => {
     const enabled = it.enabled !== false;
@@ -7280,129 +7234,11 @@ function renderManutCatalog() {
   }).join('');
 }
 
-function manutSetKm(key, kmVal) {
-  const km = Number(kmVal || 0);
-  const cat = getManutCatalog();
-  const idx = cat.findIndex(x => x && x.key === key);
-  if (idx === -1) return;
 
-  cat[idx].intervalKm = isFinite(km) ? Math.max(0, km) : 0;
-  cat[idx].enabled = (cat[idx].intervalKm > 0);
 
-  saveManutCatalog(cat);
-  renderManutCatalog();
-  renderInventario();
-  renderChecklist();
-}
 
-function manutToggle(key) {
-  const cat = getManutCatalog();
-  const idx = cat.findIndex(x => x && x.key === key);
-  if (idx === -1) return;
 
-  const enabled = cat[idx].enabled !== false;
-  if (enabled) {
-    cat[idx].enabled = false; // N/A
-  } else {
-    // se riattivo e km è 0 chiedo
-    cat[idx].enabled = true;
-    if (!cat[idx].intervalKm || Number(cat[idx].intervalKm) <= 0) {
-      const s = prompt(`Intervallo km per "${cat[idx].nome}"`, '1000');
-      const km = s ? Number(s) : 0;
-      cat[idx].intervalKm = (isFinite(km) && km > 0) ? km : 0;
-      if (cat[idx].intervalKm <= 0) cat[idx].enabled = false;
-    }
-  }
 
-  saveManutCatalog(cat);
-  renderManutCatalog();
-  renderInventario();
-  renderChecklist();
-}
-
-function manutAddCustom() {
-  const nameEl = document.getElementById('manut-new-name');
-  const kmEl = document.getElementById('manut-new-km');
-
-  const nome = nameEl ? nameEl.value.trim() : '';
-  const km = kmEl ? Number(kmEl.value || 0) : 0;
-
-  if (!nome) { showToast('⚠️ Inserisci un nome'); return; }
-
-  const key = 'custom_' + slugKey(nome);
-  const cat = getManutCatalog();
-
-  if (cat.some(x => x && x.key === key)) {
-    showToast('⚠️ Voce già esistente');
-    return;
-  }
-
-  cat.push({
-    key,
-    nome,
-    intervalKm: (isFinite(km) && km > 0) ? km : 0,
-    enabled: (isFinite(km) && km > 0)
-  });
-
-  saveManutCatalog(cat);
-
-  if (nameEl) nameEl.value = '';
-  if (kmEl) kmEl.value = '';
-
-  renderManutCatalog();
-  renderInventario();
-  renderChecklist();
-  showToast('✅ Voce aggiunta al catalogo');
-}
-
-function manutDelete(key) {
-  if (!key) return;
-
-  const cat = getManutCatalog();
-  const it = cat.find(x => x && x.key === key);
-  const nome = (it && (it.nome || it.key)) ? (it.nome || it.key) : key;
-
-  const ok = confirm(
-    `Eliminare "${nome}" dal catalogo manutenzione?\n\n` +
-    `Nota: eventuali ricambi in stock collegati a questa voce verranno scollegati.`
-  );
-  if (!ok) return;
-
-  // 1) rimuovi dal catalogo
-  const cat2 = cat.filter(x => x && x.key !== key);
-  saveManutCatalog(cat2);
-
-  // 2) pulisci ultimo cambio + stato avvisi
-  const last = caricaJSON('vt_manut_lastKm', {});
-  if (last && Object.prototype.hasOwnProperty.call(last, key)) {
-    delete last[key];
-    salva('vt_manut_lastKm', last);
-  }
-
-  const ws = caricaJSON('vt_manut_warnState', {});
-  if (ws && Object.prototype.hasOwnProperty.call(ws, key)) {
-    delete ws[key];
-    salva('vt_manut_warnState', ws);
-  }
-
-  // 3) scollega ricambi inventario che puntavano a questa voce
-  const inv = caricaJSON('vt_inventario', []);
-  if (Array.isArray(inv)) {
-    let changed = false;
-    for (const r of inv) {
-      if (r && r.manutKey === key) {
-        r.manutKey = null;
-        changed = true;
-      }
-    }
-    if (changed) salva('vt_inventario', inv);
-  }
-
-  renderManutCatalog();
-  renderInventario();
-  renderChecklist();
-  showToast('🗑️ Voce eliminata: ' + nome);
-}
 
 
 
