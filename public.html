@@ -570,7 +570,25 @@ function initMap() {
 }
 
 
+function driveToDirectImageUrl(url){
+  const s = String(url || '').trim();
+  if (!s) return '';
 
+  // già ok
+  if (s.startsWith('data:image/')) return s;
+  if (s.includes('googleusercontent.com')) return s;
+  if (s.includes('drive.google.com/thumbnail')) return s;
+
+  // estrae ID
+  let m = s.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (!m) m = s.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (!m) return s;
+
+  const id = m[1];
+
+  // ✅ thumbnail: spesso converte e funziona anche se l'originale è HEIC
+  return `https://drive.google.com/thumbnail?id=${id}&sz=w1200`;
+}
   
 
   function getYouTubeId(url) {
@@ -696,7 +714,8 @@ function initMap() {
       if (!d.geo) return;
 
       const ytId = getYouTubeId(d.videoUrl);
-      const fotoSrc = d.fotoUrl || d.foto;
+      const rawFoto = d.fotoUrl || d.foto;
+      const fotoSrc = driveToDirectImageUrl(rawFoto);
 
       const tipoMedia = ytId ? 'VIDEO' : 'FOTO';
       if (currentMarkerFilter !== 'ALL' && currentMarkerFilter !== tipoMedia) return;
@@ -704,9 +723,10 @@ function initMap() {
       let mediaHtml = '';
       if (ytId) {
         mediaHtml = `<div class="popup-video"><iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe></div>`;
-      } else if (fotoSrc) {
-        mediaHtml = `<img class="popup-img" src="${fotoSrc}" onclick="openLightbox('${fotoSrc}')">`;
-      }
+    } else if (fotoSrc) {
+  const safe = String(fotoSrc).replace(/'/g, "\\'");
+  mediaHtml = `<img class="popup-img" src="${fotoSrc}" onclick="openLightbox('${safe}')">`;
+}
 
       creaMarker(d.geo.lat, d.geo.lon, ytId ? iconVideo : iconFoto, `
         <div class="popup-title">📍 ${d.paese || ''}</div>
@@ -877,9 +897,12 @@ function initMap() {
   }
 
   function openLightbox(src) {
-    document.getElementById('lightboxImg').src = src;
-    document.getElementById('lightbox').classList.add('open');
-  }
+  const fixed = driveToDirectImageUrl(src);
+  document.getElementById('lightboxImg').src = fixed;
+  document.getElementById('lightbox').classList.add('open');
+}
+
+  
   function closeLightbox() {
     document.getElementById('lightbox').classList.remove('open');
     document.getElementById('lightboxImg').src = '';
