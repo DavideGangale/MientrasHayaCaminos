@@ -1,23 +1,107 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-01-01T00:00:00.000Z",
+  "_exportDate": "2026-03-25T23:20:12.187Z",
   "tipo": "paese",
   "paese": "Peru",
   "slug": "peru",
   "stats": {
-    "km": 0,
-    "benzina": 0,
+    "km": 356.9,
+    "benzina": 12.4,
     "benzinaFuori": 0,
-    "olioMl": 0,
-    "spesaBenzinaUsd": 0,
-    "spesaOlioUsd": 0,
+    "olioMl": 248,
+    "spesaBenzinaUsd": 13.4,
+    "spesaOlioUsd": 0.95,
     "spesaRicambiUsd": 0,
     "spesaManodoperaUsd": 0
   },
-  "tappe": [],
+  "tappe": [
+    {
+      "id": 1774475803624,
+      "tipo": "Tappa",
+      "data": "25/09/2025",
+      "ora": "07:40",
+      "paese": "Peru",
+      "km": 356.9,
+      "durata": 27800,
+      "altMin": 1200,
+      "altMax": 4100,
+      "velMax": 69,
+      "velMedia": 36.9,
+      "benzinaStimataLitri": 12.4,
+      "benzinaRealeLitri": 13.1,
+      "consumoStimatoKmL": 28.8,
+      "consumoRealeKmL": 27.2,
+      "titolo": "Cusco → Puno",
+      "note": "Demo Perù in alta quota",
+      "telemetry": [
+        {
+          "km": 0,
+          "alt": 3390,
+          "sp": 0,
+          "ts": 1774475503624
+        },
+        {
+          "km": 190,
+          "alt": 4100,
+          "sp": 53,
+          "ts": 1774475653624
+        }
+      ],
+      "traccia": [
+        [
+          -13.5319,
+          -71.9675
+        ],
+        [
+          -15.84,
+          -70.02
+        ]
+      ]
+    }
+  ],
   "turismo": [],
-  "diario": [],
+  "diario": [
+    {
+      "id": 1774475903624,
+      "ts": 1774475903624,
+      "data": "25/09/2025",
+      "ora": "19:10",
+      "paese": "Peru",
+      "km": "699.9",
+      "testo": "Altitudine seria. La Vespa continua a salire anche se io mi sento senza fiato.",
+      "tags": [
+        "Problemi",
+        "Paesaggi"
+      ],
+      "geo": {
+        "lat": -15.84,
+        "lon": -70.02
+      },
+      "videoUrl": null,
+      "videoPlanned": true,
+      "fotoUrl": null,
+      "foto": null
+    }
+  ],
   "rifornimenti": [],
   "carburazioni": [],
-  "manutenzioni": []
+  "manutenzioni": [
+    {
+      "id": 1774476103624,
+      "data": "26/09/2025",
+      "ora": "10:50",
+      "paese": "Peru",
+      "km": "720.0",
+      "nome": "Controllo candela",
+      "desc": "Smontata e controllata dopo tratto in quota.",
+      "costoLocal": 0,
+      "valuta": "USD",
+      "costoUsd": 0,
+      "fotoUrl": null,
+      "geo": {
+        "lat": -15.84,
+        "lon": -70.02
+      }
+    }
+  ]
 }
