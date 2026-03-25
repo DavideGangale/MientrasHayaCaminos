@@ -88,6 +88,21 @@
         "spesaManodoperaUsd": 0
       }
     }
+
+ {
+      "paese": "Argentina",
+      "slug": "argentina",
+      "path": "public/paesi/argentina.json",
+      "stats": {
+        "km": 666.6,
+        "benzina": 66.6,
+        "spesaBenzinaUsd": 66.6,
+        "spesaOlioUsd": 6.66,
+        "spesaRicambiUsd": 0,
+        "spesaManodoperaUsd": 0
+      }
+    }
+    
   ],
   "ultimiPost": [
     {
