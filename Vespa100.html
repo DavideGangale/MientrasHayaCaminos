@@ -214,6 +214,26 @@ html, body{
       text-align:center;
       transition:border-color 0.2s;
     }
+
+
+select.inp-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #00bcd4 50%),
+    linear-gradient(135deg, #00bcd4 50%, transparent 50%);
+  background-position:
+    calc(100% - 20px) calc(50% - 3px),
+    calc(100% - 14px) calc(50% - 3px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  padding-right: 38px;
+  font-weight: 700;
+}
+
+
+    
     input:focus,textarea:focus,select.inp-select:focus{outline:none;border-color:var(--blu);}
     input.input-error{border-color:#f44336 !important;}
 
@@ -1581,38 +1601,61 @@ color:#fff;
   </div>
 
 <!-- SETUP CARBURAZIONE (modal) -->
+
+  <!-- SETUP CARBURAZIONE (modal) -->
 <div id="modalCarbSetup" class="modal-overlay">
   <div class="modal-content" style="border-color:#00bcd4; max-width:560px;">
     <button class="close-modal" onclick="chiudiModal('modalCarbSetup')">×</button>
 
-   <h2 style="color:#00bcd4; text-align:center; margin-top:0;">🌬️ Setup Carburatore</h2>
+    <h2 style="color:#00bcd4; text-align:center; margin-top:0;">🌬️ Setup Carburatore</h2>
 
     <div class="dash-card" style="padding:15px; border:2px solid #00bcd4;">
       <h2 style="margin:0 0 10px 0; color:#00bcd4;">🌬️ Setup Carburatore 30</h2>
 
-      <div style="font-size:12px; color:#aaa; margin-bottom:10px;">
+      <div style="font-size:12px; color:#aaa; margin-bottom:14px;">
         Altitudine Attuale: <strong id="carb-alt" style="color:white;">0</strong> m
       </div>
 
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-        <input type="text" id="carbFiltro" placeholder="Filtro aria (es. originale / forato / sportivo)">
-<input type="text" id="carbViteAria" placeholder="Vite aria/miscela (es. 1.5 giri)">
-<input type="text" id="carbCandela" placeholder="Colore candela (es. nocciola / nera / bianca)">
-<input type="text" id="carbMeteo" placeholder="Meteo / temperatura (es. freddo, pioggia, caldo secco)">
-<input type="text" id="carbSintomi" placeholder="Sintomi (es. mura in alto, fuma, minimo instabile)">
-        <input type="number" id="carbChiclerMax" placeholder="Chicler Max (es. 115)" min="1" max="999">
-        <input type="number" id="carbChiclerMin" placeholder="Minimo (es. 55)" min="1" max="999">
-      </div>
+      <label class="inp-label">Chicler Max</label>
+      <input type="number" id="carbChiclerMax" placeholder="Es. 115" min="1" max="999">
 
-      <input type="text" id="carbNote" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Note (es. Fuma in altitudine...)">
+      <label class="inp-label">Chicler Min</label>
+      <input type="number" id="carbChiclerMin" placeholder="Es. 55" min="1" max="999">
+
+      <div style="height:8px;"></div>
+
+      <label class="inp-label">Vite aria / miscela (giri)</label>
+      <input type="text" id="carbViteAria" placeholder="Es. 1.5 giri">
+
+      <label class="inp-label">Vite minimo (giri)</label>
+      <input type="text" id="carbViteMinimo" placeholder="Es. 2 giri">
+
+      <div style="height:8px;"></div>
+
+      <label class="inp-label">Colore candela</label>
+      <input type="text" id="carbCandela" placeholder="Es. nocciola / nera / bianca">
+
+      <label class="inp-label">Foto candela (opzionale)</label>
+      <input type="file" id="carb-foto-input" accept="image/*" capture="environment"
+             onchange="anteprima('carb-foto-input','anteprima-carb-foto')">
+      <div id="anteprima-carb-foto" style="margin-top:10px; display:none;"></div>
+
+      <label class="inp-label">Note</label>
+      <textarea id="carbNote"
+                rows="3"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="off"
+                spellcheck="false"
+                placeholder="Es. In quota ingrassa / a caldo tiene male il minimo..."></textarea>
 
       <button class="btn-azione" style="background:#00bcd4; color:black;" onclick="salvaCarburazione()">
         💾 Salva Setup
       </button>
 
-     <button class="btn-secondary" onclick="chiudiModal('modalCarbSetup'); apriModal('modalCarb'); renderStoricoCarbur();">
-  📖 Storico Carburazioni
-</button>
+      <button class="btn-secondary" onclick="chiudiModal('modalCarbSetup'); apriModal('modalCarb'); renderStoricoCarbur();">
+        📖 Storico Carburazioni
+      </button>
     </div>
   </div>
 </div>
@@ -8206,16 +8249,20 @@ function renderGettiDisponibili() {
 function salvaCarburazione() {
   const chicMax = validaInput('carbChiclerMax', 1, 999);
   const chicMin = validaInput('carbChiclerMin', 1, 999);
-  if (!chicMax || !chicMin) { showToast('⚠️ Inserisci i valori chicler'); return; }
+  if (!chicMax || !chicMin) {
+    showToast('⚠️ Inserisci i valori chicler');
+    return;
+  }
+
+  const viteAria = document.getElementById('carbViteAria')?.value.trim() || '';
+  const viteMinimo = document.getElementById('carbViteMinimo')?.value.trim() || '';
+  const candela = document.getElementById('carbCandela')?.value.trim() || '';
 
   const notaEl = document.getElementById('carbNote');
   const nota = notaEl ? notaEl.value.trim() : '';
 
-  const filtro = document.getElementById('carbFiltro')?.value.trim() || '';
-  const viteAria = document.getElementById('carbViteAria')?.value.trim() || '';
-  const candela = document.getElementById('carbCandela')?.value.trim() || '';
-  const meteo = document.getElementById('carbMeteo')?.value.trim() || '';
-  const sintomi = document.getElementById('carbSintomi')?.value.trim() || '';
+  const fotoDiv = document.getElementById('anteprima-carb-foto');
+  const fotoCandela = (fotoDiv && fotoDiv.dataset) ? (fotoDiv.dataset.src || null) : null;
 
   const now = new Date();
 
@@ -8228,37 +8275,40 @@ function salvaCarburazione() {
     }
   } catch(e) {}
 
-
-
   const entry = {
     id: Date.now(),
     geo: geoCarb,
     data: now.toLocaleDateString('it-IT'),
+    ora: now.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' }),
     alt: altitudineAttuale,
     chicMax,
     chicMin,
-    filtro,
     viteAria,
+    viteMinimo,
     candela,
-    meteo,
-    sintomi,
-    nota
+    nota,
+    fotoCandela
   };
-
-  
 
   const storico = caricaJSON('vt_carburazione', []);
   storico.unshift(entry);
   salva('vt_carburazione', storico);
 
-   document.getElementById('carbChiclerMax').value = '';
+  document.getElementById('carbChiclerMax').value = '';
   document.getElementById('carbChiclerMin').value = '';
-  document.getElementById('carbFiltro').value = '';
   document.getElementById('carbViteAria').value = '';
+  document.getElementById('carbViteMinimo').value = '';
   document.getElementById('carbCandela').value = '';
-  document.getElementById('carbMeteo').value = '';
-  document.getElementById('carbSintomi').value = '';
   if (notaEl) notaEl.value = '';
+
+  if (fotoDiv) {
+    fotoDiv.style.display = 'none';
+    fotoDiv.dataset.src = '';
+    fotoDiv.innerHTML = '';
+  }
+
+  const fotoInput = document.getElementById('carb-foto-input');
+  if (fotoInput) fotoInput.value = '';
 
   showToast('🌬️ Setup carburazione salvato!');
 }
@@ -8273,21 +8323,18 @@ function renderStoricoCarbur() {
     return;
   }
 
-   container.innerHTML = storico.map(e => `
+  container.innerHTML = storico.map(e => `
     <div class="log-entry-full" style="border-color:#00bcd4;">
-      <div style="font-weight:bold; color:#00bcd4;">🌬️ ${e.data}</div>
+      <div style="font-weight:bold; color:#00bcd4;">🌬️ ${e.data} ${e.ora || ''}</div>
       <div>⛰️ Altitudine: <b>${e.alt} m</b></div>
       <div>🔧 Chicler Max: <b>${e.chicMax}</b> &nbsp;|&nbsp; Min: <b>${e.chicMin}</b></div>
-      ${e.filtro ? `<div>🧰 Filtro aria: <b>${e.filtro}</b></div>` : ''}
       ${e.viteAria ? `<div>🪛 Vite aria/miscela: <b>${e.viteAria}</b></div>` : ''}
+      ${e.viteMinimo ? `<div>⚙️ Vite minimo: <b>${e.viteMinimo}</b></div>` : ''}
       ${e.candela ? `<div>🔥 Candela: <b>${e.candela}</b></div>` : ''}
-      ${e.meteo ? `<div>🌦️ Meteo: <b>${e.meteo}</b></div>` : ''}
-      ${e.sintomi ? `<div>⚠️ Sintomi: <b>${e.sintomi}</b></div>` : ''}
+      ${e.fotoCandela ? `<img src="${e.fotoCandela}" class="log-img" loading="lazy">` : ''}
       ${e.nota ? `<div class="log-note">📝 ${e.nota}</div>` : ''}
     </div>
   `).join('');
-
-  
 }
 
 /* ============================================================
