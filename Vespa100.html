@@ -4746,7 +4746,11 @@ datiPaesi[paese].olioMl = (Number(datiPaesi[paese].olioMl || 0) + Number(olioMl 
       salva('vt_serbatoioLitri', serbDopo.toFixed(3));
 
       // Totali globali
-      salva('vt_benzinaUsata', (parseFloat(carica('vt_benzinaUsata', '0')) || 0) + benzPura);
+// NON aggiorniamo vt_benzinaUsata qui:
+// la benzina messa in Vespa non è ancora "bruciata".
+// La benzina realmente consumata viene calcolata dalle tappe/percorrenze.
+//salva('vt_benzinaUsata', (parseFloat(carica('vt_benzinaUsata', '0')) || 0) + benzPura);
+      
       salva('vt_olioTotaleMl', (parseFloat(carica('vt_olioTotaleMl', '0')) || 0) + olioMl);
       salva('vt_odoUltimoPieno', carica('vt_kmTotali', '0'));
 
@@ -4901,8 +4905,10 @@ function registraTravaso() {
   tappaAttuale.fuelAddedLitri = (tappaAttuale.fuelAddedLitri || 0) + qtaLitri;
   salva('vt_tappaAttuale', tappaAttuale);
 
+// NON aggiorniamo vt_benzinaUsata qui:
+// il travaso mette benzina nel serbatoio, ma non significa che sia già stata consumata.
+//salva('vt_benzinaUsata', (parseFloat(carica('vt_benzinaUsata','0')) || 0) + benzPura);
   
-  salva('vt_benzinaUsata', (parseFloat(carica('vt_benzinaUsata','0')) || 0) + benzPura);
   salva('vt_olioTotaleMl', (parseFloat(carica('vt_olioTotaleMl','0')) || 0) + olioMl);
 
 const paese = carica('vt_paeseAttuale','Colombia');
