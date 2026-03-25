@@ -1,8 +1,8 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-03-25T21:31:35.687Z",
+  "_exportDate": "2026-01-01T00:00:00.000Z",
   "titolo": "VespaTrek PX150",
-  "paeseAttuale": "Colombia",
+  "paeseAttuale": Colombia,
   "diarioTagsPreset": [
     "Paesaggi",
     "Vespistas",
@@ -35,107 +35,13 @@
     "spesaRicambiUsd": 0,
     "spesaManodoperaUsd": 0
   },
-  "paesi": [
-       {
-      "paese": "Colombia",
-      "slug": "colombia",
-      "path": "public/paesi/colombia.json",
-      "stats": {
-        "km": 132.4,
-        "benzina": 4.8,
-        "spesaBenzinaUsd": 5.82,
-        "spesaOlioUsd": 0.45,
-        "spesaRicambiUsd": 0,
-        "spesaManodoperaUsd": 0
-      }
-    }
-    
-  ],
-  "ultimiPost": [
-    {
-      "id": 1774465492255,
-      "ts": 1774465492255,
-      "data": "12/09/2025",
-      "ora": "17:40",
-      "paese": "Colombia",
-      "km": "132.4",
-      "testo": "Arrivato a Villa de Leyva. Bellissimo centro storico, prime sensazioni di libertà totale.",
-      "tags": [
-        "Paesaggi",
-        "Turismo"
-      ],
-      "geo": {
-        "lat": 5.6349,
-        "lon": -73.5248
-      },
-      "videoUrl": null,
-      "videoPlanned": false,
-      "fotoUrl": null,
-      "foto": null
-    }
-  ],
-  "ultimeTappe": [
-    
-    {
-      "id": 1774465292255,
-      "tipo": "Tappa",
-      "data": "12/09/2025",
-      "ora": "08:20",
-      "paese": "Colombia",
-      "km": 132.4,
-      "durata": 11800,
-      "altMin": 350,
-      "altMax": 2640,
-      "velMax": 78,
-      "velMedia": 41.2,
-      "benzinaStimataLitri": 4.8,
-      "benzinaRealeLitri": 5.1,
-      "consumoStimatoKmL": 27.6,
-      "consumoRealeKmL": 25.9,
-      "titolo": "Bogotá → Villa de Leyva",
-      "note": "Prima tappa demo in Colombia",
-      "telemetry": [
-        {
-          "km": 0,
-          "alt": 2640,
-          "sp": 0,
-          "ts": 1774465092255
-        },
-        {
-          "km": 70,
-          "alt": 1800,
-          "sp": 62,
-          "ts": 1774465192255
-        }
-      ],
-      "traccia": [
-        [
-          4.711,
-          -74.072
-        ],
-        [
-          5.63,
-          -73.52
-        ]
-      ]
-    }
-  ],
+  "paesi": [],
+  "ultimiPost": [],
+  "ultimeTappe": [],
   "archivi": {
     "index": "public/vespatrek_index.json",
     "officina": "public/officina.json",
-    "paesi": [
-      {
-        "paese": "Colombia",
-        "slug": "colombia",
-        "path": "public/paesi/colombia.json"
-      }
-    ],
-    "diarioMensile": [
-      {
-        "mese": "2026-03",
-        "path": "public/diario/2026-03.json",
-        "count": 3
-      }
-    ]
+    "paesi": [],
+    "diarioMensile": []
   }
 }
