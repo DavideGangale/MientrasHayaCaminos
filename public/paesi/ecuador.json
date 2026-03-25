@@ -1,23 +1,112 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-01-01T00:00:00.000Z",
+  "_exportDate": "2026-03-25T23:20:12.187Z",
   "tipo": "paese",
   "paese": "Ecuador",
   "slug": "ecuador",
   "stats": {
-    "km": 0,
-    "benzina": 0,
+    "km": 210.7,
+    "benzina": 7.3,
     "benzinaFuori": 0,
-    "olioMl": 0,
-    "spesaBenzinaUsd": 0,
-    "spesaOlioUsd": 0,
+    "olioMl": 156,
+    "spesaBenzinaUsd": 7.8,
+    "spesaOlioUsd": 0.6,
     "spesaRicambiUsd": 0,
     "spesaManodoperaUsd": 0
   },
-  "tappe": [],
+  "tappe": [
+    {
+      "id": 1774473803624,
+      "tipo": "Tappa",
+      "data": "18/09/2025",
+      "ora": "09:10",
+      "paese": "Ecuador",
+      "km": 210.7,
+      "durata": 18400,
+      "altMin": 900,
+      "altMax": 3200,
+      "velMax": 74,
+      "velMedia": 39.8,
+      "benzinaStimataLitri": 7.3,
+      "benzinaRealeLitri": 7.8,
+      "consumoStimatoKmL": 28.9,
+      "consumoRealeKmL": 27,
+      "titolo": "Quito → Baños",
+      "note": "Demo Ecuador",
+      "telemetry": [
+        {
+          "km": 0,
+          "alt": 2850,
+          "sp": 0,
+          "ts": 1774473603624
+        },
+        {
+          "km": 120,
+          "alt": 2400,
+          "sp": 59,
+          "ts": 1774473703624
+        }
+      ],
+      "traccia": [
+        [
+          -0.1807,
+          -78.4678
+        ],
+        [
+          -1.396,
+          -78.424
+        ]
+      ]
+    }
+  ],
   "turismo": [],
-  "diario": [],
-  "rifornimenti": [],
+  "diario": [
+    {
+      "id": 1774473903624,
+      "ts": 1774473903624,
+      "data": "18/09/2025",
+      "ora": "18:20",
+      "paese": "Ecuador",
+      "km": "343.1",
+      "testo": "Giornata di pioggia e montagne. Arrivare a Baños in Vespa è già una piccola vittoria.",
+      "tags": [
+        "Pioggia",
+        "Strade"
+      ],
+      "geo": {
+        "lat": -1.396,
+        "lon": -78.424
+      },
+      "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    }
+  ],
+  "rifornimenti": [
+    {
+      "id": 1774473703624,
+      "data": "18/09/2025",
+      "ora": "08:40",
+      "paese": "Ecuador",
+      "qta": "7.80",
+      "dest": "Vespa",
+      "mix": "2.0%",
+      "prezzoUnit": "1.000",
+      "valuta": "USD",
+      "fxToUsd": 1,
+      "costoBenzLocal": "7.80",
+      "costoBenzUsd": "7.80",
+      "costoBenz": "7.80",
+      "costoOlio": "0.60",
+      "luogo": "Quito",
+      "km": "132.4",
+      "geo": {
+        "lat": -0.1807,
+        "lon": -78.4678
+      }
+    }
+  ],
   "carburazioni": [],
   "manutenzioni": []
 }
