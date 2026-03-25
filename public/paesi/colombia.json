@@ -1,112 +1,23 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-03-25T23:20:12.187Z",
+  "_exportDate": "2026-03-25T23:45:19.999Z",
   "tipo": "paese",
   "paese": "Colombia",
   "slug": "colombia",
   "stats": {
-    "km": 132.4,
-    "benzina": 4.8,
+    "km": 0,
+    "benzina": 0,
     "benzinaFuori": 0,
-    "olioMl": 104,
-    "spesaBenzinaUsd": 5.82,
-    "spesaOlioUsd": 0.45,
+    "olioMl": 0,
+    "spesaBenzinaUsd": 0,
+    "spesaOlioUsd": 0,
     "spesaRicambiUsd": 0,
     "spesaManodoperaUsd": 0
   },
-  "tappe": [
-    {
-      "id": 1774471803624,
-      "tipo": "Tappa",
-      "data": "12/09/2025",
-      "ora": "08:20",
-      "paese": "Colombia",
-      "km": 132.4,
-      "durata": 11800,
-      "altMin": 350,
-      "altMax": 2640,
-      "velMax": 78,
-      "velMedia": 41.2,
-      "benzinaStimataLitri": 4.8,
-      "benzinaRealeLitri": 5.1,
-      "consumoStimatoKmL": 27.6,
-      "consumoRealeKmL": 25.9,
-      "titolo": "Bogotá → Villa de Leyva",
-      "note": "Prima tappa demo in Colombia",
-      "telemetry": [
-        {
-          "km": 0,
-          "alt": 2640,
-          "sp": 0,
-          "ts": 1774471603624
-        },
-        {
-          "km": 70,
-          "alt": 1800,
-          "sp": 62,
-          "ts": 1774471703624
-        }
-      ],
-      "traccia": [
-        [
-          4.711,
-          -74.072
-        ],
-        [
-          5.63,
-          -73.52
-        ]
-      ]
-    }
-  ],
+  "tappe": [],
   "turismo": [],
-  "diario": [
-    {
-      "id": 1774472003624,
-      "ts": 1774472003624,
-      "data": "12/09/2025",
-      "ora": "17:40",
-      "paese": "Colombia",
-      "km": "132.4",
-      "testo": "Arrivato a Villa de Leyva. Bellissimo centro storico, prime sensazioni di libertà totale.",
-      "tags": [
-        "Paesaggi",
-        "Turismo"
-      ],
-      "geo": {
-        "lat": 5.6349,
-        "lon": -73.5248
-      },
-      "videoUrl": null,
-      "videoPlanned": false,
-      "fotoUrl": null,
-      "foto": null
-    }
-  ],
-  "rifornimenti": [
-    {
-      "id": 1774471703624,
-      "data": "12/09/2025",
-      "ora": "07:55",
-      "paese": "Colombia",
-      "qta": "5.20",
-      "dest": "Vespa",
-      "mix": "2.0%",
-      "prezzoUnit": "1.120",
-      "valuta": "USD",
-      "fxToUsd": 1,
-      "costoBenzLocal": "5.82",
-      "costoBenzUsd": "5.82",
-      "costoBenz": "5.82",
-      "costoOlio": "0.45",
-      "luogo": "Bogotá",
-      "km": "0.0",
-      "geo": {
-        "lat": 4.711,
-        "lon": -74.072
-      }
-    }
-  ],
+  "diario": [],
+  "rifornimenti": [],
   "carburazioni": [],
   "manutenzioni": []
 }
