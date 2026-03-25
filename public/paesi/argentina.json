@@ -1,0 +1,201 @@
+{
+  "_version": "public-2.0",
+  "_exportDate": "2026-01-10T12:00:00.000Z",
+  "tipo": "paese",
+  "paese": "Argentina",
+  "slug": "argentina",
+  "stats": {
+    "km": 1624.4,
+    "benzina": 59.0,
+    "benzinaFuori": 5.3,
+    "olioMl": 1490,
+    "spesaBenzinaUsd": 98.8,
+    "spesaOlioUsd": 19.4,
+    "spesaRicambiUsd": 52.0,
+    "spesaManodoperaUsd": 40.0
+  },
+  "tappe": [
+    {
+      "id": 5001,
+      "tipo": "Tappa",
+      "data": "18/12/2025",
+      "ora": "08:30",
+      "paese": "Argentina",
+      "km": 396.2,
+      "durata": 29400,
+      "altMin": 14,
+      "altMax": 620,
+      "velMax": 79,
+      "velMedia": 48.5,
+      "benzinaStimataLitri": 14.2,
+      "benzinaRealeLitri": 13.9,
+      "consumoStimatoKmL": 27.9,
+      "consumoRealeKmL": 28.5,
+      "titolo": "Bariloche → Neuquén",
+      "note": "Lunghe rettilinee, vento continuo e paesaggi aperti.",
+      "telemetry": [
+        { "km": 0, "alt": 893, "sp": 0, "ts": 1766046600000 },
+        { "km": 100, "alt": 720, "sp": 58, "ts": 1766055300000 },
+        { "km": 210, "alt": 500, "sp": 63, "ts": 1766065200000 },
+        { "km": 320, "alt": 320, "sp": 66, "ts": 1766074500000 },
+        { "km": 396.2, "alt": 270, "sp": 0, "ts": 1766080200000 }
+      ],
+      "traccia": [
+        [-41.1335, -71.3103],
+        [-40.4100, -70.1000],
+        [-39.8000, -68.8000],
+        [-38.9516, -68.0591]
+      ]
+    },
+    {
+      "id": 5002,
+      "tipo": "Tappa",
+      "data": "29/12/2025",
+      "ora": "08:00",
+      "paese": "Argentina",
+      "km": 381.9,
+      "durata": 28200,
+      "altMin": 14,
+      "altMax": 190,
+      "velMax": 81,
+      "velMedia": 48.8,
+      "benzinaStimataLitri": 13.8,
+      "benzinaRealeLitri": 13.4,
+      "consumoStimatoKmL": 27.7,
+      "consumoRealeKmL": 28.5,
+      "titolo": "Rosario → Buenos Aires",
+      "note": "Ultima tappa. Traffico crescente, emozione altissima.",
+      "telemetry": [
+        { "km": 0, "alt": 25, "sp": 0, "ts": 1766995200000 },
+        { "km": 90, "alt": 32, "sp": 61, "ts": 1767003000000 },
+        { "km": 180, "alt": 28, "sp": 65, "ts": 1767011400000 },
+        { "km": 290, "alt": 24, "sp": 58, "ts": 1767020400000 },
+        { "km": 381.9, "alt": 25, "sp": 0, "ts": 1767027000000 }
+      ],
+      "traccia": [
+        [-32.9442, -60.6505],
+        [-33.4000, -60.2000],
+        [-34.0000, -59.1000],
+        [-34.6037, -58.3816]
+      ]
+    }
+  ],
+  "turismo": [
+    {
+      "id": 5101,
+      "tipo": "Turismo",
+      "data": "30/12/2025",
+      "ora": "16:10",
+      "paese": "Argentina",
+      "km": 26.4,
+      "durata": 4800,
+      "altMin": 18,
+      "altMax": 32,
+      "velMax": 34,
+      "velMedia": 19.8,
+      "benzinaStimataLitri": 1.0,
+      "benzinaRealeLitri": null,
+      "consumoStimatoKmL": 26.4,
+      "consumoRealeKmL": null,
+      "titolo": "Primi giri a Buenos Aires",
+      "note": "Traffico intenso ma bellissima energia.",
+      "telemetry": [
+        { "km": 0, "alt": 25, "sp": 0, "ts": 1767111000000 },
+        { "km": 9, "alt": 24, "sp": 16, "ts": 1767113100000 },
+        { "km": 18, "alt": 30, "sp": 22, "ts": 1767115500000 },
+        { "km": 26.4, "alt": 23, "sp": 0, "ts": 1767117300000 }
+      ],
+      "traccia": [
+        [-34.6037, -58.3816],
+        [-34.5950, -58.4000],
+        [-34.6100, -58.4200],
+        [-34.6037, -58.3816]
+      ]
+    }
+  ],
+  "diario": [
+    {
+      "id": 5201,
+      "ts": 1766081100000,
+      "data": "18/12/2025",
+      "ora": "18:25",
+      "paese": "Argentina",
+      "km": "6638.7",
+      "testo": "In Argentina il vento è diventato il vero compagno di viaggio.",
+      "tags": ["Argentina", "Pampa"],
+      "geo": { "lat": -38.9516, "lon": -68.0591 },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 5202,
+      "ts": 1767028200000,
+      "data": "29/12/2025",
+      "ora": "18:20",
+      "paese": "Argentina",
+      "km": "7421.6",
+      "testo": "Arrivato finalmente a Buenos Aires. Emozione fortissima.",
+      "tags": ["Arrivo", "BuenosAires"],
+      "geo": { "lat": -34.6037, "lon": -58.3816 },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    }
+  ],
+  "rifornimenti": [
+    {
+      "id": 5301,
+      "geo": { "lat": -38.9516, "lon": -68.0591 },
+      "data": "18/12/2025",
+      "ora": "13:00",
+      "paese": "Argentina",
+      "qta": "5.90",
+      "dest": "Vespa",
+      "mix": "2.0%",
+      "prezzoUnit": "980",
+      "valuta": "ARS",
+      "fxToUsd": 0.0010,
+      "costoBenzLocal": "5782",
+      "costoBenzUsd": "5.78",
+      "costoBenz": "5.78",
+      "costoOlio": "0.96",
+      "luogo": "Neuquén",
+      "km": "6638.7"
+    }
+  ],
+  "carburazioni": [
+    {
+      "id": 5401,
+      "data": "20/12/2025",
+      "ora": "10:00",
+      "alt": 270,
+      "chicMax": 112,
+      "chicMin": 50,
+      "viteAria": "1.5 giri",
+      "viteMinimo": "2 giri",
+      "candela": "nocciola",
+      "nota": "Ottimo rendimento dopo tratte ventose e veloci.",
+      "geo": { "lat": -38.9516, "lon": -68.0591 },
+      "fotoCandela": null
+    }
+  ],
+  "manutenzioni": [
+    {
+      "id": 5501,
+      "data": "21/12/2025",
+      "ora": "15:50",
+      "paese": "Argentina",
+      "km": "6760.2",
+      "nome": "Sostituzione candela",
+      "desc": "Cambio preventivo dopo molti km e varie quote.",
+      "costoLocal": 18000,
+      "valuta": "ARS",
+      "costoUsd": 11.0,
+      "fotoUrl": null,
+      "geo": { "lat": -38.9516, "lon": -68.0591 }
+    }
+  ]
+}
