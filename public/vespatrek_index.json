@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-03-25T23:22:43.316Z",
+  "_exportDate": "2026-03-25T23:24:21.975Z",
   "titolo": "VespaTrek PX150",
   "paeseAttuale": "Chile",
   "diarioTagsPreset": [
@@ -35,13 +35,33 @@
     "spesaRicambiUsd": 0,
     "spesaManodoperaUsd": 0
   },
-  "paesi": [],
+  "paesi": [
+    {
+      "paese": "Chile",
+      "slug": "chile",
+      "path": "public/paesi/chile.json",
+      "stats": {
+        "km": 0,
+        "benzina": 0,
+        "spesaBenzinaUsd": 0,
+        "spesaOlioUsd": 0,
+        "spesaRicambiUsd": 0,
+        "spesaManodoperaUsd": 0
+      }
+    }
+  ],
   "ultimiPost": [],
   "ultimeTappe": [],
   "archivi": {
     "index": "public/vespatrek_index.json",
     "officina": "public/officina.json",
-    "paesi": [],
+    "paesi": [
+      {
+        "paese": "Chile",
+        "slug": "chile",
+        "path": "public/paesi/chile.json"
+      }
+    ],
     "diarioMensile": []
   }
 }
