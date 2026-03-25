@@ -1,7 +1,153 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-01-01T00:00:00.000Z",
-  "rifornimenti": [],
+  "_exportDate": "2026-03-25T22:47:23.529Z",
+  "tipo": "officina",
+  "stats": {
+    "spesaRicambiUsd": 0,
+    "spesaManodoperaUsd": 0
+  },
+  "manutenzioni": [],
   "carburazioni": [],
-  "manutenzioni": []
+  "inventario": [
+    {
+      "nome": "Cavi Cambio",
+      "qta": 4,
+      "wear": "interval",
+      "intervalKm": 6000,
+      "lastKm": 0
+    },
+    {
+      "nome": "Cavo Frizione",
+      "qta": 2,
+      "wear": "interval",
+      "intervalKm": 5000,
+      "lastKm": 0
+    },
+    {
+      "nome": "Cavo Freno Anteriore",
+      "qta": 2,
+      "wear": "interval",
+      "intervalKm": 8000,
+      "lastKm": 0
+    },
+    {
+      "nome": "Cavo Freno Posteriore",
+      "qta": 2,
+      "wear": "interval",
+      "intervalKm": 8000,
+      "lastKm": 0
+    },
+    {
+      "nome": "Cavo Acceleratore",
+      "qta": 2,
+      "wear": "interval",
+      "intervalKm": 6000,
+      "lastKm": 0
+    },
+    {
+      "nome": "Ganasce freno ant.",
+      "qta": 2,
+      "wear": "interval",
+      "intervalKm": 5000,
+      "lastKm": 0
+    },
+    {
+      "nome": "Ganasce freno post.",
+      "qta": 2,
+      "wear": "interval",
+      "intervalKm": 3000,
+      "lastKm": 0
+    },
+    {
+      "nome": "Pneumatico",
+      "qta": 3,
+      "wear": "interval",
+      "intervalKm": 10000,
+      "lastKm": 0
+    },
+    {
+      "nome": "Kit frizione",
+      "qta": 1,
+      "wear": "interval",
+      "intervalKm": 12000,
+      "lastKm": 0
+    },
+    {
+      "nome": "Dischi frizione",
+      "qta": 1,
+      "wear": "interval",
+      "intervalKm": 10000,
+      "lastKm": 0
+    },
+    {
+      "nome": "Cambio Olio 300ml",
+      "qta": 1,
+      "wear": "interval",
+      "intervalKm": 2000,
+      "lastKm": 0
+    },
+    {
+      "nome": "Candela",
+      "qta": 2,
+      "wear": "interval",
+      "intervalKm": 6000,
+      "lastKm": 0
+    },
+    {
+      "nome": "CDI",
+      "qta": 1,
+      "wear": "na",
+      "intervalKm": 0,
+      "lastKm": 0
+    },
+    {
+      "nome": "Piatto Bobbine",
+      "qta": 1,
+      "wear": "na",
+      "intervalKm": 0,
+      "lastKm": 0
+    },
+    {
+      "nome": "Piste Direzione",
+      "qta": 1,
+      "wear": "na",
+      "intervalKm": 0,
+      "lastKm": 0
+    },
+    {
+      "nome": "Supporto Ammortizzatore Posteriore",
+      "qta": 1,
+      "wear": "na",
+      "intervalKm": 0,
+      "lastKm": 0
+    },
+    {
+      "nome": "Collettore carburatore",
+      "qta": 1,
+      "wear": "na",
+      "intervalKm": 0,
+      "lastKm": 0
+    },
+    {
+      "nome": "Eje Balancin",
+      "qta": 1,
+      "wear": "na",
+      "intervalKm": 0,
+      "lastKm": 0
+    },
+    {
+      "nome": "Maniglia Freno",
+      "qta": 1,
+      "wear": "na",
+      "intervalKm": 0,
+      "lastKm": 0
+    },
+    {
+      "nome": "Maniglia Frizione",
+      "qta": 1,
+      "wear": "na",
+      "intervalKm": 0,
+      "lastKm": 0
+    }
+  ]
 }
