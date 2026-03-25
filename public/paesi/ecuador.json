@@ -1,0 +1,186 @@
+{
+  "_version": "public-2.0",
+  "_exportDate": "2026-01-10T12:00:00.000Z",
+  "tipo": "paese",
+  "paese": "Ecuador",
+  "slug": "ecuador",
+  "stats": {
+    "km": 980.7,
+    "benzina": 35.1,
+    "benzinaFuori": 0.8,
+    "olioMl": 790,
+    "spesaBenzinaUsd": 61.2,
+    "spesaOlioUsd": 11.8,
+    "spesaRicambiUsd": 0.0,
+    "spesaManodoperaUsd": 0.0
+  },
+  "tappe": [
+    {
+      "id": 2001,
+      "tipo": "Tappa",
+      "data": "10/09/2025",
+      "ora": "08:15",
+      "paese": "Ecuador",
+      "km": 265.8,
+      "durata": 19800,
+      "altMin": 1018,
+      "altMax": 2940,
+      "velMax": 72,
+      "velMedia": 48.3,
+      "benzinaStimataLitri": 9.6,
+      "benzinaRealeLitri": 9.3,
+      "consumoStimatoKmL": 27.7,
+      "consumoRealeKmL": 28.6,
+      "titolo": "Tulcán → Quito",
+      "note": "Frontiera lenta ma tranquilla. Bellissimo l'arrivo verso Quito.",
+      "telemetry": [
+        { "km": 0, "alt": 2950, "sp": 0, "ts": 1757484900000 },
+        { "km": 70, "alt": 2820, "sp": 52, "ts": 1757491200000 },
+        { "km": 140, "alt": 2710, "sp": 59, "ts": 1757499000000 },
+        { "km": 220, "alt": 2850, "sp": 50, "ts": 1757506200000 },
+        { "km": 265.8, "alt": 2850, "sp": 0, "ts": 1757510700000 }
+      ],
+      "traccia": [
+        [0.8119, -77.7173],
+        [0.5930, -77.8300],
+        [0.3270, -78.1220],
+        [-0.1807, -78.4678]
+      ]
+    },
+    {
+      "id": 2002,
+      "tipo": "Tappa",
+      "data": "13/09/2025",
+      "ora": "09:00",
+      "paese": "Ecuador",
+      "km": 332.4,
+      "durata": 24480,
+      "altMin": 2400,
+      "altMax": 3200,
+      "velMax": 68,
+      "velMedia": 48.9,
+      "benzinaStimataLitri": 11.9,
+      "benzinaRealeLitri": 11.5,
+      "consumoStimatoKmL": 27.9,
+      "consumoRealeKmL": 28.9,
+      "titolo": "Quito → Cuenca",
+      "note": "Molta quota, paesaggi magnifici, Vespa un po’ grassa in salita.",
+      "telemetry": [
+        { "km": 0, "alt": 2850, "sp": 0, "ts": 1757746800000 },
+        { "km": 90, "alt": 3050, "sp": 44, "ts": 1757755500000 },
+        { "km": 180, "alt": 3180, "sp": 47, "ts": 1757764500000 },
+        { "km": 260, "alt": 2800, "sp": 56, "ts": 1757772600000 },
+        { "km": 332.4, "alt": 2560, "sp": 0, "ts": 1757779200000 }
+      ],
+      "traccia": [
+        [-0.1807, -78.4678],
+        [-1.2491, -78.6167],
+        [-2.1709, -79.9224],
+        [-2.9001, -79.0059]
+      ]
+    }
+  ],
+  "turismo": [
+    {
+      "id": 2101,
+      "tipo": "Turismo",
+      "data": "11/09/2025",
+      "ora": "16:20",
+      "paese": "Ecuador",
+      "km": 28.5,
+      "durata": 4200,
+      "altMin": 2800,
+      "altMax": 3020,
+      "velMax": 42,
+      "velMedia": 24.4,
+      "benzinaStimataLitri": 1.1,
+      "benzinaRealeLitri": null,
+      "consumoStimatoKmL": 25.9,
+      "consumoRealeKmL": null,
+      "titolo": "Quito centro e miradores",
+      "note": "Giro breve ma pieno di soste e viste sulla città.",
+      "telemetry": [
+        { "km": 0, "alt": 2850, "sp": 0, "ts": 1757588400000 },
+        { "km": 12, "alt": 2950, "sp": 26, "ts": 1757590800000 },
+        { "km": 21, "alt": 3015, "sp": 18, "ts": 1757592900000 },
+        { "km": 28.5, "alt": 2860, "sp": 0, "ts": 1757594400000 }
+      ],
+      "traccia": [
+        [-0.1807, -78.4678],
+        [-0.1930, -78.4890],
+        [-0.2080, -78.5000],
+        [-0.1807, -78.4678]
+      ]
+    }
+  ],
+  "diario": [
+    {
+      "id": 2201,
+      "ts": 1757511600000,
+      "data": "10/09/2025",
+      "ora": "18:40",
+      "paese": "Ecuador",
+      "km": "864.5",
+      "testo": "Entrare in Ecuador mi ha dato una sensazione forte: il viaggio sta prendendo forma.",
+      "tags": ["Frontiera", "Ecuador"],
+      "geo": { "lat": -0.1807, "lon": -78.4678 },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 2202,
+      "ts": 1757779800000,
+      "data": "13/09/2025",
+      "ora": "18:10",
+      "paese": "Ecuador",
+      "km": "1196.9",
+      "testo": "La strada verso Cuenca è stata una delle più belle fino ad ora.",
+      "tags": ["Montagna", "Paesaggi"],
+      "geo": { "lat": -2.9001, "lon": -79.0059 },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    }
+  ],
+  "rifornimenti": [
+    {
+      "id": 2301,
+      "geo": { "lat": -1.2491, "lon": -78.6167 },
+      "data": "13/09/2025",
+      "ora": "12:20",
+      "paese": "Ecuador",
+      "qta": "5.80",
+      "dest": "Vespa",
+      "mix": "2.0%",
+      "prezzoUnit": "1.030",
+      "valuta": "USD",
+      "fxToUsd": 1,
+      "costoBenzLocal": "5.97",
+      "costoBenzUsd": "5.97",
+      "costoBenz": "5.97",
+      "costoOlio": "0.82",
+      "luogo": "Ambato",
+      "km": "1015.2"
+    }
+  ],
+  "carburazioni": [
+    {
+      "id": 2401,
+      "data": "12/09/2025",
+      "ora": "09:00",
+      "alt": 2850,
+      "chicMax": 110,
+      "chicMin": 48,
+      "viteAria": "1.25 giri",
+      "viteMinimo": "2 giri",
+      "candela": "nocciola",
+      "nota": "Quasi perfetta, in salita lunga leggermente grassa.",
+      "geo": { "lat": -0.1807, "lon": -78.4678 },
+      "fotoCandela": null
+    }
+  ],
+  "manutenzioni": []
+}
