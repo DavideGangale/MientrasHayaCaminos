@@ -1,0 +1,200 @@
+{
+  "_version": "public-2.0",
+  "_exportDate": "2026-01-10T12:00:00.000Z",
+  "tipo": "paese",
+  "paese": "Chile",
+  "slug": "chile",
+  "stats": {
+    "km": 1490.8,
+    "benzina": 54.6,
+    "benzinaFuori": 2.4,
+    "olioMl": 1290,
+    "spesaBenzinaUsd": 112.4,
+    "spesaOlioUsd": 18.6,
+    "spesaRicambiUsd": 36.5,
+    "spesaManodoperaUsd": 22.0
+  },
+  "tappe": [
+    {
+      "id": 4001,
+      "tipo": "Tappa",
+      "data": "15/11/2025",
+      "ora": "08:00",
+      "paese": "Chile",
+      "km": 356.7,
+      "durata": 26100,
+      "altMin": 20,
+      "altMax": 780,
+      "velMax": 75,
+      "velMedia": 49.2,
+      "benzinaStimataLitri": 12.8,
+      "benzinaRealeLitri": 12.4,
+      "consumoStimatoKmL": 27.9,
+      "consumoRealeKmL": 28.8,
+      "titolo": "Arica → Iquique",
+      "note": "Deserto assoluto, vento laterale forte.",
+      "telemetry": [
+        { "km": 0, "alt": 20, "sp": 0, "ts": 1763193600000 },
+        { "km": 90, "alt": 340, "sp": 58, "ts": 1763201700000 },
+        { "km": 180, "alt": 740, "sp": 54, "ts": 1763209500000 },
+        { "km": 270, "alt": 520, "sp": 62, "ts": 1763217600000 },
+        { "km": 356.7, "alt": 39, "sp": 0, "ts": 1763223300000 }
+      ],
+      "traccia": [
+        [-18.4783, -70.3126],
+        [-19.2100, -70.1380],
+        [-20.2167, -70.1531]
+      ]
+    },
+    {
+      "id": 4002,
+      "tipo": "Tappa",
+      "data": "03/12/2025",
+      "ora": "08:40",
+      "paese": "Chile",
+      "km": 422.1,
+      "durata": 31500,
+      "altMin": 12,
+      "altMax": 440,
+      "velMax": 77,
+      "velMedia": 48.3,
+      "benzinaStimataLitri": 15.1,
+      "benzinaRealeLitri": 14.7,
+      "consumoStimatoKmL": 28.0,
+      "consumoRealeKmL": 28.7,
+      "titolo": "Puerto Montt → Chaitén",
+      "note": "Paesaggi verdi, traghetti e pioggia leggera.",
+      "telemetry": [
+        { "km": 0, "alt": 12, "sp": 0, "ts": 1764747600000 },
+        { "km": 110, "alt": 80, "sp": 44, "ts": 1764756900000 },
+        { "km": 220, "alt": 240, "sp": 51, "ts": 1764766800000 },
+        { "km": 340, "alt": 430, "sp": 47, "ts": 1764776100000 },
+        { "km": 422.1, "alt": 18, "sp": 0, "ts": 1764781800000 }
+      ],
+      "traccia": [
+        [-41.4693, -72.9424],
+        [-42.4800, -73.7600],
+        [-42.9150, -72.7060],
+        [-42.9238, -72.7089]
+      ]
+    }
+  ],
+  "turismo": [
+    {
+      "id": 4101,
+      "tipo": "Turismo",
+      "data": "16/11/2025",
+      "ora": "17:00",
+      "paese": "Chile",
+      "km": 31.8,
+      "durata": 4200,
+      "altMin": 10,
+      "altMax": 120,
+      "velMax": 36,
+      "velMedia": 21.5,
+      "benzinaStimataLitri": 1.2,
+      "benzinaRealeLitri": null,
+      "consumoStimatoKmL": 26.5,
+      "consumoRealeKmL": null,
+      "titolo": "Giro costiero a Iquique",
+      "note": "Pomeriggio sul lungomare e salite verso i miradores.",
+      "telemetry": [
+        { "km": 0, "alt": 39, "sp": 0, "ts": 1763312400000 },
+        { "km": 12, "alt": 70, "sp": 18, "ts": 1763315100000 },
+        { "km": 23, "alt": 118, "sp": 24, "ts": 1763317500000 },
+        { "km": 31.8, "alt": 25, "sp": 0, "ts": 1763319300000 }
+      ],
+      "traccia": [
+        [-20.2167, -70.1531],
+        [-20.2300, -70.1400],
+        [-20.2450, -70.1300],
+        [-20.2167, -70.1531]
+      ]
+    }
+  ],
+  "diario": [
+    {
+      "id": 4201,
+      "ts": 1763224200000,
+      "data": "15/11/2025",
+      "ora": "18:30",
+      "paese": "Chile",
+      "km": "4890.2",
+      "testo": "Il nord del Cile sembra un altro pianeta. Deserto, luce e vento.",
+      "tags": ["Chile", "Deserto"],
+      "geo": { "lat": -20.2167, "lon": -70.1531 },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 4202,
+      "ts": 1764782700000,
+      "data": "03/12/2025",
+      "ora": "18:05",
+      "paese": "Chile",
+      "km": "6244.7",
+      "testo": "La Carretera Austral in Vespa è esattamente il tipo di follia che cercavo.",
+      "tags": ["Patagonia", "Chile"],
+      "geo": { "lat": -42.9238, "lon": -72.7089 },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    }
+  ],
+  "rifornimenti": [
+    {
+      "id": 4301,
+      "geo": { "lat": -20.2167, "lon": -70.1531 },
+      "data": "15/11/2025",
+      "ora": "13:10",
+      "paese": "Chile",
+      "qta": "5.60",
+      "dest": "Vespa",
+      "mix": "2.0%",
+      "prezzoUnit": "1320",
+      "valuta": "CLP",
+      "fxToUsd": 0.0011,
+      "costoBenzLocal": "7392",
+      "costoBenzUsd": "8.13",
+      "costoBenz": "8.13",
+      "costoOlio": "1.05",
+      "luogo": "Iquique",
+      "km": "4890.2"
+    }
+  ],
+  "carburazioni": [
+    {
+      "id": 4401,
+      "data": "16/11/2025",
+      "ora": "09:20",
+      "alt": 39,
+      "chicMax": 112,
+      "chicMin": 50,
+      "viteAria": "1.5 giri",
+      "viteMinimo": "2 giri",
+      "candela": "nocciola",
+      "nota": "A livello mare gira piena e regolare.",
+      "geo": { "lat": -20.2167, "lon": -70.1531 },
+      "fotoCandela": null
+    }
+  ],
+  "manutenzioni": [
+    {
+      "id": 4501,
+      "data": "03/12/2025",
+      "ora": "16:10",
+      "paese": "Chile",
+      "km": "5820.8",
+      "nome": "Sostituzione ganasce post.",
+      "desc": "Usura avanzata, cambio preventivo prima del sud.",
+      "costoLocal": 28000,
+      "valuta": "CLP",
+      "costoUsd": 29.0,
+      "fotoUrl": null,
+      "geo": { "lat": -41.4693, "lon": -72.9424 }
+    }
+  ]
+}
