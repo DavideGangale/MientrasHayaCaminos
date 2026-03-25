@@ -9166,163 +9166,361 @@ function simplifyTelemetry(telem, step = 2, maxPts = 260) {
   }));
 }
 
+
+async function costruisciArchivioPubblicoSpezzato() {
+  const MAX_FOTO_DIARIO = 30;
+  const FOTO_MAX_W = 900;
+  const FOTO_QUALITY = 0.60;
+
+  const tappe = caricaJSON('vt_tappe', []) || [];
+  const turismo = caricaJSON('vt_turismo', []) || [];
+  const diario = caricaJSON('vt_diario', []) || [];
+  const logbook = caricaJSON('vt_logbook', []) || [];
+  const datiPaesi = caricaJSON('vt_datiPaesi', {}) || {};
+  const logCarburanti = caricaJSON('vt_logCarburanti', []) || [];
+  const carburazione = caricaJSON('vt_carburazione', []) || [];
+  const inventario = caricaJSON('vt_inventario', []) || [];
+
+  const tappePub = tappe.map(t => ({
+    id: t.id,
+    tipo: t.tipo || 'Tappa',
+    data: t.data,
+    ora: t.ora,
+    paese: t.paese,
+    km: t.km,
+    durata: t.durata,
+    altMin: t.altMin,
+    altMax: t.altMax,
+    velMax: t.velMax,
+    velMedia: t.velMedia,
+    benzinaStimataLitri: t.benzinaStimataLitri ?? t.benzina ?? null,
+    benzinaRealeLitri: t.benzinaRealeLitri ?? null,
+    consumoStimatoKmL: t.consumoStimatoKmL ?? null,
+    consumoRealeKmL: t.consumoRealeKmL ?? null,
+    titolo: t.titolo || '',
+    note: t.note || '',
+    telemetry: simplifyTelemetry(t.telemetry, 2, 260),
+    traccia: simplifyTrace(t.traccia, 3)
+  }));
+
+  const turismoPub = turismo.map(t => ({
+    id: t.id,
+    tipo: t.tipo || 'Turismo',
+    data: t.data,
+    ora: t.ora,
+    paese: t.paese,
+    km: t.km,
+    durata: t.durata,
+    altMin: t.altMin,
+    altMax: t.altMax,
+    velMax: t.velMax,
+    velMedia: t.velMedia,
+    benzinaStimataLitri: t.benzinaStimataLitri ?? t.benzina ?? null,
+    benzinaRealeLitri: t.benzinaRealeLitri ?? null,
+    consumoStimatoKmL: t.consumoStimatoKmL ?? null,
+    consumoRealeKmL: t.consumoRealeKmL ?? null,
+    titolo: t.titolo || '',
+    note: t.note || '',
+    telemetry: simplifyTelemetry(t.telemetry, 2, 260),
+    traccia: simplifyTrace(t.traccia, 3)
+  }));
+
+  const diarioSorted = [...diario].sort((a,b) => (b.id || 0) - (a.id || 0));
+  const idsConFoto = diarioSorted.filter(d => !!d.foto).map(d => d.id);
+  const keepFotoIds = new Set(idsConFoto.slice(0, MAX_FOTO_DIARIO));
+
+  const diarioPub = await Promise.all(diarioSorted.map(async d => {
+    const keepFoto = !!d.foto && keepFotoIds.has(d.id);
+    const fotoUrl = d.fotoUrl || null;
+
+    return {
+      id: d.id,
+      ts: d.ts || d.id,
+      data: d.data,
+      ora: d.ora,
+      paese: d.paese,
+      km: d.km,
+      testo: d.testo,
+      tags: Array.isArray(d.tags) ? d.tags : [],
+      geo: d.geo || null,
+      videoUrl: d.videoUrl || null,
+      videoPlanned: !!d.videoPlanned,
+      fotoUrl: fotoUrl,
+      foto: (!fotoUrl && keepFoto) ? await sanitizeImageDataUrl(d.foto, FOTO_MAX_W, FOTO_QUALITY) : null
+    };
+  }));
+
+  const logbookPub = logbook.map(e => ({
+    id: e.id,
+    data: e.data,
+    ora: e.ora,
+    paese: e.paese,
+    km: e.km,
+    nome: e.nome,
+    desc: e.desc,
+    costoLocal: e.costoLocal ?? e.costo ?? 0,
+    valuta: e.valuta ?? carica('vt_valuta','USD'),
+    costoUsd: e.costoUsd ?? 0,
+    fotoUrl: e.fotoUrl || null,
+    geo: e.geo || null
+  }));
+
+  const carburazionePub = carburazione.map(e => ({
+    id: e.id,
+    data: e.data,
+    ora: e.ora,
+    alt: e.alt,
+    chicMax: e.chicMax,
+    chicMin: e.chicMin,
+    viteAria: e.viteAria,
+    viteMinimo: e.viteMinimo,
+    candela: e.candela,
+    nota: e.nota,
+    geo: e.geo || null,
+    fotoCandela: e.fotoCandela || null
+  }));
+
+  const paesiNomi = Array.from(new Set([
+    ...Object.keys(datiPaesi || {}),
+    ...tappePub.map(x => x.paese).filter(Boolean),
+    ...turismoPub.map(x => x.paese).filter(Boolean),
+    ...diarioPub.map(x => x.paese).filter(Boolean),
+    ...logbookPub.map(x => x.paese).filter(Boolean),
+    ...logCarburanti.map(x => x.paese).filter(Boolean)
+  ])).sort();
+
+  const files = {};
+
+  // =========================
+  // OFFICINA
+  // =========================
+  files['public/officina.json'] = {
+    _version: 'public-2.0',
+    _exportDate: new Date().toISOString(),
+    tipo: 'officina',
+    stats: {
+      spesaRicambiUsd: parseFloat(carica('vt_spesaRicambiUsd','0')) || 0,
+      spesaManodoperaUsd: parseFloat(carica('vt_spesaManodoperaUsd','0')) || 0
+    },
+    manutenzioni: logbookPub,
+    carburazioni: carburazionePub,
+    inventario: inventario
+  };
+
+  // =========================
+  // DIARIO PER MESE
+  // =========================
+  const diarioPerMese = raggruppaDiarioPerMese(diarioPub);
+  const diarioIndex = [];
+
+  for (const [ym, entries] of Object.entries(diarioPerMese)) {
+    const path = `public/diario/${ym}.json`;
+    files[path] = {
+      _version: 'public-2.0',
+      _exportDate: new Date().toISOString(),
+      tipo: 'diario_mese',
+      mese: ym,
+      count: entries.length,
+      entries: entries
+    };
+
+    diarioIndex.push({
+      mese: ym,
+      path: path,
+      count: entries.length
+    });
+  }
+
+  diarioIndex.sort((a,b) => String(b.mese).localeCompare(String(a.mese)));
+
+  // =========================
+  // PAESI
+  // =========================
+  const paesiIndex = [];
+
+  for (const paese of paesiNomi) {
+    const slug = slugPaese(paese);
+    const tappePaese = filtraPerPaese(tappePub, paese);
+    const turismoPaese = filtraPerPaese(turismoPub, paese);
+    const diarioPaese = filtraPerPaese(diarioPub, paese);
+    const rifornimentiPaese = filtraPerPaese(logCarburanti, paese);
+    const carburazioniPaese = filtraPerPaese(carburazionePub, paese);
+    const manutenzioniPaese = filtraPerPaese(logbookPub, paese);
+
+    const dp = datiPaesi[paese] || {};
+
+    const path = `public/paesi/${slug}.json`;
+    files[path] = {
+      _version: 'public-2.0',
+      _exportDate: new Date().toISOString(),
+      tipo: 'paese',
+      paese: paese,
+      slug: slug,
+      stats: {
+        km: Number(dp.km || 0),
+        benzina: Number(dp.benzina || 0),
+        benzinaFuori: Number(dp.benzinaFuori || 0),
+        olioMl: Number(dp.olioMl || 0),
+        spesaBenzinaUsd: Number(dp.spesaBenzinaUsd || 0),
+        spesaOlioUsd: Number(dp.spesaOlioUsd || 0),
+        spesaRicambiUsd: Number(dp.spesaRicambiUsd || 0),
+        spesaManodoperaUsd: Number(dp.spesaManodoperaUsd || 0)
+      },
+      tappe: tappePaese,
+      turismo: turismoPaese,
+      diario: diarioPaese,
+      rifornimenti: rifornimentiPaese,
+      carburazioni: carburazioniPaese,
+      manutenzioni: manutenzioniPaese
+    };
+
+    paesiIndex.push({
+      paese: paese,
+      slug: slug,
+      path: path,
+      stats: {
+        km: Number(dp.km || 0),
+        benzina: Number(dp.benzina || 0),
+        spesaBenzinaUsd: Number(dp.spesaBenzinaUsd || 0),
+        spesaOlioUsd: Number(dp.spesaOlioUsd || 0),
+        spesaRicambiUsd: Number(dp.spesaRicambiUsd || 0),
+        spesaManodoperaUsd: Number(dp.spesaManodoperaUsd || 0)
+      }
+    });
+  }
+
+  // =========================
+  // INDEX PRINCIPALE
+  // =========================
+  files['public/vespatrek_index.json'] = {
+    _version: 'public-2.0',
+    _exportDate: new Date().toISOString(),
+    titolo: 'VespaTrek PX150',
+    paeseAttuale: carica('vt_paeseAttuale','Colombia'),
+    diarioTagsPreset: DIARIO_TAGS_PRESET,
+
+    stats: {
+      kmTotali: parseFloat(carica('vt_kmTotali','0')) || 0,
+      benzinaUsataLitri: calcBenzinaBruciataLitri(null, parseFloat(carica('vt_kmTotali','0')) || 0),
+      benzinaFuoriTappaLitri: parseFloat(carica('vt_benzinaFuoriTappaLitri','0')) || 0,
+      olioTotaleLitri: (parseFloat(carica('vt_olioTotaleMl','0')) || 0) / 1000,
+      spesaBenzinaUsd: parseFloat(carica('vt_spesaBenzinaUsd','0')) || 0,
+      spesaOlioUsd: parseFloat(carica('vt_spesaOlioUsd','0')) || 0,
+      spesaRicambiUsd: parseFloat(carica('vt_spesaRicambiUsd','0')) || 0,
+      spesaManodoperaUsd: parseFloat(carica('vt_spesaManodoperaUsd','0')) || 0
+    },
+
+    paesi: paesiIndex,
+    ultimiPost: prendiUltimi(diarioPub, 12),
+    ultimeTappe: prendiUltimi(
+      [...tappePub, ...turismoPub].sort((a,b) => Number(b.id || 0) - Number(a.id || 0)),
+      12
+    ),
+
+    archivi: {
+      index: 'public/vespatrek_index.json',
+      officina: 'public/officina.json',
+      paesi: paesiIndex.map(x => ({ paese: x.paese, slug: x.slug, path: x.path })),
+      diarioMensile: diarioIndex
+    }
+  };
+
+  return files;
+}
+
+  
   
 async function esportaDatiPubblici(azione = 'download') {
   try {
-    const MAX_FOTO_DIARIO = 30;
-    const FOTO_MAX_W = 900;
-    const FOTO_QUALITY = 0.60;
-
-    const tappe = caricaJSON('vt_tappe', []) || [];
-    const turismo = caricaJSON('vt_turismo', []) || [];
-    const diario = caricaJSON('vt_diario', []) || [];
-    const logbook = caricaJSON('vt_logbook', []) || [];
-    const datiPaesi = caricaJSON('vt_datiPaesi', {}) || {};
-    const logCarburanti = caricaJSON('vt_logCarburanti', []) || [];
-    const carburazione = caricaJSON('vt_carburazione', []) || [];
-
-    // TAPPE + TRACCE (semplificate)
-    const tappePub = tappe.map(t => ({
-      id: t.id,
-      tipo: t.tipo || 'Tappa',
-      data: t.data, ora: t.ora,
-      paese: t.paese,
-      km: t.km,
-      durata: t.durata,
-      altMin: t.altMin, altMax: t.altMax,
-      velMax: t.velMax, velMedia: t.velMedia,
-
-      benzinaStimataLitri: t.benzinaStimataLitri ?? t.benzina ?? null,
-      benzinaRealeLitri: t.benzinaRealeLitri ?? null,
-      consumoStimatoKmL: t.consumoStimatoKmL ?? null,
-      consumoRealeKmL: t.consumoRealeKmL ?? null,
-
-      titolo: t.titolo || '',
-      note: t.note || '',
-telemetry: simplifyTelemetry(t.telemetry, 2, 260),
-      traccia: simplifyTrace(t.traccia, 3)
-    }));
-
-    const turismoPub = turismo.map(t => ({
-      id: t.id,
-      tipo: t.tipo || 'Turismo',
-      data: t.data, ora: t.ora,
-      paese: t.paese,
-      km: t.km,
-      durata: t.durata,
-      altMin: t.altMin, altMax: t.altMax,
-      velMax: t.velMax, velMedia: t.velMedia,
-
-      benzinaStimataLitri: t.benzinaStimataLitri ?? t.benzina ?? null,
-      benzinaRealeLitri: t.benzinaRealeLitri ?? null,
-      consumoStimatoKmL: t.consumoStimatoKmL ?? null,
-      consumoRealeKmL: t.consumoRealeKmL ?? null,
-
-      titolo: t.titolo || '',
-      note: t.note || '',
-telemetry: simplifyTelemetry(t.telemetry, 2, 260),
-      traccia: simplifyTrace(t.traccia, 3)
-    }));
-
-    // DIARIO: tutte le voci testo, foto solo per le ultime N con foto
-    const diarioSorted = [...diario].sort((a,b) => (b.id||0) - (a.id||0));
-    const idsConFoto = diarioSorted.filter(d => !!d.foto).map(d => d.id);
-    const keepFotoIds = new Set(idsConFoto.slice(0, MAX_FOTO_DIARIO));
-
-    const diarioPub = await Promise.all(diarioSorted.map(async d => {
- //     const keepFoto = d.foto && keepFotoIds.has(d.id);
-      const keepFoto = !!d.foto && keepFotoIds.has(d.id);
-
-// Se ho già fotoUrl (Drive) => non includo base64 nel JSON
-const fotoUrl = d.fotoUrl || null;
-
-return {
-  id: d.id,
-  ts: d.ts || d.id,
-  data: d.data, ora: d.ora,
-  paese: d.paese,
-  km: d.km,
-  testo: d.testo,
-  tags: Array.isArray(d.tags) ? d.tags : [],
-  geo: d.geo || null,
- videoUrl: d.videoUrl || null, 
-  videoPlanned: !!d.videoPlanned,
-  fotoUrl: fotoUrl,
-
-  // fallback: include base64 solo se NON ho fotoUrl e se rientra nel limite keepFoto
-  foto: (!fotoUrl && keepFoto) ? await sanitizeImageDataUrl(d.foto, FOTO_MAX_W, FOTO_QUALITY) : null
-};
-    }));
-
-    // MANUTENZIONI (senza foto)
-    const logbookPub = logbook.map(e => ({
-      id: e.id,
-      data: e.data, ora: e.ora,
-      paese: e.paese,
-      km: e.km,
-      nome: e.nome,
-      desc: e.desc,
-      costoLocal: e.costoLocal ?? e.costo ?? 0,
-      valuta: e.valuta ?? carica('vt_valuta','USD'),
-      costoUsd: e.costoUsd ?? 0,
-      fotoUrl: e.fotoUrl || null,
-      geo: e.geo || null  
-    }));
-
-    const payload = {
-      _version: 'public-1.0',
-      _exportDate: new Date().toISOString(),
-      titolo: 'VespaTrek PX150',
-      diarioTagsPreset: DIARIO_TAGS_PRESET,
-      paeseAttuale: carica('vt_paeseAttuale','Colombia'),
-
-      stats: {
-        kmTotali: parseFloat(carica('vt_kmTotali','0')) || 0,
-        benzinaUsataLitri: parseFloat(carica('vt_benzinaUsata','0')) || 0,
-        benzinaFuoriTappaLitri: parseFloat(carica('vt_benzinaFuoriTappaLitri','0')) || 0,
-        olioTotaleLitri: (parseFloat(carica('vt_olioTotaleMl','0')) || 0) / 1000,
-
-        spesaBenzinaUsd: parseFloat(carica('vt_spesaBenzinaUsd','0')) || 0,
-        spesaOlioUsd: parseFloat(carica('vt_spesaOlioUsd','0')) || 0,
-        spesaRicambiUsd: parseFloat(carica('vt_spesaRicambiUsd','0')) || 0,
-        spesaManodoperaUsd: parseFloat(carica('vt_spesaManodoperaUsd','0')) || 0
-      },
-
-      datiPaesi,
-      tappe: tappePub,
-      turismo: turismoPub,
-      diario: diarioPub,
-      manutenzioni: logbookPub,
-        rifornimenti: logCarburanti, 
-      carburazioni: carburazione   
-    };
-
-       const jsonString = JSON.stringify(payload, null, 2);
+    const filesMap = await costruisciArchivioPubblicoSpezzato();
 
     if (azione === 'github') {
-      await pubblicaJSONSuGitHub(jsonString);
+      await pubblicaArchivioSpezzatoSuGitHub(filesMap);
       return;
     }
 
-    const blob = new Blob([jsonString], { type:'application/json' });
-    const url  = URL.createObjectURL(blob);
+    // download locale: per semplicità scarico almeno l'index
+    // e poi anche gli altri file uno per uno
+    const paths = Object.keys(filesMap);
+    for (const path of paths) {
+      const filename = path.split('/').pop();
+      const jsonString = JSON.stringify(filesMap[path], null, 2);
+      const blob = new Blob([jsonString], { type:'application/json' });
+      const url = URL.createObjectURL(blob);
 
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'vespatrek_public.json';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
 
-    URL.revokeObjectURL(url);
-    showToast('📤 Esportato: vespatrek_public.json');
+      URL.revokeObjectURL(url);
+
+      // piccolo ritardo per evitare problemi su telefono
+      await new Promise(r => setTimeout(r, 250));
+    }
+
+    showToast('📥 Archivio pubblico spezzato scaricato');
   } catch (e) {
     console.warn('esportaDatiPubblici error:', e);
-    showToast('❌ Errore export pubblico (vedi console)');
+    showToast('❌ Errore export pubblico: ' + (e.message || e), 5000);
   }
 }
 
+function slugPaese(nome) {
+  return String(nome || 'sconosciuto')
+    .toLowerCase()
+    .trim()
+    .replace(/à/g,'a')
+    .replace(/è/g,'e')
+    .replace(/é/g,'e')
+    .replace(/ì/g,'i')
+    .replace(/ò/g,'o')
+    .replace(/ù/g,'u')
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
 
+function getYearMonthFromEntry(entry) {
+  // prova prima con ts
+  if (entry && entry.ts) {
+    const d = new Date(Number(entry.ts));
+    if (!isNaN(d.getTime())) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      return `${y}-${m}`;
+    }
+  }
+
+  // fallback da data italiana tipo 25/03/2026
+  const ds = String(entry?.data || '').trim();
+  const m = ds.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m) {
+    const mm = String(m[2]).padStart(2, '0');
+    return `${m[3]}-${mm}`;
+  }
+
+  return 'senza-data';
+}
+
+function raggruppaDiarioPerMese(diarioList) {
+  const out = {};
+  for (const e of (Array.isArray(diarioList) ? diarioList : [])) {
+    const ym = getYearMonthFromEntry(e);
+    if (!out[ym]) out[ym] = [];
+    out[ym].push(e);
+  }
+  return out;
+}
+
+function filtraPerPaese(lista, paese) {
+  return (Array.isArray(lista) ? lista : []).filter(x => String(x?.paese || '') === String(paese));
+}
+
+function prendiUltimi(arr, n) {
+  return (Array.isArray(arr) ? arr : []).slice(0, n);
+}
 
 function utf8_to_b64(str) {
   return btoa(unescape(encodeURIComponent(str)));
@@ -9381,6 +9579,65 @@ async function pubblicaJSONSuGitHub(jsonString) {
 }
 
 
+
+  async function pubblicaFileSingoloSuGitHub(path, jsonObject) {
+  const token = carica('vt_gh_token', '');
+  const repo = carica('vt_gh_repo', '');
+
+  if (!token || !repo || !path) {
+    throw new Error('Configurazione GitHub incompleta');
+  }
+
+  const jsonString = JSON.stringify(jsonObject, null, 2);
+  const apiUrl = `https://api.github.com/repos/${repo}/contents/${path}`;
+
+  const headers = {
+    'Authorization': `token ${token}`,
+    'Accept': 'application/vnd.github.v3+json',
+    'Content-Type': 'application/json'
+  };
+
+  let sha = null;
+
+  const getRes = await fetch(apiUrl, { method: 'GET', headers });
+  if (getRes.ok) {
+    const getData = await getRes.json();
+    sha = getData.sha;
+  }
+
+  const body = {
+    message: `Aggiornamento ${path} - ${new Date().toLocaleString('it-IT')}`,
+    content: utf8_to_b64(jsonString)
+  };
+
+  if (sha) body.sha = sha;
+
+  const putRes = await fetch(apiUrl, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify(body)
+  });
+
+  if (!putRes.ok) {
+    const err = await putRes.json();
+    throw new Error(`${path}: ${err.message || 'Errore API GitHub'}`);
+  }
+
+  return true;
+}
+
+async function pubblicaArchivioSpezzatoSuGitHub(filesMap) {
+  const paths = Object.keys(filesMap || {});
+  if (!paths.length) throw new Error('Nessun file da pubblicare');
+
+  for (let i = 0; i < paths.length; i++) {
+    const path = paths[i];
+    showToast(`🐙 Pubblico ${i+1}/${paths.length}: ${path}`, 1800);
+    await pubblicaFileSingoloSuGitHub(path, filesMap[path]);
+  }
+
+  showToast('🚀 Archivio pubblico spezzato pubblicato!', 4000);
+}
 
   
 /* ============================================================
