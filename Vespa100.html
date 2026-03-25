@@ -1066,15 +1066,7 @@ color:#fff;
 
   
   
-  <!-- ===== ALERT CAMBIO PAESE ===== -->
-  <div id="alert-paese">
-    <h3 style="color:var(--giallo); margin-top:0;">🛑 CAMBIO PAESE</h3>
-    <div id="alert-testo"></div>
-    <div style="margin-top:12px;">
-      <button class="alert-btn alert-confirm" onclick="confermaCambioPaese()">✅ Conferma</button>
-      <button class="alert-btn alert-cancel" onclick="annullaCambioPaese()">❌ Annulla</button>
-    </div>
-  </div>
+
 
   <!-- ===== HEADER ===== -->
 <div class="header">
@@ -2088,28 +2080,18 @@ color:#fff;
         <button id="set-mi" class="toggle-btn unita" onclick="setDistanza('MI')">MIGLIA</button>
       </div>
 
-      <div style="text-align:left; font-size:12px; color:#aaa; margin-top:10px;">Paese (manuale)</div>
-      <select id="set-paese" class="inp-select" onchange="cambiaPaeseDaSettings()">
-        <option value="Colombia">🇨🇴 Colombia</option>
-        <option value="Ecuador">🇪🇨 Ecuador</option>
-        <option value="Peru">🇵🇪 Perù</option>
-        <option value="Bolivia">🇧🇴 Bolivia</option>
-        <option value="Chile">🇨🇱 Cile</option>
-        <option value="Argentina">🇦🇷 Argentina</option>
+ <div style="text-align:left; font-size:12px; color:#aaa; margin-top:10px;">Paese (manuale)</div>
 
-        
-<option value="Paraguay">🇵🇾 Paraguay</option>
-<option value="Uruguay">🇺🇾 Uruguay</option>
-<option value="Brasile">🇧🇷 Brasile</option>
-<option value="Venezuela">🇻🇪 Venezuela</option>
-<option value="Guyana">🇬🇾 Guyana</option>
-<option value="Suriname">🇸🇷 Suriname</option>
-<option value="Guyana Francese">🇬🇫 Guyana Francese</option>
-      </select>
+<select id="set-paese" class="inp-select" onchange="cambiaPaeseDaSettings()">
+</select>
 
-      <div style="font-size:12px;color:#777; text-align:left; margin-top:10px;">
-        Nota: il cambio paese automatico via GPS resta attivo (ti chiede conferma).
-      </div>
+<button class="btn-secondary" onclick="aggiungiPaeseManuale()">
+  ➕ Aggiungi paese
+</button>
+
+<div style="font-size:12px;color:#777; text-align:left; margin-top:10px;">
+  Il paese si cambia manualmente quando attraversi una frontiera.
+</div>
 
       <hr style="border:0;border-top:1px solid #333; margin:15px 0;">
 
@@ -2714,6 +2696,38 @@ initDB('vt_inboxLastTs', '0');        // ultimo timestamp importato
   initDB('vt_benzinaUsata', '0.0');
 
   initDB('vt_paeseAttuale', 'Colombia');
+
+initDB('vt_listaPaesi', JSON.stringify([
+  'Argentina',
+  'Belize',
+  'Bolivia',
+  'Brasil',
+  'Canada',
+  'Chile',
+  'Colombia',
+  'Costa Rica',
+  'Ecuador',
+  'El Salvador',
+  'Francia',
+  'Guatemala',
+  'Guyana',
+  'Guyana Francese',
+  'Honduras',
+  'Italia',
+  'Mexico',
+  'Nicaragua',
+  'Panama',
+  'Paraguay',
+  'Peru',
+  'Spagna',
+  'Stati Uniti',
+  'Suriname',
+  'Uruguay',
+  'Venezuela'
+]));
+
+
+  
   initDB('vt_datiPaesi', JSON.stringify({}));
 
 initDB('vt_unita', 'L');
@@ -2921,25 +2935,41 @@ initDB('vt_inventario', JSON.stringify([
   lastCountry = carica('vt_paeseAttuale', 'Colombia');
 }
 
-/* ============================================================
-   RILEVAMENTO PAESE
+
+
+
+
+  /* ============================================================
+   GESTIONE PAESE (manuale, dinamica)
 ============================================================ */
-const countryBounds = {
-  'Colombia':  { minLat:-4.2,  maxLat:12.5,  minLon:-79.0, maxLon:-66.9 },
-  'Ecuador':   { minLat:-5.0,  maxLat:1.4,   minLon:-81.0, maxLon:-75.2 },
-  'Peru':      { minLat:-18.3, maxLat:0.0,   minLon:-81.3, maxLon:-68.7 },
-  'Bolivia':   { minLat:-22.9, maxLat:-9.7,  minLon:-69.6, maxLon:-57.5 },
-  'Chile':     { minLat:-56.0, maxLat:-17.5, minLon:-75.6, maxLon:-66.4 },
-  'Argentina': { minLat:-55.0, maxLat:-21.8, minLon:-73.6, maxLon:-53.6 }
-};
+function normalizePaeseNome(nome) {
+  return String(nome || '')
+    .trim()
+    .replace(/\s+/g, ' ');
+}
 
+function getListaPaesi() {
+  const arr = caricaJSON('vt_listaPaesi', []);
+  return Array.isArray(arr) ? arr.map(normalizePaeseNome).filter(Boolean) : [];
+}
 
-  function ensurePaeseExists(paese) {
-  if (!paese) return;
+function salvaListaPaesi(lista) {
+  const clean = Array.from(new Set(
+    (Array.isArray(lista) ? lista : [])
+      .map(normalizePaeseNome)
+      .filter(Boolean)
+  )).sort((a, b) => a.localeCompare(b));
+
+  salva('vt_listaPaesi', clean);
+}
+
+function ensurePaeseExists(paese) {
+  const p = normalizePaeseNome(paese);
+  if (!p) return;
 
   const datiPaesi = caricaJSON('vt_datiPaesi', {});
-  if (!datiPaesi[paese]) {
-    datiPaesi[paese] = {
+  if (!datiPaesi[p]) {
+    datiPaesi[p] = {
       km: 0,
       benzina: 0,
       benzinaFuori: 0,
@@ -2951,73 +2981,65 @@ const countryBounds = {
     };
     salva('vt_datiPaesi', datiPaesi);
   }
+
+  const lista = getListaPaesi();
+  if (!lista.includes(p)) {
+    lista.push(p);
+    salvaListaPaesi(lista);
+  }
 }
+
+function popolaSelectPaesiSettings() {
+  const sel = document.getElementById('set-paese');
+  if (!sel) return;
+
+  const lista = getListaPaesi();
+  const paeseAttuale = normalizePaeseNome(carica('vt_paeseAttuale', 'Colombia'));
+
+  sel.innerHTML = lista.map(p => {
+    return `<option value="${p}">${p}</option>`;
+  }).join('');
+
+  if (lista.includes(paeseAttuale)) {
+    sel.value = paeseAttuale;
+  }
+}
+
+function aggiungiPaeseManuale() {
+  const raw = prompt('Nome del nuovo paese:');
+  if (raw === null) return;
+
+  const paese = normalizePaeseNome(raw);
+  if (!paese) {
+    showToast('⚠️ Nome paese non valido');
+    return;
+  }
+
+  const lista = getListaPaesi();
+  if (!lista.includes(paese)) {
+    lista.push(paese);
+    salvaListaPaesi(lista);
+  }
+
+  ensurePaeseExists(paese);
+  salva('vt_paeseAttuale', paese);
+  lastCountry = paese;
+
+  popolaSelectPaesiSettings();
+  aggiornaSettingsUI();
+  aggiornaUI();
+
+  const sel = document.getElementById('set-paese');
+  if (sel) sel.value = paese;
+
+  showToast('🌍 Paese aggiunto: ' + paese);
+}
+
 
   
-function detectCountry(lat, lon) {
-  let best = null, bestArea = Infinity;
-  for (const [paese, b] of Object.entries(countryBounds)) {
-    if (lat >= b.minLat && lat <= b.maxLat && lon >= b.minLon && lon <= b.maxLon) {
-      const area = (b.maxLat - b.minLat) * (b.maxLon - b.minLon);
-      if (area < bestArea) { best = paese; bestArea = area; }
-    }
-  }
-  return best || carica('vt_paeseAttuale', 'Colombia');
-}
 
-function checkCountryChange(lat, lon) {
-  const detected = detectCountry(lat, lon);
-  const current  = carica('vt_paeseAttuale', 'Colombia');
 
-  if (detected !== current && detected !== pendingCountryChange) {
-    pendingCountryChange = detected;
-    const alert = document.getElementById('alert-paese');
-    const testo = document.getElementById('alert-testo');
-    if (testo) {
-      testo.innerHTML = `
-        <div style="font-size:16px; margin-bottom:8px;">
-          🗺️ Da <span style="color:var(--giallo)">${current}</span>
-          → <span style="color:var(--verde)">${detected}</span>
-        </div>
-        <div style="font-size:13px; color:#aaa;">I dati benzina saranno salvati per il nuovo paese.</div>
-      `;
-    }
-    if (alert) alert.style.display = 'block';
-  }
-}
-
-function confermaCambioPaese() {
-  if (!pendingCountryChange) return;
-
-  salva('vt_paeseAttuale', pendingCountryChange);
-lastCountry = pendingCountryChange;
-ensurePaeseExists(lastCountry);
-
-  // aggiorna eventuali elementi UI ancora presenti
-  const selGuida = document.getElementById('selectPaese'); // se esiste ancora in guida
-  if (selGuida) selGuida.value = pendingCountryChange;
-
-  const lblBenz = document.getElementById('lbl-paese-benzina');
-  if (lblBenz) lblBenz.innerText = pendingCountryChange;
-
-  const selSettings = document.getElementById('set-paese'); // settings
-  if (selSettings) selSettings.value = pendingCountryChange;
-
-  const alert = document.getElementById('alert-paese');
-  if (alert) alert.style.display = 'none';
-
-  pendingCountryChange = null;
-
-  aggiornaUI();
-  showToast('🗺️ Paese aggiornato: ' + lastCountry);
-}
-
-function annullaCambioPaese() {
-  const alert = document.getElementById('alert-paese');
-  if (alert) alert.style.display = 'none';
-  pendingCountryChange = null;
-}
-
+  
 /* ============================================================
    MAPPA LEAFLET
 ============================================================ */
@@ -3066,7 +3088,7 @@ function startGPS() {
       const ok = (pos.coords.accuracy != null && pos.coords.accuracy < 30);
       aggiornaGpsBadge(ok ? 'ok' : 'weak', pos.coords.accuracy || 999);
       updatePosition(pos);
-      checkCountryChange(pos.coords.latitude, pos.coords.longitude);
+      
     },
     (err) => {
       console.warn('GPS err:', err && err.code);
@@ -6865,9 +6887,11 @@ function aggiornaSettingsUI() {
   const v = document.getElementById('set-valuta');
   if (v) v.value = valutaAttuale;
 
-  // paese
+ 
+    // paese
+  popolaSelectPaesiSettings();
   const p = document.getElementById('set-paese');
-  if (p) p.value = carica('vt_paeseAttuale','Colombia');
+  if (p) p.value = normalizePaeseNome(carica('vt_paeseAttuale','Colombia'));
 }
 
 function setUnita(u) {
@@ -6901,18 +6925,18 @@ async function setValuta(v) {
 }
 
 function cambiaPaeseDaSettings() {
-  const p = document.getElementById('set-paese')?.value || 'Colombia';
-salva('vt_paeseAttuale', p);
-lastCountry = p;
-ensurePaeseExists(lastCountry);
+  const p = normalizePaeseNome(document.getElementById('set-paese')?.value || 'Colombia');
+  if (!p) return;
+
+  ensurePaeseExists(p);
+
+  salva('vt_paeseAttuale', p);
+  lastCountry = p;
+
   aggiornaSettingsUI();
   aggiornaUI();
   showToast('🗺️ Paese: ' + p);
-
-    ;
-  
 }
-
 
   
 //let detPercorsoId = null;
@@ -9956,15 +9980,17 @@ if (modalitaGuida === 'TURISMO') modalitaGuida = 'GIRI';
 
   await setLoadingProgress(70, '🖥️ Interfaccia...');
 
-  const paese = carica('vt_paeseAttuale','Colombia');
-  ensurePaeseExists(paese);
+const paese = normalizePaeseNome(carica('vt_paeseAttuale','Colombia'));
+ensurePaeseExists(paese);
+
 
   // aggiorna select paese se esistono (guida/settings)
   const selGuida = document.getElementById('selectPaese');
   if (selGuida) selGuida.value = paese;
 
-  const selSettings = document.getElementById('set-paese');
-  if (selSettings) selSettings.value = paese;
+popolaSelectPaesiSettings();
+const selSettings = document.getElementById('set-paese');
+if (selSettings) selSettings.value = paese;
 
   setText('lbl-paese-benzina', paese);
 
