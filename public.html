@@ -560,6 +560,23 @@ function getCurrentCountryMeta() {
   return getIndexPaesiList().find(x => x.paese === currentCountry) || null;
 }
 
+
+
+  async function caricaTuttiIPaesiInCache() {
+  const paesi = getIndexPaesiList();
+
+  for (const meta of paesi) {
+    if (!meta || !meta.paese || !meta.path) continue;
+    if (PAESI_CACHE[meta.paese]) continue;
+
+    const res = await fetch(meta.path);
+    if (!res.ok) throw new Error('Errore caricamento file paese: ' + meta.path);
+
+    PAESI_CACHE[meta.paese] = await res.json();
+  }
+}
+
+  
 async function caricaPaeseSeServe(paese) {
   if (!paese) {
     DATA = unisciDatasetGlobale();
@@ -583,23 +600,55 @@ async function caricaPaeseSeServe(paese) {
 }
 
 function unisciDatasetGlobale() {
+  const paesiCaricati = Object.values(PAESI_CACHE || {});
+
+  let tappe = [];
+  let turismo = [];
+  let diario = [];
+  let rifornimenti = [];
+  let carburazioni = [];
+  let manutenzioni = [];
+
+  for (const p of paesiCaricati) {
+    if (!p) continue;
+
+    if (Array.isArray(p.tappe)) tappe.push(...p.tappe);
+    if (Array.isArray(p.turismo)) turismo.push(...p.turismo);
+    if (Array.isArray(p.diario)) diario.push(...p.diario);
+    if (Array.isArray(p.rifornimenti)) rifornimenti.push(...p.rifornimenti);
+    if (Array.isArray(p.carburazioni)) carburazioni.push(...p.carburazioni);
+    if (Array.isArray(p.manutenzioni)) manutenzioni.push(...p.manutenzioni);
+  }
+
+  // fallback: se ancora nessun paese è stato caricato, usa almeno gli ultimi elementi dall'index
+  if (tappe.length === 0 && Array.isArray(INDEX_DATA?.ultimeTappe)) {
+    tappe = INDEX_DATA.ultimeTappe.filter(x => (x.tipo || 'Tappa') !== 'Turismo');
+    turismo = INDEX_DATA.ultimeTappe.filter(x => (x.tipo || '') === 'Turismo');
+  }
+
+  if (diario.length === 0 && Array.isArray(INDEX_DATA?.ultimiPost)) {
+    diario = INDEX_DATA.ultimiPost;
+  }
+
+  // ordina per id/ts decrescente
+  tappe.sort((a,b) => Number(b.id || 0) - Number(a.id || 0));
+  turismo.sort((a,b) => Number(b.id || 0) - Number(a.id || 0));
+  diario.sort((a,b) => Number((b.ts || b.id || 0)) - Number((a.ts || a.id || 0)));
+  rifornimenti.sort((a,b) => Number(b.id || 0) - Number(a.id || 0));
+  carburazioni.sort((a,b) => Number(b.id || 0) - Number(a.id || 0));
+  manutenzioni.sort((a,b) => Number(b.id || 0) - Number(a.id || 0));
+
   return {
     titolo: INDEX_DATA?.titolo || 'VespaTrek Live 🌍',
     paeseAttuale: INDEX_DATA?.paeseAttuale || '',
     stats: INDEX_DATA?.stats || {},
     datiPaesi: buildDatiPaesiMapFromIndex(),
-    tappe: Array.isArray(INDEX_DATA?.ultimeTappe)
-  ? INDEX_DATA.ultimeTappe.filter(x => (x.tipo || 'Tappa') !== 'Turismo')
-  : [],
-
-turismo: Array.isArray(INDEX_DATA?.ultimeTappe)
-  ? INDEX_DATA.ultimeTappe.filter(x => (x.tipo || '') === 'Turismo')
-  : [],
-
-diario: Array.isArray(INDEX_DATA?.ultimiPost) ? INDEX_DATA.ultimiPost : [],
-    manutenzioni: OFFICINA_DATA?.manutenzioni || [],
-    rifornimenti: [],
-    carburazioni: OFFICINA_DATA?.carburazioni || []
+    tappe,
+    turismo,
+    diario,
+    manutenzioni: manutenzioni.length ? manutenzioni : (OFFICINA_DATA?.manutenzioni || []),
+    rifornimenti,
+    carburazioni: carburazioni.length ? carburazioni : (OFFICINA_DATA?.carburazioni || [])
   };
 }
 
@@ -1203,15 +1252,21 @@ async function setCountry(country) {
     if (!resIndex.ok) throw new Error('Errore caricamento index');
     if (!resOfficina.ok) throw new Error('Errore caricamento officina');
 
-    INDEX_DATA = await resIndex.json();
-    OFFICINA_DATA = await resOfficina.json();
+    
+INDEX_DATA = await resIndex.json();
+OFFICINA_DATA = await resOfficina.json();
 
-    DATA = unisciDatasetGlobale();
+// carica tutti i paesi in background PRIMA del primo render globale
+await caricaTuttiIPaesiInCache();
 
-    applyLang();
-    updateStatsMini();
-    popolaPaesi();
-    renderMap();
+DATA = unisciDatasetGlobale();
+
+applyLang();
+updateStatsMini();
+popolaPaesi();
+renderMap();
+
+    
   } catch (e) {
     document.getElementById('statsMini').innerText = 'Errore caricamento dati';
     console.error(e);
