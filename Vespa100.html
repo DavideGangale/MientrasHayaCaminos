@@ -2096,6 +2096,15 @@ color:#fff;
         <option value="Bolivia">🇧🇴 Bolivia</option>
         <option value="Chile">🇨🇱 Cile</option>
         <option value="Argentina">🇦🇷 Argentina</option>
+
+        
+<option value="Paraguay">🇵🇾 Paraguay</option>
+<option value="Uruguay">🇺🇾 Uruguay</option>
+<option value="Brasile">🇧🇷 Brasile</option>
+<option value="Venezuela">🇻🇪 Venezuela</option>
+<option value="Guyana">🇬🇾 Guyana</option>
+<option value="Suriname">🇸🇷 Suriname</option>
+<option value="Guyana Francese">🇬🇫 Guyana Francese</option>
       </select>
 
       <div style="font-size:12px;color:#777; text-align:left; margin-top:10px;">
@@ -2924,6 +2933,27 @@ const countryBounds = {
   'Argentina': { minLat:-55.0, maxLat:-21.8, minLon:-73.6, maxLon:-53.6 }
 };
 
+
+  function ensurePaeseExists(paese) {
+  if (!paese) return;
+
+  const datiPaesi = caricaJSON('vt_datiPaesi', {});
+  if (!datiPaesi[paese]) {
+    datiPaesi[paese] = {
+      km: 0,
+      benzina: 0,
+      benzinaFuori: 0,
+      olioMl: 0,
+      spesaBenzinaUsd: 0,
+      spesaOlioUsd: 0,
+      spesaRicambiUsd: 0,
+      spesaManodoperaUsd: 0
+    };
+    salva('vt_datiPaesi', datiPaesi);
+  }
+}
+
+  
 function detectCountry(lat, lon) {
   let best = null, bestArea = Infinity;
   for (const [paese, b] of Object.entries(countryBounds)) {
@@ -2960,7 +2990,8 @@ function confermaCambioPaese() {
   if (!pendingCountryChange) return;
 
   salva('vt_paeseAttuale', pendingCountryChange);
-  lastCountry = pendingCountryChange;
+lastCountry = pendingCountryChange;
+ensurePaeseExists(lastCountry);
 
   // aggiorna eventuali elementi UI ancora presenti
   const selGuida = document.getElementById('selectPaese'); // se esiste ancora in guida
@@ -6871,8 +6902,9 @@ async function setValuta(v) {
 
 function cambiaPaeseDaSettings() {
   const p = document.getElementById('set-paese')?.value || 'Colombia';
-  salva('vt_paeseAttuale', p);
-  lastCountry = p;
+salva('vt_paeseAttuale', p);
+lastCountry = p;
+ensurePaeseExists(lastCountry);
   aggiornaSettingsUI();
   aggiornaUI();
   showToast('🗺️ Paese: ' + p);
@@ -9925,6 +9957,7 @@ if (modalitaGuida === 'TURISMO') modalitaGuida = 'GIRI';
   await setLoadingProgress(70, '🖥️ Interfaccia...');
 
   const paese = carica('vt_paeseAttuale','Colombia');
+  ensurePaeseExists(paese);
 
   // aggiorna select paese se esistono (guida/settings)
   const selGuida = document.getElementById('selectPaese');
