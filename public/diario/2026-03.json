@@ -3,70 +3,8 @@
   "_exportDate": "2026-03-25T21:31:35.686Z",
   "tipo": "diario_mese",
   "mese": "2026-03",
-  "count": 3,
-  "entries": [
-    {
-      "id": 1774469392255,
-      "ts": 1774469392255,
-      "data": "25/09/2025",
-      "ora": "19:10",
-      "paese": "Peru",
-      "km": "699.9",
-      "testo": "Altitudine seria. La Vespa continua a salire anche se io mi sento senza fiato.",
-      "tags": [
-        "Problemi",
-        "Paesaggi"
-      ],
-      "geo": {
-        "lat": -15.84,
-        "lon": -70.02
-      },
-      "videoUrl": null,
-      "videoPlanned": true,
-      "fotoUrl": null,
-      "foto": null
-    },
-    {
-      "id": 1774467392255,
-      "ts": 1774467392255,
-      "data": "18/09/2025",
-      "ora": "18:20",
-      "paese": "Ecuador",
-      "km": "343.1",
-      "testo": "Giornata di pioggia e montagne. Arrivare a Baños in Vespa è già una piccola vittoria.",
-      "tags": [
-        "Pioggia",
-        "Strade"
-      ],
-      "geo": {
-        "lat": -1.396,
-        "lon": -78.424
-      },
-      "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      "videoPlanned": false,
-      "fotoUrl": null,
-      "foto": null
-    },
-    {
-      "id": 1774465492255,
-      "ts": 1774465492255,
-      "data": "12/09/2025",
-      "ora": "17:40",
-      "paese": "Colombia",
-      "km": "132.4",
-      "testo": "Arrivato a Villa de Leyva. Bellissimo centro storico, prime sensazioni di libertà totale.",
-      "tags": [
-        "Paesaggi",
-        "Turismo"
-      ],
-      "geo": {
-        "lat": 5.6349,
-        "lon": -73.5248
-      },
-      "videoUrl": null,
-      "videoPlanned": false,
-      "fotoUrl": null,
-      "foto": null
-    }
-  ]
+  "count": 0,
+  "entries": []
 }
+
+
