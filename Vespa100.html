@@ -1214,7 +1214,7 @@ color:#fff;
       <input type="number" id="inputCompra" placeholder="Qtà acquistata" step="0.1" min="0.1" max="999">
 
       <label class="inp-label">Luogo (opzionale)</label>
-      <input type="text" id="inputLuogo" placeholder="Es. Stazione X / città / lungo la strada">
+      <input type="text" id="inputLuogo" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Es. Stazione X / città / lungo la strada">
 
       <div id="sezioneMiscelaCompra">
         <div style="font-size:13px; color:#aaa; margin-top:10px;">% Olio Miscela:</div>
@@ -1313,7 +1313,7 @@ color:#fff;
     <div id="checklist-container"></div>
 
     <div style="display:flex; gap:10px; margin-top:10px;">
-      <input type="text" id="nuovaCheckItem" style="margin:0; text-align:left;" placeholder="Nuovo elemento...">
+      <input type="text" id="nuovaCheckItem" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="margin:0; text-align:left;" placeholder="Nuovo elemento...">
       <button class="btn-azione" style="margin:0; width:60px; padding:0; font-size:24px;"
               onclick="aggiungiCheckItem()">+</button>
     </div>
@@ -1569,7 +1569,7 @@ color:#fff;
         <input type="number" id="carbChiclerMin" placeholder="Minimo (es. 55)" min="1" max="999">
       </div>
 
-      <input type="text" id="carbNote" placeholder="Note (es. Fuma in altitudine...)">
+      <input type="text" id="carbNote" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Note (es. Fuma in altitudine...)">
 
       <button class="btn-azione" style="background:#00bcd4; color:black;" onclick="salvaCarburazione()">
         💾 Salva Setup
@@ -1807,9 +1807,9 @@ color:#fff;
     <button class="close-modal" onclick="chiudiModal('modalDettagli')">×</button>
     <h2 style="color:#ff9800; text-align:center; margin-top:0;">✏️ Dettagli percorso</h2>
 
-    <input id="det-titolo" type="text" placeholder="Titolo (es. Bogotá → Medellín / Centro storico)">
+    <input id="det-titolo" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Titolo (es. Bogotá → Medellín / Centro storico)">
 
-    <textarea id="det-note" rows="4" placeholder="Note: cosa hai visto, com’è andata, problemi, incontri..."></textarea>
+    <textarea id="det-note" rows="4"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Note: cosa hai visto, com’è andata, problemi, incontri..."></textarea>
 
     <button class="btn-azione" style="background:#ff9800;color:black;" onclick="salvaDettagliPercorso()">
       💾 Salva dettagli
@@ -1841,8 +1841,8 @@ color:#fff;
     <div class="modal-content" style="border-color:#ff9800; max-width:500px;">
       <button class="close-modal" onclick="chiudiModal('modalLogDettaglio')">×</button>
       <h2 style="color:#ff9800; text-align:center;">🔧 Nuovo Intervento</h2>
-      <input type="text" id="log-nome" placeholder="Nome intervento (es. Cambio cavo acceleratore)">
-      <textarea id="log-descrizione" placeholder="Descrizione dettagliata..." rows="3" style="width:100%;"></textarea>
+      <input type="text" id="log-nome" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Nome intervento (es. Cambio cavo acceleratore)">
+      <textarea id="log-descrizione" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Descrizione dettagliata..." rows="3" style="width:100%;"></textarea>
       <input type="number" id="log-costo" placeholder="Costo in valuta locale (opzionale)" step="0.01" min="0">
       <input type="file" id="log-foto-input" accept="image/*" style="width:100%; margin-bottom:10px;"
              onchange="anteprima('log-foto-input','anteprima-log-foto')">
@@ -3646,6 +3646,8 @@ var mapFullMarker = null;
 var mapFullPolyline = null;
 var mapFullPhotoLayer = null;
 var mapFullCtx = null; // ✅ ultima tappa/giro aperta in mappa full (per refresh marker)
+
+  let mapFullClickNavigateEnabled = true;
   
 /* ============================================================
    MODALI
@@ -3932,9 +3934,15 @@ function renderMapFullPhotoMarkersForContext(ctx) {
     m.addTo(mapFullPhotoLayer);
   }
 }  
+
+
+  
+
+  
 function apriMappaFull(coordsOverride = null, ctx = null) {
   apriModal('modalMapFull');
   mapFullCtx = ctx || null; // ✅ ricorda contesto per refresh marker
+  mapFullClickNavigateEnabled = !ctx;
   setTimeout(() => {
     const el = document.getElementById('mapFull');
     if (!el) return;
@@ -3957,15 +3965,16 @@ function apriMappaFull(coordsOverride = null, ctx = null) {
       // ✅ TAP SULLA MAPPA FULL = NAVIGA QUI (una sola volta)
 if (!mapFullInstance._vtNavBound) {
   mapFullInstance.on('click', (ev) => {
-  const ll = ev?.latlng;
-  if (!ll || !isFinite(ll.lat) || !isFinite(ll.lng)) return;
+    if (!mapFullClickNavigateEnabled) return;
 
-  // opzionale: conferma (se vuoi zero conferme, dimmelo)
-  const ok = confirm(`Aprire Google Maps verso:\n${ll.lat.toFixed(6)}, ${ll.lng.toFixed(6)} ?`);
-  if (!ok) return;
+    const ll = ev?.latlng;
+    if (!ll || !isFinite(ll.lat) || !isFinite(ll.lng)) return;
 
-  openGoogleMapsToLatLon(ll.lat, ll.lng);
-});
+    const ok = confirm(`Aprire Google Maps verso:\n${ll.lat.toFixed(6)}, ${ll.lng.toFixed(6)} ?`);
+    if (!ok) return;
+
+    openGoogleMapsToLatLon(ll.lat, ll.lng);
+  });
 
   mapFullInstance._vtNavBound = true;
 }
@@ -9342,6 +9351,8 @@ refreshStatsPaeseDropdown();
 
 caricaDriveAutoSyncUI?.();
 updateDriveSyncInfo?.();
+
+  
 if (navigator.onLine && carica('vt_driveAutoSync','1') === '1') {
   setTimeout(() => {
     // evita sync se tab non è visibile
@@ -9349,6 +9360,8 @@ if (navigator.onLine && carica('vt_driveAutoSync','1') === '1') {
   }, 6000);
 }
 
+  disattivaAutoFillCampi();
+  
   await setLoadingProgress(100, '✅ Pronto!');
   await new Promise(r => setTimeout(r, 400));
 
@@ -9362,9 +9375,27 @@ if (navigator.onLine && carica('vt_driveAutoSync','1') === '1') {
   }
 }
 
+
+
+
+  
 /* ============================================================
    AVVIO
 ============================================================ */
+
+
+function disattivaAutoFillCampi() {
+  const campi = document.querySelectorAll('input, textarea');
+  campi.forEach(el => {
+    el.setAttribute('autocomplete', 'off');
+    el.setAttribute('autocorrect', 'off');
+    el.setAttribute('autocapitalize', 'off');
+    el.setAttribute('spellcheck', 'false');
+  });
+}
+
+
+  
 window.addEventListener('load', inizializzaApp);
 
 window.addEventListener('online', () => {
