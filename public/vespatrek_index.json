@@ -1,117 +1,113 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-01-10T12:00:00.000Z",
-  "titolo": "VespaTrek PX150 TEST",
-  "paeseAttuale": "Argentina",
+  "_exportDate": "2026-03-25T17:06:28.672Z",
+  "titolo": "VespaTrek PX150",
+  "paeseAttuale": "Mexico",
+  "diarioTagsPreset": [
+    "Paesaggi",
+    "Vespistas",
+    "Moteros",
+    "Turismo",
+    "Sterrato",
+    "Paisajes",
+    "Rio",
+    "Storia",
+    "Arte",
+    "Persone",
+    "Officina",
+    "Problemi",
+    "Frontiera",
+    "Burocrazia",
+    "Polizia",
+    "Strade",
+    "Pioggia",
+    "Campeggio",
+    "Cibo",
+    "Animali"
+  ],
   "stats": {
-    "kmTotali": 7421.6,
-    "benzinaUsataLitri": 271.4,
-    "benzinaFuoriTappaLitri": 12.8,
-    "olioTotaleLitri": 6.42,
-    "spesaBenzinaUsd": 487.30,
-    "spesaOlioUsd": 92.10,
-    "spesaRicambiUsd": 164.50,
-    "spesaManodoperaUsd": 121.00
+    "kmTotali": 6,
+    "benzinaUsataLitri": 0.28,
+    "benzinaFuoriTappaLitri": 0.946,
+    "olioTotaleLitri": 0,
+    "spesaBenzinaUsd": 0,
+    "spesaOlioUsd": 0,
+    "spesaRicambiUsd": 0,
+    "spesaManodoperaUsd": 0
   },
   "paesi": [
     {
-      "paese": "Colombia",
-      "slug": "colombia",
-      "path": "public/paesi/colombia.json",
+      "paese": "Mexico",
+      "slug": "mexico",
+      "path": "public/paesi/mexico.json",
       "stats": {
-        "km": 1210.3,
-        "benzina": 44.8,
-        "olioMl": 1010,
-        "spesaBenzinaUsd": 73.4,
-        "spesaOlioUsd": 15.0,
-        "spesaRicambiUsd": 24.0,
-        "spesaManodoperaUsd": 18.0
-      }
-    },
-    {
-      "paese": "Ecuador",
-      "slug": "ecuador",
-      "path": "public/paesi/ecuador.json",
-      "stats": {
-        "km": 980.7,
-        "benzina": 35.1,
-        "olioMl": 790,
-        "spesaBenzinaUsd": 61.2,
-        "spesaOlioUsd": 11.8,
-        "spesaRicambiUsd": 0.0,
-        "spesaManodoperaUsd": 0.0
-      }
-    },
-    {
-      "paese": "Peru",
-      "slug": "peru",
-      "path": "public/paesi/peru.json",
-      "stats": {
-        "km": 2115.4,
-        "benzina": 77.9,
-        "olioMl": 1840,
-        "spesaBenzinaUsd": 141.5,
-        "spesaOlioUsd": 27.3,
-        "spesaRicambiUsd": 52.0,
-        "spesaManodoperaUsd": 41.0
-      }
-    },
-    {
-      "paese": "Chile",
-      "slug": "chile",
-      "path": "public/paesi/chile.json",
-      "stats": {
-        "km": 1490.8,
-        "benzina": 54.6,
-        "olioMl": 1290,
-        "spesaBenzinaUsd": 112.4,
-        "spesaOlioUsd": 18.6,
-        "spesaRicambiUsd": 36.5,
-        "spesaManodoperaUsd": 22.0
-      }
-    },
-    {
-      "paese": "Argentina",
-      "slug": "argentina",
-      "path": "public/paesi/argentina.json",
-      "stats": {
-        "km": 1624.4,
-        "benzina": 59.0,
-        "olioMl": 1490,
-        "spesaBenzinaUsd": 98.8,
-        "spesaOlioUsd": 19.4,
-        "spesaRicambiUsd": 52.0,
-        "spesaManodoperaUsd": 40.0
+        "km": 6,
+        "benzina": 0,
+        "spesaBenzinaUsd": 0,
+        "spesaOlioUsd": 0,
+        "spesaRicambiUsd": 0,
+        "spesaManodoperaUsd": 0
       }
     }
   ],
-  "ultimiPost": [
+  "ultimiPost": [],
+  "ultimeTappe": [
     {
-      "id": 9001,
-      "ts": 1767000000000,
-      "data": "29/12/2025",
-      "ora": "18:20",
-      "paese": "Argentina",
-      "km": "7421.6",
-      "testo": "Arrivato finalmente a Buenos Aires. Emozione fortissima.",
-      "tags": ["Arrivo", "BuenosAires"],
-      "geo": { "lat": -34.6037, "lon": -58.3816 },
-      "videoUrl": null,
-      "videoPlanned": false,
-      "fotoUrl": null,
-      "foto": null
+      "id": 1774458371585,
+      "tipo": "Tappa",
+      "data": "25/03/2026",
+      "ora": "12:06",
+      "paese": "Mexico",
+      "km": 7,
+      "durata": 1274,
+      "altMin": 2675,
+      "altMax": 2675,
+      "velMax": 0,
+      "velMedia": 19.8,
+      "benzinaStimataLitri": 0.28,
+      "benzinaRealeLitri": 0,
+      "consumoStimatoKmL": 25,
+      "consumoRealeKmL": null,
+      "titolo": "poppop",
+      "note": "ñlol",
+      "telemetry": [],
+      "traccia": [
+        [
+          4.8059418,
+          -74.3606514
+        ],
+        [
+          4.8059416,
+          -74.3606494
+        ],
+        [
+          4.8059411,
+          -74.3606478
+        ],
+        [
+          4.8059407,
+          -74.3606473
+        ],
+        [
+          4.805941,
+          -74.3606469
+        ],
+        [
+          4.8059405,
+          -74.3606467
+        ]
+      ]
     }
   ],
-  "ultimeTappe": [],
   "archivi": {
     "index": "public/vespatrek_index.json",
     "officina": "public/officina.json",
     "paesi": [
-      { "paese": "Colombia", "slug": "colombia", "path": "public/paesi/colombia.json" },
-      { "paese": "Ecuador", "slug": "ecuador", "path": "public/paesi/ecuador.json" },
-      { "paese": "Peru", "slug": "peru", "path": "public/paesi/peru.json" },
-      { "paese": "Chile", "slug": "chile", "path": "public/paesi/chile.json" },
-      { "paese": "Argentina", "slug": "argentina", "path": "public/paesi/argentina.json" }
+      {
+        "paese": "Mexico",
+        "slug": "mexico",
+        "path": "public/paesi/mexico.json"
+      }
     ],
     "diarioMensile": []
   }
