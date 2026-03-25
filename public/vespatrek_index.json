@@ -35,7 +35,23 @@
     "spesaRicambiUsd": 0,
     "spesaManodoperaUsd": 0
   },
-  "paesi": [],
+  "paesi": [
+
+  {
+    "paese": "Colombia",
+    "slug": "colombia",
+    "path": "public/paesi/colombia.json",
+    "stats": {
+      "km": 0,
+      "benzina": 0,
+      "spesaBenzinaUsd": 0,
+      "spesaOlioUsd": 0,
+      "spesaRicambiUsd": 0,
+      "spesaManodoperaUsd": 0
+    }
+  }
+    
+  ],
   "ultimiPost": [],
   "ultimeTappe": [],
   "archivi": {
