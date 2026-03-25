@@ -89,6 +89,23 @@
       }
     },
 
+
+  {
+      "paese": "Bolivia",
+      "slug": "bolivia",
+      "path": "public/paesi/bolivia.json",
+      "stats": {
+        "km": 1345.9,
+        "benzina": 129.4,
+        "spesaBenzinaUsd": 130.4,
+        "spesaOlioUsd": 2.65,
+        "spesaRicambiUsd": 0,
+        "spesaManodoperaUsd": 0
+      }
+    },
+
+
+    
  {
       "paese": "Argentina",
       "slug": "argentina",
