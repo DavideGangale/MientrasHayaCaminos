@@ -1,66 +1,13 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-03-25T23:20:12.186Z",
+  "_exportDate": "2026-03-25T23:22:43.316Z",
   "tipo": "officina",
   "stats": {
     "spesaRicambiUsd": 0,
-    "spesaManodoperaUsd": 6
+    "spesaManodoperaUsd": 0
   },
-  "manutenzioni": [
-    {
-      "id": 1774476103624,
-      "data": "26/09/2025",
-      "ora": "10:50",
-      "paese": "Peru",
-      "km": "720.0",
-      "nome": "Controllo candela",
-      "desc": "Smontata e controllata dopo tratto in quota.",
-      "costoLocal": 0,
-      "valuta": "USD",
-      "costoUsd": 0,
-      "fotoUrl": null,
-      "geo": {
-        "lat": -15.84,
-        "lon": -70.02
-      }
-    },
-    {
-      "id": 1774478403624,
-      "data": "04/10/2025",
-      "ora": "18:00",
-      "paese": "Chile",
-      "km": "1182.7",
-      "nome": "Registrazione cavo frizione",
-      "desc": "Piccolo intervento dopo sterrato.",
-      "costoLocal": 6,
-      "valuta": "USD",
-      "costoUsd": 6,
-      "fotoUrl": null,
-      "geo": {
-        "lat": -22.9087,
-        "lon": -68.1997
-      }
-    }
-  ],
-  "carburazioni": [
-    {
-      "id": 1774476203624,
-      "data": "26/09/2025",
-      "ora": "11:20",
-      "alt": 3820,
-      "chicMax": 108,
-      "chicMin": 50,
-      "viteAria": "1.5 giri",
-      "viteMinimo": "2 giri",
-      "candela": "nocciola",
-      "nota": "Setup demo per alta quota",
-      "geo": {
-        "lat": -15.84,
-        "lon": -70.02
-      },
-      "fotoCandela": null
-    }
-  ],
+  "manutenzioni": [],
+  "carburazioni": [],
   "inventario": [
     {
       "nome": "Cavi Cambio",
