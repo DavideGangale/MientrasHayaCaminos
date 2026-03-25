@@ -1884,7 +1884,7 @@ color:#fff;
   <h2 style="color:#ff9800; text-align:center;">🔧 Nuovo Intervento</h2>
 
   <label class="inp-label">Ricambio usato (opzionale)</label>
-  <select id="log-ricambio-select" class="inp-select">
+ <select id="log-ricambio-select" class="inp-select" onchange="onChangeRicambioIntervento()">
     <option value="">-- Nessun ricambio usato --</option>
   </select>
 
@@ -8286,6 +8286,38 @@ function popolaSelectRicambiIntervento(selectedId = '') {
       </option>
     `).join('')}
   `;
+}
+
+
+
+function onChangeRicambioIntervento() {
+  const sel = document.getElementById('log-ricambio-select');
+  const nomeEl = document.getElementById('log-nome');
+
+  if (!sel || !nomeEl) return;
+
+  const selectedOption = sel.options[sel.selectedIndex];
+  const ricambioId = String(sel.value || '').trim();
+
+  // se non è selezionato nulla, non forzare niente
+  if (!ricambioId) return;
+
+  // prendo il nome pulito dall'inventario
+  const inv = caricaJSON('vt_inventario', []);
+  const item = Array.isArray(inv)
+    ? inv.find(x => String(x.id || '') === ricambioId)
+    : null;
+
+  if (!item || !item.nome) return;
+
+  const testoAuto = `Montaggio ${item.nome}`;
+
+  // riempi solo se il campo è vuoto
+  // oppure se contiene già un vecchio "Montaggio ..."
+  const valAttuale = (nomeEl.value || '').trim();
+  if (!valAttuale || valAttuale.startsWith('Montaggio ')) {
+    nomeEl.value = testoAuto;
+  }
 }
 
   
