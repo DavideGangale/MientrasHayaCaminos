@@ -1,10 +1,29 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-03-25T21:31:35.686Z",
+  "_exportDate": "2026-03-25T23:12:30.231Z",
   "tipo": "diario_mese",
   "mese": "2026-03",
-  "count": 0,
-  "entries": []
+  "count": 1,
+  "entries": [
+    {
+      "id": 1774479241819,
+      "ts": 1774479241819,
+      "data": "",
+      "ora": "",
+      "paese": "Colombia",
+      "km": "",
+      "testo": "G",
+      "tags": [
+        "G"
+      ],
+      "geo": {
+        "lat": 4.806014627675499,
+        "lon": -74.36064571969258
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1RhJCqXdPTsuR3DDg19X5om02fBI7Escf",
+      "foto": null
+    }
+  ]
 }
-
-
