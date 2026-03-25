@@ -1,60 +1,159 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-01-10T12:00:00.000Z",
+  "_exportDate": "2026-03-25T17:06:28.671Z",
   "tipo": "officina",
   "stats": {
-    "spesaRicambiUsd": 164.5,
-    "spesaManodoperaUsd": 121.0
+    "spesaRicambiUsd": 0,
+    "spesaManodoperaUsd": 0
   },
-  "manutenzioni": [
+  "manutenzioni": [],
+  "carburazioni": [],
+  "inventario": [
     {
-      "id": 5001,
-      "data": "18/10/2025",
-      "ora": "11:20",
-      "paese": "Peru",
-      "km": "3180.4",
-      "nome": "Cambio cavo frizione",
-      "desc": "Rotto vicino ad Abancay, sostituito in officina locale.",
-      "costoLocal": 45,
-      "valuta": "PEN",
-      "costoUsd": 12.2,
-      "fotoUrl": null,
-      "geo": { "lat": -13.6373, "lon": -72.8782 }
+      "nome": "Cavi Cambio",
+      "qta": 3,
+      "wear": "interval",
+      "intervalKm": 6000,
+      "lastKm": -5634.0082,
+      "id": "1774374925525_56e201da5e316",
+      "usedKm": 5650,
+      "durata": 0
     },
     {
-      "id": 5002,
-      "data": "03/12/2025",
-      "ora": "16:10",
-      "paese": "Chile",
-      "km": "5820.8",
-      "nome": "Sostituzione ganasce post.",
-      "desc": "Usura avanzata, cambio preventivo prima del sud.",
-      "costoLocal": 28000,
-      "valuta": "CLP",
-      "costoUsd": 29.0,
-      "fotoUrl": null,
-      "geo": { "lat": -41.4693, "lon": -72.9424 }
-    }
-  ],
-  "carburazioni": [
+      "nome": "Cavo Frizione",
+      "qta": 1,
+      "wear": "interval",
+      "intervalKm": 5000,
+      "lastKm": 0,
+      "id": "1774442414235_3c908d806e6ae8"
+    },
     {
-      "id": 7001,
-      "data": "22/10/2025",
-      "ora": "09:40",
-      "alt": 3399,
-      "chicMax": 108,
-      "chicMin": 48,
-      "viteAria": "1.5 giri",
-      "viteMinimo": "2 giri",
-      "candela": "nocciola",
-      "nota": "Leggermente grassa in quota ma regolare.",
-      "geo": { "lat": -13.5319, "lon": -71.9675 },
-      "fotoCandela": null
+      "nome": "Cavo Freno Anteriore",
+      "qta": 2,
+      "wear": "interval",
+      "intervalKm": 8000,
+      "lastKm": 0
+    },
+    {
+      "nome": "Cavo Freno Posteriore",
+      "qta": 2,
+      "wear": "interval",
+      "intervalKm": 8000,
+      "lastKm": 0
+    },
+    {
+      "nome": "Cavo Acceleratore",
+      "qta": 1,
+      "wear": "interval",
+      "intervalKm": 6000,
+      "lastKm": 13.7016,
+      "id": "1774378180495_37374e050a566",
+      "usedKm": 0
+    },
+    {
+      "nome": "Ganasce freno ant.",
+      "qta": 2,
+      "wear": "interval",
+      "intervalKm": 5000,
+      "lastKm": 0
+    },
+    {
+      "nome": "Ganasce freno post.",
+      "qta": 2,
+      "wear": "interval",
+      "intervalKm": 3000,
+      "lastKm": 0
+    },
+    {
+      "nome": "Pneumatico",
+      "qta": 3,
+      "wear": "interval",
+      "intervalKm": 10000,
+      "lastKm": 0
+    },
+    {
+      "nome": "Kit frizione",
+      "qta": 1,
+      "wear": "interval",
+      "intervalKm": 12000,
+      "lastKm": 0
+    },
+    {
+      "nome": "Dischi frizione",
+      "qta": 1,
+      "wear": "interval",
+      "intervalKm": 10000,
+      "lastKm": 0
+    },
+    {
+      "nome": "Cambio Olio 300ml",
+      "qta": 1,
+      "wear": "interval",
+      "intervalKm": 2000,
+      "lastKm": 0
+    },
+    {
+      "nome": "Candela",
+      "qta": 2,
+      "wear": "interval",
+      "intervalKm": 6000,
+      "lastKm": 0
+    },
+    {
+      "nome": "CDI",
+      "qta": 1,
+      "wear": "na",
+      "intervalKm": 0,
+      "lastKm": 0
+    },
+    {
+      "nome": "Piatto Bobbine",
+      "qta": 1,
+      "wear": "na",
+      "intervalKm": 0,
+      "lastKm": 0
+    },
+    {
+      "nome": "Piste Direzione",
+      "qta": 1,
+      "wear": "na",
+      "intervalKm": 0,
+      "lastKm": 0
+    },
+    {
+      "nome": "Supporto Ammortizzatore Posteriore",
+      "qta": 1,
+      "wear": "na",
+      "intervalKm": 0,
+      "lastKm": 0
+    },
+    {
+      "nome": "Collettore carburatore",
+      "qta": 1,
+      "wear": "na",
+      "intervalKm": 0,
+      "lastKm": 0
+    },
+    {
+      "nome": "Eje Balancin",
+      "qta": 1,
+      "wear": "na",
+      "intervalKm": 0,
+      "lastKm": 0
+    },
+    {
+      "nome": "Maniglia Freno",
+      "qta": 1,
+      "wear": "na",
+      "intervalKm": 0,
+      "lastKm": 0
+    },
+    {
+      "nome": "Maniglia Frizione",
+      "qta": 1,
+      "wear": "na",
+      "intervalKm": 0,
+      "lastKm": 0
     }
-  ],
-  "inventario": [
-    { "nome": "Cavo frizione", "qta": 1, "wear": "interval", "intervalKm": 5000, "usedKm": 1200, "lastKm": 6220 },
-    { "nome": "Candela", "qta": 2, "wear": "interval", "intervalKm": 4000, "usedKm": 800, "lastKm": 6620 },
-    { "nome": "Ganasce freno post.", "qta": 1, "wear": "interval", "intervalKm": 3000, "usedKm": 1400, "lastKm": 6020 }
   ]
 }
