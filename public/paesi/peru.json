@@ -1,233 +1,107 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-01-10T12:00:00.000Z",
+  "_exportDate": "2026-03-25T20:30:54.107Z",
   "tipo": "paese",
   "paese": "Peru",
   "slug": "peru",
   "stats": {
-    "km": 2115.4,
-    "benzina": 77.9,
-    "benzinaFuori": 3.1,
-    "olioMl": 1840,
-    "spesaBenzinaUsd": 141.5,
-    "spesaOlioUsd": 27.3,
-    "spesaRicambiUsd": 52.0,
-    "spesaManodoperaUsd": 41.0
+    "km": 356.9,
+    "benzina": 12.4,
+    "benzinaFuori": 0,
+    "olioMl": 248,
+    "spesaBenzinaUsd": 13.4,
+    "spesaOlioUsd": 0.95,
+    "spesaRicambiUsd": 0,
+    "spesaManodoperaUsd": 0
   },
   "tappe": [
     {
-      "id": 3001,
+      "id": 1774453486466,
       "tipo": "Tappa",
-      "data": "18/09/2025",
-      "ora": "07:50",
+      "data": "25/09/2025",
+      "ora": "07:40",
       "paese": "Peru",
-      "km": 387.6,
-      "durata": 28800,
-      "altMin": 2560,
-      "altMax": 3399,
-      "velMax": 66,
-      "velMedia": 48.5,
-      "benzinaStimataLitri": 14.0,
-      "benzinaRealeLitri": 13.7,
-      "consumoStimatoKmL": 27.7,
-      "consumoRealeKmL": 28.3,
-      "titolo": "Cuenca → Piura",
-      "note": "Giornata lunga. Ingresso in Perù più lento del previsto.",
+      "km": 356.9,
+      "durata": 27800,
+      "altMin": 1200,
+      "altMax": 4100,
+      "velMax": 69,
+      "velMedia": 36.9,
+      "benzinaStimataLitri": 12.4,
+      "benzinaRealeLitri": 13.1,
+      "consumoStimatoKmL": 28.8,
+      "consumoRealeKmL": 27.2,
+      "titolo": "Cusco → Puno",
+      "note": "Demo Perù in alta quota",
       "telemetry": [
-        { "km": 0, "alt": 2560, "sp": 0, "ts": 1758172200000 },
-        { "km": 100, "alt": 1900, "sp": 54, "ts": 1758180600000 },
-        { "km": 220, "alt": 950, "sp": 61, "ts": 1758190800000 },
-        { "km": 320, "alt": 120, "sp": 64, "ts": 1758199800000 },
-        { "km": 387.6, "alt": 29, "sp": 0, "ts": 1758204600000 }
+        {
+          "km": 0,
+          "alt": 3390,
+          "sp": 0,
+          "ts": 1774453186466
+        },
+        {
+          "km": 190,
+          "alt": 4100,
+          "sp": 53,
+          "ts": 1774453336466
+        }
       ],
       "traccia": [
-        [-2.9001, -79.0059],
-        [-3.5010, -79.9590],
-        [-4.0010, -80.7310],
-        [-5.1945, -80.6328]
-      ]
-    },
-    {
-      "id": 3002,
-      "tipo": "Tappa",
-      "data": "24/09/2025",
-      "ora": "08:30",
-      "paese": "Peru",
-      "km": 410.8,
-      "durata": 30900,
-      "altMin": 29,
-      "altMax": 2400,
-      "velMax": 73,
-      "velMedia": 47.9,
-      "benzinaStimataLitri": 14.8,
-      "benzinaRealeLitri": 14.4,
-      "consumoStimatoKmL": 27.8,
-      "consumoRealeKmL": 28.5,
-      "titolo": "Piura → Trujillo",
-      "note": "Costa ventosa, tanto camion e caldo forte.",
-      "telemetry": [
-        { "km": 0, "alt": 29, "sp": 0, "ts": 1758695400000 },
-        { "km": 90, "alt": 60, "sp": 58, "ts": 1758702900000 },
-        { "km": 200, "alt": 40, "sp": 67, "ts": 1758712500000 },
-        { "km": 310, "alt": 85, "sp": 62, "ts": 1758720900000 },
-        { "km": 410.8, "alt": 34, "sp": 0, "ts": 1758726300000 }
-      ],
-      "traccia": [
-        [-5.1945, -80.6328],
-        [-6.7700, -79.8400],
-        [-7.8200, -79.1200],
-        [-8.1119, -79.0288]
-      ]
-    },
-    {
-      "id": 3003,
-      "tipo": "Tappa",
-      "data": "22/10/2025",
-      "ora": "07:20",
-      "paese": "Peru",
-      "km": 128.6,
-      "durata": 16200,
-      "altMin": 3320,
-      "altMax": 3399,
-      "velMax": 49,
-      "velMedia": 28.6,
-      "benzinaStimataLitri": 5.2,
-      "benzinaRealeLitri": 5.0,
-      "consumoStimatoKmL": 24.7,
-      "consumoRealeKmL": 25.7,
-      "titolo": "Cusco → Valle Sacra",
-      "note": "Poca strada ma tanta quota, soste continue per foto e respiro.",
-      "telemetry": [
-        { "km": 0, "alt": 3399, "sp": 0, "ts": 1761114000000 },
-        { "km": 35, "alt": 3340, "sp": 21, "ts": 1761118200000 },
-        { "km": 72, "alt": 3320, "sp": 30, "ts": 1761122700000 },
-        { "km": 102, "alt": 3380, "sp": 27, "ts": 1761126300000 },
-        { "km": 128.6, "alt": 3340, "sp": 0, "ts": 1761130200000 }
-      ],
-      "traccia": [
-        [-13.5319, -71.9675],
-        [-13.3820, -72.0040],
-        [-13.3240, -72.1300],
-        [-13.3000, -72.1800]
+        [
+          -13.5319,
+          -71.9675
+        ],
+        [
+          -15.84,
+          -70.02
+        ]
       ]
     }
   ],
-  "turismo": [
-    {
-      "id": 3101,
-      "tipo": "Turismo",
-      "data": "23/10/2025",
-      "ora": "16:00",
-      "paese": "Peru",
-      "km": 34.1,
-      "durata": 5100,
-      "altMin": 3330,
-      "altMax": 3460,
-      "velMax": 39,
-      "velMedia": 24.1,
-      "benzinaStimataLitri": 1.4,
-      "benzinaRealeLitri": null,
-      "consumoStimatoKmL": 24.4,
-      "consumoRealeKmL": null,
-      "titolo": "Giri a Cusco",
-      "note": "Mercati, centro e strade ripidissime.",
-      "telemetry": [
-        { "km": 0, "alt": 3399, "sp": 0, "ts": 1761235200000 },
-        { "km": 15, "alt": 3440, "sp": 18, "ts": 1761238200000 },
-        { "km": 27, "alt": 3460, "sp": 22, "ts": 1761240600000 },
-        { "km": 34.1, "alt": 3380, "sp": 0, "ts": 1761242100000 }
-      ],
-      "traccia": [
-        [-13.5319, -71.9675],
-        [-13.5250, -71.9750],
-        [-13.5180, -71.9600],
-        [-13.5319, -71.9675]
-      ]
-    }
-  ],
+  "turismo": [],
   "diario": [
     {
-      "id": 3201,
-      "ts": 1758205500000,
-      "data": "18/09/2025",
-      "ora": "18:45",
+      "id": 1774453586466,
+      "ts": 1774453586466,
+      "data": "25/09/2025",
+      "ora": "19:10",
       "paese": "Peru",
-      "km": "1584.5",
-      "testo": "Perù. Solo il nome mi emozionava già prima di partire.",
-      "tags": ["Peru", "Frontiera"],
-      "geo": { "lat": -5.1945, "lon": -80.6328 },
+      "km": "699.9",
+      "testo": "Altitudine seria. La Vespa continua a salire anche se io mi sento senza fiato.",
+      "tags": [
+        "Problemi",
+        "Paesaggi"
+      ],
+      "geo": {
+        "lat": -15.84,
+        "lon": -70.02
+      },
       "videoUrl": null,
-      "videoPlanned": false,
-      "fotoUrl": null,
-      "foto": null
-    },
-    {
-      "id": 3202,
-      "ts": 1761131400000,
-      "data": "22/10/2025",
-      "ora": "17:30",
-      "paese": "Peru",
-      "km": "3180.4",
-      "testo": "Cusco e l'altitudine cambiano il ritmo di tutto. Anche guidare diventa diverso.",
-      "tags": ["Cusco", "Altitudine"],
-      "geo": { "lat": -13.5319, "lon": -71.9675 },
-      "videoUrl": null,
-      "videoPlanned": false,
+      "videoPlanned": true,
       "fotoUrl": null,
       "foto": null
     }
   ],
-  "rifornimenti": [
-    {
-      "id": 3301,
-      "geo": { "lat": -8.1119, "lon": -79.0288 },
-      "data": "24/09/2025",
-      "ora": "14:30",
-      "paese": "Peru",
-      "qta": "6.10",
-      "dest": "Vespa",
-      "mix": "2.0%",
-      "prezzoUnit": "4.850",
-      "valuta": "PEN",
-      "fxToUsd": 0.27,
-      "costoBenzLocal": "29.59",
-      "costoBenzUsd": "7.99",
-      "costoBenz": "7.99",
-      "costoOlio": "1.02",
-      "luogo": "Trujillo",
-      "km": "1995.3"
-    }
-  ],
-  "carburazioni": [
-    {
-      "id": 3401,
-      "data": "22/10/2025",
-      "ora": "09:40",
-      "alt": 3399,
-      "chicMax": 108,
-      "chicMin": 48,
-      "viteAria": "1.5 giri",
-      "viteMinimo": "2 giri",
-      "candela": "nocciola",
-      "nota": "Leggermente grassa in quota ma regolare.",
-      "geo": { "lat": -13.5319, "lon": -71.9675 },
-      "fotoCandela": null
-    }
-  ],
+  "rifornimenti": [],
+  "carburazioni": [],
   "manutenzioni": [
     {
-      "id": 3501,
-      "data": "18/10/2025",
-      "ora": "11:20",
+      "id": 1774453786466,
+      "data": "26/09/2025",
+      "ora": "10:50",
       "paese": "Peru",
-      "km": "3180.4",
-      "nome": "Cambio cavo frizione",
-      "desc": "Rotto vicino ad Abancay, sostituito in officina locale.",
-      "costoLocal": 45,
-      "valuta": "PEN",
-      "costoUsd": 12.2,
+      "km": "720.0",
+      "nome": "Controllo candela",
+      "desc": "Smontata e controllata dopo tratto in quota.",
+      "costoLocal": 0,
+      "valuta": "USD",
+      "costoUsd": 0,
       "fotoUrl": null,
-      "geo": { "lat": -13.6373, "lon": -72.8782 }
+      "geo": {
+        "lat": -15.84,
+        "lon": -70.02
+      }
     }
   ]
 }
