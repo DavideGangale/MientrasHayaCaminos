@@ -1407,6 +1407,17 @@ color:#fff;
     <button class="btn-secondary" style="background:#263238;" onclick="testAddKm()">
       🧪 TEST: +1 km (finto)
     </button>
+
+
+<button class="btn-secondary" style="background:#1565c0;" onclick="caricaDatiDemoMultiPaese()">
+  🧪 CARICA DATI DEMO MULTI-PAESE
+</button>
+
+<button class="btn-secondary" style="background:#6d4c41;" onclick="rimuoviDatiDemo()">
+  🧹 RIMUOVI DATI DEMO
+</button>
+
+    
   </div>
 </div>
 
@@ -9925,6 +9936,442 @@ async function setLoadingProgress(pct, label) {
 }
 
 
+
+function caricaDatiDemoMultiPaese() {
+  if (!confirm('Caricare dati demo multi-paese nell’app privata?\n\nSovrascriverà i dati attuali di viaggio salvati in locale.')) return;
+
+  const now = Date.now();
+
+  const demoTappe = [
+    {
+      id: now - 9000000,
+      tipo: 'Tappa',
+      data: '12/09/2025',
+      ora: '08:20',
+      paese: 'Colombia',
+      km: 132.4,
+      durata: 11800,
+      altMin: 350,
+      altMax: 2640,
+      velMax: 78,
+      velMedia: 41.2,
+      benzina: 4.8,
+      benzinaStimataLitri: 4.8,
+      benzinaRealeLitri: 5.1,
+      consumoStimatoKmL: 27.6,
+      consumoRealeKmL: 25.9,
+      titolo: 'Bogotá → Villa de Leyva',
+      note: 'Prima tappa demo in Colombia',
+      startTs: now - 9200000,
+      endTs: now - 9000000,
+      traccia: [
+        [4.711, -74.072],
+        [4.85, -73.95],
+        [5.12, -73.52],
+        [5.63, -73.52]
+      ],
+      telemetry: [
+        { km: 0, alt: 2640, sp: 0, ts: now - 9200000 },
+        { km: 30, alt: 2400, sp: 48, ts: now - 9150000 },
+        { km: 70, alt: 1800, sp: 62, ts: now - 9100000 },
+        { km: 132.4, alt: 2140, sp: 0, ts: now - 9000000 }
+      ]
+    },
+    {
+      id: now - 7000000,
+      tipo: 'Tappa',
+      data: '18/09/2025',
+      ora: '09:10',
+      paese: 'Ecuador',
+      km: 210.7,
+      durata: 18400,
+      altMin: 900,
+      altMax: 3200,
+      velMax: 74,
+      velMedia: 39.8,
+      benzina: 7.3,
+      benzinaStimataLitri: 7.3,
+      benzinaRealeLitri: 7.8,
+      consumoStimatoKmL: 28.9,
+      consumoRealeKmL: 27.0,
+      titolo: 'Quito → Baños',
+      note: 'Demo Ecuador',
+      startTs: now - 7200000,
+      endTs: now - 7000000,
+      traccia: [
+        [-0.1807, -78.4678],
+        [-0.5, -78.3],
+        [-1.1, -78.5],
+        [-1.396, -78.424]
+      ],
+      telemetry: [
+        { km: 0, alt: 2850, sp: 0, ts: now - 7200000 },
+        { km: 50, alt: 3000, sp: 44, ts: now - 7150000 },
+        { km: 120, alt: 2400, sp: 59, ts: now - 7100000 },
+        { km: 210.7, alt: 1820, sp: 0, ts: now - 7000000 }
+      ]
+    },
+    {
+      id: now - 5000000,
+      tipo: 'Tappa',
+      data: '25/09/2025',
+      ora: '07:40',
+      paese: 'Peru',
+      km: 356.9,
+      durata: 27800,
+      altMin: 1200,
+      altMax: 4100,
+      velMax: 69,
+      velMedia: 36.9,
+      benzina: 12.4,
+      benzinaStimataLitri: 12.4,
+      benzinaRealeLitri: 13.1,
+      consumoStimatoKmL: 28.8,
+      consumoRealeKmL: 27.2,
+      titolo: 'Cusco → Puno',
+      note: 'Demo Perù in alta quota',
+      startTs: now - 5300000,
+      endTs: now - 5000000,
+      traccia: [
+        [-13.5319, -71.9675],
+        [-13.8, -71.6],
+        [-14.4, -70.9],
+        [-15.84, -70.02]
+      ],
+      telemetry: [
+        { km: 0, alt: 3390, sp: 0, ts: now - 5300000 },
+        { km: 80, alt: 3800, sp: 41, ts: now - 5220000 },
+        { km: 190, alt: 4100, sp: 53, ts: now - 5150000 },
+        { km: 356.9, alt: 3820, sp: 0, ts: now - 5000000 }
+      ]
+    },
+    {
+      id: now - 3000000,
+      tipo: 'Tappa',
+      data: '03/10/2025',
+      ora: '08:10',
+      paese: 'Chile',
+      km: 418.2,
+      durata: 31200,
+      altMin: 50,
+      altMax: 2450,
+      velMax: 82,
+      velMedia: 43.5,
+      benzina: 14.7,
+      benzinaStimataLitri: 14.7,
+      benzinaRealeLitri: 15.0,
+      consumoStimatoKmL: 28.4,
+      consumoRealeKmL: 27.9,
+      titolo: 'Arica → San Pedro de Atacama',
+      note: 'Demo Cile deserto',
+      startTs: now - 3300000,
+      endTs: now - 3000000,
+      traccia: [
+        [-18.4783, -70.3126],
+        [-18.9, -69.6],
+        [-21.2, -68.9],
+        [-22.9087, -68.1997]
+      ],
+      telemetry: [
+        { km: 0, alt: 20, sp: 0, ts: now - 3300000 },
+        { km: 110, alt: 1200, sp: 57, ts: now - 3220000 },
+        { km: 260, alt: 2400, sp: 61, ts: now - 3120000 },
+        { km: 418.2, alt: 2430, sp: 0, ts: now - 3000000 }
+      ]
+    }
+  ];
+
+  const demoTurismo = [
+    {
+      id: now - 2500000,
+      tipo: 'Turismo',
+      data: '04/10/2025',
+      ora: '11:30',
+      paese: 'Chile',
+      km: 64.5,
+      durata: 6200,
+      altMin: 2200,
+      altMax: 2550,
+      velMax: 58,
+      velMedia: 34.5,
+      benzina: 2.3,
+      benzinaStimataLitri: 2.3,
+      benzinaRealeLitri: 2.5,
+      consumoStimatoKmL: 28.0,
+      consumoRealeKmL: 25.8,
+      titolo: 'Giro Valle de la Luna',
+      note: 'Uscita turistica demo',
+      startTs: now - 2600000,
+      endTs: now - 2500000,
+      traccia: [
+        [-22.9087, -68.1997],
+        [-22.95, -68.28],
+        [-22.99, -68.31],
+        [-22.9087, -68.1997]
+      ],
+      telemetry: [
+        { km: 0, alt: 2430, sp: 0, ts: now - 2600000 },
+        { km: 22, alt: 2480, sp: 36, ts: now - 2570000 },
+        { km: 43, alt: 2520, sp: 41, ts: now - 2530000 },
+        { km: 64.5, alt: 2430, sp: 0, ts: now - 2500000 }
+      ]
+    }
+  ];
+
+  const demoDiario = [
+    {
+      id: now - 8800000,
+      ts: now - 8800000,
+      data: '12/09/2025',
+      ora: '17:40',
+      paese: 'Colombia',
+      km: '132.4',
+      testo: 'Arrivato a Villa de Leyva. Bellissimo centro storico, prime sensazioni di libertà totale.',
+      tags: ['Paesaggi', 'Turismo'],
+      geo: { lat: 5.6349, lon: -73.5248 },
+      foto: null,
+      fotoUrl: null,
+      videoUrl: null,
+      videoPlanned: false
+    },
+    {
+      id: now - 6900000,
+      ts: now - 6900000,
+      data: '18/09/2025',
+      ora: '18:20',
+      paese: 'Ecuador',
+      km: '343.1',
+      testo: 'Giornata di pioggia e montagne. Arrivare a Baños in Vespa è già una piccola vittoria.',
+      tags: ['Pioggia', 'Strade'],
+      geo: { lat: -1.396, lon: -78.424 },
+      foto: null,
+      fotoUrl: null,
+      videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      videoPlanned: false
+    },
+    {
+      id: now - 4900000,
+      ts: now - 4900000,
+      data: '25/09/2025',
+      ora: '19:10',
+      paese: 'Peru',
+      km: '699.9',
+      testo: 'Altitudine seria. La Vespa continua a salire anche se io mi sento senza fiato.',
+      tags: ['Problemi', 'Paesaggi'],
+      geo: { lat: -15.84, lon: -70.02 },
+      foto: null,
+      fotoUrl: null,
+      videoUrl: null,
+      videoPlanned: true
+    }
+  ];
+
+  const demoLogCarburanti = [
+    {
+      id: now - 9100000,
+      data: '12/09/2025',
+      ora: '07:55',
+      paese: 'Colombia',
+      qta: '5.20',
+      dest: 'Vespa',
+      mix: '2.0%',
+      prezzoUnit: '1.120',
+      valuta: 'USD',
+      fxToUsd: 1,
+      costoBenzLocal: '5.82',
+      costoBenzUsd: '5.82',
+      costoBenz: '5.82',
+      costoOlio: '0.45',
+      luogo: 'Bogotá',
+      km: '0.0',
+      geo: { lat: 4.711, lon: -74.072 }
+    },
+    {
+      id: now - 7100000,
+      data: '18/09/2025',
+      ora: '08:40',
+      paese: 'Ecuador',
+      qta: '7.80',
+      dest: 'Vespa',
+      mix: '2.0%',
+      prezzoUnit: '1.000',
+      valuta: 'USD',
+      fxToUsd: 1,
+      costoBenzLocal: '7.80',
+      costoBenzUsd: '7.80',
+      costoBenz: '7.80',
+      costoOlio: '0.60',
+      luogo: 'Quito',
+      km: '132.4',
+      geo: { lat: -0.1807, lon: -78.4678 }
+    }
+  ];
+
+  const demoLogbook = [
+    {
+      id: now - 4700000,
+      data: '26/09/2025',
+      ora: '10:50',
+      paese: 'Peru',
+      km: '720.0',
+      nome: 'Controllo candela',
+      desc: 'Smontata e controllata dopo tratto in quota.',
+      valuta: 'USD',
+      fxToUsd: 1,
+      costoLocal: 0,
+      costoUsd: 0,
+      foto: null,
+      fotoUrl: null,
+      geo: { lat: -15.84, lon: -70.02 }
+    },
+    {
+      id: now - 2400000,
+      data: '04/10/2025',
+      ora: '18:00',
+      paese: 'Chile',
+      km: '1182.7',
+      nome: 'Registrazione cavo frizione',
+      desc: 'Piccolo intervento dopo sterrato.',
+      valuta: 'USD',
+      fxToUsd: 1,
+      costoLocal: 6,
+      costoUsd: 6,
+      foto: null,
+      fotoUrl: null,
+      geo: { lat: -22.9087, lon: -68.1997 }
+    }
+  ];
+
+  const demoCarburazione = [
+    {
+      id: now - 4600000,
+      data: '26/09/2025',
+      ora: '11:20',
+      alt: 3820,
+      chicMax: 108,
+      chicMin: 50,
+      viteAria: '1.5 giri',
+      viteMinimo: '2 giri',
+      candela: 'nocciola',
+      nota: 'Setup demo per alta quota',
+      geo: { lat: -15.84, lon: -70.02 },
+      fotoCandela: null
+    }
+  ];
+
+  const demoDatiPaesi = {
+    Colombia: {
+      km: 132.4,
+      benzina: 4.8,
+      benzinaFuori: 0,
+      olioMl: 104,
+      spesaBenzinaUsd: 5.82,
+      spesaOlioUsd: 0.45,
+      spesaRicambiUsd: 0,
+      spesaManodoperaUsd: 0
+    },
+    Ecuador: {
+      km: 210.7,
+      benzina: 7.3,
+      benzinaFuori: 0,
+      olioMl: 156,
+      spesaBenzinaUsd: 7.80,
+      spesaOlioUsd: 0.60,
+      spesaRicambiUsd: 0,
+      spesaManodoperaUsd: 0
+    },
+    Peru: {
+      km: 356.9,
+      benzina: 12.4,
+      benzinaFuori: 0,
+      olioMl: 248,
+      spesaBenzinaUsd: 13.40,
+      spesaOlioUsd: 0.95,
+      spesaRicambiUsd: 0,
+      spesaManodoperaUsd: 0
+    },
+    Chile: {
+      km: 482.7,
+      benzina: 17.0,
+      benzinaFuori: 0,
+      olioMl: 340,
+      spesaBenzinaUsd: 18.90,
+      spesaOlioUsd: 1.20,
+      spesaRicambiUsd: 0,
+      spesaManodoperaUsd: 6
+    }
+  };
+
+  salva('vt_tappe', demoTappe);
+  salva('vt_turismo', demoTurismo);
+  salva('vt_diario', demoDiario);
+  salva('vt_logCarburanti', demoLogCarburanti);
+  salva('vt_logbook', demoLogbook);
+  salva('vt_carburazione', demoCarburazione);
+  salva('vt_datiPaesi', demoDatiPaesi);
+
+  salva('vt_kmTotali', '1182.7');
+  salva('vt_paeseAttuale', 'Chile');
+  salva('vt_benzinaUsata', '41.5');
+  salva('vt_olioTotaleMl', '848');
+  salva('vt_spesaBenzinaUsd', '45.92');
+  salva('vt_spesaOlioUsd', '3.20');
+  salva('vt_spesaRicambiUsd', '0');
+  salva('vt_spesaManodoperaUsd', '6.00');
+  salva('vt_scortaLitri', '4.2');
+  salva('vt_serbatoioLitri', '3.4');
+  salva('vt_coordinateTracciato', []);
+  salva('vt_tappaAttuale', nuovaTappa(1182.7));
+
+  ensurePaeseExists('Colombia');
+  ensurePaeseExists('Ecuador');
+  ensurePaeseExists('Peru');
+  ensurePaeseExists('Chile');
+
+  aggiornaSettingsUI();
+  aggiornaUI();
+  renderTappe();
+  renderDiarioFull();
+  renderLogCarburanti();
+  renderLogManutenzione();
+  renderStoricoCarbur();
+
+  showToast('🧪 Dati demo multi-paese caricati');
+}
+
+function rimuoviDatiDemo() {
+  if (!confirm('Rimuovere i dati demo e ripulire i dati di viaggio locali?')) return;
+
+  salva('vt_tappe', []);
+  salva('vt_turismo', []);
+  salva('vt_diario', []);
+  salva('vt_logCarburanti', []);
+  salva('vt_logbook', []);
+  salva('vt_carburazione', []);
+  salva('vt_datiPaesi', {});
+  salva('vt_kmTotali', '0');
+  salva('vt_benzinaUsata', '0');
+  salva('vt_olioTotaleMl', '0');
+  salva('vt_spesaBenzinaUsd', '0');
+  salva('vt_spesaOlioUsd', '0');
+  salva('vt_spesaRicambiUsd', '0');
+  salva('vt_spesaManodoperaUsd', '0');
+  salva('vt_scortaLitri', '0');
+  salva('vt_serbatoioLitri', String(getSerbatoioCapLitri().toFixed(3)));
+  salva('vt_coordinateTracciato', []);
+  salva('vt_tappaAttuale', nuovaTappa(0));
+
+  aggiornaSettingsUI();
+  aggiornaUI();
+  renderTappe();
+  renderDiarioFull();
+  renderLogCarburanti();
+  renderLogManutenzione();
+  renderStoricoCarbur();
+
+  showToast('🧹 Dati demo rimossi');
+}
+  
 
   function testAddKm() {
   const aggiungi = 1; // km finti
