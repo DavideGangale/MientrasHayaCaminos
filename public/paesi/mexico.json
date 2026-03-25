@@ -1,0 +1,70 @@
+{
+  "_version": "public-2.0",
+  "_exportDate": "2026-03-25T17:06:28.672Z",
+  "tipo": "paese",
+  "paese": "Mexico",
+  "slug": "mexico",
+  "stats": {
+    "km": 6,
+    "benzina": 0,
+    "benzinaFuori": 0,
+    "olioMl": 0,
+    "spesaBenzinaUsd": 0,
+    "spesaOlioUsd": 0,
+    "spesaRicambiUsd": 0,
+    "spesaManodoperaUsd": 0
+  },
+  "tappe": [
+    {
+      "id": 1774458371585,
+      "tipo": "Tappa",
+      "data": "25/03/2026",
+      "ora": "12:06",
+      "paese": "Mexico",
+      "km": 7,
+      "durata": 1274,
+      "altMin": 2675,
+      "altMax": 2675,
+      "velMax": 0,
+      "velMedia": 19.8,
+      "benzinaStimataLitri": 0.28,
+      "benzinaRealeLitri": 0,
+      "consumoStimatoKmL": 25,
+      "consumoRealeKmL": null,
+      "titolo": "poppop",
+      "note": "ñlol",
+      "telemetry": [],
+      "traccia": [
+        [
+          4.8059418,
+          -74.3606514
+        ],
+        [
+          4.8059416,
+          -74.3606494
+        ],
+        [
+          4.8059411,
+          -74.3606478
+        ],
+        [
+          4.8059407,
+          -74.3606473
+        ],
+        [
+          4.805941,
+          -74.3606469
+        ],
+        [
+          4.8059405,
+          -74.3606467
+        ]
+      ]
+    }
+  ],
+  "turismo": [],
+  "diario": [],
+  "rifornimenti": [],
+  "carburazioni": [],
+  "manutenzioni": []
+}
