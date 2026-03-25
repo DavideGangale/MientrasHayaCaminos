@@ -1,129 +1,23 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-03-25T23:20:12.187Z",
+  "_exportDate": "2026-03-25T23:24:21.975Z",
   "tipo": "paese",
   "paese": "Chile",
   "slug": "chile",
   "stats": {
-    "km": 482.7,
-    "benzina": 17,
+    "km": 0,
+    "benzina": 0,
     "benzinaFuori": 0,
-    "olioMl": 340,
-    "spesaBenzinaUsd": 18.9,
-    "spesaOlioUsd": 1.2,
+    "olioMl": 0,
+    "spesaBenzinaUsd": 0,
+    "spesaOlioUsd": 0,
     "spesaRicambiUsd": 0,
-    "spesaManodoperaUsd": 6
+    "spesaManodoperaUsd": 0
   },
-  "tappe": [
-    {
-      "id": 1774477803624,
-      "tipo": "Tappa",
-      "data": "03/10/2025",
-      "ora": "08:10",
-      "paese": "Chile",
-      "km": 418.2,
-      "durata": 31200,
-      "altMin": 50,
-      "altMax": 2450,
-      "velMax": 82,
-      "velMedia": 43.5,
-      "benzinaStimataLitri": 14.7,
-      "benzinaRealeLitri": 15,
-      "consumoStimatoKmL": 28.4,
-      "consumoRealeKmL": 27.9,
-      "titolo": "Arica → San Pedro de Atacama",
-      "note": "Demo Cile deserto",
-      "telemetry": [
-        {
-          "km": 0,
-          "alt": 20,
-          "sp": 0,
-          "ts": 1774477503624
-        },
-        {
-          "km": 260,
-          "alt": 2400,
-          "sp": 61,
-          "ts": 1774477683624
-        }
-      ],
-      "traccia": [
-        [
-          -18.4783,
-          -70.3126
-        ],
-        [
-          -22.9087,
-          -68.1997
-        ]
-      ]
-    }
-  ],
-  "turismo": [
-    {
-      "id": 1774478303624,
-      "tipo": "Turismo",
-      "data": "04/10/2025",
-      "ora": "11:30",
-      "paese": "Chile",
-      "km": 64.5,
-      "durata": 6200,
-      "altMin": 2200,
-      "altMax": 2550,
-      "velMax": 58,
-      "velMedia": 34.5,
-      "benzinaStimataLitri": 2.3,
-      "benzinaRealeLitri": 2.5,
-      "consumoStimatoKmL": 28,
-      "consumoRealeKmL": 25.8,
-      "titolo": "Giro Valle de la Luna",
-      "note": "Uscita turistica demo",
-      "telemetry": [
-        {
-          "km": 0,
-          "alt": 2430,
-          "sp": 0,
-          "ts": 1774478203624
-        },
-        {
-          "km": 43,
-          "alt": 2520,
-          "sp": 41,
-          "ts": 1774478273624
-        }
-      ],
-      "traccia": [
-        [
-          -22.9087,
-          -68.1997
-        ],
-        [
-          -22.9087,
-          -68.1997
-        ]
-      ]
-    }
-  ],
+  "tappe": [],
+  "turismo": [],
   "diario": [],
   "rifornimenti": [],
   "carburazioni": [],
-  "manutenzioni": [
-    {
-      "id": 1774478403624,
-      "data": "04/10/2025",
-      "ora": "18:00",
-      "paese": "Chile",
-      "km": "1182.7",
-      "nome": "Registrazione cavo frizione",
-      "desc": "Piccolo intervento dopo sterrato.",
-      "costoLocal": 6,
-      "valuta": "USD",
-      "costoUsd": 6,
-      "fotoUrl": null,
-      "geo": {
-        "lat": -22.9087,
-        "lon": -68.1997
-      }
-    }
-  ]
+  "manutenzioni": []
 }
