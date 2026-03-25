@@ -1301,6 +1301,11 @@ color:#fff;
     🌬️ CARBURAZIONE (SETUP)
 </button>
 
+  <button class="btn-azione btn-yellow"
+        onclick="apriModal('modalGetti'); renderGettiDisponibili();">
+  🎯 GETTI DISPONIBILI
+</button>
+  
 <button class="btn-azione" style="background:#ff9800; color:black;"
         onclick="apriModal('modalLogDettaglio')">
   🔧 NUOVO INTERVENTO
@@ -1565,6 +1570,11 @@ color:#fff;
       </div>
 
       <div style="display:flex; gap:10px;">
+        <input type="text" id="carbFiltro" placeholder="Filtro aria (es. originale / forato / sportivo)">
+<input type="text" id="carbViteAria" placeholder="Vite aria/miscela (es. 1.5 giri)">
+<input type="text" id="carbCandela" placeholder="Colore candela (es. nocciola / nera / bianca)">
+<input type="text" id="carbMeteo" placeholder="Meteo / temperatura (es. freddo, pioggia, caldo secco)">
+<input type="text" id="carbSintomi" placeholder="Sintomi (es. mura in alto, fuma, minimo instabile)">
         <input type="number" id="carbChiclerMax" placeholder="Chicler Max (es. 115)" min="1" max="999">
         <input type="number" id="carbChiclerMin" placeholder="Minimo (es. 55)" min="1" max="999">
       </div>
@@ -1592,6 +1602,37 @@ color:#fff;
     </div>
   </div>
 
+
+  <div id="modalGetti" class="modal-overlay">
+  <div class="modal-content" style="border-color:#00bcd4; max-width:560px;">
+    <button class="close-modal" onclick="chiudiModal('modalGetti')">×</button>
+    <h2 style="color:#00bcd4; text-align:center; margin-top:0;">🎯 Getti disponibili</h2>
+
+    <div class="dash-card" style="padding:15px; border:2px solid #00bcd4;">
+      <h3 style="margin-top:0; color:#00bcd4;">Getti MAX</h3>
+
+      <div style="display:flex; gap:10px;">
+        <input id="getto-max-new" type="number" min="1" step="1" placeholder="Es. 108">
+        <button class="btn-secondary" onclick="aggiungiGetto('max')">➕ Aggiungi</button>
+      </div>
+
+      <div id="lista-getti-max" style="margin-top:10px;"></div>
+
+      <hr style="border:0;border-top:1px solid #333; margin:15px 0;">
+
+      <h3 style="margin-top:0; color:#00bcd4;">Getti MIN</h3>
+
+      <div style="display:flex; gap:10px;">
+        <input id="getto-min-new" type="number" min="1" step="1" placeholder="Es. 50">
+        <button class="btn-secondary" onclick="aggiungiGetto('min')">➕ Aggiungi</button>
+      </div>
+
+      <div id="lista-getti-min" style="margin-top:10px;"></div>
+    </div>
+  </div>
+</div>
+
+  
   <!-- STATISTICHE PER PAESE -->
   <div id="modalPaesi" class="modal-overlay">
     <div class="modal-content" style="border-color:#4CAF50;">
@@ -1838,17 +1879,32 @@ color:#fff;
 
   <!-- NUOVO INTERVENTO -->
   <div id="modalLogDettaglio" class="modal-overlay">
-    <div class="modal-content" style="border-color:#ff9800; max-width:500px;">
-      <button class="close-modal" onclick="chiudiModal('modalLogDettaglio')">×</button>
-      <h2 style="color:#ff9800; text-align:center;">🔧 Nuovo Intervento</h2>
-      <input type="text" id="log-nome" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Nome intervento (es. Cambio cavo acceleratore)">
-      <textarea id="log-descrizione" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Descrizione dettagliata..." rows="3" style="width:100%;"></textarea>
-      <input type="number" id="log-costo" placeholder="Costo in valuta locale (opzionale)" step="0.01" min="0">
-      <input type="file" id="log-foto-input" accept="image/*" style="width:100%; margin-bottom:10px;"
-             onchange="anteprima('log-foto-input','anteprima-log-foto')">
-      <div id="anteprima-log-foto" style="margin-bottom:10px; display:none;"></div>
-      <button class="btn-azione" onclick="salvaIntervento()">💾 Salva Intervento</button>
-    </div>
+   <div class="modal-content" style="border-color:#ff9800; max-width:500px;">
+  <button class="close-modal" onclick="chiudiModal('modalLogDettaglio')">×</button>
+  <h2 style="color:#ff9800; text-align:center;">🔧 Nuovo Intervento</h2>
+
+  <label class="inp-label">Ricambio usato (opzionale)</label>
+  <select id="log-ricambio-select" class="inp-select">
+    <option value="">-- Nessun ricambio usato --</option>
+  </select>
+
+  <div style="font-size:12px; color:#777; text-align:left; margin-top:4px;">
+    Se selezioni un ricambio, al salvataggio verrà scalato 1 pezzo dallo stock.
+  </div>
+
+  <input type="text" id="log-nome" placeholder="Nome intervento (es. Cambio cavo acceleratore)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+
+  <textarea id="log-descrizione" placeholder="Descrizione dettagliata..." rows="3" style="width:100%;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+
+  <input type="number" id="log-costo" placeholder="Costo in valuta locale (opzionale)" step="0.01" min="0">
+
+  <input type="file" id="log-foto-input" accept="image/*" style="width:100%; margin-bottom:10px;"
+         onchange="anteprima('log-foto-input','anteprima-log-foto')">
+
+  <div id="anteprima-log-foto" style="margin-bottom:10px; display:none;"></div>
+
+  <button class="btn-azione" onclick="salvaIntervento()">💾 Salva Intervento</button>
+</div>
   </div>
 
 
@@ -2569,6 +2625,9 @@ initDB('vt_inboxFeedUrl', '');
   
 initDB('vt_uploadQueue', JSON.stringify([]));   // coda foto da caricare su Drive
 initDB('vt_driveAutoSync', '1');               // 1 = auto sync quando torna online
+
+    initDB('vt_gettiMax', JSON.stringify([]));
+  initDB('vt_gettiMin', JSON.stringify([]));
 
     // ===== INBOX iPhone Sync =====
 initDB('vt_inboxLastTs', '0');        // ultimo timestamp importato
@@ -3685,6 +3744,10 @@ function apriModal(id) {
     setTimeout(() => {
       try { if (mapFullInstance) mapFullInstance.invalidateSize(true); } catch {}
     }, 350);
+  }
+
+  if (id === 'modalLogDettaglio') {
+    popolaSelectRicambiIntervento();
   }
 }
 
@@ -5004,30 +5067,38 @@ function calcolaConsumoRealeDaTappe() {
 
   let kmSum = 0;
   let benzSum = 0;
+  let tappeValide = 0;
 
   for (const t of tappe) {
     const km = Number(t.km || 0);
     const realL = Number(t.benzinaRealeLitri);
 
-    // consideriamo solo tappe "buone"
-    if (km < 20) continue;
-    if (!isFinite(realL) || realL <= 0.3) continue;
+    // scarta tappe troppo corte
+    if (km < 40) continue;
+
+    // serve un consumo reale sensato
+    if (!isFinite(realL) || realL <= 0.8) continue;
+
+    const consumo = km / realL;
+
+    // scarta valori assurdi
+    if (!isFinite(consumo) || consumo < 10 || consumo > 45) continue;
 
     kmSum += km;
     benzSum += realL;
+    tappeValide++;
 
-    // bastano ~150km reali per fare una buona media
-    if (kmSum >= 150) break;
+    // bastano le ultime 6 tappe valide
+    if (tappeValide >= 6) break;
   }
 
-  if (benzSum <= 0) return null;
+  if (benzSum <= 0 || kmSum <= 0) return null;
 
-  const consumo = kmSum / benzSum; // km/L
-  if (consumo < 10 || consumo > 60) return null;
+  const consumoMedio = kmSum / benzSum;
+  if (!isFinite(consumoMedio) || consumoMedio < 10 || consumoMedio > 45) return null;
 
-  return consumo;
+  return consumoMedio;
 }
-
 
 function getConsumoUsatoKmPerL() {
   const manuale = getConsumoMedioManuale(); // km/L o null
@@ -8032,13 +8103,94 @@ function aggiungiRicambio() {
 /* ============================================================
    CARBURAZIONE
 ============================================================ */
+
+function getGetti(tipo) {
+  const key = (tipo === 'max') ? 'vt_gettiMax' : 'vt_gettiMin';
+  const arr = caricaJSON(key, []);
+  return Array.isArray(arr) ? arr.map(x => Number(x)).filter(x => isFinite(x) && x > 0).sort((a,b) => a-b) : [];
+}
+
+function setGetti(tipo, arr) {
+  const key = (tipo === 'max') ? 'vt_gettiMax' : 'vt_gettiMin';
+  const clean = Array.isArray(arr)
+    ? Array.from(new Set(arr.map(x => Number(x)).filter(x => isFinite(x) && x > 0))).sort((a,b) => a-b)
+    : [];
+  salva(key, clean);
+}
+
+function aggiungiGetto(tipo) {
+  const inputId = (tipo === 'max') ? 'getto-max-new' : 'getto-min-new';
+  const el = document.getElementById(inputId);
+  if (!el) return;
+
+  const val = Number(el.value || 0);
+  if (!isFinite(val) || val <= 0) {
+    showToast('⚠️ Inserisci una misura valida');
+    return;
+  }
+
+  const arr = getGetti(tipo);
+  arr.push(val);
+  setGetti(tipo, arr);
+
+  el.value = '';
+  renderGettiDisponibili();
+  showToast('✅ Getto aggiunto');
+}
+
+function eliminaGetto(tipo, misura) {
+  if (!confirm(`Eliminare il getto ${misura}?`)) return;
+
+  const arr = getGetti(tipo).filter(x => Number(x) !== Number(misura));
+  setGetti(tipo, arr);
+  renderGettiDisponibili();
+  showToast('🗑️ Getto eliminato');
+}
+
+function renderGettiDisponibili() {
+  const boxMax = document.getElementById('lista-getti-max');
+  const boxMin = document.getElementById('lista-getti-min');
+
+  const maxArr = getGetti('max');
+  const minArr = getGetti('min');
+
+  if (boxMax) {
+    boxMax.innerHTML = maxArr.length
+      ? maxArr.map(g => `
+          <div class="inv-item">
+            <div class="inv-nome">Getto MAX ${g}</div>
+            <button class="btn-secondary danger" style="margin:0;" onclick="eliminaGetto('max', ${g})">🗑️</button>
+          </div>
+        `).join('')
+      : `<div style="color:#777; text-align:center; padding:10px;">Nessun getto MAX inserito</div>`;
+  }
+
+  if (boxMin) {
+    boxMin.innerHTML = minArr.length
+      ? minArr.map(g => `
+          <div class="inv-item">
+            <div class="inv-nome">Getto MIN ${g}</div>
+            <button class="btn-secondary danger" style="margin:0;" onclick="eliminaGetto('min', ${g})">🗑️</button>
+          </div>
+        `).join('')
+      : `<div style="color:#777; text-align:center; padding:10px;">Nessun getto MIN inserito</div>`;
+  }
+}
+
+  
 function salvaCarburazione() {
   const chicMax = validaInput('carbChiclerMax', 1, 999);
   const chicMin = validaInput('carbChiclerMin', 1, 999);
   if (!chicMax || !chicMin) { showToast('⚠️ Inserisci i valori chicler'); return; }
 
-   const notaEl = document.getElementById('carbNote');
+  const notaEl = document.getElementById('carbNote');
   const nota = notaEl ? notaEl.value.trim() : '';
+
+  const filtro = document.getElementById('carbFiltro')?.value.trim() || '';
+  const viteAria = document.getElementById('carbViteAria')?.value.trim() || '';
+  const candela = document.getElementById('carbCandela')?.value.trim() || '';
+  const meteo = document.getElementById('carbMeteo')?.value.trim() || '';
+  const sintomi = document.getElementById('carbSintomi')?.value.trim() || '';
 
   const now = new Date();
 
@@ -8051,6 +8203,8 @@ function salvaCarburazione() {
     }
   } catch(e) {}
 
+
+
   const entry = {
     id: Date.now(),
     geo: geoCarb,
@@ -8058,15 +8212,27 @@ function salvaCarburazione() {
     alt: altitudineAttuale,
     chicMax,
     chicMin,
+    filtro,
+    viteAria,
+    candela,
+    meteo,
+    sintomi,
     nota
   };
+
+  
 
   const storico = caricaJSON('vt_carburazione', []);
   storico.unshift(entry);
   salva('vt_carburazione', storico);
 
-  document.getElementById('carbChiclerMax').value = '';
+   document.getElementById('carbChiclerMax').value = '';
   document.getElementById('carbChiclerMin').value = '';
+  document.getElementById('carbFiltro').value = '';
+  document.getElementById('carbViteAria').value = '';
+  document.getElementById('carbCandela').value = '';
+  document.getElementById('carbMeteo').value = '';
+  document.getElementById('carbSintomi').value = '';
   if (notaEl) notaEl.value = '';
 
   showToast('🌬️ Setup carburazione salvato!');
@@ -8082,19 +8248,47 @@ function renderStoricoCarbur() {
     return;
   }
 
-  container.innerHTML = storico.map(e => `
+   container.innerHTML = storico.map(e => `
     <div class="log-entry-full" style="border-color:#00bcd4;">
       <div style="font-weight:bold; color:#00bcd4;">🌬️ ${e.data}</div>
       <div>⛰️ Altitudine: <b>${e.alt} m</b></div>
       <div>🔧 Chicler Max: <b>${e.chicMax}</b> &nbsp;|&nbsp; Min: <b>${e.chicMin}</b></div>
+      ${e.filtro ? `<div>🧰 Filtro aria: <b>${e.filtro}</b></div>` : ''}
+      ${e.viteAria ? `<div>🪛 Vite aria/miscela: <b>${e.viteAria}</b></div>` : ''}
+      ${e.candela ? `<div>🔥 Candela: <b>${e.candela}</b></div>` : ''}
+      ${e.meteo ? `<div>🌦️ Meteo: <b>${e.meteo}</b></div>` : ''}
+      ${e.sintomi ? `<div>⚠️ Sintomi: <b>${e.sintomi}</b></div>` : ''}
       ${e.nota ? `<div class="log-note">📝 ${e.nota}</div>` : ''}
     </div>
   `).join('');
+
+  
 }
 
 /* ============================================================
    INTERVENTI MANUTENZIONE
 ============================================================ */
+
+function popolaSelectRicambiIntervento(selectedId = '') {
+  const sel = document.getElementById('log-ricambio-select');
+  if (!sel) return;
+
+  const inv = caricaJSON('vt_inventario', []);
+  const list = Array.isArray(inv) ? inv : [];
+
+  const disponibili = list.filter(it => Number(it.qta || 0) > 0);
+
+  sel.innerHTML = `
+    <option value="">-- Nessun ricambio usato --</option>
+    ${disponibili.map(it => `
+      <option value="${it.id || ''}" ${String(selectedId) === String(it.id) ? 'selected' : ''}>
+        ${it.nome || 'Ricambio'} (stock: ${Number(it.qta || 0)})
+      </option>
+    `).join('')}
+  `;
+}
+
+  
 function salvaIntervento() {
   const nomeEl = document.getElementById('log-nome');
   const nome = nomeEl ? nomeEl.value.trim() : '';
@@ -8111,7 +8305,10 @@ const costoUsd = (costoLocal > 0) ? convertLocalToUsd(costoLocal, cur) : 0;
   const foto = (ante && ante.dataset) ? (ante.dataset.src || null) : null;
 
   const now = new Date();
-
+  
+  const ricambioSel = document.getElementById('log-ricambio-select');
+  const ricambioIdSelezionato = ricambioSel ? String(ricambioSel.value || '').trim() : '';
+  
   let geoMaint = null;
   try {
     if (typeof lastLat !== 'undefined' && lastLat != null) geoMaint = { lat: lastLat, lon: lastLon };
@@ -8165,6 +8362,11 @@ updateDriveSyncInfo();
   if (nomeEl) nomeEl.value = '';
   if (descEl) descEl.value = '';
   document.getElementById('log-costo').value = '';
+
+  const selRic = document.getElementById('log-ricambio-select');
+  if (selRic) selRic.value = '';
+
+  
   if (ante) { ante.style.display = 'none'; ante.dataset.src = ''; }
   const f = document.getElementById('log-foto-input');
   if (f) f.value = '';
@@ -8218,7 +8420,41 @@ if (pendingManutFromChecklist && pendingManutFromChecklist.key) {
   renderInventario();
 }
 
+  // ✅ Se nel modal è stato selezionato un ricambio, scala 1 pezzo e resetta usura
+  if (ricambioIdSelezionato) {
+    const inv = caricaJSON('vt_inventario', []);
+    const kmTot = parseFloat(carica('vt_kmTotali','0')) || 0;
 
+    const idxRic = Array.isArray(inv)
+      ? inv.findIndex(x => String(x.id || '') === ricambioIdSelezionato)
+      : -1;
+
+    if (idxRic !== -1) {
+      const it = inv[idxRic];
+      const q = Number(it.qta || 0);
+
+      if (q > 0) {
+        inv[idxRic].qta = q - 1;
+        inv[idxRic].lastKm = kmTot;
+        inv[idxRic].usedKm = 0;
+
+        salva('vt_inventario', inv);
+
+        const manutKey = it.manutKey || inferManutKeyFromNome(it.nome);
+        if (manutKey) {
+          const last = caricaJSON('vt_manut_lastKm', {});
+          last[manutKey] = kmTot;
+          salva('vt_manut_lastKm', last);
+
+          const ws = caricaJSON('vt_manut_warnState', {});
+          ws[manutKey] = {};
+          salva('vt_manut_warnState', ws);
+        }
+      } else {
+        showToast('⚠️ Il ricambio selezionato non è disponibile in stock');
+      }
+    }
+  }
   
   chiudiModal('modalLogDettaglio');
   showToast('🔧 Intervento salvato!');
