@@ -221,8 +221,16 @@
         <option value="">🌎 Globale</option>
       </select>
 
+
+
+<select id="monthSelect" class="btn-filter" onchange="setMonthFilter(this.value)">
+  <option value="">🗓️ Tutti i mesi</option>
+</select>
+
+      
       <select id="markerSelect" class="btn-filter" onchange="setMarkerFilter(this.value)">
         <option value="ALL">📍 Tutti i Marker</option>
+        <option value="NONE">🚫 Nessun Marker</option>
         <option value="FOTO">📷 Foto</option>
         <option value="VIDEO">▶️ Video</option>
         <option value="MAINT">🔧 Officina</option>
@@ -299,6 +307,7 @@ let canvasRenderer = null;
   let currentMode = 'TUTTO';
   let currentCountry = '';
   let currentMarkerFilter = 'ALL';
+  let currentMonthFilter = '';
 
   // ===== LINGUA (i18n) =====
   let LANG = localStorage.getItem('vt_pub_lang') || 'it';
@@ -311,6 +320,8 @@ let canvasRenderer = null;
       onlyGiri: '🛵 Solo Giri',
 
       allMarkers: '📍 Tutti i Marker',
+      allMonths: '🗓️ Tutti i mesi',
+      noMarkers: '🚫 Nessun Marker',
       foto: '📷 Foto',
       video: '▶️ Video',
       maint: '🔧 Officina',
@@ -353,6 +364,8 @@ let canvasRenderer = null;
       onlyGiri: '🛵 Rides only',
 
       allMarkers: '📍 All markers',
+      allMonths: '🗓️ All months',
+      noMarkers: '🚫 No markers',
       foto: '📷 Photos',
       video: '▶️ Videos',
       maint: '🔧 Workshop',
@@ -395,6 +408,8 @@ let canvasRenderer = null;
       onlyGiri: '🛵 Solo Paseos',
 
       allMarkers: '📍 Todos los marcadores',
+      allMonths: '🗓️ Todos los meses',
+      noMarkers: '🚫 Sin marcadores',
       foto: '📷 Fotos',
       video: '▶️ Videos',
       maint: '🔧 Taller',
@@ -436,6 +451,28 @@ let canvasRenderer = null;
     return d[key] ?? (I18N.it[key] ?? key);
   }
 
+
+
+function getYearMonthFromPublicEntry(entry) {
+  if (entry && entry.ts) {
+    const d = new Date(Number(entry.ts));
+    if (!isNaN(d.getTime())) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      return `${y}-${m}`;
+    }
+  }
+
+  const ds = String(entry?.data || '').trim();
+  const m = ds.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m) {
+    return `${m[3]}-${String(m[2]).padStart(2, '0')}`;
+  }
+
+  return '';
+}
+
+  
   // ===== Stats helpers (benzina bruciata da tappe/giri) =====
   const CONSUMO_FALLBACK_KM_L = 28;
 
@@ -522,14 +559,15 @@ let canvasRenderer = null;
     const markerSel = document.getElementById('markerSelect');
     if (markerSel) {
       const v = markerSel.value || 'ALL';
-      markerSel.innerHTML = `
-        <option value="ALL">${T('allMarkers')}</option>
-        <option value="FOTO">${T('foto')}</option>
-        <option value="VIDEO">${T('video')}</option>
-        <option value="MAINT">${T('maint')}</option>
-        <option value="FUEL">${T('fuel')}</option>
-        <option value="CARB">${T('carb')}</option>
-      `;
+markerSel.innerHTML = `
+  <option value="ALL">${T('allMarkers')}</option>
+  <option value="NONE">${T('noMarkers')}</option>
+  <option value="FOTO">${T('foto')}</option>
+  <option value="VIDEO">${T('video')}</option>
+  <option value="MAINT">${T('maint')}</option>
+  <option value="FUEL">${T('fuel')}</option>
+  <option value="CARB">${T('carb')}</option>
+`;
       markerSel.value = v;
     }
 
@@ -540,6 +578,19 @@ let canvasRenderer = null;
       if (firstOpt) firstOpt.innerText = T('global');
       statsSel.value = v;
     }
+
+
+
+    const monthSel = document.getElementById('monthSelect');
+if (monthSel) {
+  const v = monthSel.value || '';
+  const firstOpt = monthSel.querySelector('option[value=""]');
+  if (firstOpt) firstOpt.innerText = T('allMonths');
+  monthSel.value = v;
+}
+
+
+    
   }
 
 
@@ -877,6 +928,14 @@ function getYouTubeId(url) {
       markerFine.bindPopup(infoEstesa);
     });
 
+
+if (currentMarkerFilter === 'NONE') {
+  if (drawnLines > 0) {
+    map.fitBounds(bounds.pad(0.1));
+  }
+  return;
+}
+    
     function creaMarker(lat, lon, icona, popupHTML) {
       if (!isFinite(lat) || !isFinite(lon)) return;
       const m = L.marker([lat, lon], { icon: icona }).addTo(layerMarkers);
@@ -887,6 +946,7 @@ function getYouTubeId(url) {
     const diario = Array.isArray(DATA.diario) ? DATA.diario : [];
 diario.forEach(d => {
   if (currentCountry && d.paese !== currentCountry) return;
+  if (currentMonthFilter && getYearMonthFromPublicEntry(d) !== currentMonthFilter) return;
   if (!d.geo) return;
 
   const lat = Number(d.geo.lat);
@@ -1008,12 +1068,41 @@ async function setCountry(country) {
   }
 }
 
+
+  function setMonthFilter(month) {
+  currentMonthFilter = month || '';
+  renderMap();
+}
+  
   
   function setMarkerFilter(filterType) {
     currentMarkerFilter = filterType;
     renderMap();
   }
 
+
+function popolaMesi() {
+  const sel = document.getElementById('monthSelect');
+  if (!sel || !INDEX_DATA) return;
+
+  sel.innerHTML = `<option value="">${T('allMonths')}</option>`;
+
+  const arr = Array.isArray(INDEX_DATA?.archivi?.diarioMensile)
+    ? INDEX_DATA.archivi.diarioMensile
+    : [];
+
+  arr.forEach(m => {
+    if (!m || !m.mese) return;
+    const opt = document.createElement('option');
+    opt.value = m.mese;
+    opt.innerText = '🗓️ ' + m.mese;
+    sel.appendChild(opt);
+  });
+
+  sel.value = currentMonthFilter || '';
+}
+
+  
   function popolaPaesi() {
   const selectMap = document.getElementById('selectCountry');
   const selectStats = document.getElementById('statsCountryFilter');
@@ -1264,6 +1353,7 @@ DATA = unisciDatasetGlobale();
 applyLang();
 updateStatsMini();
 popolaPaesi();
+popolaMesi();
 renderMap();
 
     
