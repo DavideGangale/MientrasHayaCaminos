@@ -286,11 +286,15 @@
   </div>
 
 <script>
-  let DATA = null;
-  let map = null;
-  let layerTracce = null;
-  let layerMarkers = null;
-  let canvasRenderer = null; // ✅ aggiungi questo
+let DATA = null;               // dataset corrente visualizzato
+let INDEX_DATA = null;         // public/vespatrek_index.json
+let OFFICINA_DATA = null;      // public/officina.json
+let PAESI_CACHE = {};          // cache file paese già caricati
+
+let map = null;
+let layerTracce = null;
+let layerMarkers = null;
+let canvasRenderer = null;
   
   let currentMode = 'TUTTO';
   let currentCountry = '';
@@ -538,21 +542,118 @@
     }
   }
 
-  function updateStatsMini() {
-    const el = document.getElementById('statsMini');
-    if (!el) return;
 
-    if (!DATA) {
-      el.innerText = T('loading');
-      return;
-    }
+function getCurrentDataSource() {
+  return DATA || INDEX_DATA || null;
+}
 
-    const fb = calcFuelBurnedFromPercorsi(null);
-    const km = Number(fb.km || 0).toFixed(1);
-    const l  = Number(fb.litri || 0).toFixed(1);
+function getIndexStats() {
+  return (INDEX_DATA && INDEX_DATA.stats) ? INDEX_DATA.stats : {};
+}
 
-    el.innerHTML = `${T('totalLbl')}: ${km} km<br>${T('fuelLbl')}: ${l} L`;
+function getIndexPaesiList() {
+  return Array.isArray(INDEX_DATA?.paesi) ? INDEX_DATA.paesi : [];
+}
+
+function getCurrentCountryMeta() {
+  if (!currentCountry) return null;
+  return getIndexPaesiList().find(x => x.paese === currentCountry) || null;
+}
+
+async function caricaPaeseSeServe(paese) {
+  if (!paese) {
+    DATA = unisciDatasetGlobale();
+    return;
   }
+
+  const meta = getIndexPaesiList().find(x => x.paese === paese);
+  if (!meta || !meta.path) {
+    console.warn('Paese non trovato in index:', paese);
+    DATA = unisciDatasetGlobale();
+    return;
+  }
+
+  if (!PAESI_CACHE[paese]) {
+    const res = await fetch(meta.path);
+    if (!res.ok) throw new Error('Errore caricamento file paese: ' + meta.path);
+    PAESI_CACHE[paese] = await res.json();
+  }
+
+  DATA = unisciDatasetPaese(PAESI_CACHE[paese]);
+}
+
+function unisciDatasetGlobale() {
+  return {
+    titolo: INDEX_DATA?.titolo || 'VespaTrek Live 🌍',
+    paeseAttuale: INDEX_DATA?.paeseAttuale || '',
+    stats: INDEX_DATA?.stats || {},
+    datiPaesi: buildDatiPaesiMapFromIndex(),
+    tappe: Array.isArray(INDEX_DATA?.ultimeTappe)
+  ? INDEX_DATA.ultimeTappe.filter(x => (x.tipo || 'Tappa') !== 'Turismo')
+  : [],
+
+turismo: Array.isArray(INDEX_DATA?.ultimeTappe)
+  ? INDEX_DATA.ultimeTappe.filter(x => (x.tipo || '') === 'Turismo')
+  : [],
+
+diario: Array.isArray(INDEX_DATA?.ultimiPost) ? INDEX_DATA.ultimiPost : [],
+    manutenzioni: OFFICINA_DATA?.manutenzioni || [],
+    rifornimenti: [],
+    carburazioni: OFFICINA_DATA?.carburazioni || []
+  };
+}
+
+function unisciDatasetPaese(paeseData) {
+  const paeseNome = paeseData?.paese || '';
+  const manut = Array.isArray(paeseData?.manutenzioni) ? paeseData.manutenzioni : [];
+  const carb = Array.isArray(paeseData?.carburazioni) ? paeseData.carburazioni : [];
+  const rif  = Array.isArray(paeseData?.rifornimenti) ? paeseData.rifornimenti : [];
+
+  const datiPaesiMap = buildDatiPaesiMapFromIndex();
+
+  return {
+    titolo: INDEX_DATA?.titolo || 'VespaTrek Live 🌍',
+    paeseAttuale: paeseNome,
+    stats: INDEX_DATA?.stats || {},
+    datiPaesi: datiPaesiMap,
+    tappe: Array.isArray(paeseData?.tappe) ? paeseData.tappe : [],
+    turismo: Array.isArray(paeseData?.turismo) ? paeseData.turismo : [],
+    diario: Array.isArray(paeseData?.diario) ? paeseData.diario : [],
+    manutenzioni: manut,
+    rifornimenti: rif,
+    carburazioni: carb
+  };
+}
+
+function buildDatiPaesiMapFromIndex() {
+  const out = {};
+  const arr = getIndexPaesiList();
+  for (const p of arr) {
+    if (!p || !p.paese) continue;
+    out[p.paese] = {
+      ...(p.stats || {})
+    };
+  }
+  return out;
+}
+
+  
+
+function updateStatsMini() {
+  const el = document.getElementById('statsMini');
+  if (!el) return;
+
+  if (!INDEX_DATA) {
+    el.innerText = T('loading');
+    return;
+  }
+
+  const s = getIndexStats();
+  const km = Number(s.kmTotali || 0).toFixed(1);
+  const l  = Number(s.benzinaUsataLitri || 0).toFixed(1);
+
+  el.innerHTML = `${T('totalLbl')}: ${km} km<br>${T('fuelLbl')}: ${l} L`;
+}
 
   
 
@@ -843,32 +944,53 @@ diario.forEach(d => {
     currentMode = mode;
     renderMap();
   }
-  function setCountry(country) {
-    currentCountry = country;
+
+
+
+async function setCountry(country) {
+  currentCountry = country;
+
+  try {
+    await caricaPaeseSeServe(currentCountry);
     renderMap();
+  } catch (e) {
+    console.error(e);
+    alert('Errore caricamento paese');
   }
+}
+
+  
   function setMarkerFilter(filterType) {
     currentMarkerFilter = filterType;
     renderMap();
   }
 
   function popolaPaesi() {
-    const selectMap = document.getElementById('selectCountry');
-    const selectStats = document.getElementById('statsCountryFilter');
-    if (!DATA || !DATA.datiPaesi) return;
+  const selectMap = document.getElementById('selectCountry');
+  const selectStats = document.getElementById('statsCountryFilter');
+  if (!INDEX_DATA) return;
 
-    Object.keys(DATA.datiPaesi).sort().forEach(p => {
-      const optMap = document.createElement('option');
-      optMap.value = p;
-      optMap.innerText = "📍 " + p;
-      selectMap.appendChild(optMap);
+  // pulizia opzioni vecchie tranne la prima
+  while (selectMap.options.length > 1) selectMap.remove(1);
+  while (selectStats.options.length > 1) selectStats.remove(1);
 
-      const optStats = document.createElement('option');
-      optStats.value = p;
-      optStats.innerText = "📍 " + p;
-      selectStats.appendChild(optStats);
-    });
-  }
+  const paesi = getIndexPaesiList();
+
+  paesi.forEach(p => {
+    const nome = p.paese || '';
+    if (!nome) return;
+
+    const optMap = document.createElement('option');
+    optMap.value = nome;
+    optMap.innerText = "📍 " + nome;
+    selectMap.appendChild(optMap);
+
+    const optStats = document.createElement('option');
+    optStats.value = nome;
+    optStats.innerText = "📍 " + nome;
+    selectStats.appendChild(optStats);
+  });
+}
 
   function apriStats() {
     document.getElementById('statsModal').style.display = 'flex';
@@ -876,81 +998,83 @@ diario.forEach(d => {
     renderStatsDati();
   }
 
-  function renderStatsDati() {
-    if (!DATA) return;
-    const mode = document.getElementById('statsCountryFilter').value;
+ function renderStatsDati() {
+  if (!INDEX_DATA) return;
 
-    let km = 0, benz = 0, spesaBenz = 0, spesaMaint = 0, olio = 0;
+  const mode = document.getElementById('statsCountryFilter').value;
 
-    const country = (mode === 'GLOBAL') ? null : mode;
+  let km = 0, benz = 0, spesaBenz = 0, spesaMaint = 0, olio = 0;
+  const country = (mode === 'GLOBAL') ? null : mode;
 
-    const fb = calcFuelBurnedFromPercorsi(country);
-    km = fb.km || 0;
-    benz = fb.litri || 0;
+  if (country === null) {
+    const s = INDEX_DATA.stats || {};
+    km = Number(s.kmTotali || 0);
+    benz = Number(s.benzinaUsataLitri || 0);
+    olio = Number(s.olioTotaleLitri || 0);
+    spesaBenz = Number(s.spesaBenzinaUsd || 0);
+    spesaMaint = Number(s.spesaRicambiUsd || 0) + Number(s.spesaManodoperaUsd || 0);
+  } else {
+    const meta = getIndexPaesiList().find(x => x.paese === country);
+    const st = meta?.stats || {};
+    km = Number(st.km || 0);
 
-    const ol = getOlioUsatoLitriPublic(country);
-    olio = (ol == null) ? 0 : ol;
+    // usa benzina del paese se presente, altrimenti 0
+    benz = Number(st.benzina || 0);
+    olio = Number((INDEX_DATA?.paesi || []).find(x => x.paese === country)?.stats?.olioMl || 0) / 1000;
 
-    if (mode === 'GLOBAL') {
-      const s = DATA.stats || {};
-      spesaBenz = s.spesaBenzinaUsd || 0;
-      spesaMaint = (s.spesaRicambiUsd || 0) + (s.spesaManodoperaUsd || 0);
-    } else {
-      const dp = (DATA.datiPaesi && DATA.datiPaesi[mode]) ? DATA.datiPaesi[mode] : {};
-      spesaBenz = dp.spesaBenzinaUsd || 0;
-      spesaMaint = (dp.spesaRicambiUsd || 0) + (dp.spesaManodoperaUsd || 0);
-    }
-
-    const cons = benz > 0 ? (km / benz).toFixed(1) : '--';
-
-    const spesaOlio = (mode === 'GLOBAL')
-      ? Number((DATA.stats || {}).spesaOlioUsd || 0)
-      : Number((DATA.datiPaesi && DATA.datiPaesi[mode] ? DATA.datiPaesi[mode].spesaOlioUsd : 0) || 0);
-
-    const fmtUsd = (x) => '$' + Number(x || 0).toFixed(2);
-
-    // ✅ olio box: globale numero; per paese: numero se disponibile, altrimenti --
-    const olioBoxValue = (country === null)
-      ? `${Number(olio || 0).toFixed(2)} L`
-      : (getOlioUsatoLitriPublic(country) != null ? `${Number(olio || 0).toFixed(2)} L` : `--`);
-
-    document.getElementById('statsModalContent').innerHTML = `
-      <div style="background:#333; padding:10px; border-radius:10px;">
-        <div style="font-size:11px; color:#aaa;">KM TOTALI</div>
-        <div style="font-size:18px; color:#4caf50; font-weight:bold;">${Number(km || 0).toFixed(1)}</div>
-      </div>
-
-      <div style="background:#333; padding:10px; border-radius:10px;">
-        <div style="font-size:11px; color:#aaa;">BENZINA USATA</div>
-        <div style="font-size:18px; color:#ff9800; font-weight:bold;">${Number(benz || 0).toFixed(1)} L</div>
-      </div>
-
-      <div style="background:#333; padding:10px; border-radius:10px;">
-        <div style="font-size:11px; color:#aaa;">OLIO 2T USATO</div>
-        <div style="font-size:18px; color:#00bcd4; font-weight:bold;">${olioBoxValue}</div>
-      </div>
-
-      <div style="background:#333; padding:10px; border-radius:10px;">
-        <div style="font-size:11px; color:#aaa;">SPESA OFFICINA</div>
-        <div style="font-size:18px; color:var(--maint); font-weight:bold;">${fmtUsd(spesaMaint)}</div>
-      </div>
-
-      <div style="background:#333; padding:10px; border-radius:10px;">
-        <div style="font-size:11px; color:#aaa;">SPESA BENZINA</div>
-        <div style="font-size:18px; color:#fff; font-weight:bold;">${fmtUsd(spesaBenz)}</div>
-      </div>
-
-      <div style="background:#333; padding:10px; border-radius:10px;">
-        <div style="font-size:11px; color:#aaa;">SPESA OLIO 2T</div>
-        <div style="font-size:18px; color:#00bcd4; font-weight:bold;">${fmtUsd(spesaOlio)}</div>
-      </div>
-
-      <div style="background:#333; padding:10px; border-radius:10px; grid-column: 1 / -1;">
-        <div style="font-size:11px; color:#aaa;">CONSUMO MEDIO</div>
-        <div style="font-size:20px; color:var(--brand); font-weight:bold;">${cons} km/L</div>
-      </div>
-    `;
+    spesaBenz = Number(st.spesaBenzinaUsd || 0);
+    spesaMaint = Number(st.spesaRicambiUsd || 0) + Number(st.spesaManodoperaUsd || 0);
   }
+
+  const cons = benz > 0 ? (km / benz).toFixed(1) : '--';
+
+  const spesaOlio = (country === null)
+    ? Number((INDEX_DATA.stats || {}).spesaOlioUsd || 0)
+    : Number((getIndexPaesiList().find(x => x.paese === country)?.stats?.spesaOlioUsd || 0));
+
+  const fmtUsd = (x) => '$' + Number(x || 0).toFixed(2);
+
+  const olioBoxValue = (country === null)
+    ? `${Number(olio || 0).toFixed(2)} L`
+    : (olio > 0 ? `${Number(olio || 0).toFixed(2)} L` : '--');
+
+  document.getElementById('statsModalContent').innerHTML = `
+    <div style="background:#333; padding:10px; border-radius:10px;">
+      <div style="font-size:11px; color:#aaa;">KM TOTALI</div>
+      <div style="font-size:18px; color:#4caf50; font-weight:bold;">${Number(km || 0).toFixed(1)}</div>
+    </div>
+
+    <div style="background:#333; padding:10px; border-radius:10px;">
+      <div style="font-size:11px; color:#aaa;">BENZINA USATA</div>
+      <div style="font-size:18px; color:#ff9800; font-weight:bold;">${Number(benz || 0).toFixed(1)} L</div>
+    </div>
+
+    <div style="background:#333; padding:10px; border-radius:10px;">
+      <div style="font-size:11px; color:#aaa;">OLIO 2T USATO</div>
+      <div style="font-size:18px; color:#00bcd4; font-weight:bold;">${olioBoxValue}</div>
+    </div>
+
+    <div style="background:#333; padding:10px; border-radius:10px;">
+      <div style="font-size:11px; color:#aaa;">SPESA OFFICINA</div>
+      <div style="font-size:18px; color:var(--maint); font-weight:bold;">${fmtUsd(spesaMaint)}</div>
+    </div>
+
+    <div style="background:#333; padding:10px; border-radius:10px;">
+      <div style="font-size:11px; color:#aaa;">SPESA BENZINA</div>
+      <div style="font-size:18px; color:#fff; font-weight:bold;">${fmtUsd(spesaBenz)}</div>
+    </div>
+
+    <div style="background:#333; padding:10px; border-radius:10px;">
+      <div style="font-size:11px; color:#aaa;">SPESA OLIO 2T</div>
+      <div style="font-size:18px; color:#00bcd4; font-weight:bold;">${fmtUsd(spesaOlio)}</div>
+    </div>
+
+    <div style="background:#333; padding:10px; border-radius:10px; grid-column: 1 / -1;">
+      <div style="font-size:11px; color:#aaa;">CONSUMO MEDIO</div>
+      <div style="font-size:20px; color:var(--brand); font-weight:bold;">${cons} km/L</div>
+    </div>
+  `;
+}
 
   function openLightbox(src) {
   const fixed = driveToDirectImageUrl(src);
@@ -1063,24 +1187,36 @@ diario.forEach(d => {
     }, 120);
   };
 
-  async function loadData() {
-    initMap();
-    try {
-      const urlParams = new URLSearchParams(window.location.search);
-      const src = urlParams.get('src') || 'public/vespatrek_public.json';
+ async function loadData() {
+  initMap();
 
-      const res = await fetch(src);
-      DATA = await res.json();
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const srcIndex = urlParams.get('src') || 'public/vespatrek_index.json';
+    const srcOfficina = urlParams.get('officina') || 'public/officina.json';
 
-      applyLang();
-      updateStatsMini();
-      popolaPaesi();
-      renderMap();
-    } catch (e) {
-      document.getElementById('statsMini').innerText = 'Errore caricamento dati';
-      console.error(e);
-    }
+    const [resIndex, resOfficina] = await Promise.all([
+      fetch(srcIndex),
+      fetch(srcOfficina)
+    ]);
+
+    if (!resIndex.ok) throw new Error('Errore caricamento index');
+    if (!resOfficina.ok) throw new Error('Errore caricamento officina');
+
+    INDEX_DATA = await resIndex.json();
+    OFFICINA_DATA = await resOfficina.json();
+
+    DATA = unisciDatasetGlobale();
+
+    applyLang();
+    updateStatsMini();
+    popolaPaesi();
+    renderMap();
+  } catch (e) {
+    document.getElementById('statsMini').innerText = 'Errore caricamento dati';
+    console.error(e);
   }
+}
 
   window.onload = loadData;
 </script>
