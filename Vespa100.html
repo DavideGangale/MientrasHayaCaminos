@@ -11223,12 +11223,10 @@ async function rimuoviDatiDemo() {
   );
   if (!ok) return;
 
-  // se sto tracciando, fermo tutto
   if (inViaggio) {
     try { toggleTracking(); } catch(e) {}
   }
 
-  // reset dati viaggio principali
   salva('vt_tappe', []);
   salva('vt_turismo', []);
   salva('vt_diario', []);
@@ -11238,7 +11236,6 @@ async function rimuoviDatiDemo() {
   salva('vt_coordinateTracciato', []);
   salva('vt_tappaAttuale', nuovaTappa(0));
 
-  // reset km / carburante / olio
   salva('vt_kmTotali', '0');
   salva('vt_odoUltimoPieno', '0');
   salva('vt_litriVespa', '0');
@@ -11252,17 +11249,14 @@ async function rimuoviDatiDemo() {
   salva('vt_olioStockMl', '0');
   salva('vt_olioCostoStockUsd', '0');
 
-  // reset spese
   salva('vt_spesaBenzinaUsd', '0');
   salva('vt_spesaOlioUsd', '0');
   salva('vt_spesaRicambiUsd', '0');
   salva('vt_spesaManodoperaUsd', '0');
 
-  // reset paese
   salva('vt_paeseAttuale', 'Colombia');
   lastCountry = 'Colombia';
 
-  // reset statistiche paesi: lascia solo Colombia vuota
   salva('vt_datiPaesi', {
     Colombia: {
       km: 0,
@@ -11276,7 +11270,25 @@ async function rimuoviDatiDemo() {
     }
   });
 
-  // opzionale ma consigliato: reset stato guida
+  // inventario e checklist: li lascio ai default di app
+  initDB('vt_checklist', JSON.stringify([
+    { id:'c1', nome:'Controllo olio motore', fatto:false },
+    { id:'c2', nome:'Pressione gomme', fatto:false },
+    { id:'c3', nome:'Controllo freni', fatto:false },
+    { id:'c4', nome:'Kit attrezzi completo', fatto:false },
+    { id:'c5', nome:'Documenti (passaporto/patente)', fatto:false },
+    { id:'c6', nome:'Livello benzina/scorta', fatto:false }
+  ]));
+
+  salva('vt_checklist', [
+    { id:'c1', nome:'Controllare serraggi generali', fatto:false },
+    { id:'c2', nome:'Pressione gomme', fatto:false },
+    { id:'c3', nome:'Controllo freni', fatto:false }
+  ]);
+
+  salva('vt_manut_lastKm', {});
+  salva('vt_manut_warnState', {});
+
   coordinateTracciato = [];
   tappaAttuale = nuovaTappa(0);
   pendingFuelTappaId = null;
@@ -11284,11 +11296,8 @@ async function rimuoviDatiDemo() {
   pendingMount = null;
   pendingManutFromChecklist = null;
 
-  try {
-    polyline.setLatLngs([]);
-  } catch(e) {}
+  try { polyline.setLatLngs([]); } catch(e) {}
 
-  // aggiorna UI
   aggiornaSettingsUI();
   aggiornaUI();
   renderTappe();
@@ -11296,10 +11305,11 @@ async function rimuoviDatiDemo() {
   renderLogCarburanti();
   renderLogManutenzione();
   renderStoricoCarbur();
+  renderInventario();
+  renderChecklist();
 
   showToast('🧹 Dati demo rimossi: archivio locale azzerato');
 
-  // domanda finale: vuoi pubblicare anche GitHub vuoto?
   const pub = confirm(
     'Vuoi anche AZZERARE i file pubblici su GitHub?\n\n' +
     'OK = sì, pubblico archivio vuoto\n' +
@@ -11316,7 +11326,6 @@ async function rimuoviDatiDemo() {
     }
   }
 }
-  
 
   function testAddKm() {
   const aggiungi = 1; // km finti
