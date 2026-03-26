@@ -1,50 +1,93 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-03-25T23:20:12.187Z",
+  "_exportDate": "2026-03-26T00:49:28.578Z",
   "tipo": "paese",
   "paese": "Ecuador",
   "slug": "ecuador",
   "stats": {
-    "km": 210.7,
-    "benzina": 7.3,
+    "km": 447.7,
+    "benzina": 16.1,
     "benzinaFuori": 0,
-    "olioMl": 156,
-    "spesaBenzinaUsd": 7.8,
-    "spesaOlioUsd": 0.6,
+    "olioMl": 322,
+    "spesaBenzinaUsd": 7.96,
+    "spesaOlioUsd": 0.55,
     "spesaRicambiUsd": 0,
-    "spesaManodoperaUsd": 0
+    "spesaManodoperaUsd": 4
   },
   "tappe": [
     {
-      "id": 1774473803624,
+      "id": 1768783557432,
       "tipo": "Tappa",
-      "data": "18/09/2025",
-      "ora": "09:10",
+      "data": "18/01/2026",
+      "ora": "09:15",
       "paese": "Ecuador",
-      "km": 210.7,
-      "durata": 18400,
-      "altMin": 900,
-      "altMax": 3200,
-      "velMax": 74,
-      "velMedia": 39.8,
-      "benzinaStimataLitri": 7.3,
-      "benzinaRealeLitri": 7.8,
-      "consumoStimatoKmL": 28.9,
-      "consumoRealeKmL": 27,
+      "km": 233.5,
+      "durata": 20500,
+      "altMin": 600,
+      "altMax": 2980,
+      "velMax": 73,
+      "velMedia": 41,
+      "benzinaStimataLitri": 8.4,
+      "benzinaRealeLitri": 8.9,
+      "consumoStimatoKmL": 27.8,
+      "consumoRealeKmL": 26.2,
+      "titolo": "Tulcán → Quito",
+      "note": "Ingresso in Ecuador, controlli frontiera lenti ma tranquilli.",
+      "telemetry": [
+        {
+          "km": 0,
+          "alt": 2950,
+          "sp": 0,
+          "ts": 1768783556432
+        },
+        {
+          "km": 145,
+          "alt": 2500,
+          "sp": 53,
+          "ts": 1768793156432
+        }
+      ],
+      "traccia": [
+        [
+          0.8119,
+          -77.7173
+        ],
+        [
+          -0.1807,
+          -78.4678
+        ]
+      ]
+    },
+    {
+      "id": 1769906757432,
+      "tipo": "Tappa",
+      "data": "31/01/2026",
+      "ora": "08:25",
+      "paese": "Ecuador",
+      "km": 177.8,
+      "durata": 15600,
+      "altMin": 1820,
+      "altMax": 3210,
+      "velMax": 70,
+      "velMedia": 41,
+      "benzinaStimataLitri": 6.4,
+      "benzinaRealeLitri": 6.7,
+      "consumoStimatoKmL": 27.8,
+      "consumoRealeKmL": 26.5,
       "titolo": "Quito → Baños",
-      "note": "Demo Ecuador",
+      "note": "Pioggia a tratti, panorama andino spettacolare.",
       "telemetry": [
         {
           "km": 0,
           "alt": 2850,
           "sp": 0,
-          "ts": 1774473603624
+          "ts": 1769906756432
         },
         {
-          "km": 120,
-          "alt": 2400,
-          "sp": 59,
-          "ts": 1774473703624
+          "km": 115,
+          "alt": 2480,
+          "sp": 48,
+          "ts": 1769915756432
         }
       ],
       "traccia": [
@@ -59,25 +102,90 @@
       ]
     }
   ],
-  "turismo": [],
+  "turismo": [
+    {
+      "id": 1769388361432,
+      "tipo": "Turismo",
+      "data": "25/01/2026",
+      "ora": "15:10",
+      "paese": "Ecuador",
+      "km": 36.4,
+      "durata": 3800,
+      "altMin": 2790,
+      "altMax": 3020,
+      "velMax": 48,
+      "velMedia": 34.4,
+      "benzinaStimataLitri": 1.3,
+      "benzinaRealeLitri": 1.4,
+      "consumoStimatoKmL": 28,
+      "consumoRealeKmL": 26,
+      "titolo": "Giro centro storico di Quito",
+      "note": "Turismo urbano demo.",
+      "telemetry": [
+        {
+          "km": 0,
+          "alt": 2850,
+          "sp": 0,
+          "ts": 1769388356432
+        },
+        {
+          "km": 23,
+          "alt": 3010,
+          "sp": 35,
+          "ts": 1769391056432
+        }
+      ],
+      "traccia": [
+        [
+          -0.1807,
+          -78.4678
+        ],
+        [
+          -0.1807,
+          -78.4678
+        ]
+      ]
+    }
+  ],
   "diario": [
     {
-      "id": 1774473903624,
-      "ts": 1774473903624,
-      "data": "18/09/2025",
-      "ora": "18:20",
+      "id": 1769906846432,
+      "ts": 1769906846432,
+      "data": "31/01/2026",
+      "ora": "17:40",
       "paese": "Ecuador",
-      "km": "343.1",
-      "testo": "Giornata di pioggia e montagne. Arrivare a Baños in Vespa è già una piccola vittoria.",
+      "km": "1091.2",
+      "testo": "Strada verso Baños con nuvole basse e pioggia. Una di quelle giornate in cui vai piano ma ti resta dentro tutto. #Pioggia #Paesaggi",
       "tags": [
         "Pioggia",
-        "Strade"
+        "Paesaggi"
       ],
       "geo": {
         "lat": -1.396,
         "lon": -78.424
       },
-      "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "videoUrl": null,
+      "videoPlanned": true,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1768783646432,
+      "ts": 1768783646432,
+      "data": "18/01/2026",
+      "ora": "20:05",
+      "paese": "Ecuador",
+      "km": "913.4",
+      "testo": "Frontiera passata. Ecuador! Giornata lunga ma tranquilla. Quito mi accoglie con traffico, quota e aria fredda. #Frontiera #Burocrazia",
+      "tags": [
+        "Frontiera",
+        "Burocrazia"
+      ],
+      "geo": {
+        "lat": -0.1807,
+        "lon": -78.4678
+      },
+      "videoUrl": null,
       "videoPlanned": false,
       "fotoUrl": null,
       "foto": null
@@ -85,28 +193,46 @@
   ],
   "rifornimenti": [
     {
-      "id": 1774473703624,
-      "data": "18/09/2025",
-      "ora": "08:40",
+      "id": 1768783556932,
+      "data": "18/01/2026",
+      "ora": "08:50",
       "paese": "Ecuador",
       "qta": "7.80",
       "dest": "Vespa",
       "mix": "2.0%",
-      "prezzoUnit": "1.000",
+      "prezzoUnit": "1.020",
       "valuta": "USD",
       "fxToUsd": 1,
-      "costoBenzLocal": "7.80",
-      "costoBenzUsd": "7.80",
-      "costoBenz": "7.80",
-      "costoOlio": "0.60",
-      "luogo": "Quito",
-      "km": "132.4",
+      "costoBenzLocal": "7.96",
+      "costoBenzUsd": "7.96",
+      "costoBenz": "7.96",
+      "costoOlio": "0.55",
+      "luogo": "Tulcán",
+      "km": "679.9",
+      "geo": {
+        "lat": 0.8119,
+        "lon": -77.7173
+      }
+    }
+  ],
+  "carburazioni": [],
+  "manutenzioni": [
+    {
+      "id": 1769388357432,
+      "data": "25/01/2026",
+      "ora": "18:20",
+      "paese": "Ecuador",
+      "km": "949.8",
+      "nome": "Registrazione cavo frizione",
+      "desc": "Regolazione fatta dopo traffico e salite in quota.",
+      "costoLocal": 4,
+      "valuta": "USD",
+      "costoUsd": 4,
+      "fotoUrl": null,
       "geo": {
         "lat": -0.1807,
         "lon": -78.4678
       }
     }
-  ],
-  "carburazioni": [],
-  "manutenzioni": []
+  ]
 }
