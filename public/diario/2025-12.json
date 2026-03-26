@@ -1,0 +1,30 @@
+{
+  "_version": "public-2.0",
+  "_exportDate": "2026-03-26T00:49:28.572Z",
+  "tipo": "diario_mese",
+  "mese": "2025-12",
+  "count": 1,
+  "entries": [
+    {
+      "id": 1766882846432,
+      "ts": 1766882846432,
+      "data": "27/12/2025",
+      "ora": "18:10",
+      "paese": "Colombia",
+      "km": "186.4",
+      "testo": "Primo giorno di viaggio demo. Lasciare Bogotá in Vespa e arrivare a Villa de Leyva mi ha fatto capire che stavolta si parte davvero. #Paesaggi #Turismo",
+      "tags": [
+        "Paesaggi",
+        "Turismo"
+      ],
+      "geo": {
+        "lat": 5.6349,
+        "lon": -73.5248
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    }
+  ]
+}
