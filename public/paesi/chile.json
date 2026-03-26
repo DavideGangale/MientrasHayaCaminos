@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-03-26T01:04:24.894Z",
+  "_exportDate": "2026-03-26T01:47:07.741Z",
   "tipo": "paese",
   "paese": "Chile",
   "slug": "chile",
@@ -170,7 +170,7 @@
         "lat": -33.4489,
         "lon": -70.6693
       },
-      "videoUrl": null,
+      "videoUrl": "https://youtube.com/shorts/B0l8hiHNxas?si=1NF0YOHox4bGByBK",
       "videoPlanned": false,
       "fotoUrl": null,
       "foto": null
