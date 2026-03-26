@@ -1,0 +1,72 @@
+{
+  "_version": "public-2.0",
+  "_exportDate": "2026-03-26T00:49:28.572Z",
+  "tipo": "diario_mese",
+  "mese": "2026-01",
+  "count": 3,
+  "entries": [
+    {
+      "id": 1769906846432,
+      "ts": 1769906846432,
+      "data": "31/01/2026",
+      "ora": "17:40",
+      "paese": "Ecuador",
+      "km": "1091.2",
+      "testo": "Strada verso Baños con nuvole basse e pioggia. Una di quelle giornate in cui vai piano ma ti resta dentro tutto. #Pioggia #Paesaggi",
+      "tags": [
+        "Pioggia",
+        "Paesaggi"
+      ],
+      "geo": {
+        "lat": -1.396,
+        "lon": -78.424
+      },
+      "videoUrl": null,
+      "videoPlanned": true,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1768783646432,
+      "ts": 1768783646432,
+      "data": "18/01/2026",
+      "ora": "20:05",
+      "paese": "Ecuador",
+      "km": "913.4",
+      "testo": "Frontiera passata. Ecuador! Giornata lunga ma tranquilla. Quito mi accoglie con traffico, quota e aria fredda. #Frontiera #Burocrazia",
+      "tags": [
+        "Frontiera",
+        "Burocrazia"
+      ],
+      "geo": {
+        "lat": -0.1807,
+        "lon": -78.4678
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1768351646432,
+      "ts": 1768351646432,
+      "data": "13/01/2026",
+      "ora": "19:20",
+      "paese": "Colombia",
+      "km": "679.9",
+      "testo": "Verso Cúcuta il caldo si è fatto sentire. Domani frontiera. La Vespa sembra voler andare più lontano di me. #Frontiera #Strade",
+      "tags": [
+        "Frontiera",
+        "Strade"
+      ],
+      "geo": {
+        "lat": 7.8939,
+        "lon": -72.5078
+      },
+      "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    }
+  ]
+}
