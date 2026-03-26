@@ -1,153 +1,286 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-03-26T00:39:26.288Z",
+  "_exportDate": "2026-03-26T00:49:28.572Z",
   "tipo": "officina",
   "stats": {
     "spesaRicambiUsd": 0,
-    "spesaManodoperaUsd": 0
+    "spesaManodoperaUsd": 39
   },
-  "manutenzioni": [],
-  "carburazioni": [],
+  "manutenzioni": [
+    {
+      "id": 1769388357432,
+      "data": "25/01/2026",
+      "ora": "18:20",
+      "paese": "Ecuador",
+      "km": "949.8",
+      "nome": "Registrazione cavo frizione",
+      "desc": "Regolazione fatta dopo traffico e salite in quota.",
+      "costoLocal": 4,
+      "valuta": "USD",
+      "costoUsd": 4,
+      "fotoUrl": null,
+      "geo": {
+        "lat": -0.1807,
+        "lon": -78.4678
+      }
+    },
+    {
+      "id": 1771548358432,
+      "data": "20/02/2026",
+      "ora": "17:10",
+      "paese": "Peru",
+      "km": "3003.0",
+      "nome": "Controllo candela",
+      "desc": "Smontata e letta candela dopo salita a Cusco.",
+      "costoLocal": 0,
+      "valuta": "USD",
+      "costoUsd": 0,
+      "fotoUrl": null,
+      "geo": {
+        "lat": -13.5319,
+        "lon": -71.9675
+      }
+    },
+    {
+      "id": 1772153158432,
+      "data": "26/02/2026",
+      "ora": "19:00",
+      "paese": "Bolivia",
+      "km": "3392.4",
+      "nome": "Regolazione carburazione",
+      "desc": "Piccolo aggiustamento vite aria per alta quota.",
+      "costoLocal": 8,
+      "valuta": "USD",
+      "costoUsd": 8,
+      "fotoUrl": null,
+      "geo": {
+        "lat": -16.4897,
+        "lon": -68.1193
+      }
+    },
+    {
+      "id": 1773362758432,
+      "data": "12/03/2026",
+      "ora": "20:10",
+      "paese": "Chile",
+      "km": "5894.9",
+      "nome": "Cambio olio cambio",
+      "desc": "Manutenzione preventiva dopo lunga sezione andina.",
+      "costoLocal": 12,
+      "valuta": "USD",
+      "costoUsd": 12,
+      "fotoUrl": null,
+      "geo": {
+        "lat": -33.4489,
+        "lon": -70.6693
+      }
+    },
+    {
+      "id": 1774313158432,
+      "data": "23/03/2026",
+      "ora": "20:30",
+      "paese": "Argentina",
+      "km": "9062.1",
+      "nome": "Controllo generale arrivo Ushuaia",
+      "desc": "Bulloneria, freni, cavi e trasmissione controllati.",
+      "costoLocal": 15,
+      "valuta": "USD",
+      "costoUsd": 15,
+      "fotoUrl": null,
+      "geo": {
+        "lat": -54.8019,
+        "lon": -68.303
+      }
+    }
+  ],
+  "carburazioni": [
+    {
+      "id": 1771548359432,
+      "data": "20/02/2026",
+      "ora": "18:00",
+      "alt": 3390,
+      "chicMax": 108,
+      "chicMin": 50,
+      "viteAria": "1.5 giri",
+      "viteMinimo": "2 giri",
+      "candela": "nocciola",
+      "nota": "Setup Cusco, motore regolare ma un po’ grasso ai medi.",
+      "geo": {
+        "lat": -13.5319,
+        "lon": -71.9675
+      },
+      "fotoCandela": null
+    },
+    {
+      "id": 1772153159432,
+      "data": "26/02/2026",
+      "ora": "19:20",
+      "alt": 3640,
+      "chicMax": 105,
+      "chicMin": 48,
+      "viteAria": "1.75 giri",
+      "viteMinimo": "2 giri",
+      "candela": "nocciola chiaro",
+      "nota": "Setup La Paz / alta quota.",
+      "geo": {
+        "lat": -16.4897,
+        "lon": -68.1193
+      },
+      "fotoCandela": null
+    },
+    {
+      "id": 1772757959432,
+      "data": "05/03/2026",
+      "ora": "20:15",
+      "alt": 2430,
+      "chicMax": 108,
+      "chicMin": 50,
+      "viteAria": "1.5 giri",
+      "viteMinimo": "2 giri",
+      "candela": "nocciola",
+      "nota": "Rientro a quote più favorevoli nel deserto cileno.",
+      "geo": {
+        "lat": -22.9087,
+        "lon": -68.1997
+      },
+      "fotoCandela": null
+    }
+  ],
   "inventario": [
     {
+      "id": "inv1",
       "nome": "Cavi Cambio",
-      "qta": 4,
+      "qta": 3,
       "wear": "interval",
       "intervalKm": 6000,
-      "lastKm": 0
+      "usedKm": 1800,
+      "lastKm": 7262.1
     },
     {
+      "id": "inv2",
       "nome": "Cavo Frizione",
-      "qta": 2,
+      "qta": 1,
       "wear": "interval",
       "intervalKm": 5000,
-      "lastKm": 0
+      "usedKm": 900,
+      "lastKm": 8162.1
     },
     {
+      "id": "inv3",
       "nome": "Cavo Freno Anteriore",
       "qta": 2,
       "wear": "interval",
       "intervalKm": 8000,
-      "lastKm": 0
+      "usedKm": 900,
+      "lastKm": 8162.1
     },
     {
+      "id": "inv4",
       "nome": "Cavo Freno Posteriore",
       "qta": 2,
       "wear": "interval",
       "intervalKm": 8000,
-      "lastKm": 0
+      "usedKm": 900,
+      "lastKm": 8162.1
     },
     {
+      "id": "inv5",
       "nome": "Cavo Acceleratore",
-      "qta": 2,
+      "qta": 1,
       "wear": "interval",
       "intervalKm": 6000,
-      "lastKm": 0
+      "usedKm": 2300,
+      "lastKm": 6762.1
     },
     {
+      "id": "inv6",
       "nome": "Ganasce freno ant.",
-      "qta": 2,
+      "qta": 1,
       "wear": "interval",
       "intervalKm": 5000,
-      "lastKm": 0
+      "usedKm": 2800,
+      "lastKm": 6262.1
     },
     {
+      "id": "inv7",
       "nome": "Ganasce freno post.",
-      "qta": 2,
+      "qta": 1,
       "wear": "interval",
       "intervalKm": 3000,
-      "lastKm": 0
+      "usedKm": 2100,
+      "lastKm": 6962.1
     },
     {
+      "id": "inv8",
       "nome": "Pneumatico",
-      "qta": 3,
+      "qta": 2,
       "wear": "interval",
       "intervalKm": 10000,
-      "lastKm": 0
+      "usedKm": 6200,
+      "lastKm": 2862.1000000000004
     },
     {
+      "id": "inv9",
       "nome": "Kit frizione",
       "qta": 1,
       "wear": "interval",
       "intervalKm": 12000,
-      "lastKm": 0
+      "usedKm": 4300,
+      "lastKm": 4762.1
     },
     {
+      "id": "inv10",
       "nome": "Dischi frizione",
       "qta": 1,
       "wear": "interval",
       "intervalKm": 10000,
-      "lastKm": 0
+      "usedKm": 4300,
+      "lastKm": 4762.1
     },
     {
+      "id": "inv11",
       "nome": "Cambio Olio 300ml",
-      "qta": 1,
+      "qta": 0,
       "wear": "interval",
       "intervalKm": 2000,
-      "lastKm": 0
+      "usedKm": 1200,
+      "lastKm": 7862.1
     },
     {
+      "id": "inv12",
       "nome": "Candela",
-      "qta": 2,
+      "qta": 1,
       "wear": "interval",
       "intervalKm": 6000,
-      "lastKm": 0
+      "usedKm": 4500,
+      "lastKm": 4562.1
     },
     {
+      "id": "inv13",
       "nome": "CDI",
       "qta": 1,
       "wear": "na",
       "intervalKm": 0,
-      "lastKm": 0
+      "usedKm": 0,
+      "lastKm": 9062.1
     },
     {
+      "id": "inv14",
       "nome": "Piatto Bobbine",
       "qta": 1,
       "wear": "na",
       "intervalKm": 0,
-      "lastKm": 0
+      "usedKm": 0,
+      "lastKm": 9062.1
     },
     {
-      "nome": "Piste Direzione",
-      "qta": 1,
-      "wear": "na",
-      "intervalKm": 0,
-      "lastKm": 0
-    },
-    {
-      "nome": "Supporto Ammortizzatore Posteriore",
-      "qta": 1,
-      "wear": "na",
-      "intervalKm": 0,
-      "lastKm": 0
-    },
-    {
-      "nome": "Collettore carburatore",
-      "qta": 1,
-      "wear": "na",
-      "intervalKm": 0,
-      "lastKm": 0
-    },
-    {
-      "nome": "Eje Balancin",
-      "qta": 1,
-      "wear": "na",
-      "intervalKm": 0,
-      "lastKm": 0
-    },
-    {
+      "id": "inv15",
       "nome": "Maniglia Freno",
       "qta": 1,
       "wear": "na",
       "intervalKm": 0,
-      "lastKm": 0
-    },
-    {
-      "nome": "Maniglia Frizione",
-      "qta": 1,
-      "wear": "na",
-      "intervalKm": 0,
-      "lastKm": 0
+      "usedKm": 0,
+      "lastKm": 9062.1
     }
   ]
 }
