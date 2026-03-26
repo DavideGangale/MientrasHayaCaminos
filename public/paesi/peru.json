@@ -1,50 +1,187 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-03-25T23:20:12.187Z",
+  "_exportDate": "2026-03-26T00:49:28.578Z",
   "tipo": "paese",
   "paese": "Peru",
   "slug": "peru",
   "stats": {
-    "km": 356.9,
-    "benzina": 12.4,
+    "km": 1969,
+    "benzina": 70.4,
     "benzinaFuori": 0,
-    "olioMl": 248,
-    "spesaBenzinaUsd": 13.4,
-    "spesaOlioUsd": 0.95,
+    "olioMl": 1760,
+    "spesaBenzinaUsd": 29.05,
+    "spesaOlioUsd": 1.53,
     "spesaRicambiUsd": 0,
     "spesaManodoperaUsd": 0
   },
   "tappe": [
     {
-      "id": 1774475803624,
+      "id": 1770425157432,
       "tipo": "Tappa",
-      "data": "25/09/2025",
-      "ora": "07:40",
+      "data": "06/02/2026",
+      "ora": "07:10",
       "paese": "Peru",
-      "km": 356.9,
-      "durata": 27800,
-      "altMin": 1200,
-      "altMax": 4100,
-      "velMax": 69,
-      "velMedia": 36.9,
-      "benzinaStimataLitri": 12.4,
-      "benzinaRealeLitri": 13.1,
-      "consumoStimatoKmL": 28.8,
-      "consumoRealeKmL": 27.2,
-      "titolo": "Cusco → Puno",
-      "note": "Demo Perù in alta quota",
+      "km": 312.7,
+      "durata": 26800,
+      "altMin": 900,
+      "altMax": 3330,
+      "velMax": 74,
+      "velMedia": 42,
+      "benzinaStimataLitri": 11.2,
+      "benzinaRealeLitri": 11.8,
+      "consumoStimatoKmL": 27.9,
+      "consumoRealeKmL": 26.5,
+      "titolo": "Piura → Trujillo",
+      "note": "Ingresso in Perù e discesa verso la costa.",
+      "telemetry": [
+        {
+          "km": 0,
+          "alt": 120,
+          "sp": 0,
+          "ts": 1770425156432
+        },
+        {
+          "km": 190,
+          "alt": 80,
+          "sp": 65,
+          "ts": 1770437756432
+        }
+      ],
+      "traccia": [
+        [
+          -5.1945,
+          -80.6328
+        ],
+        [
+          -8.1116,
+          -79.0287
+        ]
+      ]
+    },
+    {
+      "id": 1771029957432,
+      "tipo": "Tappa",
+      "data": "13/02/2026",
+      "ora": "07:50",
+      "paese": "Peru",
+      "km": 486.3,
+      "durata": 38100,
+      "altMin": 0,
+      "altMax": 540,
+      "velMax": 83,
+      "velMedia": 46,
+      "benzinaStimataLitri": 17.1,
+      "benzinaRealeLitri": 17.8,
+      "consumoStimatoKmL": 28.4,
+      "consumoRealeKmL": 27.3,
+      "titolo": "Trujillo → Lima",
+      "note": "Lunga tirata costiera, vento laterale forte.",
+      "telemetry": [
+        {
+          "km": 0,
+          "alt": 34,
+          "sp": 0,
+          "ts": 1771029956432
+        },
+        {
+          "km": 290,
+          "alt": 45,
+          "sp": 69,
+          "ts": 1771046156432
+        }
+      ],
+      "traccia": [
+        [
+          -8.1116,
+          -79.0287
+        ],
+        [
+          -12.0464,
+          -77.0428
+        ]
+      ]
+    },
+    {
+      "id": 1771548357432,
+      "tipo": "Tappa",
+      "data": "19/02/2026",
+      "ora": "06:45",
+      "paese": "Peru",
+      "km": 1112.8,
+      "durata": 80400,
+      "altMin": 0,
+      "altMax": 3390,
+      "velMax": 79,
+      "velMedia": 49.8,
+      "benzinaStimataLitri": 39.6,
+      "benzinaRealeLitri": 41.3,
+      "consumoStimatoKmL": 28.1,
+      "consumoRealeKmL": 26.9,
+      "titolo": "Lima → Cusco",
+      "note": "Tappa demo molto lunga, compressa per popolare bene la pagina pubblica.",
+      "telemetry": [
+        {
+          "km": 0,
+          "alt": 80,
+          "sp": 0,
+          "ts": 1771548356432
+        },
+        {
+          "km": 610,
+          "alt": 1860,
+          "sp": 52,
+          "ts": 1771584356432
+        },
+        {
+          "km": 1112.8,
+          "alt": 3390,
+          "sp": 0,
+          "ts": 1771616756432
+        }
+      ],
+      "traccia": [
+        [
+          -12.0464,
+          -77.0428
+        ],
+        [
+          -13.5319,
+          -71.9675
+        ]
+      ]
+    }
+  ],
+  "turismo": [
+    {
+      "id": 1771548361432,
+      "tipo": "Turismo",
+      "data": "20/02/2026",
+      "ora": "10:40",
+      "paese": "Peru",
+      "km": 58.6,
+      "durata": 5200,
+      "altMin": 3320,
+      "altMax": 3520,
+      "velMax": 54,
+      "velMedia": 40.5,
+      "benzinaStimataLitri": 2.1,
+      "benzinaRealeLitri": 2.2,
+      "consumoStimatoKmL": 27.9,
+      "consumoRealeKmL": 26.6,
+      "titolo": "Giro archeologico Cusco",
+      "note": "Breve uscita nei siti vicini.",
       "telemetry": [
         {
           "km": 0,
           "alt": 3390,
           "sp": 0,
-          "ts": 1774475503624
+          "ts": 1771634756432
         },
         {
-          "km": 190,
-          "alt": 4100,
-          "sp": 53,
-          "ts": 1774475653624
+          "km": 39,
+          "alt": 3520,
+          "sp": 46,
+          "ts": 1771638556432
         }
       ],
       "traccia": [
@@ -53,54 +190,142 @@
           -71.9675
         ],
         [
-          -15.84,
-          -70.02
+          -13.5319,
+          -71.9675
         ]
       ]
     }
   ],
-  "turismo": [],
   "diario": [
     {
-      "id": 1774475903624,
-      "ts": 1774475903624,
-      "data": "25/09/2025",
-      "ora": "19:10",
+      "id": 1771634846432,
+      "ts": 1771634846432,
+      "data": "20/02/2026",
+      "ora": "19:05",
       "paese": "Peru",
-      "km": "699.9",
-      "testo": "Altitudine seria. La Vespa continua a salire anche se io mi sento senza fiato.",
+      "km": "3003.0",
+      "testo": "A Cusco la Vespa soffre meno di me. In quota cambiano i rumori del motore e cambia anche il modo di guardare il paesaggio. #Problemi #Paesaggi #Officina",
       "tags": [
         "Problemi",
-        "Paesaggi"
+        "Paesaggi",
+        "Officina"
       ],
       "geo": {
-        "lat": -15.84,
-        "lon": -70.02
+        "lat": -13.5319,
+        "lon": -71.9675
       },
       "videoUrl": null,
-      "videoPlanned": true,
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1771030046432,
+      "ts": 1771030046432,
+      "data": "13/02/2026",
+      "ora": "21:10",
+      "paese": "Peru",
+      "km": "1890.2",
+      "testo": "Entrare a Lima in Vespa è stato quasi più difficile della frontiera. Caos totale, ma anche energia pura. #Strade #Persone",
+      "tags": [
+        "Strade",
+        "Persone"
+      ],
+      "geo": {
+        "lat": -12.0464,
+        "lon": -77.0428
+      },
+      "videoUrl": "https://www.youtube.com/watch?v=jNQXAC9IVRw",
+      "videoPlanned": false,
       "fotoUrl": null,
       "foto": null
     }
   ],
-  "rifornimenti": [],
+  "rifornimenti": [
+    {
+      "id": 1770425156932,
+      "data": "06/02/2026",
+      "ora": "06:35",
+      "paese": "Peru",
+      "qta": "8.50",
+      "dest": "Vespa",
+      "mix": "2.5%",
+      "prezzoUnit": "1.030",
+      "valuta": "USD",
+      "fxToUsd": 1,
+      "costoBenzLocal": "8.75",
+      "costoBenzUsd": "8.75",
+      "costoBenz": "8.75",
+      "costoOlio": "0.72",
+      "luogo": "Piura",
+      "km": "1091.2",
+      "geo": {
+        "lat": -5.1945,
+        "lon": -80.6328
+      }
+    },
+    {
+      "id": 1771029956932,
+      "data": "13/02/2026",
+      "ora": "07:05",
+      "paese": "Peru",
+      "qta": "10.20",
+      "dest": "Tanica",
+      "mix": "--",
+      "prezzoUnit": "1.010",
+      "valuta": "USD",
+      "fxToUsd": 1,
+      "costoBenzLocal": "10.30",
+      "costoBenzUsd": "10.30",
+      "costoBenz": "10.30",
+      "costoOlio": null,
+      "luogo": "Trujillo",
+      "km": "1403.9",
+      "geo": {
+        "lat": -8.1116,
+        "lon": -79.0287
+      }
+    },
+    {
+      "id": 1771548356932,
+      "data": "19/02/2026",
+      "ora": "06:20",
+      "paese": "Peru",
+      "qta": "9.80",
+      "dest": "Vespa",
+      "mix": "2.5%",
+      "prezzoUnit": "1.020",
+      "valuta": "USD",
+      "fxToUsd": 1,
+      "costoBenzLocal": "10.00",
+      "costoBenzUsd": "10.00",
+      "costoBenz": "10.00",
+      "costoOlio": "0.81",
+      "luogo": "Lima",
+      "km": "1890.2",
+      "geo": {
+        "lat": -12.0464,
+        "lon": -77.0428
+      }
+    }
+  ],
   "carburazioni": [],
   "manutenzioni": [
     {
-      "id": 1774476103624,
-      "data": "26/09/2025",
-      "ora": "10:50",
+      "id": 1771548358432,
+      "data": "20/02/2026",
+      "ora": "17:10",
       "paese": "Peru",
-      "km": "720.0",
+      "km": "3003.0",
       "nome": "Controllo candela",
-      "desc": "Smontata e controllata dopo tratto in quota.",
+      "desc": "Smontata e letta candela dopo salita a Cusco.",
       "costoLocal": 0,
       "valuta": "USD",
       "costoUsd": 0,
       "fotoUrl": null,
       "geo": {
-        "lat": -15.84,
-        "lon": -70.02
+        "lat": -13.5319,
+        "lon": -71.9675
       }
     }
   ]
