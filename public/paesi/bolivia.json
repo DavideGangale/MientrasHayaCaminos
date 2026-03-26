@@ -1,23 +1,130 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-01-01T00:00:00.000Z",
+  "_exportDate": "2026-03-26T00:49:28.578Z",
   "tipo": "paese",
   "paese": "Bolivia",
   "slug": "bolivia",
   "stats": {
-    "km": 0,
-    "benzina": 0,
+    "km": 389.4,
+    "benzina": 14,
     "benzinaFuori": 0,
-    "olioMl": 0,
-    "spesaBenzinaUsd": 0,
-    "spesaOlioUsd": 0,
+    "olioMl": 420,
+    "spesaBenzinaUsd": 8.72,
+    "spesaOlioUsd": 0.92,
     "spesaRicambiUsd": 0,
-    "spesaManodoperaUsd": 0
+    "spesaManodoperaUsd": 8
   },
-  "tappe": [],
+  "tappe": [
+    {
+      "id": 1772153157432,
+      "tipo": "Tappa",
+      "data": "26/02/2026",
+      "ora": "07:30",
+      "paese": "Bolivia",
+      "km": 389.4,
+      "durata": 31700,
+      "altMin": 3650,
+      "altMax": 4320,
+      "velMax": 66,
+      "velMedia": 44.2,
+      "benzinaStimataLitri": 14,
+      "benzinaRealeLitri": 14.8,
+      "consumoStimatoKmL": 27.8,
+      "consumoRealeKmL": 26.3,
+      "titolo": "Cusco → La Paz",
+      "note": "Frontiera e prima vera alta quota prolungata.",
+      "telemetry": [
+        {
+          "km": 0,
+          "alt": 3390,
+          "sp": 0,
+          "ts": 1772153156432
+        },
+        {
+          "km": 240,
+          "alt": 4310,
+          "sp": 49,
+          "ts": 1772171156432
+        }
+      ],
+      "traccia": [
+        [
+          -13.5319,
+          -71.9675
+        ],
+        [
+          -16.4897,
+          -68.1193
+        ]
+      ]
+    }
+  ],
   "turismo": [],
-  "diario": [],
-  "rifornimenti": [],
+  "diario": [
+    {
+      "id": 1772153246432,
+      "ts": 1772153246432,
+      "data": "26/02/2026",
+      "ora": "20:15",
+      "paese": "Bolivia",
+      "km": "3392.4",
+      "testo": "La Paz è un vortice. Il motore gira ancora bene, ma qui ogni salita sembra chiedere rispetto. #Paesaggi #Problemi",
+      "tags": [
+        "Paesaggi",
+        "Problemi"
+      ],
+      "geo": {
+        "lat": -16.4897,
+        "lon": -68.1193
+      },
+      "videoUrl": null,
+      "videoPlanned": true,
+      "fotoUrl": null,
+      "foto": null
+    }
+  ],
+  "rifornimenti": [
+    {
+      "id": 1772153156932,
+      "data": "26/02/2026",
+      "ora": "07:05",
+      "paese": "Bolivia",
+      "qta": "8.90",
+      "dest": "Vespa",
+      "mix": "3.0%",
+      "prezzoUnit": "0.980",
+      "valuta": "USD",
+      "fxToUsd": 1,
+      "costoBenzLocal": "8.72",
+      "costoBenzUsd": "8.72",
+      "costoBenz": "8.72",
+      "costoOlio": "0.92",
+      "luogo": "Cusco",
+      "km": "3003.0",
+      "geo": {
+        "lat": -13.5319,
+        "lon": -71.9675
+      }
+    }
+  ],
   "carburazioni": [],
-  "manutenzioni": []
+  "manutenzioni": [
+    {
+      "id": 1772153158432,
+      "data": "26/02/2026",
+      "ora": "19:00",
+      "paese": "Bolivia",
+      "km": "3392.4",
+      "nome": "Regolazione carburazione",
+      "desc": "Piccolo aggiustamento vite aria per alta quota.",
+      "costoLocal": 8,
+      "valuta": "USD",
+      "costoUsd": 8,
+      "fotoUrl": null,
+      "geo": {
+        "lat": -16.4897,
+        "lon": -68.1193
+      }
+    }
+  ]
 }
