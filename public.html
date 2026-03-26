@@ -471,6 +471,37 @@ function getYearMonthFromPublicEntry(entry) {
   return '';
 }
 
+
+
+  function getYearMonthFromPercorso(entry) {
+  if (entry && entry.ts) {
+    const d = new Date(Number(entry.ts));
+    if (!isNaN(d.getTime())) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      return `${y}-${m}`;
+    }
+  }
+
+  const ds = String(entry?.data || '').trim();
+
+  // formato tipo 05/09/2025
+  let m = ds.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m) {
+    return `${m[3]}-${String(m[2]).padStart(2, '0')}`;
+  }
+
+  // formato tipo 2025-09-05
+  m = ds.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (m) {
+    return `${m[1]}-${String(m[2]).padStart(2, '0')}`;
+  }
+
+  return '';
+}
+
+
+
   
   // ===== Stats helpers (benzina bruciata da tappe/giri) =====
   const CONSUMO_FALLBACK_KM_L = 28;
@@ -847,9 +878,11 @@ function getYouTubeId(url) {
     if (currentMode === 'TUTTO' || currentMode === 'TAPPE') tracceDaMostrare.push(...tappe);
     if (currentMode === 'TUTTO' || currentMode === 'GIRI') tracceDaMostrare.push(...turismo);
 
-    tracceDaMostrare.forEach(t => {
-      if (currentCountry && t.paese !== currentCountry) return;
-      if (!t.traccia || t.traccia.length < 2) return;
+    
+tracceDaMostrare.forEach(t => {
+  if (currentCountry && t.paese !== currentCountry) return;
+  if (currentMonthFilter && getYearMonthFromPercorso(t) !== currentMonthFilter) return;
+  if (!t.traccia || t.traccia.length < 2) return;
 
       const latlngs = t.traccia.map(p => Array.isArray(p) ? [p[0], p[1]] : [p.lat, p.lon || p.lng]);
       const color = t.tipo === 'Turismo' ? '#2196F3' : '#d32f2f';
@@ -1060,13 +1093,13 @@ async function setCountry(country) {
 
   try {
     await caricaPaeseSeServe(currentCountry);
+    popolaMesi();
     renderMap();
   } catch (e) {
     console.error(e);
     alert('Errore caricamento paese');
   }
 }
-
 
   function setMonthFilter(month) {
   currentMonthFilter = month || '';
@@ -1082,19 +1115,37 @@ async function setCountry(country) {
 
 function popolaMesi() {
   const sel = document.getElementById('monthSelect');
-  if (!sel || !INDEX_DATA) return;
+  if (!sel || !DATA) return;
 
   sel.innerHTML = `<option value="">${T('allMonths')}</option>`;
 
-  const arr = Array.isArray(INDEX_DATA?.archivi?.diarioMensile)
-    ? INDEX_DATA.archivi.diarioMensile
-    : [];
+  const mesiSet = new Set();
 
-  arr.forEach(m => {
-    if (!m || !m.mese) return;
+  const tappe = Array.isArray(DATA?.tappe) ? DATA.tappe : [];
+  const turismo = Array.isArray(DATA?.turismo) ? DATA.turismo : [];
+  const diario = Array.isArray(DATA?.diario) ? DATA.diario : [];
+
+  tappe.forEach(t => {
+    const mese = getYearMonthFromPercorso(t);
+    if (mese) mesiSet.add(mese);
+  });
+
+  turismo.forEach(t => {
+    const mese = getYearMonthFromPercorso(t);
+    if (mese) mesiSet.add(mese);
+  });
+
+  diario.forEach(d => {
+    const mese = getYearMonthFromPublicEntry(d);
+    if (mese) mesiSet.add(mese);
+  });
+
+  const mesi = Array.from(mesiSet).sort();
+
+  mesi.forEach(mese => {
     const opt = document.createElement('option');
-    opt.value = m.mese;
-    opt.innerText = '🗓️ ' + m.mese;
+    opt.value = mese;
+    opt.innerText = '🗓️ ' + mese;
     sel.appendChild(opt);
   });
 
