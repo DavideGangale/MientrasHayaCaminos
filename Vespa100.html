@@ -2286,7 +2286,7 @@ color:#fff;
         <input type="text" id="set-gh-repo" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="es. davidegangale/MientrasHayaCaminos">
 
         <label class="inp-label">Percorso del file nel repository</label>
-        <input type="text" id="set-gh-path" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="es. public/vespatrek_public.json">
+        <input type="text" id="set-gh-path" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="es. public/vespatrek_index.json">
 
         <button class="btn-secondary" onclick="salvaGitHubSettings()">💾 Salva Impostazioni GitHub</button>
       </div>
@@ -4771,18 +4771,6 @@ function cambiaPaese() {
   showToast('🗺️ Paese: ' + p);
 }
 
-/* ============================================================
-   UNITÀ (L / G)
-============================================================ */
-function cambiaUnita(u) {
-  unitaAttuale = u;
-  salva('vt_unita', u);
-  const bl = document.getElementById('btn-litri');
-  const bg = document.getElementById('btn-galloni');
-  if (bl) bl.classList.toggle('active', u === 'L');
-  if (bg) bg.classList.toggle('active', u === 'G');
-  aggiornaUI();
-}
 
 /* ============================================================
    DESTINAZIONE BENZINA (Vespa / Tanica)
@@ -5352,7 +5340,7 @@ if (fuelMini) {
 /* ============================================================
    CONDIVISIONE (FUNZIONE UNICA, FIX)
 ============================================================ */
-const PUBLIC_BLOG_URL = 'https://davidegangale.github.io/MientrasHayaCaminos/public.html?src=public/vespatrek_public.json';
+const PUBLIC_BLOG_URL = 'https://davidegangale.github.io/MientrasHayaCaminos/public.html?src=public/vespatrek_index.json';
   
 function dataURLToFile(dataUrl, filename = 'foto.jpg') {
   const arr = dataUrl.split(',');
@@ -6949,51 +6937,6 @@ function cambiaPaeseDaSettings() {
   showToast('🗺️ Paese: ' + p);
 }
 
-  
-//let detPercorsoId = null;
-
-//function trovaPercorsoById(id) {
-//  const tappe = caricaJSON('vt_tappe', []);
-//  const tur   = caricaJSON('vt_turismo', []);
-
-//  let idx = Array.isArray(tappe) ? tappe.findIndex(x => x.id === id) : -1;
- // if (idx !== -1) return { key:'vt_tappe', list:tappe, idx, item:tappe[idx] };
-
-//  idx = Array.isArray(tur) ? tur.findIndex(x => x.id === id) : -1;
-//  if (idx !== -1) return { key:'vt_turismo', list:tur, idx, item:tur[idx] };
-
- // return null;
-//}
-
-//function apriDettagliPercorso(id) {
-//  const found = trovaPercorsoById(id);
-//  if (!found) { showToast('⚠️ Elemento non trovato'); return; }
-
-//  detPercorsoId = id;
-//  document.getElementById('det-titolo').value = found.item.titolo || '';
-//  document.getElementById('det-note').value   = found.item.note || '';
-
-//  apriModal('modalDettagli');
-//}
-
-//function salvaDettagliPercorso() {
-//  if (!detPercorsoId) return;
-
-//  const found = trovaPercorsoById(detPercorsoId);
-//  if (!found) { showToast('⚠️ Elemento non trovato'); return; }
-
-//  const titolo = document.getElementById('det-titolo').value.trim();
-//  const note   = document.getElementById('det-note').value.trim();
-
-//  found.list[found.idx].titolo = titolo;
-//  found.list[found.idx].note   = note;
-
-//  salva(found.key, found.list);
-
-//  chiudiModal('modalDettagli');
-//  renderTappe();
-//  showToast('✅ Dettagli salvati');
-//}
 
 let detPercorsoId = null;
 
@@ -9120,65 +9063,7 @@ function aggiungiCheckItem() {
 /* ============================================================
    BACKUP LIGHT
 ============================================================ */
-function esportaDatiLight() {
-  const chiavi = [
-    'vt_kmTotali','vt_odoUltimoPieno',
-    'vt_scortaLitri','vt_olioTotaleMl','vt_benzinaUsata',
-    'vt_spesaBenzina','vt_spesaOlio','vt_paeseAttuale',
-    'vt_datiPaesi','vt_tappe','vt_logbook','vt_diario',
-    'vt_logCarburanti','vt_coordinateTracciato',
-    'vt_carburazione','vt_checklist','vt_inventario','vt_tappaAttuale',
-    'vt_serbatoioLitri','vt_olioStockMl','vt_olioCostoStockUsd','vt_spesaBenzinaUsd','vt_spesaOlioUsd','vt_spesaRicambiUsd','vt_spesaManodoperaUsd',
-    'vt_turismo',
-'vt_benzinaFuoriTappaLitri','vt_kmFuoriTappa',
 
-'vt_unita','vt_dist','vt_valuta',
-'vt_fxRates',
-
-'vt_manutCatalog','vt_manut_lastKm','vt_manut_warnState',
-
-'vt_serbatoioCapLitri','vt_tanica1CapLitri','vt_tanica2CapLitri','vt_consumoMedioManuale',
-
-'vt_driveUploadUrl','vt_driveFolderId','vt_driveAutoSync','vt_uploadQueue',
-
-'vt_gh_token','vt_gh_repo','vt_gh_path',
-
-'vt_diarioTagsCustom'
-  ];
-
-  const backup = { _version:'1.2-light', _exportDate: new Date().toISOString() };
-  chiavi.forEach(k => backup[k] = localStorage.getItem(k));
-
-  // ripulisci immagini (opzionale)
-  try {
-    const tappe = JSON.parse(backup.vt_tappe || '[]');
-    tappe.forEach(t => { if (t) t.snapshot = null; });
-    backup.vt_tappe = JSON.stringify(tappe);
-
-    const diario = JSON.parse(backup.vt_diario || '[]');
-    diario.forEach(d => { if (d) d.foto = null; });
-    backup.vt_diario = JSON.stringify(diario);
-
-    const logbook = JSON.parse(backup.vt_logbook || '[]');
-    logbook.forEach(e => { if (e) e.foto = null; });
-    backup.vt_logbook = JSON.stringify(logbook);
-  } catch (e) {
-    console.warn('Backup light sanitize error:', e);
-  }
-
-  const blob = new Blob([JSON.stringify(backup, null, 2)], { type:'application/json' });
-  const url  = URL.createObjectURL(blob);
-
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `vespatrek_backup_LIGHT_${new Date().toLocaleDateString('it-IT').replace(/\//g,'-')}.json`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-
-  URL.revokeObjectURL(url);
-  showToast('💾 Backup LIGHT esportato!');
-}
 
  
 
@@ -9347,14 +9232,19 @@ async function costruisciArchivioPubblicoSpezzato() {
     fotoCandela: e.fotoCandela || null
   }));
 
-  const paesiNomi = Array.from(new Set([
-    ...Object.keys(datiPaesi || {}),
-    ...tappePub.map(x => x.paese).filter(Boolean),
-    ...turismoPub.map(x => x.paese).filter(Boolean),
-    ...diarioPub.map(x => x.paese).filter(Boolean),
-    ...logbookPub.map(x => x.paese).filter(Boolean),
-    ...logCarburanti.map(x => x.paese).filter(Boolean)
-  ])).sort();
+let paesiNomi = Array.from(new Set([
+  ...Object.keys(datiPaesi || {}),
+  ...tappePub.map(x => x.paese).filter(Boolean),
+  ...turismoPub.map(x => x.paese).filter(Boolean),
+  ...diarioPub.map(x => x.paese).filter(Boolean),
+  ...logbookPub.map(x => x.paese).filter(Boolean),
+  ...logCarburanti.map(x => x.paese).filter(Boolean)
+])).sort();
+
+// se tutto è vuoto, lascia almeno Colombia
+if (!paesiNomi.length) {
+  paesiNomi = ['Colombia'];
+}
 
   const files = {};
 
@@ -9414,8 +9304,16 @@ async function costruisciArchivioPubblicoSpezzato() {
     const carburazioniPaese = filtraPerPaese(carburazionePub, paese);
     const manutenzioniPaese = filtraPerPaese(logbookPub, paese);
 
-    const dp = datiPaesi[paese] || {};
-
+  const dp = datiPaesi[paese] || {
+  km: 0,
+  benzina: 0,
+  benzinaFuori: 0,
+  olioMl: 0,
+  spesaBenzinaUsd: 0,
+  spesaOlioUsd: 0,
+  spesaRicambiUsd: 0,
+  spesaManodoperaUsd: 0
+};
     const path = `public/paesi/${slug}.json`;
     files[path] = {
       _version: 'public-2.0',
@@ -9592,60 +9490,6 @@ function prendiUltimi(arr, n) {
 function utf8_to_b64(str) {
   return btoa(unescape(encodeURIComponent(str)));
 }
-
-async function pubblicaJSONSuGitHub(jsonString) {
-  const token = carica('vt_gh_token', '');
-  const repo = carica('vt_gh_repo', '');
-  const path = carica('vt_gh_path', '');
-
-  if (!token || !repo || !path) {
-    showToast('⚠️ Configura i dati di GitHub (Token, Repo e Path) nei Settings prima di pubblicare!');
-    return;
-  }
-
-  showToast('🐙 Contattando GitHub...', 3000);
-  const apiUrl = `https://api.github.com/repos/${repo}/contents/${path}`;
-  const headers = {
-    'Authorization': `token ${token}`,
-    'Accept': 'application/vnd.github.v3+json',
-    'Content-Type': 'application/json'
-  };
-
-  try {
-    // 1. Chiediamo a GitHub l'ID (SHA) del file vecchio (serve per sovrascriverlo)
-    let sha = null;
-    const getRes = await fetch(apiUrl, { method: 'GET', headers });
-    if (getRes.ok) {
-      const getData = await getRes.json();
-      sha = getData.sha;
-    }
-
-    // 2. Prepariamo e inviamo il nuovo file
-    const body = {
-      message: `Aggiornamento VespaTrek Live App: ${new Date().toLocaleString('it-IT')}`,
-      content: utf8_to_b64(jsonString)
-    };
-    if (sha) body.sha = sha;
-
-    const putRes = await fetch(apiUrl, {
-      method: 'PUT',
-      headers,
-      body: JSON.stringify(body)
-    });
-
-    if (!putRes.ok) {
-      const err = await putRes.json();
-      throw new Error(err.message || 'Errore API GitHub');
-    }
-
-    showToast('🚀 JSON Pubblicato con successo su GitHub!', 4000);
-  } catch(e) {
-    console.error('GitHub API Error:', e);
-    showToast('❌ Errore GitHub: ' + e.message, 5000);
-  }
-}
-
-
 
   async function pubblicaFileSingoloSuGitHub(path, jsonObject) {
   const token = carica('vt_gh_token', '');
@@ -10339,28 +10183,80 @@ function caricaDatiDemoMultiPaese() {
   showToast('🧪 Dati demo multi-paese caricati');
 }
 
-function rimuoviDatiDemo() {
-  if (!confirm('Rimuovere i dati demo e ripulire i dati di viaggio locali?')) return;
+async function rimuoviDatiDemo() {
+  const ok = confirm(
+    'Rimuovere i dati demo e ripulire TUTTI i dati di viaggio?\n\n' +
+    'Verranno azzerati: tappe, turismo, diario, rifornimenti, manutenzioni, carburazioni, km, spese, consumi.\n' +
+    'Paese attuale: Colombia.'
+  );
+  if (!ok) return;
 
+  // se sto tracciando, fermo tutto
+  if (inViaggio) {
+    try { toggleTracking(); } catch(e) {}
+  }
+
+  // reset dati viaggio principali
   salva('vt_tappe', []);
   salva('vt_turismo', []);
   salva('vt_diario', []);
   salva('vt_logCarburanti', []);
   salva('vt_logbook', []);
   salva('vt_carburazione', []);
-  salva('vt_datiPaesi', {});
+  salva('vt_coordinateTracciato', []);
+  salva('vt_tappaAttuale', nuovaTappa(0));
+
+  // reset km / carburante / olio
   salva('vt_kmTotali', '0');
+  salva('vt_odoUltimoPieno', '0');
+  salva('vt_litriVespa', '0');
+  salva('vt_scortaLitri', '0');
+  salva('vt_serbatoioLitri', '0');
   salva('vt_benzinaUsata', '0');
+  salva('vt_benzinaFuoriTappaLitri', '0');
+  salva('vt_kmFuoriTappa', '0');
+
   salva('vt_olioTotaleMl', '0');
+  salva('vt_olioStockMl', '0');
+  salva('vt_olioCostoStockUsd', '0');
+
+  // reset spese
   salva('vt_spesaBenzinaUsd', '0');
   salva('vt_spesaOlioUsd', '0');
   salva('vt_spesaRicambiUsd', '0');
   salva('vt_spesaManodoperaUsd', '0');
-  salva('vt_scortaLitri', '0');
-  salva('vt_serbatoioLitri', String(getSerbatoioCapLitri().toFixed(3)));
-  salva('vt_coordinateTracciato', []);
-  salva('vt_tappaAttuale', nuovaTappa(0));
 
+  // reset paese
+  salva('vt_paeseAttuale', 'Colombia');
+  lastCountry = 'Colombia';
+
+  // reset statistiche paesi: lascia solo Colombia vuota
+  salva('vt_datiPaesi', {
+    Colombia: {
+      km: 0,
+      benzina: 0,
+      benzinaFuori: 0,
+      olioMl: 0,
+      spesaBenzinaUsd: 0,
+      spesaOlioUsd: 0,
+      spesaRicambiUsd: 0,
+      spesaManodoperaUsd: 0
+    }
+  });
+
+  // opzionale ma consigliato: reset stato guida
+  coordinateTracciato = [];
+  tappaAttuale = nuovaTappa(0);
+  pendingFuelTappaId = null;
+  pendingFuelKind = null;
+  pendingMount = null;
+  pendingManutFromChecklist = null;
+
+  try {
+    polyline.setLatLngs([]);
+  } catch(e) {}
+
+  // aggiorna UI
   aggiornaSettingsUI();
   aggiornaUI();
   renderTappe();
@@ -10369,7 +10265,24 @@ function rimuoviDatiDemo() {
   renderLogManutenzione();
   renderStoricoCarbur();
 
-  showToast('🧹 Dati demo rimossi');
+  showToast('🧹 Dati demo rimossi: archivio locale azzerato');
+
+  // domanda finale: vuoi pubblicare anche GitHub vuoto?
+  const pub = confirm(
+    'Vuoi anche AZZERARE i file pubblici su GitHub?\n\n' +
+    'OK = sì, pubblico archivio vuoto\n' +
+    'Annulla = no, pulisco solo l’app locale'
+  );
+
+  if (pub) {
+    try {
+      await esportaDatiPubblici('github');
+      showToast('🚀 Archivio pubblico aggiornato su GitHub');
+    } catch (e) {
+      console.warn(e);
+      showToast('❌ Errore pubblicazione GitHub: ' + (e.message || e), 5000);
+    }
+  }
 }
   
 
