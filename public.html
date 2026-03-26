@@ -1208,7 +1208,14 @@ function popolaMesi() {
 
     // usa benzina del paese se presente, altrimenti 0
     benz = Number(st.benzina || 0);
-    olio = Number((INDEX_DATA?.paesi || []).find(x => x.paese === country)?.stats?.olioMl || 0) / 1000;
+    const paeseMeta = (INDEX_DATA?.paesi || []).find(x => x.paese === country);
+if (paeseMeta?.stats?.olioTotaleLitri != null) {
+  olio = Number(paeseMeta.stats.olioTotaleLitri || 0);
+} else if (paeseMeta?.stats?.olioMl != null) {
+  olio = Number(paeseMeta.stats.olioMl || 0) / 1000;
+} else {
+  olio = 0;
+}
 
     spesaBenz = Number(st.spesaBenzinaUsd || 0);
     spesaMaint = Number(st.spesaRicambiUsd || 0) + Number(st.spesaManodoperaUsd || 0);
