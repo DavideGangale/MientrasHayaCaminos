@@ -1,23 +1,272 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-01-01T00:00:00.000Z",
+  "_exportDate": "2026-03-26T00:49:28.578Z",
   "tipo": "paese",
   "paese": "Argentina",
   "slug": "argentina",
   "stats": {
-    "km": 0,
-    "benzina": 0,
+    "km": 3195.6,
+    "benzina": 114.3,
     "benzinaFuori": 0,
-    "olioMl": 0,
-    "spesaBenzinaUsd": 0,
-    "spesaOlioUsd": 0,
+    "olioMl": 2286,
+    "spesaBenzinaUsd": 26.79,
+    "spesaOlioUsd": 1.42,
     "spesaRicambiUsd": 0,
-    "spesaManodoperaUsd": 0
+    "spesaManodoperaUsd": 15
   },
-  "tappe": [],
-  "turismo": [],
-  "diario": [],
-  "rifornimenti": [],
+  "tappe": [
+    {
+      "id": 1773967557432,
+      "tipo": "Tappa",
+      "data": "19/03/2026",
+      "ora": "07:20",
+      "paese": "Argentina",
+      "km": 1512.4,
+      "durata": 118000,
+      "altMin": 0,
+      "altMax": 1250,
+      "velMax": 83,
+      "velMedia": 46.1,
+      "benzinaStimataLitri": 54,
+      "benzinaRealeLitri": 56.2,
+      "consumoStimatoKmL": 28,
+      "consumoRealeKmL": 26.9,
+      "titolo": "Santiago → Bariloche",
+      "note": "Ingresso in Argentina e grandi paesaggi patagonici.",
+      "telemetry": [
+        {
+          "km": 0,
+          "alt": 520,
+          "sp": 0,
+          "ts": 1773967556432
+        },
+        {
+          "km": 860,
+          "alt": 1150,
+          "sp": 63,
+          "ts": 1774021556432
+        },
+        {
+          "km": 1512.4,
+          "alt": 893,
+          "sp": 0,
+          "ts": 1774068356432
+        }
+      ],
+      "traccia": [
+        [
+          -33.4489,
+          -70.6693
+        ],
+        [
+          -41.1335,
+          -71.3103
+        ]
+      ]
+    },
+    {
+      "id": 1774313157432,
+      "tipo": "Tappa",
+      "data": "23/03/2026",
+      "ora": "06:40",
+      "paese": "Argentina",
+      "km": 1654.8,
+      "durata": 129000,
+      "altMin": 0,
+      "altMax": 920,
+      "velMax": 82,
+      "velMedia": 46.2,
+      "benzinaStimataLitri": 59.3,
+      "benzinaRealeLitri": 61.1,
+      "consumoStimatoKmL": 27.9,
+      "consumoRealeKmL": 27.1,
+      "titolo": "Bariloche → Ushuaia",
+      "note": "Arrivo simbolico a Ushuaia nel dataset demo.",
+      "telemetry": [
+        {
+          "km": 0,
+          "alt": 893,
+          "sp": 0,
+          "ts": 1774313156432
+        },
+        {
+          "km": 860,
+          "alt": 120,
+          "sp": 70,
+          "ts": 1774367156432
+        },
+        {
+          "km": 1654.8,
+          "alt": 35,
+          "sp": 0,
+          "ts": 1774424756432
+        }
+      ],
+      "traccia": [
+        [
+          -41.1335,
+          -71.3103
+        ],
+        [
+          -54.8019,
+          -68.303
+        ]
+      ]
+    }
+  ],
+  "turismo": [
+    {
+      "id": 1774313161432,
+      "tipo": "Turismo",
+      "data": "24/03/2026",
+      "ora": "14:20",
+      "paese": "Argentina",
+      "km": 28.4,
+      "durata": 3100,
+      "altMin": 15,
+      "altMax": 120,
+      "velMax": 46,
+      "velMedia": 33,
+      "benzinaStimataLitri": 1,
+      "benzinaRealeLitri": 1.1,
+      "consumoStimatoKmL": 28.4,
+      "consumoRealeKmL": 25.8,
+      "titolo": "Giro locale Ushuaia",
+      "note": "Fine del mondo demo.",
+      "telemetry": [
+        {
+          "km": 0,
+          "alt": 35,
+          "sp": 0,
+          "ts": 1774399556432
+        },
+        {
+          "km": 19,
+          "alt": 115,
+          "sp": 39,
+          "ts": 1774402156432
+        }
+      ],
+      "traccia": [
+        [
+          -54.8019,
+          -68.303
+        ],
+        [
+          -54.8019,
+          -68.303
+        ]
+      ]
+    }
+  ],
+  "diario": [
+    {
+      "id": 1774313246432,
+      "ts": 1774313246432,
+      "data": "23/03/2026",
+      "ora": "21:55",
+      "paese": "Argentina",
+      "km": "9062.1",
+      "testo": "Ushuaia demo. Non è la fine del viaggio, ma un punto enorme dentro la testa. La Vespa è arrivata fin qui. #Paesaggi #Storia",
+      "tags": [
+        "Paesaggi",
+        "Storia"
+      ],
+      "geo": {
+        "lat": -54.8019,
+        "lon": -68.303
+      },
+      "videoUrl": "https://www.youtube.com/watch?v=ysz5S6PUM-U",
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1773967646432,
+      "ts": 1773967646432,
+      "data": "19/03/2026",
+      "ora": "20:40",
+      "paese": "Argentina",
+      "km": "7407.3",
+      "testo": "Bariloche segna l’ingresso nella Patagonia che avevo in testa da anni. Da qui in giù cambia tutto. #Paesaggi #Turismo",
+      "tags": [
+        "Paesaggi",
+        "Turismo"
+      ],
+      "geo": {
+        "lat": -41.1335,
+        "lon": -71.3103
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    }
+  ],
+  "rifornimenti": [
+    {
+      "id": 1773967556932,
+      "data": "19/03/2026",
+      "ora": "06:55",
+      "paese": "Argentina",
+      "qta": "10.50",
+      "dest": "Vespa",
+      "mix": "2.0%",
+      "prezzoUnit": "1.180",
+      "valuta": "USD",
+      "fxToUsd": 1,
+      "costoBenzLocal": "12.39",
+      "costoBenzUsd": "12.39",
+      "costoBenz": "12.39",
+      "costoOlio": "0.68",
+      "luogo": "Santiago",
+      "km": "5894.9",
+      "geo": {
+        "lat": -33.4489,
+        "lon": -70.6693
+      }
+    },
+    {
+      "id": 1774313156932,
+      "data": "23/03/2026",
+      "ora": "06:10",
+      "paese": "Argentina",
+      "qta": "11.80",
+      "dest": "Vespa",
+      "mix": "2.0%",
+      "prezzoUnit": "1.220",
+      "valuta": "USD",
+      "fxToUsd": 1,
+      "costoBenzLocal": "14.40",
+      "costoBenzUsd": "14.40",
+      "costoBenz": "14.40",
+      "costoOlio": "0.74",
+      "luogo": "Bariloche",
+      "km": "7407.3",
+      "geo": {
+        "lat": -41.1335,
+        "lon": -71.3103
+      }
+    }
+  ],
   "carburazioni": [],
-  "manutenzioni": []
+  "manutenzioni": [
+    {
+      "id": 1774313158432,
+      "data": "23/03/2026",
+      "ora": "20:30",
+      "paese": "Argentina",
+      "km": "9062.1",
+      "nome": "Controllo generale arrivo Ushuaia",
+      "desc": "Bulloneria, freni, cavi e trasmissione controllati.",
+      "costoLocal": 15,
+      "valuta": "USD",
+      "costoUsd": 15,
+      "fotoUrl": null,
+      "geo": {
+        "lat": -54.8019,
+        "lon": -68.303
+      }
+    }
+  ]
 }
