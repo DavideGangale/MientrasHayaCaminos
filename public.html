@@ -860,6 +860,7 @@ function getYouTubeId(url) {
   const iconMaint = L.divIcon({ className: 'custom-marker marker-maint', html: '🔧' });
   const iconFuel = L.divIcon({ className: 'custom-marker marker-fuel', html: '⛽' });
   const iconCarb = L.divIcon({ className: 'custom-marker marker-carb', html: '🌬️' });
+  const iconNote = L.divIcon({ className: 'custom-marker marker-foto', html: '📝' });
 
   function renderMap() {
     if (!layerTracce || !layerMarkers) return;
@@ -975,7 +976,7 @@ if (currentMarkerFilter === 'NONE') {
       m.bindPopup(popupHTML, { minWidth: 250 });
     }
 
-    const diario = Array.isArray(DATA.diario) ? DATA.diario : [];
+ const diario = Array.isArray(DATA.diario) ? DATA.diario : [];
 diario.forEach(d => {
   if (currentCountry && d.paese !== currentCountry) return;
   if (currentMonthFilter && getYearMonthFromPublicEntry(d) !== currentMonthFilter) return;
@@ -992,19 +993,14 @@ diario.forEach(d => {
   const fotoSrc = driveToDirectImageUrl(rawFoto);
   const hasPhoto = !!fotoSrc;
 
-  // filtro marker: se ALL mostra se ha almeno un media
   if (currentMarkerFilter !== 'ALL') {
     if (currentMarkerFilter === 'VIDEO' && !hasVideo) return;
-    if (currentMarkerFilter === 'FOTO'  && !hasPhoto) return;
-    // MAINT/FUEL/CARB vengono gestiti negli altri blocchi, qui skip
+    if (currentMarkerFilter === 'FOTO' && !hasPhoto) return;
     if (currentMarkerFilter !== 'VIDEO' && currentMarkerFilter !== 'FOTO') return;
-  } else {
-    if (!hasVideo && !hasPhoto) return;
   }
 
   let mediaHtml = '';
 
-  // ✅ foto (se c'è)
   if (hasPhoto) {
     const safe = String(fotoSrc).replace(/'/g, "\\'");
     mediaHtml += `
@@ -1014,7 +1010,6 @@ diario.forEach(d => {
     `;
   }
 
-  // ✅ video (se c'è)
   if (hasVideo) {
     mediaHtml += `
       <div class="popup-video" style="margin-top:10px;">
@@ -1023,22 +1018,25 @@ diario.forEach(d => {
     `;
   }
 
-  // icona: se ha video metti play, altrimenti foto
-  const icon = hasVideo ? iconVideo : iconFoto;
+  const icon = hasVideo ? iconVideo : (hasPhoto ? iconFoto : iconNote);
 
   creaMarker(lat, lon, icon, `
     <div class="popup-title">📍 ${d.paese || ''}</div>
-    <div class="popup-meta">📅 ${d.data} ${d.ora || ''} | 📏 km ${d.km}</div>
+    <div class="popup-meta">📅 ${d.data || ''} ${d.ora || ''} | 📏 km ${d.km || ''}</div>
     <div>${d.testo || ''}</div>
     ${mediaHtml}
   `);
 });
 
     const manutenzioni = Array.isArray(DATA.manutenzioni) ? DATA.manutenzioni : [];
-    manutenzioni.forEach(m => {
-      if (currentCountry && m.paese !== currentCountry) return;
-      if (!m.geo) return;
-      if (currentMarkerFilter !== 'ALL' && currentMarkerFilter !== 'MAINT') return;
+    
+
+manutenzioni.forEach(m => {
+  if (currentCountry && m.paese !== currentCountry) return;
+  if (currentMonthFilter && getYearMonthFromPublicEntry(m) !== currentMonthFilter) return;
+  if (!m.geo) return;
+  if (currentMarkerFilter !== 'ALL' && currentMarkerFilter !== 'MAINT') return;
+    
 
       creaMarker(m.geo.lat, m.geo.lon, iconMaint, `
         <div class="popup-title" style="color:var(--maint)">${T('workshop')}: ${m.nome}</div>
@@ -1049,10 +1047,11 @@ diario.forEach(d => {
     });
 
     const rifornimenti = Array.isArray(DATA.rifornimenti) ? DATA.rifornimenti : [];
-    rifornimenti.forEach(r => {
-      if (currentCountry && r.paese !== currentCountry) return;
-      if (!r.geo) return;
-      if (currentMarkerFilter !== 'ALL' && currentMarkerFilter !== 'FUEL') return;
+rifornimenti.forEach(r => {
+  if (currentCountry && r.paese !== currentCountry) return;
+  if (currentMonthFilter && getYearMonthFromPublicEntry(r) !== currentMonthFilter) return;
+  if (!r.geo) return;
+  if (currentMarkerFilter !== 'ALL' && currentMarkerFilter !== 'FUEL') return;
 
       creaMarker(r.geo.lat, r.geo.lon, iconFuel, `
         <div class="popup-title" style="color:var(--fuel)">${T('refuel')}</div>
@@ -1064,9 +1063,11 @@ diario.forEach(d => {
     });
 
     const carburazioni = Array.isArray(DATA.carburazioni) ? DATA.carburazioni : [];
-    carburazioni.forEach(c => {
-      if (!c.geo) return;
-      if (currentMarkerFilter !== 'ALL' && currentMarkerFilter !== 'CARB') return;
+carburazioni.forEach(c => {
+  if (currentCountry && c.paese !== currentCountry) return;
+  if (currentMonthFilter && getYearMonthFromPublicEntry(c) !== currentMonthFilter) return;
+  if (!c.geo) return;
+  if (currentMarkerFilter !== 'ALL' && currentMarkerFilter !== 'CARB') return;
 
       creaMarker(c.geo.lat, c.geo.lon, iconCarb, `
         <div class="popup-title" style="color:var(--carb)">${T('carbSetup')}</div>
@@ -1124,6 +1125,9 @@ function popolaMesi() {
   const tappe = Array.isArray(DATA?.tappe) ? DATA.tappe : [];
   const turismo = Array.isArray(DATA?.turismo) ? DATA.turismo : [];
   const diario = Array.isArray(DATA?.diario) ? DATA.diario : [];
+  const manutenzioni = Array.isArray(DATA?.manutenzioni) ? DATA.manutenzioni : [];
+  const rifornimenti = Array.isArray(DATA?.rifornimenti) ? DATA.rifornimenti : [];
+  const carburazioni = Array.isArray(DATA?.carburazioni) ? DATA.carburazioni : [];
 
   tappe.forEach(t => {
     const mese = getYearMonthFromPercorso(t);
@@ -1140,6 +1144,21 @@ function popolaMesi() {
     if (mese) mesiSet.add(mese);
   });
 
+  manutenzioni.forEach(m => {
+    const mese = getYearMonthFromPublicEntry(m);
+    if (mese) mesiSet.add(mese);
+  });
+
+  rifornimenti.forEach(r => {
+    const mese = getYearMonthFromPublicEntry(r);
+    if (mese) mesiSet.add(mese);
+  });
+
+  carburazioni.forEach(c => {
+    const mese = getYearMonthFromPublicEntry(c);
+    if (mese) mesiSet.add(mese);
+  });
+
   const mesi = Array.from(mesiSet).sort();
 
   mesi.forEach(mese => {
@@ -1148,6 +1167,16 @@ function popolaMesi() {
     opt.innerText = '🗓️ ' + mese;
     sel.appendChild(opt);
   });
+
+  if (mesi.length > 0) {
+    const ultimoMese = mesi[mesi.length - 1];
+
+    if (!currentMonthFilter || !mesi.includes(currentMonthFilter)) {
+      currentMonthFilter = ultimoMese;
+    }
+  } else {
+    currentMonthFilter = '';
+  }
 
   sel.value = currentMonthFilter || '';
 }
@@ -1204,18 +1233,17 @@ function popolaMesi() {
   } else {
     const meta = getIndexPaesiList().find(x => x.paese === country);
     const st = meta?.stats || {};
-    km = Number(st.km || 0);
 
-    // usa benzina del paese se presente, altrimenti 0
+    km = Number(st.km || 0);
     benz = Number(st.benzina || 0);
-    const paeseMeta = (INDEX_DATA?.paesi || []).find(x => x.paese === country);
-if (paeseMeta?.stats?.olioTotaleLitri != null) {
-  olio = Number(paeseMeta.stats.olioTotaleLitri || 0);
-} else if (paeseMeta?.stats?.olioMl != null) {
-  olio = Number(paeseMeta.stats.olioMl || 0) / 1000;
-} else {
-  olio = 0;
-}
+
+    if (st.olioTotaleLitri != null) {
+      olio = Number(st.olioTotaleLitri || 0);
+    } else if (st.olioMl != null) {
+      olio = Number(st.olioMl || 0) / 1000;
+    } else {
+      olio = 0;
+    }
 
     spesaBenz = Number(st.spesaBenzinaUsd || 0);
     spesaMaint = Number(st.spesaRicambiUsd || 0) + Number(st.spesaManodoperaUsd || 0);
