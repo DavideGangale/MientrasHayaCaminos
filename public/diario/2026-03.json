@@ -1,69 +1,90 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-03-25T23:20:12.187Z",
+  "_exportDate": "2026-03-26T00:49:28.572Z",
   "tipo": "diario_mese",
   "mese": "2026-03",
-  "count": 3,
+  "count": 4,
   "entries": [
     {
-      "id": 1774475903624,
-      "ts": 1774475903624,
-      "data": "25/09/2025",
-      "ora": "19:10",
-      "paese": "Peru",
-      "km": "699.9",
-      "testo": "Altitudine seria. La Vespa continua a salire anche se io mi sento senza fiato.",
+      "id": 1774313246432,
+      "ts": 1774313246432,
+      "data": "23/03/2026",
+      "ora": "21:55",
+      "paese": "Argentina",
+      "km": "9062.1",
+      "testo": "Ushuaia demo. Non è la fine del viaggio, ma un punto enorme dentro la testa. La Vespa è arrivata fin qui. #Paesaggi #Storia",
       "tags": [
-        "Problemi",
-        "Paesaggi"
+        "Paesaggi",
+        "Storia"
       ],
       "geo": {
-        "lat": -15.84,
-        "lon": -70.02
+        "lat": -54.8019,
+        "lon": -68.303
       },
-      "videoUrl": null,
-      "videoPlanned": true,
-      "fotoUrl": null,
-      "foto": null
-    },
-    {
-      "id": 1774473903624,
-      "ts": 1774473903624,
-      "data": "18/09/2025",
-      "ora": "18:20",
-      "paese": "Ecuador",
-      "km": "343.1",
-      "testo": "Giornata di pioggia e montagne. Arrivare a Baños in Vespa è già una piccola vittoria.",
-      "tags": [
-        "Pioggia",
-        "Strade"
-      ],
-      "geo": {
-        "lat": -1.396,
-        "lon": -78.424
-      },
-      "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "videoUrl": "https://www.youtube.com/watch?v=ysz5S6PUM-U",
       "videoPlanned": false,
       "fotoUrl": null,
       "foto": null
     },
     {
-      "id": 1774472003624,
-      "ts": 1774472003624,
-      "data": "12/09/2025",
-      "ora": "17:40",
-      "paese": "Colombia",
-      "km": "132.4",
-      "testo": "Arrivato a Villa de Leyva. Bellissimo centro storico, prime sensazioni di libertà totale.",
+      "id": 1773967646432,
+      "ts": 1773967646432,
+      "data": "19/03/2026",
+      "ora": "20:40",
+      "paese": "Argentina",
+      "km": "7407.3",
+      "testo": "Bariloche segna l’ingresso nella Patagonia che avevo in testa da anni. Da qui in giù cambia tutto. #Paesaggi #Turismo",
       "tags": [
         "Paesaggi",
         "Turismo"
       ],
       "geo": {
-        "lat": 5.6349,
-        "lon": -73.5248
+        "lat": -41.1335,
+        "lon": -71.3103
       },
       "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1773362846432,
+      "ts": 1773362846432,
+      "data": "12/03/2026",
+      "ora": "22:00",
+      "paese": "Chile",
+      "km": "5894.9",
+      "testo": "Verso Santiago la strada cambia faccia di continuo. Oggi tantissimi chilometri, stanchezza vera, ma anche soddisfazione. #Strade #Problemi",
+      "tags": [
+        "Strade",
+        "Problemi"
+      ],
+      "geo": {
+        "lat": -33.4489,
+        "lon": -70.6693
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1772758046432,
+      "ts": 1772758046432,
+      "data": "05/03/2026",
+      "ora": "21:30",
+      "paese": "Chile",
+      "km": "4216.6",
+      "testo": "Atacama. Silenzio, vento e luce tagliente. Qui anche una Vespa sembra una nave nel deserto. #Paesaggi #Sterrato",
+      "tags": [
+        "Paesaggi",
+        "Sterrato"
+      ],
+      "geo": {
+        "lat": -22.9087,
+        "lon": -68.1997
+      },
+      "videoUrl": "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
       "videoPlanned": false,
       "fotoUrl": null,
       "foto": null
