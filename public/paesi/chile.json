@@ -1,23 +1,266 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-03-25T23:45:19.999Z",
+  "_exportDate": "2026-03-26T00:49:28.578Z",
   "tipo": "paese",
   "paese": "Chile",
   "slug": "chile",
   "stats": {
-    "km": 0,
-    "benzina": 0,
+    "km": 2567,
+    "benzina": 91.7,
     "benzinaFuori": 0,
-    "olioMl": 0,
-    "spesaBenzinaUsd": 0,
-    "spesaOlioUsd": 0,
+    "olioMl": 2290,
+    "spesaBenzinaUsd": 28.82,
+    "spesaOlioUsd": 1.56,
     "spesaRicambiUsd": 0,
-    "spesaManodoperaUsd": 0
+    "spesaManodoperaUsd": 12
   },
-  "tappe": [],
-  "turismo": [],
-  "diario": [],
-  "rifornimenti": [],
+  "tappe": [
+    {
+      "id": 1772757957432,
+      "tipo": "Tappa",
+      "data": "05/03/2026",
+      "ora": "08:00",
+      "paese": "Chile",
+      "km": 824.2,
+      "durata": 59800,
+      "altMin": 2430,
+      "altMax": 4680,
+      "velMax": 76,
+      "velMedia": 49.6,
+      "benzinaStimataLitri": 29.6,
+      "benzinaRealeLitri": 30.7,
+      "consumoStimatoKmL": 27.8,
+      "consumoRealeKmL": 26.8,
+      "titolo": "La Paz → San Pedro de Atacama",
+      "note": "Demo di passaggio altiplano/deserto.",
+      "telemetry": [
+        {
+          "km": 0,
+          "alt": 3640,
+          "sp": 0,
+          "ts": 1772757956432
+        },
+        {
+          "km": 420,
+          "alt": 4680,
+          "sp": 44,
+          "ts": 1772784956432
+        }
+      ],
+      "traccia": [
+        [
+          -16.4897,
+          -68.1193
+        ],
+        [
+          -22.9087,
+          -68.1997
+        ]
+      ]
+    },
+    {
+      "id": 1773362757432,
+      "tipo": "Tappa",
+      "data": "12/03/2026",
+      "ora": "08:50",
+      "paese": "Chile",
+      "km": 1678.3,
+      "durata": 126000,
+      "altMin": 0,
+      "altMax": 2430,
+      "velMax": 84,
+      "velMedia": 47.9,
+      "benzinaStimataLitri": 59.8,
+      "benzinaRealeLitri": 62.1,
+      "consumoStimatoKmL": 28.1,
+      "consumoRealeKmL": 27,
+      "titolo": "San Pedro de Atacama → Santiago",
+      "note": "Tappa demo compressa per simulare grande avanzamento verso sud.",
+      "telemetry": [
+        {
+          "km": 0,
+          "alt": 2430,
+          "sp": 0,
+          "ts": 1773362756432
+        },
+        {
+          "km": 980,
+          "alt": 950,
+          "sp": 67,
+          "ts": 1773420356432
+        },
+        {
+          "km": 1678.3,
+          "alt": 520,
+          "sp": 0,
+          "ts": 1773470756432
+        }
+      ],
+      "traccia": [
+        [
+          -22.9087,
+          -68.1997
+        ],
+        [
+          -33.4489,
+          -70.6693
+        ]
+      ]
+    }
+  ],
+  "turismo": [
+    {
+      "id": 1772757961432,
+      "tipo": "Turismo",
+      "data": "06/03/2026",
+      "ora": "12:00",
+      "paese": "Chile",
+      "km": 64.5,
+      "durata": 6200,
+      "altMin": 2200,
+      "altMax": 2550,
+      "velMax": 58,
+      "velMedia": 34.5,
+      "benzinaStimataLitri": 2.3,
+      "benzinaRealeLitri": 2.5,
+      "consumoStimatoKmL": 28,
+      "consumoRealeKmL": 25.8,
+      "titolo": "Giro Valle de la Luna",
+      "note": "Uscita turistica demo.",
+      "telemetry": [
+        {
+          "km": 0,
+          "alt": 2430,
+          "sp": 0,
+          "ts": 1772844356432
+        },
+        {
+          "km": 43,
+          "alt": 2520,
+          "sp": 41,
+          "ts": 1772848656432
+        }
+      ],
+      "traccia": [
+        [
+          -22.9087,
+          -68.1997
+        ],
+        [
+          -22.9087,
+          -68.1997
+        ]
+      ]
+    }
+  ],
+  "diario": [
+    {
+      "id": 1773362846432,
+      "ts": 1773362846432,
+      "data": "12/03/2026",
+      "ora": "22:00",
+      "paese": "Chile",
+      "km": "5894.9",
+      "testo": "Verso Santiago la strada cambia faccia di continuo. Oggi tantissimi chilometri, stanchezza vera, ma anche soddisfazione. #Strade #Problemi",
+      "tags": [
+        "Strade",
+        "Problemi"
+      ],
+      "geo": {
+        "lat": -33.4489,
+        "lon": -70.6693
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1772758046432,
+      "ts": 1772758046432,
+      "data": "05/03/2026",
+      "ora": "21:30",
+      "paese": "Chile",
+      "km": "4216.6",
+      "testo": "Atacama. Silenzio, vento e luce tagliente. Qui anche una Vespa sembra una nave nel deserto. #Paesaggi #Sterrato",
+      "tags": [
+        "Paesaggi",
+        "Sterrato"
+      ],
+      "geo": {
+        "lat": -22.9087,
+        "lon": -68.1997
+      },
+      "videoUrl": "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    }
+  ],
+  "rifornimenti": [
+    {
+      "id": 1772757956932,
+      "data": "05/03/2026",
+      "ora": "07:35",
+      "paese": "Chile",
+      "qta": "11.40",
+      "dest": "Vespa",
+      "mix": "2.5%",
+      "prezzoUnit": "1.190",
+      "valuta": "USD",
+      "fxToUsd": 1,
+      "costoBenzLocal": "13.57",
+      "costoBenzUsd": "13.57",
+      "costoBenz": "13.57",
+      "costoOlio": "0.88",
+      "luogo": "La Paz",
+      "km": "3392.4",
+      "geo": {
+        "lat": -16.4897,
+        "lon": -68.1193
+      }
+    },
+    {
+      "id": 1773362756932,
+      "data": "12/03/2026",
+      "ora": "08:10",
+      "paese": "Chile",
+      "qta": "12.60",
+      "dest": "Tanica",
+      "mix": "--",
+      "prezzoUnit": "1.210",
+      "valuta": "USD",
+      "fxToUsd": 1,
+      "costoBenzLocal": "15.25",
+      "costoBenzUsd": "15.25",
+      "costoBenz": "15.25",
+      "costoOlio": null,
+      "luogo": "San Pedro de Atacama",
+      "km": "4216.6",
+      "geo": {
+        "lat": -22.9087,
+        "lon": -68.1997
+      }
+    }
+  ],
   "carburazioni": [],
-  "manutenzioni": []
+  "manutenzioni": [
+    {
+      "id": 1773362758432,
+      "data": "12/03/2026",
+      "ora": "20:10",
+      "paese": "Chile",
+      "km": "5894.9",
+      "nome": "Cambio olio cambio",
+      "desc": "Manutenzione preventiva dopo lunga sezione andina.",
+      "costoLocal": 12,
+      "valuta": "USD",
+      "costoUsd": 12,
+      "fotoUrl": null,
+      "geo": {
+        "lat": -33.4489,
+        "lon": -70.6693
+      }
+    }
+  ]
 }
