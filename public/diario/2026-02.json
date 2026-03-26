@@ -1,0 +1,73 @@
+{
+  "_version": "public-2.0",
+  "_exportDate": "2026-03-26T00:49:28.572Z",
+  "tipo": "diario_mese",
+  "mese": "2026-02",
+  "count": 3,
+  "entries": [
+    {
+      "id": 1772153246432,
+      "ts": 1772153246432,
+      "data": "26/02/2026",
+      "ora": "20:15",
+      "paese": "Bolivia",
+      "km": "3392.4",
+      "testo": "La Paz è un vortice. Il motore gira ancora bene, ma qui ogni salita sembra chiedere rispetto. #Paesaggi #Problemi",
+      "tags": [
+        "Paesaggi",
+        "Problemi"
+      ],
+      "geo": {
+        "lat": -16.4897,
+        "lon": -68.1193
+      },
+      "videoUrl": null,
+      "videoPlanned": true,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1771634846432,
+      "ts": 1771634846432,
+      "data": "20/02/2026",
+      "ora": "19:05",
+      "paese": "Peru",
+      "km": "3003.0",
+      "testo": "A Cusco la Vespa soffre meno di me. In quota cambiano i rumori del motore e cambia anche il modo di guardare il paesaggio. #Problemi #Paesaggi #Officina",
+      "tags": [
+        "Problemi",
+        "Paesaggi",
+        "Officina"
+      ],
+      "geo": {
+        "lat": -13.5319,
+        "lon": -71.9675
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1771030046432,
+      "ts": 1771030046432,
+      "data": "13/02/2026",
+      "ora": "21:10",
+      "paese": "Peru",
+      "km": "1890.2",
+      "testo": "Entrare a Lima in Vespa è stato quasi più difficile della frontiera. Caos totale, ma anche energia pura. #Strade #Persone",
+      "tags": [
+        "Strade",
+        "Persone"
+      ],
+      "geo": {
+        "lat": -12.0464,
+        "lon": -77.0428
+      },
+      "videoUrl": "https://www.youtube.com/watch?v=jNQXAC9IVRw",
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    }
+  ]
+}
