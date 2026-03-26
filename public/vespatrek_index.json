@@ -1,8 +1,8 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-03-26T00:39:26.289Z",
+  "_exportDate": "2026-03-26T00:49:28.578Z",
   "titolo": "VespaTrek PX150",
-  "paeseAttuale": "Colombia",
+  "paeseAttuale": "Argentina",
   "diarioTagsPreset": [
     "Paesaggi",
     "Vespistas",
@@ -26,42 +26,927 @@
     "Animali"
   ],
   "stats": {
-    "kmTotali": 0,
-    "benzinaUsataLitri": 0,
+    "kmTotali": 9062.1,
+    "benzinaUsataLitri": 345.8,
     "benzinaFuoriTappaLitri": 0,
-    "olioTotaleLitri": 0,
-    "spesaBenzinaUsd": 0,
-    "spesaOlioUsd": 0,
+    "olioTotaleLitri": 7.598,
+    "spesaBenzinaUsd": 120.54,
+    "spesaOlioUsd": 7.28,
     "spesaRicambiUsd": 0,
-    "spesaManodoperaUsd": 0
+    "spesaManodoperaUsd": 39
   },
   "paesi": [
+    {
+      "paese": "Argentina",
+      "slug": "argentina",
+      "path": "public/paesi/argentina.json",
+      "stats": {
+        "km": 3195.6,
+        "benzina": 114.3,
+        "spesaBenzinaUsd": 26.79,
+        "spesaOlioUsd": 1.42,
+        "spesaRicambiUsd": 0,
+        "spesaManodoperaUsd": 15
+      }
+    },
+    {
+      "paese": "Bolivia",
+      "slug": "bolivia",
+      "path": "public/paesi/bolivia.json",
+      "stats": {
+        "km": 389.4,
+        "benzina": 14,
+        "spesaBenzinaUsd": 8.72,
+        "spesaOlioUsd": 0.92,
+        "spesaRicambiUsd": 0,
+        "spesaManodoperaUsd": 8
+      }
+    },
+    {
+      "paese": "Chile",
+      "slug": "chile",
+      "path": "public/paesi/chile.json",
+      "stats": {
+        "km": 2567,
+        "benzina": 91.7,
+        "spesaBenzinaUsd": 28.82,
+        "spesaOlioUsd": 1.56,
+        "spesaRicambiUsd": 0,
+        "spesaManodoperaUsd": 12
+      }
+    },
     {
       "paese": "Colombia",
       "slug": "colombia",
       "path": "public/paesi/colombia.json",
       "stats": {
-        "km": 0,
-        "benzina": 0,
-        "spesaBenzinaUsd": 0,
-        "spesaOlioUsd": 0,
+        "km": 722.7,
+        "benzina": 26,
+        "spesaBenzinaUsd": 19.2,
+        "spesaOlioUsd": 1.3,
+        "spesaRicambiUsd": 0,
+        "spesaManodoperaUsd": 0
+      }
+    },
+    {
+      "paese": "Ecuador",
+      "slug": "ecuador",
+      "path": "public/paesi/ecuador.json",
+      "stats": {
+        "km": 447.7,
+        "benzina": 16.1,
+        "spesaBenzinaUsd": 7.96,
+        "spesaOlioUsd": 0.55,
+        "spesaRicambiUsd": 0,
+        "spesaManodoperaUsd": 4
+      }
+    },
+    {
+      "paese": "Peru",
+      "slug": "peru",
+      "path": "public/paesi/peru.json",
+      "stats": {
+        "km": 1969,
+        "benzina": 70.4,
+        "spesaBenzinaUsd": 29.05,
+        "spesaOlioUsd": 1.53,
         "spesaRicambiUsd": 0,
         "spesaManodoperaUsd": 0
       }
     }
   ],
-  "ultimiPost": [],
-  "ultimeTappe": [],
+  "ultimiPost": [
+    {
+      "id": 1774313246432,
+      "ts": 1774313246432,
+      "data": "23/03/2026",
+      "ora": "21:55",
+      "paese": "Argentina",
+      "km": "9062.1",
+      "testo": "Ushuaia demo. Non è la fine del viaggio, ma un punto enorme dentro la testa. La Vespa è arrivata fin qui. #Paesaggi #Storia",
+      "tags": [
+        "Paesaggi",
+        "Storia"
+      ],
+      "geo": {
+        "lat": -54.8019,
+        "lon": -68.303
+      },
+      "videoUrl": "https://www.youtube.com/watch?v=ysz5S6PUM-U",
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1773967646432,
+      "ts": 1773967646432,
+      "data": "19/03/2026",
+      "ora": "20:40",
+      "paese": "Argentina",
+      "km": "7407.3",
+      "testo": "Bariloche segna l’ingresso nella Patagonia che avevo in testa da anni. Da qui in giù cambia tutto. #Paesaggi #Turismo",
+      "tags": [
+        "Paesaggi",
+        "Turismo"
+      ],
+      "geo": {
+        "lat": -41.1335,
+        "lon": -71.3103
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1773362846432,
+      "ts": 1773362846432,
+      "data": "12/03/2026",
+      "ora": "22:00",
+      "paese": "Chile",
+      "km": "5894.9",
+      "testo": "Verso Santiago la strada cambia faccia di continuo. Oggi tantissimi chilometri, stanchezza vera, ma anche soddisfazione. #Strade #Problemi",
+      "tags": [
+        "Strade",
+        "Problemi"
+      ],
+      "geo": {
+        "lat": -33.4489,
+        "lon": -70.6693
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1772758046432,
+      "ts": 1772758046432,
+      "data": "05/03/2026",
+      "ora": "21:30",
+      "paese": "Chile",
+      "km": "4216.6",
+      "testo": "Atacama. Silenzio, vento e luce tagliente. Qui anche una Vespa sembra una nave nel deserto. #Paesaggi #Sterrato",
+      "tags": [
+        "Paesaggi",
+        "Sterrato"
+      ],
+      "geo": {
+        "lat": -22.9087,
+        "lon": -68.1997
+      },
+      "videoUrl": "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1772153246432,
+      "ts": 1772153246432,
+      "data": "26/02/2026",
+      "ora": "20:15",
+      "paese": "Bolivia",
+      "km": "3392.4",
+      "testo": "La Paz è un vortice. Il motore gira ancora bene, ma qui ogni salita sembra chiedere rispetto. #Paesaggi #Problemi",
+      "tags": [
+        "Paesaggi",
+        "Problemi"
+      ],
+      "geo": {
+        "lat": -16.4897,
+        "lon": -68.1193
+      },
+      "videoUrl": null,
+      "videoPlanned": true,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1771634846432,
+      "ts": 1771634846432,
+      "data": "20/02/2026",
+      "ora": "19:05",
+      "paese": "Peru",
+      "km": "3003.0",
+      "testo": "A Cusco la Vespa soffre meno di me. In quota cambiano i rumori del motore e cambia anche il modo di guardare il paesaggio. #Problemi #Paesaggi #Officina",
+      "tags": [
+        "Problemi",
+        "Paesaggi",
+        "Officina"
+      ],
+      "geo": {
+        "lat": -13.5319,
+        "lon": -71.9675
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1771030046432,
+      "ts": 1771030046432,
+      "data": "13/02/2026",
+      "ora": "21:10",
+      "paese": "Peru",
+      "km": "1890.2",
+      "testo": "Entrare a Lima in Vespa è stato quasi più difficile della frontiera. Caos totale, ma anche energia pura. #Strade #Persone",
+      "tags": [
+        "Strade",
+        "Persone"
+      ],
+      "geo": {
+        "lat": -12.0464,
+        "lon": -77.0428
+      },
+      "videoUrl": "https://www.youtube.com/watch?v=jNQXAC9IVRw",
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1769906846432,
+      "ts": 1769906846432,
+      "data": "31/01/2026",
+      "ora": "17:40",
+      "paese": "Ecuador",
+      "km": "1091.2",
+      "testo": "Strada verso Baños con nuvole basse e pioggia. Una di quelle giornate in cui vai piano ma ti resta dentro tutto. #Pioggia #Paesaggi",
+      "tags": [
+        "Pioggia",
+        "Paesaggi"
+      ],
+      "geo": {
+        "lat": -1.396,
+        "lon": -78.424
+      },
+      "videoUrl": null,
+      "videoPlanned": true,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1768783646432,
+      "ts": 1768783646432,
+      "data": "18/01/2026",
+      "ora": "20:05",
+      "paese": "Ecuador",
+      "km": "913.4",
+      "testo": "Frontiera passata. Ecuador! Giornata lunga ma tranquilla. Quito mi accoglie con traffico, quota e aria fredda. #Frontiera #Burocrazia",
+      "tags": [
+        "Frontiera",
+        "Burocrazia"
+      ],
+      "geo": {
+        "lat": -0.1807,
+        "lon": -78.4678
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1768351646432,
+      "ts": 1768351646432,
+      "data": "13/01/2026",
+      "ora": "19:20",
+      "paese": "Colombia",
+      "km": "679.9",
+      "testo": "Verso Cúcuta il caldo si è fatto sentire. Domani frontiera. La Vespa sembra voler andare più lontano di me. #Frontiera #Strade",
+      "tags": [
+        "Frontiera",
+        "Strade"
+      ],
+      "geo": {
+        "lat": 7.8939,
+        "lon": -72.5078
+      },
+      "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1766882846432,
+      "ts": 1766882846432,
+      "data": "27/12/2025",
+      "ora": "18:10",
+      "paese": "Colombia",
+      "km": "186.4",
+      "testo": "Primo giorno di viaggio demo. Lasciare Bogotá in Vespa e arrivare a Villa de Leyva mi ha fatto capire che stavolta si parte davvero. #Paesaggi #Turismo",
+      "tags": [
+        "Paesaggi",
+        "Turismo"
+      ],
+      "geo": {
+        "lat": 5.6349,
+        "lon": -73.5248
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    }
+  ],
+  "ultimeTappe": [
+    {
+      "id": 1774313161432,
+      "tipo": "Turismo",
+      "data": "24/03/2026",
+      "ora": "14:20",
+      "paese": "Argentina",
+      "km": 28.4,
+      "durata": 3100,
+      "altMin": 15,
+      "altMax": 120,
+      "velMax": 46,
+      "velMedia": 33,
+      "benzinaStimataLitri": 1,
+      "benzinaRealeLitri": 1.1,
+      "consumoStimatoKmL": 28.4,
+      "consumoRealeKmL": 25.8,
+      "titolo": "Giro locale Ushuaia",
+      "note": "Fine del mondo demo.",
+      "telemetry": [
+        {
+          "km": 0,
+          "alt": 35,
+          "sp": 0,
+          "ts": 1774399556432
+        },
+        {
+          "km": 19,
+          "alt": 115,
+          "sp": 39,
+          "ts": 1774402156432
+        }
+      ],
+      "traccia": [
+        [
+          -54.8019,
+          -68.303
+        ],
+        [
+          -54.8019,
+          -68.303
+        ]
+      ]
+    },
+    {
+      "id": 1774313157432,
+      "tipo": "Tappa",
+      "data": "23/03/2026",
+      "ora": "06:40",
+      "paese": "Argentina",
+      "km": 1654.8,
+      "durata": 129000,
+      "altMin": 0,
+      "altMax": 920,
+      "velMax": 82,
+      "velMedia": 46.2,
+      "benzinaStimataLitri": 59.3,
+      "benzinaRealeLitri": 61.1,
+      "consumoStimatoKmL": 27.9,
+      "consumoRealeKmL": 27.1,
+      "titolo": "Bariloche → Ushuaia",
+      "note": "Arrivo simbolico a Ushuaia nel dataset demo.",
+      "telemetry": [
+        {
+          "km": 0,
+          "alt": 893,
+          "sp": 0,
+          "ts": 1774313156432
+        },
+        {
+          "km": 860,
+          "alt": 120,
+          "sp": 70,
+          "ts": 1774367156432
+        },
+        {
+          "km": 1654.8,
+          "alt": 35,
+          "sp": 0,
+          "ts": 1774424756432
+        }
+      ],
+      "traccia": [
+        [
+          -41.1335,
+          -71.3103
+        ],
+        [
+          -54.8019,
+          -68.303
+        ]
+      ]
+    },
+    {
+      "id": 1773967557432,
+      "tipo": "Tappa",
+      "data": "19/03/2026",
+      "ora": "07:20",
+      "paese": "Argentina",
+      "km": 1512.4,
+      "durata": 118000,
+      "altMin": 0,
+      "altMax": 1250,
+      "velMax": 83,
+      "velMedia": 46.1,
+      "benzinaStimataLitri": 54,
+      "benzinaRealeLitri": 56.2,
+      "consumoStimatoKmL": 28,
+      "consumoRealeKmL": 26.9,
+      "titolo": "Santiago → Bariloche",
+      "note": "Ingresso in Argentina e grandi paesaggi patagonici.",
+      "telemetry": [
+        {
+          "km": 0,
+          "alt": 520,
+          "sp": 0,
+          "ts": 1773967556432
+        },
+        {
+          "km": 860,
+          "alt": 1150,
+          "sp": 63,
+          "ts": 1774021556432
+        },
+        {
+          "km": 1512.4,
+          "alt": 893,
+          "sp": 0,
+          "ts": 1774068356432
+        }
+      ],
+      "traccia": [
+        [
+          -33.4489,
+          -70.6693
+        ],
+        [
+          -41.1335,
+          -71.3103
+        ]
+      ]
+    },
+    {
+      "id": 1773362757432,
+      "tipo": "Tappa",
+      "data": "12/03/2026",
+      "ora": "08:50",
+      "paese": "Chile",
+      "km": 1678.3,
+      "durata": 126000,
+      "altMin": 0,
+      "altMax": 2430,
+      "velMax": 84,
+      "velMedia": 47.9,
+      "benzinaStimataLitri": 59.8,
+      "benzinaRealeLitri": 62.1,
+      "consumoStimatoKmL": 28.1,
+      "consumoRealeKmL": 27,
+      "titolo": "San Pedro de Atacama → Santiago",
+      "note": "Tappa demo compressa per simulare grande avanzamento verso sud.",
+      "telemetry": [
+        {
+          "km": 0,
+          "alt": 2430,
+          "sp": 0,
+          "ts": 1773362756432
+        },
+        {
+          "km": 980,
+          "alt": 950,
+          "sp": 67,
+          "ts": 1773420356432
+        },
+        {
+          "km": 1678.3,
+          "alt": 520,
+          "sp": 0,
+          "ts": 1773470756432
+        }
+      ],
+      "traccia": [
+        [
+          -22.9087,
+          -68.1997
+        ],
+        [
+          -33.4489,
+          -70.6693
+        ]
+      ]
+    },
+    {
+      "id": 1772757961432,
+      "tipo": "Turismo",
+      "data": "06/03/2026",
+      "ora": "12:00",
+      "paese": "Chile",
+      "km": 64.5,
+      "durata": 6200,
+      "altMin": 2200,
+      "altMax": 2550,
+      "velMax": 58,
+      "velMedia": 34.5,
+      "benzinaStimataLitri": 2.3,
+      "benzinaRealeLitri": 2.5,
+      "consumoStimatoKmL": 28,
+      "consumoRealeKmL": 25.8,
+      "titolo": "Giro Valle de la Luna",
+      "note": "Uscita turistica demo.",
+      "telemetry": [
+        {
+          "km": 0,
+          "alt": 2430,
+          "sp": 0,
+          "ts": 1772844356432
+        },
+        {
+          "km": 43,
+          "alt": 2520,
+          "sp": 41,
+          "ts": 1772848656432
+        }
+      ],
+      "traccia": [
+        [
+          -22.9087,
+          -68.1997
+        ],
+        [
+          -22.9087,
+          -68.1997
+        ]
+      ]
+    },
+    {
+      "id": 1772757957432,
+      "tipo": "Tappa",
+      "data": "05/03/2026",
+      "ora": "08:00",
+      "paese": "Chile",
+      "km": 824.2,
+      "durata": 59800,
+      "altMin": 2430,
+      "altMax": 4680,
+      "velMax": 76,
+      "velMedia": 49.6,
+      "benzinaStimataLitri": 29.6,
+      "benzinaRealeLitri": 30.7,
+      "consumoStimatoKmL": 27.8,
+      "consumoRealeKmL": 26.8,
+      "titolo": "La Paz → San Pedro de Atacama",
+      "note": "Demo di passaggio altiplano/deserto.",
+      "telemetry": [
+        {
+          "km": 0,
+          "alt": 3640,
+          "sp": 0,
+          "ts": 1772757956432
+        },
+        {
+          "km": 420,
+          "alt": 4680,
+          "sp": 44,
+          "ts": 1772784956432
+        }
+      ],
+      "traccia": [
+        [
+          -16.4897,
+          -68.1193
+        ],
+        [
+          -22.9087,
+          -68.1997
+        ]
+      ]
+    },
+    {
+      "id": 1772153157432,
+      "tipo": "Tappa",
+      "data": "26/02/2026",
+      "ora": "07:30",
+      "paese": "Bolivia",
+      "km": 389.4,
+      "durata": 31700,
+      "altMin": 3650,
+      "altMax": 4320,
+      "velMax": 66,
+      "velMedia": 44.2,
+      "benzinaStimataLitri": 14,
+      "benzinaRealeLitri": 14.8,
+      "consumoStimatoKmL": 27.8,
+      "consumoRealeKmL": 26.3,
+      "titolo": "Cusco → La Paz",
+      "note": "Frontiera e prima vera alta quota prolungata.",
+      "telemetry": [
+        {
+          "km": 0,
+          "alt": 3390,
+          "sp": 0,
+          "ts": 1772153156432
+        },
+        {
+          "km": 240,
+          "alt": 4310,
+          "sp": 49,
+          "ts": 1772171156432
+        }
+      ],
+      "traccia": [
+        [
+          -13.5319,
+          -71.9675
+        ],
+        [
+          -16.4897,
+          -68.1193
+        ]
+      ]
+    },
+    {
+      "id": 1771548361432,
+      "tipo": "Turismo",
+      "data": "20/02/2026",
+      "ora": "10:40",
+      "paese": "Peru",
+      "km": 58.6,
+      "durata": 5200,
+      "altMin": 3320,
+      "altMax": 3520,
+      "velMax": 54,
+      "velMedia": 40.5,
+      "benzinaStimataLitri": 2.1,
+      "benzinaRealeLitri": 2.2,
+      "consumoStimatoKmL": 27.9,
+      "consumoRealeKmL": 26.6,
+      "titolo": "Giro archeologico Cusco",
+      "note": "Breve uscita nei siti vicini.",
+      "telemetry": [
+        {
+          "km": 0,
+          "alt": 3390,
+          "sp": 0,
+          "ts": 1771634756432
+        },
+        {
+          "km": 39,
+          "alt": 3520,
+          "sp": 46,
+          "ts": 1771638556432
+        }
+      ],
+      "traccia": [
+        [
+          -13.5319,
+          -71.9675
+        ],
+        [
+          -13.5319,
+          -71.9675
+        ]
+      ]
+    },
+    {
+      "id": 1771548357432,
+      "tipo": "Tappa",
+      "data": "19/02/2026",
+      "ora": "06:45",
+      "paese": "Peru",
+      "km": 1112.8,
+      "durata": 80400,
+      "altMin": 0,
+      "altMax": 3390,
+      "velMax": 79,
+      "velMedia": 49.8,
+      "benzinaStimataLitri": 39.6,
+      "benzinaRealeLitri": 41.3,
+      "consumoStimatoKmL": 28.1,
+      "consumoRealeKmL": 26.9,
+      "titolo": "Lima → Cusco",
+      "note": "Tappa demo molto lunga, compressa per popolare bene la pagina pubblica.",
+      "telemetry": [
+        {
+          "km": 0,
+          "alt": 80,
+          "sp": 0,
+          "ts": 1771548356432
+        },
+        {
+          "km": 610,
+          "alt": 1860,
+          "sp": 52,
+          "ts": 1771584356432
+        },
+        {
+          "km": 1112.8,
+          "alt": 3390,
+          "sp": 0,
+          "ts": 1771616756432
+        }
+      ],
+      "traccia": [
+        [
+          -12.0464,
+          -77.0428
+        ],
+        [
+          -13.5319,
+          -71.9675
+        ]
+      ]
+    },
+    {
+      "id": 1771029957432,
+      "tipo": "Tappa",
+      "data": "13/02/2026",
+      "ora": "07:50",
+      "paese": "Peru",
+      "km": 486.3,
+      "durata": 38100,
+      "altMin": 0,
+      "altMax": 540,
+      "velMax": 83,
+      "velMedia": 46,
+      "benzinaStimataLitri": 17.1,
+      "benzinaRealeLitri": 17.8,
+      "consumoStimatoKmL": 28.4,
+      "consumoRealeKmL": 27.3,
+      "titolo": "Trujillo → Lima",
+      "note": "Lunga tirata costiera, vento laterale forte.",
+      "telemetry": [
+        {
+          "km": 0,
+          "alt": 34,
+          "sp": 0,
+          "ts": 1771029956432
+        },
+        {
+          "km": 290,
+          "alt": 45,
+          "sp": 69,
+          "ts": 1771046156432
+        }
+      ],
+      "traccia": [
+        [
+          -8.1116,
+          -79.0287
+        ],
+        [
+          -12.0464,
+          -77.0428
+        ]
+      ]
+    },
+    {
+      "id": 1770425157432,
+      "tipo": "Tappa",
+      "data": "06/02/2026",
+      "ora": "07:10",
+      "paese": "Peru",
+      "km": 312.7,
+      "durata": 26800,
+      "altMin": 900,
+      "altMax": 3330,
+      "velMax": 74,
+      "velMedia": 42,
+      "benzinaStimataLitri": 11.2,
+      "benzinaRealeLitri": 11.8,
+      "consumoStimatoKmL": 27.9,
+      "consumoRealeKmL": 26.5,
+      "titolo": "Piura → Trujillo",
+      "note": "Ingresso in Perù e discesa verso la costa.",
+      "telemetry": [
+        {
+          "km": 0,
+          "alt": 120,
+          "sp": 0,
+          "ts": 1770425156432
+        },
+        {
+          "km": 190,
+          "alt": 80,
+          "sp": 65,
+          "ts": 1770437756432
+        }
+      ],
+      "traccia": [
+        [
+          -5.1945,
+          -80.6328
+        ],
+        [
+          -8.1116,
+          -79.0287
+        ]
+      ]
+    },
+    {
+      "id": 1769906757432,
+      "tipo": "Tappa",
+      "data": "31/01/2026",
+      "ora": "08:25",
+      "paese": "Ecuador",
+      "km": 177.8,
+      "durata": 15600,
+      "altMin": 1820,
+      "altMax": 3210,
+      "velMax": 70,
+      "velMedia": 41,
+      "benzinaStimataLitri": 6.4,
+      "benzinaRealeLitri": 6.7,
+      "consumoStimatoKmL": 27.8,
+      "consumoRealeKmL": 26.5,
+      "titolo": "Quito → Baños",
+      "note": "Pioggia a tratti, panorama andino spettacolare.",
+      "telemetry": [
+        {
+          "km": 0,
+          "alt": 2850,
+          "sp": 0,
+          "ts": 1769906756432
+        },
+        {
+          "km": 115,
+          "alt": 2480,
+          "sp": 48,
+          "ts": 1769915756432
+        }
+      ],
+      "traccia": [
+        [
+          -0.1807,
+          -78.4678
+        ],
+        [
+          -1.396,
+          -78.424
+        ]
+      ]
+    }
+  ],
   "archivi": {
     "index": "public/vespatrek_index.json",
     "officina": "public/officina.json",
     "paesi": [
       {
+        "paese": "Argentina",
+        "slug": "argentina",
+        "path": "public/paesi/argentina.json"
+      },
+      {
+        "paese": "Bolivia",
+        "slug": "bolivia",
+        "path": "public/paesi/bolivia.json"
+      },
+      {
+        "paese": "Chile",
+        "slug": "chile",
+        "path": "public/paesi/chile.json"
+      },
+      {
         "paese": "Colombia",
         "slug": "colombia",
         "path": "public/paesi/colombia.json"
+      },
+      {
+        "paese": "Ecuador",
+        "slug": "ecuador",
+        "path": "public/paesi/ecuador.json"
+      },
+      {
+        "paese": "Peru",
+        "slug": "peru",
+        "path": "public/paesi/peru.json"
       }
     ],
-    "diarioMensile": []
+    "diarioMensile": [
+      {
+        "mese": "2026-03",
+        "path": "public/diario/2026-03.json",
+        "count": 4
+      },
+      {
+        "mese": "2026-02",
+        "path": "public/diario/2026-02.json",
+        "count": 3
+      },
+      {
+        "mese": "2026-01",
+        "path": "public/diario/2026-01.json",
+        "count": 3
+      },
+      {
+        "mese": "2025-12",
+        "path": "public/diario/2025-12.json",
+        "count": 1
+      }
+    ]
   }
 }
