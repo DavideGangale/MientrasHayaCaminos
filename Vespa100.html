@@ -9782,155 +9782,669 @@ async function setLoadingProgress(pct, label) {
 
 
 function caricaDatiDemoMultiPaese() {
-  if (!confirm('Caricare dati demo multi-paese nell’app privata?\n\nSovrascriverà i dati attuali di viaggio salvati in locale.')) return;
+  if (!confirm(
+    'Caricare dati demo completi multi-paese nell’app privata?\n\n' +
+    'Sovrascriverà i dati attuali di viaggio salvati in locale.'
+  )) return;
 
   const now = Date.now();
+  const DAY = 24 * 60 * 60 * 1000;
 
+  // ============================================================
+  // DATE DEMO: ultimi ~3 mesi
+  // ============================================================
+  const d1  = now - 88 * DAY;
+  const d2  = now - 83 * DAY;
+  const d3  = now - 78 * DAY;
+  const d4  = now - 71 * DAY;
+  const d5  = now - 66 * DAY;
+  const d6  = now - 59 * DAY;
+  const d7  = now - 53 * DAY;
+  const d8  = now - 47 * DAY;
+  const d9  = now - 40 * DAY;
+  const d10 = now - 34 * DAY;
+  const d11 = now - 27 * DAY;
+  const d12 = now - 20 * DAY;
+  const d13 = now - 13 * DAY;
+  const d14 = now - 6 * DAY;
+  const d15 = now - 2 * DAY;
+
+  function fmtData(ts) {
+    return new Date(ts).toLocaleDateString('it-IT');
+  }
+  function fmtOra(ts) {
+    return new Date(ts).toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' });
+  }
+
+  // ============================================================
+  // TAPPE VIAGGIO
+  // ============================================================
   const demoTappe = [
     {
-      id: now - 9000000,
+      id: d1 + 1000,
       tipo: 'Tappa',
-      data: '12/09/2025',
-      ora: '08:20',
+      data: fmtData(d1),
+      ora: '08:10',
       paese: 'Colombia',
-      km: 132.4,
-      durata: 11800,
-      altMin: 350,
+      km: 186.4,
+      durata: 17100,
+      altMin: 320,
       altMax: 2640,
-      velMax: 78,
-      velMedia: 41.2,
-      benzina: 4.8,
-      benzinaStimataLitri: 4.8,
-      benzinaRealeLitri: 5.1,
-      consumoStimatoKmL: 27.6,
-      consumoRealeKmL: 25.9,
+      velMax: 79,
+      velMedia: 39.2,
+      benzina: 6.7,
+      benzinaStimataLitri: 6.7,
+      benzinaRealeLitri: 7.0,
+      consumoStimatoKmL: 27.8,
+      consumoRealeKmL: 26.6,
       titolo: 'Bogotá → Villa de Leyva',
-      note: 'Prima tappa demo in Colombia',
-      startTs: now - 9200000,
-      endTs: now - 9000000,
+      note: 'Partenza simbolica del viaggio demo.',
+      startTs: d1,
+      endTs: d1 + 5 * 60 * 60 * 1000,
+      fuelStartGal: 1.80,
+      fuelStartLitri: 6.81,
+      fuelAddedLitri: 1.50,
+      fuelEndGal: 0.85,
+      fuelEndLitri: 3.22,
       traccia: [
         [4.711, -74.072],
-        [4.85, -73.95],
-        [5.12, -73.52],
-        [5.63, -73.52]
+        [4.95, -73.89],
+        [5.22, -73.66],
+        [5.6349, -73.5248]
       ],
       telemetry: [
-        { km: 0, alt: 2640, sp: 0, ts: now - 9200000 },
-        { km: 30, alt: 2400, sp: 48, ts: now - 9150000 },
-        { km: 70, alt: 1800, sp: 62, ts: now - 9100000 },
-        { km: 132.4, alt: 2140, sp: 0, ts: now - 9000000 }
+        { km: 0, alt: 2640, sp: 0, ts: d1 },
+        { km: 40, alt: 2450, sp: 48, ts: d1 + 3600000 },
+        { km: 90, alt: 2120, sp: 55, ts: d1 + 7200000 },
+        { km: 145, alt: 2240, sp: 61, ts: d1 + 10800000 },
+        { km: 186.4, alt: 2140, sp: 0, ts: d1 + 18000000 }
       ]
     },
     {
-      id: now - 7000000,
+      id: d3 + 1000,
       tipo: 'Tappa',
-      data: '18/09/2025',
-      ora: '09:10',
+      data: fmtData(d3),
+      ora: '07:40',
+      paese: 'Colombia',
+      km: 214.6,
+      durata: 19600,
+      altMin: 420,
+      altMax: 2810,
+      velMax: 77,
+      velMedia: 39.4,
+      benzina: 7.7,
+      benzinaStimataLitri: 7.7,
+      benzinaRealeLitri: 8.1,
+      consumoStimatoKmL: 27.9,
+      consumoRealeKmL: 26.5,
+      titolo: 'Villa de Leyva → San Gil',
+      note: 'Strade secondarie molto belle, primi incontri con altri motoviaggiatori.',
+      startTs: d3,
+      endTs: d3 + 5.5 * 60 * 60 * 1000,
+      fuelStartGal: 1.00,
+      fuelStartLitri: 3.79,
+      fuelAddedLitri: 5.00,
+      fuelEndGal: 0.20,
+      fuelEndLitri: 0.76,
+      traccia: [
+        [5.6349, -73.5248],
+        [5.80, -73.35],
+        [6.15, -73.18],
+        [6.5547, -73.1331]
+      ],
+      telemetry: [
+        { km: 0, alt: 2140, sp: 0, ts: d3 },
+        { km: 55, alt: 2400, sp: 51, ts: d3 + 4200000 },
+        { km: 120, alt: 1780, sp: 63, ts: d3 + 9000000 },
+        { km: 214.6, alt: 1110, sp: 0, ts: d3 + 19800000 }
+      ]
+    },
+    {
+      id: d4 + 1000,
+      tipo: 'Tappa',
+      data: fmtData(d4),
+      ora: '08:00',
+      paese: 'Colombia',
+      km: 278.9,
+      durata: 24700,
+      altMin: 180,
+      altMax: 1320,
+      velMax: 81,
+      velMedia: 40.7,
+      benzina: 10.1,
+      benzinaStimataLitri: 10.1,
+      benzinaRealeLitri: 10.4,
+      consumoStimatoKmL: 27.6,
+      consumoRealeKmL: 26.8,
+      titolo: 'San Gil → Cúcuta',
+      note: 'Tappa calda e lunga verso il confine.',
+      startTs: d4,
+      endTs: d4 + 6.3 * 60 * 60 * 1000,
+      fuelStartGal: 1.00,
+      fuelStartLitri: 3.79,
+      fuelAddedLitri: 7.00,
+      fuelEndGal: 0.10,
+      fuelEndLitri: 0.38,
+      traccia: [
+        [6.5547, -73.1331],
+        [7.2, -72.95],
+        [7.8, -72.65],
+        [7.8939, -72.5078]
+      ],
+      telemetry: [
+        { km: 0, alt: 1110, sp: 0, ts: d4 },
+        { km: 90, alt: 1260, sp: 57, ts: d4 + 5400000 },
+        { km: 180, alt: 720, sp: 61, ts: d4 + 12000000 },
+        { km: 278.9, alt: 320, sp: 0, ts: d4 + 22680000 }
+      ]
+    },
+    {
+      id: d5 + 1000,
+      tipo: 'Tappa',
+      data: fmtData(d5),
+      ora: '09:15',
       paese: 'Ecuador',
-      km: 210.7,
-      durata: 18400,
-      altMin: 900,
-      altMax: 3200,
-      velMax: 74,
-      velMedia: 39.8,
-      benzina: 7.3,
-      benzinaStimataLitri: 7.3,
-      benzinaRealeLitri: 7.8,
-      consumoStimatoKmL: 28.9,
-      consumoRealeKmL: 27.0,
+      km: 233.5,
+      durata: 20500,
+      altMin: 600,
+      altMax: 2980,
+      velMax: 73,
+      velMedia: 41.0,
+      benzina: 8.4,
+      benzinaStimataLitri: 8.4,
+      benzinaRealeLitri: 8.9,
+      consumoStimatoKmL: 27.8,
+      consumoRealeKmL: 26.2,
+      titolo: 'Tulcán → Quito',
+      note: 'Ingresso in Ecuador, controlli frontiera lenti ma tranquilli.',
+      startTs: d5,
+      endTs: d5 + 5.7 * 60 * 60 * 1000,
+      fuelStartGal: 1.60,
+      fuelStartLitri: 6.06,
+      fuelAddedLitri: 2.50,
+      fuelEndGal: 0.25,
+      fuelEndLitri: 0.95,
+      traccia: [
+        [0.8119, -77.7173],
+        [0.45, -77.90],
+        [0.12, -78.23],
+        [-0.1807, -78.4678]
+      ],
+      telemetry: [
+        { km: 0, alt: 2950, sp: 0, ts: d5 },
+        { km: 60, alt: 2800, sp: 44, ts: d5 + 4800000 },
+        { km: 145, alt: 2500, sp: 53, ts: d5 + 9600000 },
+        { km: 233.5, alt: 2850, sp: 0, ts: d5 + 20500000 }
+      ]
+    },
+    {
+      id: d7 + 1000,
+      tipo: 'Tappa',
+      data: fmtData(d7),
+      ora: '08:25',
+      paese: 'Ecuador',
+      km: 177.8,
+      durata: 15600,
+      altMin: 1820,
+      altMax: 3210,
+      velMax: 70,
+      velMedia: 41.0,
+      benzina: 6.4,
+      benzinaStimataLitri: 6.4,
+      benzinaRealeLitri: 6.7,
+      consumoStimatoKmL: 27.8,
+      consumoRealeKmL: 26.5,
       titolo: 'Quito → Baños',
-      note: 'Demo Ecuador',
-      startTs: now - 7200000,
-      endTs: now - 7000000,
+      note: 'Pioggia a tratti, panorama andino spettacolare.',
+      startTs: d7,
+      endTs: d7 + 4.8 * 60 * 60 * 1000,
+      fuelStartGal: 1.70,
+      fuelStartLitri: 6.44,
+      fuelAddedLitri: 1.00,
+      fuelEndGal: 0.45,
+      fuelEndLitri: 1.70,
       traccia: [
         [-0.1807, -78.4678],
-        [-0.5, -78.3],
-        [-1.1, -78.5],
+        [-0.55, -78.45],
+        [-1.05, -78.56],
         [-1.396, -78.424]
       ],
       telemetry: [
-        { km: 0, alt: 2850, sp: 0, ts: now - 7200000 },
-        { km: 50, alt: 3000, sp: 44, ts: now - 7150000 },
-        { km: 120, alt: 2400, sp: 59, ts: now - 7100000 },
-        { km: 210.7, alt: 1820, sp: 0, ts: now - 7000000 }
+        { km: 0, alt: 2850, sp: 0, ts: d7 },
+        { km: 50, alt: 3100, sp: 39, ts: d7 + 3600000 },
+        { km: 115, alt: 2480, sp: 48, ts: d7 + 9000000 },
+        { km: 177.8, alt: 1820, sp: 0, ts: d7 + 17280000 }
       ]
     },
     {
-      id: now - 5000000,
+      id: d8 + 1000,
       tipo: 'Tappa',
-      data: '25/09/2025',
-      ora: '07:40',
+      data: fmtData(d8),
+      ora: '07:10',
       paese: 'Peru',
-      km: 356.9,
-      durata: 27800,
-      altMin: 1200,
-      altMax: 4100,
-      velMax: 69,
-      velMedia: 36.9,
-      benzina: 12.4,
-      benzinaStimataLitri: 12.4,
-      benzinaRealeLitri: 13.1,
-      consumoStimatoKmL: 28.8,
-      consumoRealeKmL: 27.2,
-      titolo: 'Cusco → Puno',
-      note: 'Demo Perù in alta quota',
-      startTs: now - 5300000,
-      endTs: now - 5000000,
+      km: 312.7,
+      durata: 26800,
+      altMin: 900,
+      altMax: 3330,
+      velMax: 74,
+      velMedia: 42.0,
+      benzina: 11.2,
+      benzinaStimataLitri: 11.2,
+      benzinaRealeLitri: 11.8,
+      consumoStimatoKmL: 27.9,
+      consumoRealeKmL: 26.5,
+      titolo: 'Piura → Trujillo',
+      note: 'Ingresso in Perù e discesa verso la costa.',
+      startTs: d8,
+      endTs: d8 + 6.8 * 60 * 60 * 1000,
+      fuelStartGal: 1.50,
+      fuelStartLitri: 5.68,
+      fuelAddedLitri: 6.50,
+      fuelEndGal: 0.10,
+      fuelEndLitri: 0.38,
       traccia: [
-        [-13.5319, -71.9675],
-        [-13.8, -71.6],
-        [-14.4, -70.9],
-        [-15.84, -70.02]
+        [-5.1945, -80.6328],
+        [-6.0, -80.75],
+        [-7.25, -79.95],
+        [-8.1116, -79.0287]
       ],
       telemetry: [
-        { km: 0, alt: 3390, sp: 0, ts: now - 5300000 },
-        { km: 80, alt: 3800, sp: 41, ts: now - 5220000 },
-        { km: 190, alt: 4100, sp: 53, ts: now - 5150000 },
-        { km: 356.9, alt: 3820, sp: 0, ts: now - 5000000 }
+        { km: 0, alt: 120, sp: 0, ts: d8 },
+        { km: 80, alt: 210, sp: 58, ts: d8 + 5400000 },
+        { km: 190, alt: 80, sp: 65, ts: d8 + 12600000 },
+        { km: 312.7, alt: 34, sp: 0, ts: d8 + 24480000 }
       ]
     },
     {
-      id: now - 3000000,
+      id: d9 + 1000,
       tipo: 'Tappa',
-      data: '03/10/2025',
-      ora: '08:10',
-      paese: 'Chile',
-      km: 418.2,
-      durata: 31200,
-      altMin: 50,
-      altMax: 2450,
-      velMax: 82,
-      velMedia: 43.5,
-      benzina: 14.7,
-      benzinaStimataLitri: 14.7,
-      benzinaRealeLitri: 15.0,
+      data: fmtData(d9),
+      ora: '07:50',
+      paese: 'Peru',
+      km: 486.3,
+      durata: 38100,
+      altMin: 0,
+      altMax: 540,
+      velMax: 83,
+      velMedia: 46.0,
+      benzina: 17.1,
+      benzinaStimataLitri: 17.1,
+      benzinaRealeLitri: 17.8,
       consumoStimatoKmL: 28.4,
-      consumoRealeKmL: 27.9,
-      titolo: 'Arica → San Pedro de Atacama',
-      note: 'Demo Cile deserto',
-      startTs: now - 3300000,
-      endTs: now - 3000000,
+      consumoRealeKmL: 27.3,
+      titolo: 'Trujillo → Lima',
+      note: 'Lunga tirata costiera, vento laterale forte.',
+      startTs: d9,
+      endTs: d9 + 8.5 * 60 * 60 * 1000,
+      fuelStartGal: 1.90,
+      fuelStartLitri: 7.19,
+      fuelAddedLitri: 10.00,
+      fuelEndGal: 0.15,
+      fuelEndLitri: 0.57,
       traccia: [
-        [-18.4783, -70.3126],
-        [-18.9, -69.6],
-        [-21.2, -68.9],
+        [-8.1116, -79.0287],
+        [-9.5, -78.95],
+        [-11.1, -77.82],
+        [-12.0464, -77.0428]
+      ],
+      telemetry: [
+        { km: 0, alt: 34, sp: 0, ts: d9 },
+        { km: 130, alt: 60, sp: 63, ts: d9 + 7200000 },
+        { km: 290, alt: 45, sp: 69, ts: d9 + 16200000 },
+        { km: 486.3, alt: 80, sp: 0, ts: d9 + 30600000 }
+      ]
+    },
+    {
+      id: d10 + 1000,
+      tipo: 'Tappa',
+      data: fmtData(d10),
+      ora: '06:45',
+      paese: 'Peru',
+      km: 1112.8,
+      durata: 80400,
+      altMin: 0,
+      altMax: 3390,
+      velMax: 79,
+      velMedia: 49.8,
+      benzina: 39.6,
+      benzinaStimataLitri: 39.6,
+      benzinaRealeLitri: 41.3,
+      consumoStimatoKmL: 28.1,
+      consumoRealeKmL: 26.9,
+      titolo: 'Lima → Cusco',
+      note: 'Tappa demo molto lunga, compressa per popolare bene la pagina pubblica.',
+      startTs: d10,
+      endTs: d10 + 19 * 60 * 60 * 1000,
+      fuelStartGal: 2.00,
+      fuelStartLitri: 7.57,
+      fuelAddedLitri: 34.00,
+      fuelEndGal: 0.10,
+      fuelEndLitri: 0.38,
+      traccia: [
+        [-12.0464, -77.0428],
+        [-13.7, -76.2],
+        [-14.8, -74.2],
+        [-13.5319, -71.9675]
+      ],
+      telemetry: [
+        { km: 0, alt: 80, sp: 0, ts: d10 },
+        { km: 240, alt: 420, sp: 58, ts: d10 + 14400000 },
+        { km: 610, alt: 1860, sp: 52, ts: d10 + 36000000 },
+        { km: 920, alt: 3100, sp: 47, ts: d10 + 54000000 },
+        { km: 1112.8, alt: 3390, sp: 0, ts: d10 + 68400000 }
+      ]
+    },
+    {
+      id: d11 + 1000,
+      tipo: 'Tappa',
+      data: fmtData(d11),
+      ora: '07:30',
+      paese: 'Bolivia',
+      km: 389.4,
+      durata: 31700,
+      altMin: 3650,
+      altMax: 4320,
+      velMax: 66,
+      velMedia: 44.2,
+      benzina: 14.0,
+      benzinaStimataLitri: 14.0,
+      benzinaRealeLitri: 14.8,
+      consumoStimatoKmL: 27.8,
+      consumoRealeKmL: 26.3,
+      titolo: 'Cusco → La Paz',
+      note: 'Frontiera e prima vera alta quota prolungata.',
+      startTs: d11,
+      endTs: d11 + 8 * 60 * 60 * 1000,
+      fuelStartGal: 1.80,
+      fuelStartLitri: 6.81,
+      fuelAddedLitri: 8.50,
+      fuelEndGal: 0.12,
+      fuelEndLitri: 0.45,
+      traccia: [
+        [-13.5319, -71.9675],
+        [-14.6, -70.85],
+        [-15.2, -69.85],
+        [-16.4897, -68.1193]
+      ],
+      telemetry: [
+        { km: 0, alt: 3390, sp: 0, ts: d11 },
+        { km: 110, alt: 3920, sp: 43, ts: d11 + 7200000 },
+        { km: 240, alt: 4310, sp: 49, ts: d11 + 18000000 },
+        { km: 389.4, alt: 3640, sp: 0, ts: d11 + 28800000 }
+      ]
+    },
+    {
+      id: d12 + 1000,
+      tipo: 'Tappa',
+      data: fmtData(d12),
+      ora: '08:00',
+      paese: 'Chile',
+      km: 824.2,
+      durata: 59800,
+      altMin: 2430,
+      altMax: 4680,
+      velMax: 76,
+      velMedia: 49.6,
+      benzina: 29.6,
+      benzinaStimataLitri: 29.6,
+      benzinaRealeLitri: 30.7,
+      consumoStimatoKmL: 27.8,
+      consumoRealeKmL: 26.8,
+      titolo: 'La Paz → San Pedro de Atacama',
+      note: 'Demo di passaggio altiplano/deserto.',
+      startTs: d12,
+      endTs: d12 + 14 * 60 * 60 * 1000,
+      fuelStartGal: 2.00,
+      fuelStartLitri: 7.57,
+      fuelAddedLitri: 24.00,
+      fuelEndGal: 0.22,
+      fuelEndLitri: 0.83,
+      traccia: [
+        [-16.4897, -68.1193],
+        [-18.1, -68.8],
+        [-21.2, -68.7],
         [-22.9087, -68.1997]
       ],
       telemetry: [
-        { km: 0, alt: 20, sp: 0, ts: now - 3300000 },
-        { km: 110, alt: 1200, sp: 57, ts: now - 3220000 },
-        { km: 260, alt: 2400, sp: 61, ts: now - 3120000 },
-        { km: 418.2, alt: 2430, sp: 0, ts: now - 3000000 }
+        { km: 0, alt: 3640, sp: 0, ts: d12 },
+        { km: 180, alt: 4100, sp: 51, ts: d12 + 10800000 },
+        { km: 420, alt: 4680, sp: 44, ts: d12 + 27000000 },
+        { km: 824.2, alt: 2430, sp: 0, ts: d12 + 50400000 }
+      ]
+    },
+    {
+      id: d13 + 1000,
+      tipo: 'Tappa',
+      data: fmtData(d13),
+      ora: '08:50',
+      paese: 'Chile',
+      km: 1678.3,
+      durata: 126000,
+      altMin: 0,
+      altMax: 2430,
+      velMax: 84,
+      velMedia: 47.9,
+      benzina: 59.8,
+      benzinaStimataLitri: 59.8,
+      benzinaRealeLitri: 62.1,
+      consumoStimatoKmL: 28.1,
+      consumoRealeKmL: 27.0,
+      titolo: 'San Pedro de Atacama → Santiago',
+      note: 'Tappa demo compressa per simulare grande avanzamento verso sud.',
+      startTs: d13,
+      endTs: d13 + 30 * 60 * 60 * 1000,
+      fuelStartGal: 2.00,
+      fuelStartLitri: 7.57,
+      fuelAddedLitri: 55.00,
+      fuelEndGal: 0.12,
+      fuelEndLitri: 0.45,
+      traccia: [
+        [-22.9087, -68.1997],
+        [-26.0, -69.5],
+        [-30.2, -71.4],
+        [-33.4489, -70.6693]
+      ],
+      telemetry: [
+        { km: 0, alt: 2430, sp: 0, ts: d13 },
+        { km: 420, alt: 1800, sp: 58, ts: d13 + 21600000 },
+        { km: 980, alt: 950, sp: 67, ts: d13 + 57600000 },
+        { km: 1430, alt: 210, sp: 71, ts: d13 + 90000000 },
+        { km: 1678.3, alt: 520, sp: 0, ts: d13 + 108000000 }
+      ]
+    },
+    {
+      id: d14 + 1000,
+      tipo: 'Tappa',
+      data: fmtData(d14),
+      ora: '07:20',
+      paese: 'Argentina',
+      km: 1512.4,
+      durata: 118000,
+      altMin: 0,
+      altMax: 1250,
+      velMax: 83,
+      velMedia: 46.1,
+      benzina: 54.0,
+      benzinaStimataLitri: 54.0,
+      benzinaRealeLitri: 56.2,
+      consumoStimatoKmL: 28.0,
+      consumoRealeKmL: 26.9,
+      titolo: 'Santiago → Bariloche',
+      note: 'Ingresso in Argentina e grandi paesaggi patagonici.',
+      startTs: d14,
+      endTs: d14 + 28 * 60 * 60 * 1000,
+      fuelStartGal: 1.90,
+      fuelStartLitri: 7.19,
+      fuelAddedLitri: 50.00,
+      fuelEndGal: 0.14,
+      fuelEndLitri: 0.53,
+      traccia: [
+        [-33.4489, -70.6693],
+        [-36.7, -71.1],
+        [-40.2, -71.3],
+        [-41.1335, -71.3103]
+      ],
+      telemetry: [
+        { km: 0, alt: 520, sp: 0, ts: d14 },
+        { km: 360, alt: 820, sp: 55, ts: d14 + 18000000 },
+        { km: 860, alt: 1150, sp: 63, ts: d14 + 54000000 },
+        { km: 1240, alt: 740, sp: 68, ts: d14 + 86400000 },
+        { km: 1512.4, alt: 893, sp: 0, ts: d14 + 100800000 }
+      ]
+    },
+    {
+      id: d15 + 1000,
+      tipo: 'Tappa',
+      data: fmtData(d15),
+      ora: '06:40',
+      paese: 'Argentina',
+      km: 1654.8,
+      durata: 129000,
+      altMin: 0,
+      altMax: 920,
+      velMax: 82,
+      velMedia: 46.2,
+      benzina: 59.3,
+      benzinaStimataLitri: 59.3,
+      benzinaRealeLitri: 61.1,
+      consumoStimatoKmL: 27.9,
+      consumoRealeKmL: 27.1,
+      titolo: 'Bariloche → Ushuaia',
+      note: 'Arrivo simbolico a Ushuaia nel dataset demo.',
+      startTs: d15,
+      endTs: d15 + 31 * 60 * 60 * 1000,
+      fuelStartGal: 2.00,
+      fuelStartLitri: 7.57,
+      fuelAddedLitri: 55.00,
+      fuelEndGal: 0.38,
+      fuelEndLitri: 1.44,
+      traccia: [
+        [-41.1335, -71.3103],
+        [-45.86, -67.48],
+        [-50.34, -72.27],
+        [-54.8019, -68.3030]
+      ],
+      telemetry: [
+        { km: 0, alt: 893, sp: 0, ts: d15 },
+        { km: 420, alt: 340, sp: 61, ts: d15 + 21600000 },
+        { km: 860, alt: 120, sp: 70, ts: d15 + 54000000 },
+        { km: 1270, alt: 80, sp: 72, ts: d15 + 90000000 },
+        { km: 1654.8, alt: 35, sp: 0, ts: d15 + 111600000 }
       ]
     }
   ];
 
+  // ============================================================
+  // GIRI / TURISMO
+  // ============================================================
   const demoTurismo = [
     {
-      id: now - 2500000,
+      id: d2 + 5000,
       tipo: 'Turismo',
-      data: '04/10/2025',
-      ora: '11:30',
+      data: fmtData(d2),
+      ora: '11:20',
+      paese: 'Colombia',
+      km: 42.8,
+      durata: 4300,
+      altMin: 2080,
+      altMax: 2260,
+      velMax: 51,
+      velMedia: 35.8,
+      benzina: 1.5,
+      benzinaStimataLitri: 1.5,
+      benzinaRealeLitri: 1.7,
+      consumoStimatoKmL: 28.5,
+      consumoRealeKmL: 25.2,
+      titolo: 'Giro locale Villa de Leyva',
+      note: 'Giro turistico nei dintorni.',
+      startTs: d2,
+      endTs: d2 + 2 * 60 * 60 * 1000,
+      traccia: [
+        [5.6349, -73.5248],
+        [5.66, -73.55],
+        [5.69, -73.48],
+        [5.6349, -73.5248]
+      ],
+      telemetry: [
+        { km: 0, alt: 2140, sp: 0, ts: d2 },
+        { km: 12, alt: 2200, sp: 31, ts: d2 + 1800000 },
+        { km: 28, alt: 2260, sp: 42, ts: d2 + 3600000 },
+        { km: 42.8, alt: 2140, sp: 0, ts: d2 + 7200000 }
+      ]
+    },
+    {
+      id: d6 + 5000,
+      tipo: 'Turismo',
+      data: fmtData(d6),
+      ora: '15:10',
+      paese: 'Ecuador',
+      km: 36.4,
+      durata: 3800,
+      altMin: 2790,
+      altMax: 3020,
+      velMax: 48,
+      velMedia: 34.4,
+      benzina: 1.3,
+      benzinaStimataLitri: 1.3,
+      benzinaRealeLitri: 1.4,
+      consumoStimatoKmL: 28.0,
+      consumoRealeKmL: 26.0,
+      titolo: 'Giro centro storico di Quito',
+      note: 'Turismo urbano demo.',
+      startTs: d6,
+      endTs: d6 + 1.8 * 60 * 60 * 1000,
+      traccia: [
+        [-0.1807, -78.4678],
+        [-0.19, -78.50],
+        [-0.21, -78.47],
+        [-0.1807, -78.4678]
+      ],
+      telemetry: [
+        { km: 0, alt: 2850, sp: 0, ts: d6 },
+        { km: 11, alt: 2920, sp: 22, ts: d6 + 1200000 },
+        { km: 23, alt: 3010, sp: 35, ts: d6 + 2700000 },
+        { km: 36.4, alt: 2850, sp: 0, ts: d6 + 6480000 }
+      ]
+    },
+    {
+      id: d10 + 5000,
+      tipo: 'Turismo',
+      data: fmtData(d10 + DAY),
+      ora: '10:40',
+      paese: 'Peru',
+      km: 58.6,
+      durata: 5200,
+      altMin: 3320,
+      altMax: 3520,
+      velMax: 54,
+      velMedia: 40.5,
+      benzina: 2.1,
+      benzinaStimataLitri: 2.1,
+      benzinaRealeLitri: 2.2,
+      consumoStimatoKmL: 27.9,
+      consumoRealeKmL: 26.6,
+      titolo: 'Giro archeologico Cusco',
+      note: 'Breve uscita nei siti vicini.',
+      startTs: d10 + DAY,
+      endTs: d10 + DAY + 2.2 * 60 * 60 * 1000,
+      traccia: [
+        [-13.5319, -71.9675],
+        [-13.50, -71.94],
+        [-13.47, -71.90],
+        [-13.5319, -71.9675]
+      ],
+      telemetry: [
+        { km: 0, alt: 3390, sp: 0, ts: d10 + DAY },
+        { km: 18, alt: 3450, sp: 28, ts: d10 + DAY + 1600000 },
+        { km: 39, alt: 3520, sp: 46, ts: d10 + DAY + 3800000 },
+        { km: 58.6, alt: 3390, sp: 0, ts: d10 + DAY + 7920000 }
+      ]
+    },
+    {
+      id: d12 + 5000,
+      tipo: 'Turismo',
+      data: fmtData(d12 + DAY),
+      ora: '12:00',
       paese: 'Chile',
       km: 64.5,
       durata: 6200,
@@ -9944,9 +10458,9 @@ function caricaDatiDemoMultiPaese() {
       consumoStimatoKmL: 28.0,
       consumoRealeKmL: 25.8,
       titolo: 'Giro Valle de la Luna',
-      note: 'Uscita turistica demo',
-      startTs: now - 2600000,
-      endTs: now - 2500000,
+      note: 'Uscita turistica demo.',
+      startTs: d12 + DAY,
+      endTs: d12 + DAY + 2.1 * 60 * 60 * 1000,
       traccia: [
         [-22.9087, -68.1997],
         [-22.95, -68.28],
@@ -9954,23 +10468,60 @@ function caricaDatiDemoMultiPaese() {
         [-22.9087, -68.1997]
       ],
       telemetry: [
-        { km: 0, alt: 2430, sp: 0, ts: now - 2600000 },
-        { km: 22, alt: 2480, sp: 36, ts: now - 2570000 },
-        { km: 43, alt: 2520, sp: 41, ts: now - 2530000 },
-        { km: 64.5, alt: 2430, sp: 0, ts: now - 2500000 }
+        { km: 0, alt: 2430, sp: 0, ts: d12 + DAY },
+        { km: 22, alt: 2480, sp: 36, ts: d12 + DAY + 2000000 },
+        { km: 43, alt: 2520, sp: 41, ts: d12 + DAY + 4300000 },
+        { km: 64.5, alt: 2430, sp: 0, ts: d12 + DAY + 7560000 }
+      ]
+    },
+    {
+      id: d15 + 5000,
+      tipo: 'Turismo',
+      data: fmtData(d15 + DAY),
+      ora: '14:20',
+      paese: 'Argentina',
+      km: 28.4,
+      durata: 3100,
+      altMin: 15,
+      altMax: 120,
+      velMax: 46,
+      velMedia: 33.0,
+      benzina: 1.0,
+      benzinaStimataLitri: 1.0,
+      benzinaRealeLitri: 1.1,
+      consumoStimatoKmL: 28.4,
+      consumoRealeKmL: 25.8,
+      titolo: 'Giro locale Ushuaia',
+      note: 'Fine del mondo demo.',
+      startTs: d15 + DAY,
+      endTs: d15 + DAY + 1.5 * 60 * 60 * 1000,
+      traccia: [
+        [-54.8019, -68.3030],
+        [-54.82, -68.35],
+        [-54.78, -68.27],
+        [-54.8019, -68.3030]
+      ],
+      telemetry: [
+        { km: 0, alt: 35, sp: 0, ts: d15 + DAY },
+        { km: 10, alt: 70, sp: 26, ts: d15 + DAY + 1200000 },
+        { km: 19, alt: 115, sp: 39, ts: d15 + DAY + 2600000 },
+        { km: 28.4, alt: 35, sp: 0, ts: d15 + DAY + 5400000 }
       ]
     }
   ];
 
+  // ============================================================
+  // DIARIO
+  // ============================================================
   const demoDiario = [
     {
-      id: now - 8800000,
-      ts: now - 8800000,
-      data: '12/09/2025',
-      ora: '17:40',
+      id: d1 + 90000,
+      ts: d1 + 90000,
+      data: fmtData(d1),
+      ora: '18:10',
       paese: 'Colombia',
-      km: '132.4',
-      testo: 'Arrivato a Villa de Leyva. Bellissimo centro storico, prime sensazioni di libertà totale.',
+      km: '186.4',
+      testo: 'Primo giorno di viaggio demo. Lasciare Bogotá in Vespa e arrivare a Villa de Leyva mi ha fatto capire che stavolta si parte davvero. #Paesaggi #Turismo',
       tags: ['Paesaggi', 'Turismo'],
       geo: { lat: 5.6349, lon: -73.5248 },
       foto: null,
@@ -9979,173 +10530,629 @@ function caricaDatiDemoMultiPaese() {
       videoPlanned: false
     },
     {
-      id: now - 6900000,
-      ts: now - 6900000,
-      data: '18/09/2025',
-      ora: '18:20',
-      paese: 'Ecuador',
-      km: '343.1',
-      testo: 'Giornata di pioggia e montagne. Arrivare a Baños in Vespa è già una piccola vittoria.',
-      tags: ['Pioggia', 'Strade'],
-      geo: { lat: -1.396, lon: -78.424 },
+      id: d4 + 90000,
+      ts: d4 + 90000,
+      data: fmtData(d4),
+      ora: '19:20',
+      paese: 'Colombia',
+      km: '679.9',
+      testo: 'Verso Cúcuta il caldo si è fatto sentire. Domani frontiera. La Vespa sembra voler andare più lontano di me. #Frontiera #Strade',
+      tags: ['Frontiera', 'Strade'],
+      geo: { lat: 7.8939, lon: -72.5078 },
       foto: null,
       fotoUrl: null,
       videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
       videoPlanned: false
     },
     {
-      id: now - 4900000,
-      ts: now - 4900000,
-      data: '25/09/2025',
-      ora: '19:10',
-      paese: 'Peru',
-      km: '699.9',
-      testo: 'Altitudine seria. La Vespa continua a salire anche se io mi sento senza fiato.',
-      tags: ['Problemi', 'Paesaggi'],
-      geo: { lat: -15.84, lon: -70.02 },
+      id: d5 + 90000,
+      ts: d5 + 90000,
+      data: fmtData(d5),
+      ora: '20:05',
+      paese: 'Ecuador',
+      km: '913.4',
+      testo: 'Frontiera passata. Ecuador! Giornata lunga ma tranquilla. Quito mi accoglie con traffico, quota e aria fredda. #Frontiera #Burocrazia',
+      tags: ['Frontiera', 'Burocrazia'],
+      geo: { lat: -0.1807, lon: -78.4678 },
+      foto: null,
+      fotoUrl: null,
+      videoUrl: null,
+      videoPlanned: false
+    },
+    {
+      id: d7 + 90000,
+      ts: d7 + 90000,
+      data: fmtData(d7),
+      ora: '17:40',
+      paese: 'Ecuador',
+      km: '1091.2',
+      testo: 'Strada verso Baños con nuvole basse e pioggia. Una di quelle giornate in cui vai piano ma ti resta dentro tutto. #Pioggia #Paesaggi',
+      tags: ['Pioggia', 'Paesaggi'],
+      geo: { lat: -1.396, lon: -78.424 },
       foto: null,
       fotoUrl: null,
       videoUrl: null,
       videoPlanned: true
+    },
+    {
+      id: d9 + 90000,
+      ts: d9 + 90000,
+      data: fmtData(d9),
+      ora: '21:10',
+      paese: 'Peru',
+      km: '1890.2',
+      testo: 'Entrare a Lima in Vespa è stato quasi più difficile della frontiera. Caos totale, ma anche energia pura. #Strade #Persone',
+      tags: ['Strade', 'Persone'],
+      geo: { lat: -12.0464, lon: -77.0428 },
+      foto: null,
+      fotoUrl: null,
+      videoUrl: 'https://www.youtube.com/watch?v=jNQXAC9IVRw',
+      videoPlanned: false
+    },
+    {
+      id: d10 + DAY + 90000,
+      ts: d10 + DAY + 90000,
+      data: fmtData(d10 + DAY),
+      ora: '19:05',
+      paese: 'Peru',
+      km: '3003.0',
+      testo: 'A Cusco la Vespa soffre meno di me. In quota cambiano i rumori del motore e cambia anche il modo di guardare il paesaggio. #Problemi #Paesaggi #Officina',
+      tags: ['Problemi', 'Paesaggi', 'Officina'],
+      geo: { lat: -13.5319, lon: -71.9675 },
+      foto: null,
+      fotoUrl: null,
+      videoUrl: null,
+      videoPlanned: false
+    },
+    {
+      id: d11 + 90000,
+      ts: d11 + 90000,
+      data: fmtData(d11),
+      ora: '20:15',
+      paese: 'Bolivia',
+      km: '3392.4',
+      testo: 'La Paz è un vortice. Il motore gira ancora bene, ma qui ogni salita sembra chiedere rispetto. #Paesaggi #Problemi',
+      tags: ['Paesaggi', 'Problemi'],
+      geo: { lat: -16.4897, lon: -68.1193 },
+      foto: null,
+      fotoUrl: null,
+      videoUrl: null,
+      videoPlanned: true
+    },
+    {
+      id: d12 + 90000,
+      ts: d12 + 90000,
+      data: fmtData(d12),
+      ora: '21:30',
+      paese: 'Chile',
+      km: '4216.6',
+      testo: 'Atacama. Silenzio, vento e luce tagliente. Qui anche una Vespa sembra una nave nel deserto. #Paesaggi #Sterrato',
+      tags: ['Paesaggi', 'Sterrato'],
+      geo: { lat: -22.9087, lon: -68.1997 },
+      foto: null,
+      fotoUrl: null,
+      videoUrl: 'https://www.youtube.com/watch?v=aqz-KE-bpKQ',
+      videoPlanned: false
+    },
+    {
+      id: d13 + 90000,
+      ts: d13 + 90000,
+      data: fmtData(d13),
+      ora: '22:00',
+      paese: 'Chile',
+      km: '5894.9',
+      testo: 'Verso Santiago la strada cambia faccia di continuo. Oggi tantissimi chilometri, stanchezza vera, ma anche soddisfazione. #Strade #Problemi',
+      tags: ['Strade', 'Problemi'],
+      geo: { lat: -33.4489, lon: -70.6693 },
+      foto: null,
+      fotoUrl: null,
+      videoUrl: null,
+      videoPlanned: false
+    },
+    {
+      id: d14 + 90000,
+      ts: d14 + 90000,
+      data: fmtData(d14),
+      ora: '20:40',
+      paese: 'Argentina',
+      km: '7407.3',
+      testo: 'Bariloche segna l’ingresso nella Patagonia che avevo in testa da anni. Da qui in giù cambia tutto. #Paesaggi #Turismo',
+      tags: ['Paesaggi', 'Turismo'],
+      geo: { lat: -41.1335, lon: -71.3103 },
+      foto: null,
+      fotoUrl: null,
+      videoUrl: null,
+      videoPlanned: false
+    },
+    {
+      id: d15 + 90000,
+      ts: d15 + 90000,
+      data: fmtData(d15),
+      ora: '21:55',
+      paese: 'Argentina',
+      km: '9062.1',
+      testo: 'Ushuaia demo. Non è la fine del viaggio, ma un punto enorme dentro la testa. La Vespa è arrivata fin qui. #Paesaggi #Storia',
+      tags: ['Paesaggi', 'Storia'],
+      geo: { lat: -54.8019, lon: -68.3030 },
+      foto: null,
+      fotoUrl: null,
+      videoUrl: 'https://www.youtube.com/watch?v=ysz5S6PUM-U',
+      videoPlanned: false
     }
   ];
 
+  // ============================================================
+  // RIFORNIMENTI
+  // ============================================================
   const demoLogCarburanti = [
     {
-      id: now - 9100000,
-      data: '12/09/2025',
-      ora: '07:55',
+      id: d1 + 500,
+      data: fmtData(d1),
+      ora: '07:40',
       paese: 'Colombia',
-      qta: '5.20',
+      qta: '5.50',
       dest: 'Vespa',
       mix: '2.0%',
-      prezzoUnit: '1.120',
+      prezzoUnit: '1.100',
       valuta: 'USD',
       fxToUsd: 1,
-      costoBenzLocal: '5.82',
-      costoBenzUsd: '5.82',
-      costoBenz: '5.82',
-      costoOlio: '0.45',
+      costoBenzLocal: '6.05',
+      costoBenzUsd: '6.05',
+      costoBenz: '6.05',
+      costoOlio: '0.40',
       luogo: 'Bogotá',
       km: '0.0',
       geo: { lat: 4.711, lon: -74.072 }
     },
     {
-      id: now - 7100000,
-      data: '18/09/2025',
-      ora: '08:40',
+      id: d3 + 500,
+      data: fmtData(d3),
+      ora: '07:10',
+      paese: 'Colombia',
+      qta: '6.20',
+      dest: 'Vespa',
+      mix: '2.0%',
+      prezzoUnit: '1.080',
+      valuta: 'USD',
+      fxToUsd: 1,
+      costoBenzLocal: '6.70',
+      costoBenzUsd: '6.70',
+      costoBenz: '6.70',
+      costoOlio: '0.45',
+      luogo: 'Villa de Leyva',
+      km: '186.4',
+      geo: { lat: 5.6349, lon: -73.5248 }
+    },
+    {
+      id: d5 + 500,
+      data: fmtData(d5),
+      ora: '08:50',
       paese: 'Ecuador',
       qta: '7.80',
       dest: 'Vespa',
       mix: '2.0%',
-      prezzoUnit: '1.000',
+      prezzoUnit: '1.020',
       valuta: 'USD',
       fxToUsd: 1,
-      costoBenzLocal: '7.80',
-      costoBenzUsd: '7.80',
-      costoBenz: '7.80',
-      costoOlio: '0.60',
-      luogo: 'Quito',
-      km: '132.4',
-      geo: { lat: -0.1807, lon: -78.4678 }
+      costoBenzLocal: '7.96',
+      costoBenzUsd: '7.96',
+      costoBenz: '7.96',
+      costoOlio: '0.55',
+      luogo: 'Tulcán',
+      km: '679.9',
+      geo: { lat: 0.8119, lon: -77.7173 }
+    },
+    {
+      id: d8 + 500,
+      data: fmtData(d8),
+      ora: '06:35',
+      paese: 'Peru',
+      qta: '8.50',
+      dest: 'Vespa',
+      mix: '2.5%',
+      prezzoUnit: '1.030',
+      valuta: 'USD',
+      fxToUsd: 1,
+      costoBenzLocal: '8.75',
+      costoBenzUsd: '8.75',
+      costoBenz: '8.75',
+      costoOlio: '0.72',
+      luogo: 'Piura',
+      km: '1091.2',
+      geo: { lat: -5.1945, lon: -80.6328 }
+    },
+    {
+      id: d9 + 500,
+      data: fmtData(d9),
+      ora: '07:05',
+      paese: 'Peru',
+      qta: '10.20',
+      dest: 'Tanica',
+      mix: '--',
+      prezzoUnit: '1.010',
+      valuta: 'USD',
+      fxToUsd: 1,
+      costoBenzLocal: '10.30',
+      costoBenzUsd: '10.30',
+      costoBenz: '10.30',
+      costoOlio: null,
+      luogo: 'Trujillo',
+      km: '1403.9',
+      geo: { lat: -8.1116, lon: -79.0287 }
+    },
+    {
+      id: d10 + 500,
+      data: fmtData(d10),
+      ora: '06:20',
+      paese: 'Peru',
+      qta: '9.80',
+      dest: 'Vespa',
+      mix: '2.5%',
+      prezzoUnit: '1.020',
+      valuta: 'USD',
+      fxToUsd: 1,
+      costoBenzLocal: '10.00',
+      costoBenzUsd: '10.00',
+      costoBenz: '10.00',
+      costoOlio: '0.81',
+      luogo: 'Lima',
+      km: '1890.2',
+      geo: { lat: -12.0464, lon: -77.0428 }
+    },
+    {
+      id: d11 + 500,
+      data: fmtData(d11),
+      ora: '07:05',
+      paese: 'Bolivia',
+      qta: '8.90',
+      dest: 'Vespa',
+      mix: '3.0%',
+      prezzoUnit: '0.980',
+      valuta: 'USD',
+      fxToUsd: 1,
+      costoBenzLocal: '8.72',
+      costoBenzUsd: '8.72',
+      costoBenz: '8.72',
+      costoOlio: '0.92',
+      luogo: 'Cusco',
+      km: '3003.0',
+      geo: { lat: -13.5319, lon: -71.9675 }
+    },
+    {
+      id: d12 + 500,
+      data: fmtData(d12),
+      ora: '07:35',
+      paese: 'Chile',
+      qta: '11.40',
+      dest: 'Vespa',
+      mix: '2.5%',
+      prezzoUnit: '1.190',
+      valuta: 'USD',
+      fxToUsd: 1,
+      costoBenzLocal: '13.57',
+      costoBenzUsd: '13.57',
+      costoBenz: '13.57',
+      costoOlio: '0.88',
+      luogo: 'La Paz',
+      km: '3392.4',
+      geo: { lat: -16.4897, lon: -68.1193 }
+    },
+    {
+      id: d13 + 500,
+      data: fmtData(d13),
+      ora: '08:10',
+      paese: 'Chile',
+      qta: '12.60',
+      dest: 'Tanica',
+      mix: '--',
+      prezzoUnit: '1.210',
+      valuta: 'USD',
+      fxToUsd: 1,
+      costoBenzLocal: '15.25',
+      costoBenzUsd: '15.25',
+      costoBenz: '15.25',
+      costoOlio: null,
+      luogo: 'San Pedro de Atacama',
+      km: '4216.6',
+      geo: { lat: -22.9087, lon: -68.1997 }
+    },
+    {
+      id: d14 + 500,
+      data: fmtData(d14),
+      ora: '06:55',
+      paese: 'Argentina',
+      qta: '10.50',
+      dest: 'Vespa',
+      mix: '2.0%',
+      prezzoUnit: '1.180',
+      valuta: 'USD',
+      fxToUsd: 1,
+      costoBenzLocal: '12.39',
+      costoBenzUsd: '12.39',
+      costoBenz: '12.39',
+      costoOlio: '0.68',
+      luogo: 'Santiago',
+      km: '5894.9',
+      geo: { lat: -33.4489, lon: -70.6693 }
+    },
+    {
+      id: d15 + 500,
+      data: fmtData(d15),
+      ora: '06:10',
+      paese: 'Argentina',
+      qta: '11.80',
+      dest: 'Vespa',
+      mix: '2.0%',
+      prezzoUnit: '1.220',
+      valuta: 'USD',
+      fxToUsd: 1,
+      costoBenzLocal: '14.40',
+      costoBenzUsd: '14.40',
+      costoBenz: '14.40',
+      costoOlio: '0.74',
+      luogo: 'Bariloche',
+      km: '7407.3',
+      geo: { lat: -41.1335, lon: -71.3103 }
     }
   ];
 
+  // ============================================================
+  // LOG OFFICINA
+  // ============================================================
   const demoLogbook = [
     {
-      id: now - 4700000,
-      data: '26/09/2025',
-      ora: '10:50',
+      id: d6 + 1000,
+      data: fmtData(d6),
+      ora: '18:20',
+      paese: 'Ecuador',
+      km: '949.8',
+      nome: 'Registrazione cavo frizione',
+      desc: 'Regolazione fatta dopo traffico e salite in quota.',
+      valuta: 'USD',
+      fxToUsd: 1,
+      costoLocal: 4,
+      costoUsd: 4,
+      foto: null,
+      fotoUrl: null,
+      geo: { lat: -0.1807, lon: -78.4678 }
+    },
+    {
+      id: d10 + 2000,
+      data: fmtData(d10 + DAY),
+      ora: '17:10',
       paese: 'Peru',
-      km: '720.0',
+      km: '3003.0',
       nome: 'Controllo candela',
-      desc: 'Smontata e controllata dopo tratto in quota.',
+      desc: 'Smontata e letta candela dopo salita a Cusco.',
       valuta: 'USD',
       fxToUsd: 1,
       costoLocal: 0,
       costoUsd: 0,
       foto: null,
       fotoUrl: null,
-      geo: { lat: -15.84, lon: -70.02 }
+      geo: { lat: -13.5319, lon: -71.9675 }
     },
     {
-      id: now - 2400000,
-      data: '04/10/2025',
-      ora: '18:00',
-      paese: 'Chile',
-      km: '1182.7',
-      nome: 'Registrazione cavo frizione',
-      desc: 'Piccolo intervento dopo sterrato.',
+      id: d11 + 2000,
+      data: fmtData(d11),
+      ora: '19:00',
+      paese: 'Bolivia',
+      km: '3392.4',
+      nome: 'Regolazione carburazione',
+      desc: 'Piccolo aggiustamento vite aria per alta quota.',
       valuta: 'USD',
       fxToUsd: 1,
-      costoLocal: 6,
-      costoUsd: 6,
+      costoLocal: 8,
+      costoUsd: 8,
       foto: null,
       fotoUrl: null,
-      geo: { lat: -22.9087, lon: -68.1997 }
+      geo: { lat: -16.4897, lon: -68.1193 }
+    },
+    {
+      id: d13 + 2000,
+      data: fmtData(d13),
+      ora: '20:10',
+      paese: 'Chile',
+      km: '5894.9',
+      nome: 'Cambio olio cambio',
+      desc: 'Manutenzione preventiva dopo lunga sezione andina.',
+      valuta: 'USD',
+      fxToUsd: 1,
+      costoLocal: 12,
+      costoUsd: 12,
+      foto: null,
+      fotoUrl: null,
+      geo: { lat: -33.4489, lon: -70.6693 }
+    },
+    {
+      id: d15 + 2000,
+      data: fmtData(d15),
+      ora: '20:30',
+      paese: 'Argentina',
+      km: '9062.1',
+      nome: 'Controllo generale arrivo Ushuaia',
+      desc: 'Bulloneria, freni, cavi e trasmissione controllati.',
+      valuta: 'USD',
+      fxToUsd: 1,
+      costoLocal: 15,
+      costoUsd: 15,
+      foto: null,
+      fotoUrl: null,
+      geo: { lat: -54.8019, lon: -68.3030 }
     }
   ];
 
+  // ============================================================
+  // CARBURAZIONE
+  // ============================================================
   const demoCarburazione = [
     {
-      id: now - 4600000,
-      data: '26/09/2025',
-      ora: '11:20',
-      alt: 3820,
+      id: d10 + 3000,
+      data: fmtData(d10 + DAY),
+      ora: '18:00',
+      alt: 3390,
       chicMax: 108,
       chicMin: 50,
       viteAria: '1.5 giri',
       viteMinimo: '2 giri',
       candela: 'nocciola',
-      nota: 'Setup demo per alta quota',
-      geo: { lat: -15.84, lon: -70.02 },
+      nota: 'Setup Cusco, motore regolare ma un po’ grasso ai medi.',
+      geo: { lat: -13.5319, lon: -71.9675 },
+      fotoCandela: null
+    },
+    {
+      id: d11 + 3000,
+      data: fmtData(d11),
+      ora: '19:20',
+      alt: 3640,
+      chicMax: 105,
+      chicMin: 48,
+      viteAria: '1.75 giri',
+      viteMinimo: '2 giri',
+      candela: 'nocciola chiaro',
+      nota: 'Setup La Paz / alta quota.',
+      geo: { lat: -16.4897, lon: -68.1193 },
+      fotoCandela: null
+    },
+    {
+      id: d12 + 3000,
+      data: fmtData(d12),
+      ora: '20:15',
+      alt: 2430,
+      chicMax: 108,
+      chicMin: 50,
+      viteAria: '1.5 giri',
+      viteMinimo: '2 giri',
+      candela: 'nocciola',
+      nota: 'Rientro a quote più favorevoli nel deserto cileno.',
+      geo: { lat: -22.9087, lon: -68.1997 },
       fotoCandela: null
     }
   ];
 
+  // ============================================================
+  // DATI PAESE
+  // ============================================================
   const demoDatiPaesi = {
     Colombia: {
-      km: 132.4,
-      benzina: 4.8,
+      km: 722.7,
+      benzina: 26.0,
       benzinaFuori: 0,
-      olioMl: 104,
-      spesaBenzinaUsd: 5.82,
-      spesaOlioUsd: 0.45,
+      olioMl: 520,
+      spesaBenzinaUsd: 19.20,
+      spesaOlioUsd: 1.30,
       spesaRicambiUsd: 0,
       spesaManodoperaUsd: 0
     },
     Ecuador: {
-      km: 210.7,
-      benzina: 7.3,
+      km: 447.7,
+      benzina: 16.1,
       benzinaFuori: 0,
-      olioMl: 156,
-      spesaBenzinaUsd: 7.80,
-      spesaOlioUsd: 0.60,
+      olioMl: 322,
+      spesaBenzinaUsd: 7.96,
+      spesaOlioUsd: 0.55,
       spesaRicambiUsd: 0,
-      spesaManodoperaUsd: 0
+      spesaManodoperaUsd: 4
     },
     Peru: {
-      km: 356.9,
-      benzina: 12.4,
+      km: 1969.0,
+      benzina: 70.4,
       benzinaFuori: 0,
-      olioMl: 248,
-      spesaBenzinaUsd: 13.40,
-      spesaOlioUsd: 0.95,
+      olioMl: 1760,
+      spesaBenzinaUsd: 29.05,
+      spesaOlioUsd: 1.53,
       spesaRicambiUsd: 0,
       spesaManodoperaUsd: 0
     },
-    Chile: {
-      km: 482.7,
-      benzina: 17.0,
+    Bolivia: {
+      km: 389.4,
+      benzina: 14.0,
       benzinaFuori: 0,
-      olioMl: 340,
-      spesaBenzinaUsd: 18.90,
-      spesaOlioUsd: 1.20,
+      olioMl: 420,
+      spesaBenzinaUsd: 8.72,
+      spesaOlioUsd: 0.92,
       spesaRicambiUsd: 0,
-      spesaManodoperaUsd: 6
+      spesaManodoperaUsd: 8
+    },
+    Chile: {
+      km: 2567.0,
+      benzina: 91.7,
+      benzinaFuori: 0,
+      olioMl: 2290,
+      spesaBenzinaUsd: 28.82,
+      spesaOlioUsd: 1.56,
+      spesaRicambiUsd: 0,
+      spesaManodoperaUsd: 12
+    },
+    Argentina: {
+      km: 3195.6,
+      benzina: 114.3,
+      benzinaFuori: 0,
+      olioMl: 2286,
+      spesaBenzinaUsd: 26.79,
+      spesaOlioUsd: 1.42,
+      spesaRicambiUsd: 0,
+      spesaManodoperaUsd: 15
     }
   };
 
+  // ============================================================
+  // INVENTARIO / CHECKLIST / STATO MANUTENZIONE DEMO
+  // ============================================================
+  const kmTotDemo = 9062.1;
+
+  const demoInventario = [
+    { id:'inv1', nome:'Cavi Cambio', qta:3, wear:'interval', intervalKm:6000, usedKm:1800, lastKm:kmTotDemo-1800 },
+    { id:'inv2', nome:'Cavo Frizione', qta:1, wear:'interval', intervalKm:5000, usedKm:900, lastKm:kmTotDemo-900 },
+    { id:'inv3', nome:'Cavo Freno Anteriore', qta:2, wear:'interval', intervalKm:8000, usedKm:900, lastKm:kmTotDemo-900 },
+    { id:'inv4', nome:'Cavo Freno Posteriore', qta:2, wear:'interval', intervalKm:8000, usedKm:900, lastKm:kmTotDemo-900 },
+    { id:'inv5', nome:'Cavo Acceleratore', qta:1, wear:'interval', intervalKm:6000, usedKm:2300, lastKm:kmTotDemo-2300 },
+
+    { id:'inv6', nome:'Ganasce freno ant.', qta:1, wear:'interval', intervalKm:5000, usedKm:2800, lastKm:kmTotDemo-2800 },
+    { id:'inv7', nome:'Ganasce freno post.', qta:1, wear:'interval', intervalKm:3000, usedKm:2100, lastKm:kmTotDemo-2100 },
+
+    { id:'inv8', nome:'Pneumatico', qta:2, wear:'interval', intervalKm:10000, usedKm:6200, lastKm:kmTotDemo-6200 },
+
+    { id:'inv9', nome:'Kit frizione', qta:1, wear:'interval', intervalKm:12000, usedKm:4300, lastKm:kmTotDemo-4300 },
+    { id:'inv10', nome:'Dischi frizione', qta:1, wear:'interval', intervalKm:10000, usedKm:4300, lastKm:kmTotDemo-4300 },
+
+    { id:'inv11', nome:'Cambio Olio 300ml', qta:0, wear:'interval', intervalKm:2000, usedKm:1200, lastKm:kmTotDemo-1200 },
+
+    { id:'inv12', nome:'Candela', qta:1, wear:'interval', intervalKm:6000, usedKm:4500, lastKm:kmTotDemo-4500 },
+
+    { id:'inv13', nome:'CDI', qta:1, wear:'na', intervalKm:0, usedKm:0, lastKm:kmTotDemo },
+    { id:'inv14', nome:'Piatto Bobbine', qta:1, wear:'na', intervalKm:0, usedKm:0, lastKm:kmTotDemo },
+    { id:'inv15', nome:'Maniglia Freno', qta:1, wear:'na', intervalKm:0, usedKm:0, lastKm:kmTotDemo }
+  ];
+
+  const demoChecklist = [
+    { id:'k1', nome:'Controllare serraggi portapacchi posteriore', fatto:false },
+    { id:'k2', nome:'Pulire filtro aria', fatto:true },
+    { id:'k3', nome:'Controllare gioco leva frizione', fatto:false },
+    { id:'k4', nome:'Verifica pressione pneumatici Patagonia', fatto:false }
+  ];
+
+  const demoManutLastKm = {
+    candela: 4562,
+    olioCambio: 5894,
+    ganasceAnt: 6262,
+    ganascePost: 6962,
+    dischiFrizione: 4762,
+    cavoFrizione: 8162,
+    cavoCambio: 7262,
+    cavoFrenoAnt: 8162,
+    cavoFrenoPos: 8162,
+    cavoAccelleratore: 6762,
+    neumatico: 2862,
+    kitFrizione: 4762
+  };
+
+  // reset stato avvisi
+  const demoManutWarnState = {};
+
+  // ============================================================
+  // SALVATAGGI
+  // ============================================================
   salva('vt_tappe', demoTappe);
   salva('vt_turismo', demoTurismo);
   salva('vt_diario', demoDiario);
@@ -10154,23 +11161,46 @@ function caricaDatiDemoMultiPaese() {
   salva('vt_carburazione', demoCarburazione);
   salva('vt_datiPaesi', demoDatiPaesi);
 
-  salva('vt_kmTotali', '1182.7');
-  salva('vt_paeseAttuale', 'Chile');
-  salva('vt_benzinaUsata', '41.5');
-  salva('vt_olioTotaleMl', '848');
-  salva('vt_spesaBenzinaUsd', '45.92');
-  salva('vt_spesaOlioUsd', '3.20');
-  salva('vt_spesaRicambiUsd', '0');
-  salva('vt_spesaManodoperaUsd', '6.00');
-  salva('vt_scortaLitri', '4.2');
-  salva('vt_serbatoioLitri', '3.4');
-  salva('vt_coordinateTracciato', []);
-  salva('vt_tappaAttuale', nuovaTappa(1182.7));
+  salva('vt_inventario', demoInventario);
+  salva('vt_checklist', demoChecklist);
+  salva('vt_manut_lastKm', demoManutLastKm);
+  salva('vt_manut_warnState', demoManutWarnState);
 
+  salva('vt_kmTotali', String(kmTotDemo));
+  salva('vt_odoUltimoPieno', String(kmTotDemo));
+  salva('vt_paeseAttuale', 'Argentina');
+
+  salva('vt_benzinaUsata', '332.5');
+  salva('vt_olioTotaleMl', '7598');
+
+  salva('vt_spesaBenzinaUsd', '120.54');
+  salva('vt_spesaOlioUsd', '7.28');
+  salva('vt_spesaRicambiUsd', '0');
+  salva('vt_spesaManodoperaUsd', '39.00');
+
+  salva('vt_scortaLitri', '6.8');
+  salva('vt_serbatoioLitri', '1.44');
+
+  salva('vt_benzinaFuoriTappaLitri', '0');
+  salva('vt_kmFuoriTappa', '0');
+
+  salva('vt_coordinateTracciato', []);
+  coordinateTracciato = [];
+
+  tappaAttuale = nuovaTappa(kmTotDemo);
+  salva('vt_tappaAttuale', tappaAttuale);
+
+  // assicurati che i paesi esistano nella lista
   ensurePaeseExists('Colombia');
   ensurePaeseExists('Ecuador');
   ensurePaeseExists('Peru');
+  ensurePaeseExists('Bolivia');
   ensurePaeseExists('Chile');
+  ensurePaeseExists('Argentina');
+
+  lastCountry = 'Argentina';
+
+  try { polyline.setLatLngs([]); } catch(e) {}
 
   aggiornaSettingsUI();
   aggiornaUI();
@@ -10179,8 +11209,10 @@ function caricaDatiDemoMultiPaese() {
   renderLogCarburanti();
   renderLogManutenzione();
   renderStoricoCarbur();
+  renderInventario();
+  renderChecklist();
 
-  showToast('🧪 Dati demo multi-paese caricati');
+  showToast('🧪 Dati demo completi caricati: Colombia → Ushuaia');
 }
 
 async function rimuoviDatiDemo() {
