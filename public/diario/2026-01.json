@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-03-26T01:04:24.893Z",
+  "_exportDate": "2026-03-26T01:47:07.740Z",
   "tipo": "diario_mese",
   "mese": "2026-01",
   "count": 3,
@@ -42,7 +42,7 @@
         "lat": -0.1807,
         "lon": -78.4678
       },
-      "videoUrl": null,
+      "videoUrl": "https://youtube.com/shorts/B0l8hiHNxas?si=1NF0YOHox4bGByBK",
       "videoPlanned": false,
       "fotoUrl": null,
       "foto": null
