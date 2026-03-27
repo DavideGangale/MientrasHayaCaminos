@@ -2352,6 +2352,8 @@ let lastTimestamp = null;
 
 let coordinateTracciato = [];
 let watchId = null;
+  let gpsDisponibile = false;
+let ultimoErroreGps = '';
 
 let lastCountry = null;
 let pendingCountryChange = null;
@@ -3091,23 +3093,41 @@ function aggiornaGpsBadge(stato, acc) {
   if (stato === 'off')  { b.className = 'gps-badge gps-off';  b.innerText = 'GPS OFF'; }
 }
 
+
+
+
 function startGPS() {
-  if (!navigator.geolocation) { aggiornaGpsBadge('off'); return; }
+  if (!navigator.geolocation) {
+    gpsDisponibile = false;
+    ultimoErroreGps = 'Geolocalizzazione non supportata';
+    aggiornaGpsBadge('off');
+    return;
+  }
 
   watchId = navigator.geolocation.watchPosition(
     (pos) => {
+      gpsDisponibile = true;
+      ultimoErroreGps = '';
+
       const ok = (pos.coords.accuracy != null && pos.coords.accuracy < 30);
       aggiornaGpsBadge(ok ? 'ok' : 'weak', pos.coords.accuracy || 999);
       updatePosition(pos);
-      
     },
     (err) => {
+      gpsDisponibile = false;
+
+      if (err && err.code === 1) ultimoErroreGps = 'Permesso posizione negato';
+      else if (err && err.code === 2) ultimoErroreGps = 'Posizione non disponibile';
+      else if (err && err.code === 3) ultimoErroreGps = 'Timeout GPS';
+      else ultimoErroreGps = 'GPS non disponibile';
+
       console.warn('GPS err:', err && err.code);
       aggiornaGpsBadge('off');
     },
     { enableHighAccuracy:true, timeout:15000, maximumAge:0 }
   );
 }
+  
 
 function calcolaDistanza(lat1, lon1, lat2, lon2) {
   const R = 6371;
@@ -3422,7 +3442,15 @@ function toggleTracking() {
   }
 
   // SE NON STO VIAGGIANDO -> DEVO PARTIRE
-  // Se tappa nuova e non ho fuelStart, chiedi prima
+
+
+  // Controllo GPS prima di partire
+  if (!gpsDisponibile && (lastLat === null || lastLon === null)) {
+    showToast('📍 GPS non disponibile: ' + (ultimoErroreGps || 'controlla posizione del telefono'));
+    return;
+  }
+
+    // Se tappa nuova e non ho fuelStart, chiedi prima
  if (serveFuelStart()) {
   pendingStartTracking = true;
    popolaSelectLivelloSerbatoio('fuel-start-select', true);
