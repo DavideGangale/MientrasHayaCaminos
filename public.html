@@ -260,19 +260,14 @@ button.btn-host {
      
       
       <button id="btnHost" class="btn-host" onclick="openHostForm()">🏠 Offri supporto</button>
+      <button id="btnThanks" class="btn-filter" onclick="openThanksModal()">🙏 Ringraziamenti</button>
     </div>
   </div>
 
   <!-- MAPPA -->
  <div id="mapPub"></div>
 
-<div id="thanksSection" style="background:#181818; border-top:1px solid var(--border); padding:18px; overflow-y:auto; max-height:35vh;">
-  <h3 id="thanksTitle" style="margin:0 0 8px 0; color:var(--accent);">🙏 Ringraziamenti</h3>
-  <div id="thanksIntro" style="font-size:13px; color:#aaa; margin-bottom:12px;">
-    Persone che hanno aiutato o supportato il viaggio.
-  </div>
-  <div id="thanksList" style="display:grid; gap:10px;"></div>
-</div>
+
 
   <!-- MODALE STATISTICHE -->
   <div id="statsModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:8000; align-items:center; justify-content:center; padding:15px;">
@@ -361,6 +356,28 @@ button.btn-host {
     </div>
   </div>
 
+
+
+
+    <!-- MODALE RINGRAZIAMENTI -->
+  <div id="thanksModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:8450; align-items:center; justify-content:center; padding:15px;">
+    <div style="background:var(--card); width:100%; max-width:520px; border-radius:15px; border:2px solid var(--accent); padding:20px; position:relative; max-height:90vh; overflow-y:auto;">
+      <button onclick="closeThanksModal()" style="position:absolute; top:10px; right:10px; background:#f44336; color:#fff; border:none; border-radius:50%; width:30px; height:30px; font-weight:bold; cursor:pointer;">×</button>
+
+      <h2 id="thanksModalTitle" style="color:var(--accent); margin-top:0; text-align:center;">🙏 Ringraziamenti</h2>
+
+      <div id="thanksModalIntro" style="font-size:13px; color:#aaa; margin-bottom:12px; line-height:1.4;">
+        Persone che hanno aiutato o supportato il viaggio.
+      </div>
+
+      <div id="thanksModalList" style="display:grid; gap:10px;"></div>
+    </div>
+  </div>
+
+
+
+
+  
   <!-- LIGHTBOX FOTO -->
   <div id="lightbox" onclick="closeLightbox()">
     <button id="lightboxClose" onclick="event.stopPropagation(); closeLightbox()">×</button>
@@ -446,6 +463,7 @@ hostOpenForm: 'Compila il modulo',
 thanksTitle: '🙏 Ringraziamenti',
 thanksEmpty: 'Nessun ringraziamento pubblicato per ora.',
 thanksIntro: 'Persone che hanno aiutato o supportato il viaggio.',
+thanksBtn: '🙏 Ringraziamenti',
 hostFormUnavailable: 'Link del modulo non disponibile al momento'
     },
 
@@ -501,6 +519,7 @@ hostOpenForm: 'Fill out the form',
 thanksTitle: '🙏 Thanks',
 thanksEmpty: 'No public thanks yet.',
 thanksIntro: 'People who helped or supported the journey.',
+thanksBtn: '🙏 Thanks',
 hostFormUnavailable: 'Form link is currently unavailable'
     },
 
@@ -556,6 +575,7 @@ hostOpenForm: 'Completa el formulario',
 thanksTitle: '🙏 Agradecimientos',
 thanksEmpty: 'Todavía no hay agradecimientos públicos.',
 thanksIntro: 'Personas que ayudaron o apoyaron el viaje.',
+thanksBtn: '🙏 Agradecimientos',
 hostFormUnavailable: 'El enlace del formulario no está disponible en este momento'
     }
   };
@@ -752,7 +772,16 @@ if (hostText3) hostText3.innerText = T('hostText3');
 const hostOpenFormBtn = document.getElementById('hostOpenFormBtn');
 if (hostOpenFormBtn) hostOpenFormBtn.innerText = T('hostOpenForm');
 
-renderThanksSection();
+const btnThanks = document.getElementById('btnThanks');
+if (btnThanks) btnThanks.innerText = T('thanksBtn');
+
+const thanksModalTitle = document.getElementById('thanksModalTitle');
+if (thanksModalTitle) thanksModalTitle.innerText = T('thanksTitle');
+
+const thanksModalIntro = document.getElementById('thanksModalIntro');
+if (thanksModalIntro) thanksModalIntro.innerText = T('thanksIntro');
+
+renderThanksModalList();
     
   }
 
@@ -1469,6 +1498,19 @@ function popolaMesi() {
   if (el) el.style.display = 'flex';
 }
 
+
+function openThanksModal() {
+  renderThanksModalList();
+  const el = document.getElementById('thanksModal');
+  if (el) el.style.display = 'flex';
+}
+
+function closeThanksModal() {
+  const el = document.getElementById('thanksModal');
+  if (el) el.style.display = 'none';
+}
+
+  
 function closeHostForm() {
   const el = document.getElementById('hostModal');
   if (el) el.style.display = 'none';
@@ -1631,7 +1673,8 @@ updateStatsMini();
 popolaPaesi();
 popolaMesi();
 renderMap();
-renderThanksSection();
+renderThanksModalList();
+
 
     
   } catch (e) {
