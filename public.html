@@ -259,8 +259,8 @@ button.btn-host {
       <button id="btnStats" class="btn-filter" onclick="apriStats()">📊 Statistiche</button>
      
       
-      <button id="btnHost" class="btn-host" onclick="openHostForm()">🏠 Offri supporto</button>
-      <button id="btnThanks" class="btn-filter" onclick="openThanksModal()">🙏 Ringraziamenti</button>
+      <button id="btnHost" class="btn-host" onclick="openHostForm()">🤝 Supporto & 🙏 Ringraziamenti</button>
+    
     </div>
   </div>
 
@@ -308,12 +308,13 @@ button.btn-host {
 
  
 
-  <!-- MODALE OSPITALITÀ -->
+  <
+   <!-- MODALE SUPPORTO -->
   <div id="hostModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:8400; align-items:center; justify-content:center; padding:15px;">
-    <div style="background:var(--card); width:100%; max-width:520px; border-radius:15px; border:2px solid #4caf50; padding:20px; position:relative; max-height:90vh; overflow-y:auto;">
+    <div style="background:var(--card); width:100%; max-width:560px; border-radius:15px; border:2px solid #4caf50; padding:20px; position:relative; max-height:90vh; overflow-y:auto;">
       <button onclick="closeHostForm()" style="position:absolute; top:10px; right:10px; background:#f44336; color:#fff; border:none; border-radius:50%; width:30px; height:30px; font-weight:bold; cursor:pointer;">×</button>
 
-      <h2 id="hostModalTitle" style="color:#4caf50; margin-top:0; text-align:center;">🏠 Offri supporto al viaggio</h2>
+      <h2 id="hostModalTitle" style="color:#4caf50; margin-top:0; text-align:center;">🤝 Supporto al viaggio</h2>
 
       <div style="font-size:14px; color:#ddd; line-height:1.5;">
         <p id="hostText1">
@@ -330,26 +331,22 @@ button.btn-host {
       <button id="hostOpenFormBtn" onclick="goToHostExternalForm()" style="margin-top:15px; width:100%; background:#4caf50; color:#fff; border:none; border-radius:10px; padding:12px; font-size:15px; font-weight:bold; cursor:pointer;">
         Compila il modulo
       </button>
-    </div>
-  </div>
 
+      <div style="height:1px; background:#333; margin:18px 0;"></div>
 
+      <h3 id="thanksModalTitle" style="margin:0 0 8px 0; color:var(--accent); text-align:center;">🙏 Ringraziamenti</h3>
 
-
-    <!-- MODALE RINGRAZIAMENTI -->
-  <div id="thanksModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:8450; align-items:center; justify-content:center; padding:15px;">
-    <div style="background:var(--card); width:100%; max-width:520px; border-radius:15px; border:2px solid var(--accent); padding:20px; position:relative; max-height:90vh; overflow-y:auto;">
-      <button onclick="closeThanksModal()" style="position:absolute; top:10px; right:10px; background:#f44336; color:#fff; border:none; border-radius:50%; width:30px; height:30px; font-weight:bold; cursor:pointer;">×</button>
-
-      <h2 id="thanksModalTitle" style="color:var(--accent); margin-top:0; text-align:center;">🙏 Ringraziamenti</h2>
-
-      <div id="thanksModalIntro" style="font-size:13px; color:#aaa; margin-bottom:12px; line-height:1.4;">
+      <div id="thanksModalIntro" style="font-size:13px; color:#aaa; margin-bottom:12px; line-height:1.4; text-align:center;">
         Persone che hanno aiutato o supportato il viaggio.
       </div>
 
       <div id="thanksModalList" style="display:grid; gap:10px;"></div>
     </div>
   </div>
+
+
+
+
 
 
 
@@ -431,8 +428,8 @@ let THANKS_DATA = [];
       carbSetup: '🌬️ Setup Carburatore',
       altitude: 'Altitudine',
 
-hostBtn: '🏠 Offri supporto',
-hostTitle: '🏠 Offri supporto al viaggio',
+hostBtn: '🤝 Supporto',
+hostTitle: '🤝 Supporto al viaggio',
 hostText1: 'Se vivi lungo il percorso e vuoi dare una mano al viaggio, puoi inviarmi una proposta di ospitalità o supporto.',
 hostText2: 'Anche una sola notte, un posto sicuro per la Vespa, uno spazio tenda, un pasto o un consiglio locale possono fare la differenza.',
 hostText3: 'L’invio della proposta non garantisce una conferma: valuterò in base a percorso, tempi e organizzazione reale del viaggio.',
@@ -487,8 +484,8 @@ hostFormUnavailable: 'Link del modulo non disponibile al momento'
       carbSetup: '🌬️ Carb setup',
       altitude: 'Altitude',
 
-hostBtn: '🏠 Offer support',
-hostTitle: '🏠 Offer support to the journey',
+hostBtn: '🤝 Support',
+hostTitle: '🤝 Support the journey',
 hostText1: 'If you live along the route and would like to help the journey, you can send me an offer of hospitality or support.',
 hostText2: 'Even just one night, a safe place for the Vespa, a tent space, a meal or local advice can make a big difference.',
 hostText3: 'Sending a proposal does not guarantee confirmation: I will evaluate it based on route, timing and real travel logistics.',
@@ -543,8 +540,8 @@ hostFormUnavailable: 'Form link is currently unavailable'
       carbSetup: '🌬️ Carburación',
       altitude: 'Altitud',
 
-hostBtn: '🏠 Ofrecer apoyo',
-hostTitle: '🏠 Ofrece apoyo al viaje',
+hostBtn: '🤝 Apoyo',
+hostTitle: '🤝 Apoya el viaje',
 hostText1: 'Si vives a lo largo de la ruta y quieres apoyar el viaje, puedes enviarme una propuesta de hospedaje o ayuda.',
 hostText2: 'Incluso una sola noche, un lugar seguro para la Vespa, espacio para la tienda, una comida o un consejo local pueden marcar la diferencia.',
 hostText3: 'Enviar una propuesta no garantiza confirmación: la evaluaré según la ruta, los tiempos y la logística real del viaje.',
@@ -733,8 +730,6 @@ if (monthSel) {
 
 updateHostModalTexts();
 
-const btnThanks = document.getElementById('btnThanks');
-if (btnThanks) btnThanks.innerText = T('thanksBtn');
 
 const thanksModalTitle = document.getElementById('thanksModalTitle');
 if (thanksModalTitle) thanksModalTitle.innerText = T('thanksTitle');
@@ -1483,16 +1478,8 @@ function updateHostModalTexts() {
 }
 
 
-function openThanksModal() {
-  renderThanksModalList();
-  const el = document.getElementById('thanksModal');
-  if (el) el.style.display = 'flex';
-}
 
-function closeThanksModal() {
-  const el = document.getElementById('thanksModal');
-  if (el) el.style.display = 'none';
-}
+
 
   
 function closeHostForm() {
