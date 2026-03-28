@@ -125,6 +125,19 @@
       grid-column: span 2;
     }
 
+button.btn-host {
+  background: #4caf50;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  grid-column: span 2;
+}
+
+    
     /* ===== MAPPA ===== */
     #mapPub {
       flex: 1 1 auto;
@@ -244,6 +257,7 @@
       </select>
 
       <button id="btnStats" class="btn-filter" onclick="apriStats()">📊 Statistiche</button>
+      <button id="btnHost" class="btn-host" onclick="openHostForm()">🏠 Offri ospitalità</button>
     </div>
   </div>
 
@@ -285,6 +299,34 @@
       <div id="graphInfo" style="font-size:12px;color:#888;text-align:left;margin-top:10px;"></div>
     </div>
   </div>
+
+
+  <!-- MODALE OSPITALITÀ -->
+  <div id="hostModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:8400; align-items:center; justify-content:center; padding:15px;">
+    <div style="background:var(--card); width:100%; max-width:520px; border-radius:15px; border:2px solid #4caf50; padding:20px; position:relative; max-height:90vh; overflow-y:auto;">
+      <button onclick="closeHostForm()" style="position:absolute; top:10px; right:10px; background:#f44336; color:#fff; border:none; border-radius:50%; width:30px; height:30px; font-weight:bold; cursor:pointer;">×</button>
+
+      <h2 style="color:#4caf50; margin-top:0; text-align:center;">🏠 Offri supporto al viaggio</h2>
+
+      <div style="font-size:14px; color:#ddd; line-height:1.5;">
+        <p>
+          Se vivi lungo il percorso e vuoi dare una mano al viaggio, puoi inviarmi una proposta di ospitalità o supporto.
+        </p>
+        <p>
+          Anche una sola notte, un posto sicuro per la Vespa, uno spazio tenda, un pasto o un consiglio locale possono fare la differenza.
+        </p>
+        <p style="color:#aaa; font-size:13px;">
+          L’invio della proposta non garantisce una conferma: valuterò in base a percorso, tempi e organizzazione reale del viaggio.
+        </p>
+      </div>
+
+      <button onclick="goToHostExternalForm()" style="margin-top:15px; width:100%; background:#4caf50; color:#fff; border:none; border-radius:10px; padding:12px; font-size:15px; font-weight:bold; cursor:pointer;">
+        Compila il modulo
+      </button>
+    </div>
+  </div>
+
+  
 
   <!-- LIGHTBOX FOTO -->
   <div id="lightbox" onclick="closeLightbox()">
@@ -1298,6 +1340,24 @@ function popolaMesi() {
     </div>
   `;
 }
+
+
+
+  function openHostForm() {
+  const el = document.getElementById('hostModal');
+  if (el) el.style.display = 'flex';
+}
+
+function closeHostForm() {
+  const el = document.getElementById('hostModal');
+  if (el) el.style.display = 'none';
+}
+
+function goToHostExternalForm() {
+  window.open('https://docs.google.com/forms/d/e/QUI_METTI_IL_TUO_LINK/viewform', '_blank', 'noopener');
+}
+
+  
 
   function openLightbox(src) {
   const fixed = driveToDirectImageUrl(src);
