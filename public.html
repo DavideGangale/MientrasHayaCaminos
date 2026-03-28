@@ -94,12 +94,46 @@
       white-space:nowrap;
     }
 
-    .top-controls {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: 5px;
-    }
+.top-controls {
+  display: none;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.top-controls.open {
+  display: grid;
+}
+
+.top-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+button.btn-menu {
+  background: #444;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button.btn-close-menu {
+  background: #666;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  grid-column: span 2;
+}
 
     select.btn-filter {
       background: #333;
@@ -223,7 +257,12 @@ button.btn-host {
       <div id="statsMini" class="stats-mini">Caricamento...</div>
     </div>
 
-    <div class="top-controls">
+        <div class="top-actions">
+      <button id="btnMenuToggle" class="btn-menu" onclick="toggleTopMenu()">☰ Menu</button>
+      <button id="btnHost" class="btn-host" onclick="openHostForm()">🤝 Supporto</button>
+    </div>
+
+    <div id="topControls" class="top-controls">
       <select id="modeSelect" class="btn-filter" onchange="setMode(this.value)">
         <option value="TUTTO">🛣️ Tutte le tracce</option>
         <option value="TAPPE">🏁 Solo Tappe</option>
@@ -258,8 +297,8 @@ button.btn-host {
 
       <button id="btnStats" class="btn-filter" onclick="apriStats()">📊 Statistiche</button>
      
-      
-      <button id="btnHost" class="btn-host" onclick="openHostForm()">🤝 Supporto & 🙏 Ringraziamenti</button>
+      <button id="btnCloseMenu" class="btn-close-menu" onclick="toggleTopMenu()">✕ Chiudi menu</button>
+     
     
     </div>
   </div>
@@ -442,6 +481,9 @@ let THANKS_DATA = [];
       carbSetup: '🌬️ Setup Carburatore',
       altitude: 'Altitudine',
 
+menuBtn: '☰ Menu',
+closeMenuBtn: '✕ Chiudi menu',
+      
 hostBtn: '🤝 Supporto & 🙏 Ringraziamenti',
 hostTitle: '🤝 Supporto al viaggio',
 hostText1: 'Se vivi lungo il percorso e vuoi dare una mano al viaggio, puoi inviarmi una proposta di ospitalità o supporto.',
@@ -510,6 +552,9 @@ vespaClubFormUnavailable: 'Link del modulo Vespa Club non disponibile al momento
       carbSetup: '🌬️ Carb setup',
       altitude: 'Altitude',
 
+menuBtn: '☰ Menu',
+closeMenuBtn: '✕ Close menu',
+      
 hostBtn: '🤝 Support & 🙏 Thanks',
 hostTitle: '🤝 Support the journey',
 hostText1: 'If you live along the route and would like to help the journey, you can send me an offer of hospitality or support.',
@@ -579,6 +624,9 @@ vespaClubFormUnavailable: 'Vespa Club form link is currently unavailable'
       carbSetup: '🌬️ Carburación',
       altitude: 'Altitud',
 
+menuBtn: '☰ Menú',
+closeMenuBtn: '✕ Cerrar menú',
+      
 hostBtn: '🤝 Apoyo & 🙏 Agradecimientos',
 hostTitle: '🤝 Apoya el viaje',
 hostText1: 'Si vives a lo largo de la ruta y quieres apoyar el viaje, puedes enviarme una propuesta de hospedaje o ayuda.',
@@ -731,6 +779,13 @@ if (monthSel) {
 }
 
 updateHostModalTexts();
+
+
+    const btnMenuToggle = document.getElementById('btnMenuToggle');
+if (btnMenuToggle) btnMenuToggle.innerText = T('menuBtn');
+
+const btnCloseMenu = document.getElementById('btnCloseMenu');
+if (btnCloseMenu) btnCloseMenu.innerText = T('closeMenuBtn');
 
 
 const thanksModalTitle = document.getElementById('thanksModalTitle');
@@ -1483,6 +1538,18 @@ if (vespaClubBtn) vespaClubBtn.innerText = T('vespaClubBtn');
 }
 
 
+function toggleTopMenu() {
+  const panel = document.getElementById('topControls');
+  if (!panel) return;
+
+  panel.classList.toggle('open');
+
+  setTimeout(() => {
+    if (map) map.invalidateSize();
+  }, 250);
+}
+
+  
   
   function openHostForm() {
   updateHostModalTexts();
