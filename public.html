@@ -378,31 +378,11 @@ let layerTracce = null;
 let layerMarkers = null;
 let canvasRenderer = null;
 
+let HOST_FORM_URL = '';
+let THANKS_DATA = [];
 
 
 
-let HOST_FORM_URL = 'https://docs.google.com/forms/d/e/https://docs.google.com/forms/d/1u8cgL7giNLZHkLZCxcf7IDPF4Z_TPO3VPa8Ez0TaxK8/viewform';
-
-let THANKS_DATA = [
-  {
-    name: 'Famiglia Rossi',
-    country: 'Argentina',
-    city: 'Mendoza',
-    type: 'ospitalità',
-    note_it: 'Per l’accoglienza e il posto sicuro per la Vespa.',
-    note_en: 'For the warm welcome and the safe place for the Vespa.',
-    note_es: 'Por la cálida bienvenida y el lugar seguro para la Vespa.'
-  },
-  {
-    name: 'Carlos',
-    country: 'Perù',
-    city: 'Cusco',
-    type: 'aiuto meccanico',
-    note_it: 'Per l’aiuto pratico e i consigli sulla strada.',
-    note_en: 'For the practical help and road advice.',
-    note_es: 'Por la ayuda práctica y los consejos sobre la ruta.'
-  }
-];
   
   
   let currentMode = 'TUTTO';
@@ -465,7 +445,8 @@ hostText3: 'L’invio della proposta non garantisce una conferma: valuterò in b
 hostOpenForm: 'Compila il modulo',
 thanksTitle: '🙏 Ringraziamenti',
 thanksEmpty: 'Nessun ringraziamento pubblicato per ora.',
-thanksIntro: 'Persone che hanno aiutato o supportato il viaggio.'
+thanksIntro: 'Persone che hanno aiutato o supportato il viaggio.',
+hostFormUnavailable: 'Link del modulo non disponibile al momento'
     },
 
     en: {
@@ -519,7 +500,8 @@ hostText3: 'Sending a proposal does not guarantee confirmation: I will evaluate 
 hostOpenForm: 'Fill out the form',
 thanksTitle: '🙏 Thanks',
 thanksEmpty: 'No public thanks yet.',
-thanksIntro: 'People who helped or supported the journey.'
+thanksIntro: 'People who helped or supported the journey.',
+hostFormUnavailable: 'Form link is currently unavailable'
     },
 
     es: {
@@ -573,7 +555,8 @@ hostText3: 'Enviar una propuesta no garantiza confirmación: la evaluaré según
 hostOpenForm: 'Completa el formulario',
 thanksTitle: '🙏 Agradecimientos',
 thanksEmpty: 'Todavía no hay agradecimientos públicos.',
-thanksIntro: 'Personas que ayudaron o apoyaron el viaje.'
+thanksIntro: 'Personas que ayudaron o apoyaron el viaje.',
+hostFormUnavailable: 'El enlace del formulario no está disponible en este momento'
     }
   };
 
@@ -773,6 +756,36 @@ renderThanksSection();
     
   }
 
+
+
+async function loadHostConfig() {
+  try {
+    const res = await fetch('public/host_config.json');
+    if (!res.ok) throw new Error('Errore caricamento host_config.json');
+
+    const cfg = await res.json();
+    HOST_FORM_URL = String(cfg.hostFormUrl || '').trim();
+  } catch (e) {
+    console.error(e);
+    HOST_FORM_URL = '';
+  }
+}
+
+async function loadThanksData() {
+  try {
+    const res = await fetch('public/thanks.json');
+    if (!res.ok) throw new Error('Errore caricamento thanks.json');
+
+    const json = await res.json();
+    THANKS_DATA = Array.isArray(json.items) ? json.items : [];
+  } catch (e) {
+    console.error(e);
+    THANKS_DATA = [];
+  }
+}
+
+  
+  
 
 function getCurrentDataSource() {
   return DATA || INDEX_DATA || null;
@@ -1462,58 +1475,15 @@ function closeHostForm() {
 }
 
 function goToHostExternalForm() {
-  window.open('https://docs.google.com/forms/d/e/1FAIpQLScB7HXHmFUhyDbCCJBQG5l1hH1U61ut7jD_h0deJd-NKqnnEA/viewform?usp=publish-editor/viewform', '_blank', 'noopener');
-}
-
-
-  function openHostForm() {
-  const el = document.getElementById('hostModal');
-  if (el) el.style.display = 'flex';
-}
-
-function closeHostForm() {
-  const el = document.getElementById('hostModal');
-  if (el) el.style.display = 'none';
-}
-
-function goToHostExternalForm() {
-  window.open(HOST_FORM_URL, '_blank', 'noopener');
-}
-
-function renderThanksSection() {
-  const titleEl = document.getElementById('thanksTitle');
-  const introEl = document.getElementById('thanksIntro');
-  const listEl = document.getElementById('thanksList');
-
-  if (titleEl) titleEl.innerText = T('thanksTitle');
-  if (introEl) introEl.innerText = T('thanksIntro');
-  if (!listEl) return;
-
-  if (!Array.isArray(THANKS_DATA) || THANKS_DATA.length === 0) {
-    listEl.innerHTML = `<div style="color:#888; font-size:13px;">${T('thanksEmpty')}</div>`;
+  if (!HOST_FORM_URL) {
+    alert(T('hostFormUnavailable'));
     return;
   }
 
-  listEl.innerHTML = THANKS_DATA.map(item => {
-    const note =
-      LANG === 'en' ? (item.note_en || item.note_it || '') :
-      LANG === 'es' ? (item.note_es || item.note_it || '') :
-      (item.note_it || '');
-
-    return `
-      <div style="background:#222; border:1px solid #333; border-radius:12px; padding:12px;">
-        <div style="font-weight:700; color:#fff;">${item.name || ''}</div>
-        <div style="font-size:12px; color:#aaa; margin-top:2px;">
-          ${item.city || ''}${item.city && item.country ? ', ' : ''}${item.country || ''}
-        </div>
-        <div style="font-size:13px; color:#ddd; margin-top:8px;">
-          ${note}
-        </div>
-      </div>
-    `;
-  }).join('');
+  window.open(HOST_FORM_URL, '_blank', 'noopener');
 }
-  
+
+
 
   function openLightbox(src) {
   const fixed = driveToDirectImageUrl(src);
@@ -1630,14 +1600,19 @@ function renderThanksSection() {
   initMap();
 
   try {
-    const urlParams = new URLSearchParams(window.location.search);
-    const srcIndex = urlParams.get('src') || 'public/vespatrek_index.json';
-    const srcOfficina = urlParams.get('officina') || 'public/officina.json';
+   const urlParams = new URLSearchParams(window.location.search);
+const srcIndex = urlParams.get('src') || 'public/vespatrek_index.json';
+const srcOfficina = urlParams.get('officina') || 'public/officina.json';
 
-    const [resIndex, resOfficina] = await Promise.all([
-      fetch(srcIndex),
-      fetch(srcOfficina)
-    ]);
+const [resIndex, resOfficina] = await Promise.all([
+  fetch(srcIndex),
+  fetch(srcOfficina)
+]);
+
+await Promise.all([
+  loadHostConfig(),
+  loadThanksData()
+]);
 
     if (!resIndex.ok) throw new Error('Errore caricamento index');
     if (!resOfficina.ok) throw new Error('Errore caricamento officina');
