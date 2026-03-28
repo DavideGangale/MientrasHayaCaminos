@@ -437,8 +437,17 @@ hostOpenForm: 'Compila il modulo',
 thanksTitle: '🙏 Ringraziamenti',
 thanksEmpty: 'Nessun ringraziamento pubblicato per ora.',
 thanksIntro: 'Persone che hanno aiutato o supportato il viaggio.',
+hostFormUnavailable: 'Link del modulo non disponibile al momento',
 
-hostFormUnavailable: 'Link del modulo non disponibile al momento'
+statsKmTotal: 'KM TOTALI',
+statsFuelUsed: 'BENZINA USATA',
+statsOilUsed: 'OLIO 2T USATO',
+statsWorkshopCost: 'SPESA OFFICINA',
+statsFuelCost: 'SPESA BENZINA',
+statsOilCost: 'SPESA OLIO 2T',
+statsAvgConsumption: 'CONSUMO MEDIO'
+
+      
     },
 
     en: {
@@ -494,7 +503,15 @@ thanksTitle: '🙏 Thanks',
 thanksEmpty: 'No public thanks yet.',
 thanksIntro: 'People who helped or supported the journey.',
 
-hostFormUnavailable: 'Form link is currently unavailable'
+hostFormUnavailable: 'Form link is currently unavailable',
+
+statsKmTotal: 'TOTAL KM',
+statsFuelUsed: 'FUEL USED',
+statsOilUsed: '2T OIL USED',
+statsWorkshopCost: 'WORKSHOP COST',
+statsFuelCost: 'FUEL COST',
+statsOilCost: '2T OIL COST',
+statsAvgConsumption: 'AVERAGE CONSUMPTION'
     },
 
     es: {
@@ -550,7 +567,17 @@ thanksTitle: '🙏 Agradecimientos',
 thanksEmpty: 'Todavía no hay agradecimientos públicos.',
 thanksIntro: 'Personas que ayudaron o apoyaron el viaje.',
 
-hostFormUnavailable: 'El enlace del formulario no está disponible en este momento'
+hostFormUnavailable: 'El enlace del formulario no está disponible en este momento',
+
+statsKmTotal: 'KM TOTALES',
+statsFuelUsed: 'GASOLINA USADA',
+statsOilUsed: 'ACEITE 2T USADO',
+statsWorkshopCost: 'GASTO DE TALLER',
+statsFuelCost: 'GASTO DE GASOLINA',
+statsOilCost: 'GASTO DE ACEITE 2T',
+statsAvgConsumption: 'CONSUMO MEDIO'
+
+      
     }
   };
 
@@ -1359,41 +1386,41 @@ function popolaMesi() {
     : (olio > 0 ? `${Number(olio || 0).toFixed(2)} L` : '--');
 
   document.getElementById('statsModalContent').innerHTML = `
-    <div style="background:#333; padding:10px; border-radius:10px;">
-      <div style="font-size:11px; color:#aaa;">KM TOTALI</div>
-      <div style="font-size:18px; color:#4caf50; font-weight:bold;">${Number(km || 0).toFixed(1)}</div>
-    </div>
+  <div style="background:#333; padding:10px; border-radius:10px;">
+    <div style="font-size:11px; color:#aaa;">${T('statsKmTotal')}</div>
+    <div style="font-size:18px; color:#4caf50; font-weight:bold;">${Number(km || 0).toFixed(1)}</div>
+  </div>
 
-    <div style="background:#333; padding:10px; border-radius:10px;">
-      <div style="font-size:11px; color:#aaa;">BENZINA USATA</div>
-      <div style="font-size:18px; color:#ff9800; font-weight:bold;">${Number(benz || 0).toFixed(1)} L</div>
-    </div>
+  <div style="background:#333; padding:10px; border-radius:10px;">
+    <div style="font-size:11px; color:#aaa;">${T('statsFuelUsed')}</div>
+    <div style="font-size:18px; color:#ff9800; font-weight:bold;">${Number(benz || 0).toFixed(1)} L</div>
+  </div>
 
-    <div style="background:#333; padding:10px; border-radius:10px;">
-      <div style="font-size:11px; color:#aaa;">OLIO 2T USATO</div>
-      <div style="font-size:18px; color:#00bcd4; font-weight:bold;">${olioBoxValue}</div>
-    </div>
+  <div style="background:#333; padding:10px; border-radius:10px;">
+    <div style="font-size:11px; color:#aaa;">${T('statsOilUsed')}</div>
+    <div style="font-size:18px; color:#00bcd4; font-weight:bold;">${olioBoxValue}</div>
+  </div>
 
-    <div style="background:#333; padding:10px; border-radius:10px;">
-      <div style="font-size:11px; color:#aaa;">SPESA OFFICINA</div>
-      <div style="font-size:18px; color:var(--maint); font-weight:bold;">${fmtUsd(spesaMaint)}</div>
-    </div>
+  <div style="background:#333; padding:10px; border-radius:10px;">
+    <div style="font-size:11px; color:#aaa;">${T('statsWorkshopCost')}</div>
+    <div style="font-size:18px; color:var(--maint); font-weight:bold;">${fmtUsd(spesaMaint)}</div>
+  </div>
 
-    <div style="background:#333; padding:10px; border-radius:10px;">
-      <div style="font-size:11px; color:#aaa;">SPESA BENZINA</div>
-      <div style="font-size:18px; color:#fff; font-weight:bold;">${fmtUsd(spesaBenz)}</div>
-    </div>
+  <div style="background:#333; padding:10px; border-radius:10px;">
+    <div style="font-size:11px; color:#aaa;">${T('statsFuelCost')}</div>
+    <div style="font-size:18px; color:#fff; font-weight:bold;">${fmtUsd(spesaBenz)}</div>
+  </div>
 
-    <div style="background:#333; padding:10px; border-radius:10px;">
-      <div style="font-size:11px; color:#aaa;">SPESA OLIO 2T</div>
-      <div style="font-size:18px; color:#00bcd4; font-weight:bold;">${fmtUsd(spesaOlio)}</div>
-    </div>
+  <div style="background:#333; padding:10px; border-radius:10px;">
+    <div style="font-size:11px; color:#aaa;">${T('statsOilCost')}</div>
+    <div style="font-size:18px; color:#00bcd4; font-weight:bold;">${fmtUsd(spesaOlio)}</div>
+  </div>
 
-    <div style="background:#333; padding:10px; border-radius:10px; grid-column: 1 / -1;">
-      <div style="font-size:11px; color:#aaa;">CONSUMO MEDIO</div>
-      <div style="font-size:20px; color:var(--brand); font-weight:bold;">${cons} km/L</div>
-    </div>
-  `;
+  <div style="background:#333; padding:10px; border-radius:10px; grid-column: 1 / -1;">
+    <div style="font-size:11px; color:#aaa;">${T('statsAvgConsumption')}</div>
+    <div style="font-size:20px; color:var(--brand); font-weight:bold;">${cons} km/L</div>
+  </div>
+`;
 }
 
 
