@@ -9,6 +9,19 @@
       "note_en": "For the warm welcome and the safe place for the Vespa.",
       "note_es": "Por la cálida bienvenida y el lugar seguro para la Vespa."
     },
+
+
+ {
+      "name": "Angelica Ruiz",
+      "country": "Colombia",
+      "city": "Girón",
+      "type": "hospitality",
+      "note_it": "Per la pasta con la zucca e il pollo con i peperoni.",
+      "note_en": "For the pumpkin pasta and the peppers chicken",
+      "note_es": "Para la pasta de calabaza y el pollo con pimientones"
+    },
+
+    
     {
       "name": "Carlos",
       "country": "Perù",
