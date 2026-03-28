@@ -306,32 +306,9 @@ button.btn-host {
   </div>
 
 
+ 
+
   <!-- MODALE OSPITALITÀ -->
-  <div id="hostModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:8400; align-items:center; justify-content:center; padding:15px;">
-    <div style="background:var(--card); width:100%; max-width:520px; border-radius:15px; border:2px solid #4caf50; padding:20px; position:relative; max-height:90vh; overflow-y:auto;">
-      <button onclick="closeHostForm()" style="position:absolute; top:10px; right:10px; background:#f44336; color:#fff; border:none; border-radius:50%; width:30px; height:30px; font-weight:bold; cursor:pointer;">×</button>
-
-      <h2 style="color:#4caf50; margin-top:0; text-align:center;">🏠 Offri supporto al viaggio</h2>
-
-      <div style="font-size:14px; color:#ddd; line-height:1.5;">
-        <p>
-          Se vivi lungo il percorso e vuoi dare una mano al viaggio, puoi inviarmi una proposta di ospitalità o supporto.
-        </p>
-        <p>
-          Anche una sola notte, un posto sicuro per la Vespa, uno spazio tenda, un pasto o un consiglio locale possono fare la differenza.
-        </p>
-        <p style="color:#aaa; font-size:13px;">
-          L’invio della proposta non garantisce una conferma: valuterò in base a percorso, tempi e organizzazione reale del viaggio.
-        </p>
-      </div>
-
-      <button onclick="goToHostExternalForm()" style="margin-top:15px; width:100%; background:#4caf50; color:#fff; border:none; border-radius:10px; padding:12px; font-size:15px; font-weight:bold; cursor:pointer;">
-        Compila il modulo
-      </button>
-    </div>
-  </div>
-
-    <!-- MODALE OSPITALITÀ -->
   <div id="hostModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:8400; align-items:center; justify-content:center; padding:15px;">
     <div style="background:var(--card); width:100%; max-width:520px; border-radius:15px; border:2px solid #4caf50; padding:20px; position:relative; max-height:90vh; overflow-y:auto;">
       <button onclick="closeHostForm()" style="position:absolute; top:10px; right:10px; background:#f44336; color:#fff; border:none; border-radius:50%; width:30px; height:30px; font-weight:bold; cursor:pointer;">×</button>
@@ -754,23 +731,7 @@ if (monthSel) {
   monthSel.value = v;
 }
 
-const btnHost = document.getElementById('btnHost');
-if (btnHost) btnHost.innerText = T('hostBtn');
-
-const hostModalTitle = document.getElementById('hostModalTitle');
-if (hostModalTitle) hostModalTitle.innerText = T('hostTitle');
-
-const hostText1 = document.getElementById('hostText1');
-if (hostText1) hostText1.innerText = T('hostText1');
-
-const hostText2 = document.getElementById('hostText2');
-if (hostText2) hostText2.innerText = T('hostText2');
-
-const hostText3 = document.getElementById('hostText3');
-if (hostText3) hostText3.innerText = T('hostText3');
-
-const hostOpenFormBtn = document.getElementById('hostOpenFormBtn');
-if (hostOpenFormBtn) hostOpenFormBtn.innerText = T('hostOpenForm');
+updateHostModalTexts();
 
 const btnThanks = document.getElementById('btnThanks');
 if (btnThanks) btnThanks.innerText = T('thanksBtn');
@@ -1493,7 +1454,30 @@ function popolaMesi() {
 
 
 
+function updateHostModalTexts() {
+  const btnHost = document.getElementById('btnHost');
+  if (btnHost) btnHost.innerText = T('hostBtn');
+
+  const hostModalTitle = document.getElementById('hostModalTitle');
+  if (hostModalTitle) hostModalTitle.innerText = T('hostTitle');
+
+  const hostText1 = document.getElementById('hostText1');
+  if (hostText1) hostText1.innerText = T('hostText1');
+
+  const hostText2 = document.getElementById('hostText2');
+  if (hostText2) hostText2.innerText = T('hostText2');
+
+  const hostText3 = document.getElementById('hostText3');
+  if (hostText3) hostText3.innerText = T('hostText3');
+
+  const hostOpenFormBtn = document.getElementById('hostOpenFormBtn');
+  if (hostOpenFormBtn) hostOpenFormBtn.innerText = T('hostOpenForm');
+}
+
+
+  
   function openHostForm() {
+  updateHostModalTexts();
   const el = document.getElementById('hostModal');
   if (el) el.style.display = 'flex';
 }
