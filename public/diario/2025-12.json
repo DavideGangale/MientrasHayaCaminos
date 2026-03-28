@@ -1,14 +1,14 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-03-26T02:57:15.294Z",
+  "_exportDate": "2026-03-28T15:13:37.206Z",
   "tipo": "diario_mese",
   "mese": "2025-12",
   "count": 1,
   "entries": [
     {
-      "id": 1766883948046,
-      "ts": 1766883948046,
-      "data": "27/12/2025",
+      "id": 1767107699534,
+      "ts": 1767107699534,
+      "data": "30/12/2025",
       "ora": "18:10",
       "paese": "Colombia",
       "km": "186.4",
@@ -21,7 +21,7 @@
         "lat": 5.6349,
         "lon": -73.5248
       },
-      "videoUrl": "https://youtube.com/shorts/B0l8hiHNxas?si=1NF0YOHox4bGByBK",
+      "videoUrl": null,
       "videoPlanned": false,
       "fotoUrl": null,
       "foto": null
