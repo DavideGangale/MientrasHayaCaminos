@@ -263,6 +263,10 @@ button.btn-host {
     </div>
 
     <div id="topControls" class="top-controls">
+
+      
+      <button id="btnStats" class="btn-filter" onclick="apriStats()">📊 Statistiche</button>
+      
       <select id="modeSelect" class="btn-filter" onchange="setMode(this.value)">
         <option value="TUTTO">🛣️ Tutte le tracce</option>
         <option value="TAPPE">🏁 Solo Tappe</option>
@@ -295,7 +299,6 @@ button.btn-host {
         <option value="es">🇪🇸 Español</option>
       </select>
 
-      <button id="btnStats" class="btn-filter" onclick="apriStats()">📊 Statistiche</button>
      
       <button id="btnCloseMenu" class="btn-close-menu" onclick="toggleTopMenu()">✕ Chiudi menu</button>
      
@@ -350,9 +353,12 @@ button.btn-host {
   
    <!-- MODALE SUPPORTO -->
   <div id="hostModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:8400; align-items:center; justify-content:center; padding:15px;">
-    <div style="background:var(--card); width:100%; max-width:560px; border-radius:15px; border:2px solid #4caf50; padding:20px; position:relative; max-height:90vh; overflow-y:auto;">
-      <button onclick="closeHostForm()" style="position:absolute; top:10px; right:10px; background:#f44336; color:#fff; border:none; border-radius:50%; width:30px; height:30px; font-weight:bold; cursor:pointer;">×</button>
-
+   <div style="background:var(--card); width:100%; max-width:560px; border-radius:15px; border:2px solid #4caf50; padding:20px; position:relative; max-height:90vh; overflow-y:auto;">
+  <div style="position:sticky; top:0; display:flex; justify-content:flex-end; z-index:10; padding-bottom:8px; background:linear-gradient(to bottom, var(--card) 70%, rgba(30,30,30,0));">
+    <button onclick="closeHostForm()" style="background:#f44336; color:#fff; border:none; border-radius:50%; width:34px; height:34px; font-weight:bold; cursor:pointer;">
+      ×
+    </button>
+  </div>
       <h2 id="hostModalTitle" style="color:#4caf50; margin-top:0; text-align:center;">🤝 Supporto al viaggio</h2>
 
       <div style="font-size:14px; color:#ddd; line-height:1.5;">
@@ -481,7 +487,7 @@ let THANKS_DATA = [];
       carbSetup: '🌬️ Setup Carburatore',
       altitude: 'Altitudine',
 
-menuBtn: '☰ Menu',
+menuBtn: '☰ Filtri e statistiche',
 closeMenuBtn: '✕ Chiudi menu',
       
 hostBtn: '🤝 Supporto & 🙏 Ringraziamenti',
@@ -552,7 +558,7 @@ vespaClubFormUnavailable: 'Link del modulo Vespa Club non disponibile al momento
       carbSetup: '🌬️ Carb setup',
       altitude: 'Altitude',
 
-menuBtn: '☰ Menu',
+menuBtn: '☰ Filters & stats',
 closeMenuBtn: '✕ Close menu',
       
 hostBtn: '🤝 Support & 🙏 Thanks',
@@ -624,7 +630,7 @@ vespaClubFormUnavailable: 'Vespa Club form link is currently unavailable'
       carbSetup: '🌬️ Carburación',
       altitude: 'Altitud',
 
-menuBtn: '☰ Menú',
+menuBtn: '☰ Filtros y estadísticas',
 closeMenuBtn: '✕ Cerrar menú',
       
 hostBtn: '🤝 Apoyo & 🙏 Agradecimientos',
