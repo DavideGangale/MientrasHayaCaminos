@@ -1,35 +1,14 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-03-26T02:57:15.294Z",
+  "_exportDate": "2026-03-28T15:13:37.206Z",
   "tipo": "diario_mese",
   "mese": "2026-02",
   "count": 3,
   "entries": [
     {
-      "id": 1772154348046,
-      "ts": 1772154348046,
-      "data": "26/02/2026",
-      "ora": "20:15",
-      "paese": "Bolivia",
-      "km": "3392.4",
-      "testo": "La Paz è un vortice. Il motore gira ancora bene, ma qui ogni salita sembra chiedere rispetto. #Paesaggi #Problemi",
-      "tags": [
-        "Paesaggi",
-        "Problemi"
-      ],
-      "geo": {
-        "lat": -16.4897,
-        "lon": -68.1193
-      },
-      "videoUrl": null,
-      "videoPlanned": true,
-      "fotoUrl": null,
-      "foto": null
-    },
-    {
-      "id": 1771635948046,
-      "ts": 1771635948046,
-      "data": "20/02/2026",
+      "id": 1771859699534,
+      "ts": 1771859699534,
+      "data": "23/02/2026",
       "ora": "19:05",
       "paese": "Peru",
       "km": "3003.0",
@@ -49,9 +28,9 @@
       "foto": null
     },
     {
-      "id": 1771031148046,
-      "ts": 1771031148046,
-      "data": "13/02/2026",
+      "id": 1771254899534,
+      "ts": 1771254899534,
+      "data": "16/02/2026",
       "ora": "21:10",
       "paese": "Peru",
       "km": "1890.2",
@@ -66,6 +45,27 @@
       },
       "videoUrl": "https://www.youtube.com/watch?v=jNQXAC9IVRw",
       "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1770131699534,
+      "ts": 1770131699534,
+      "data": "03/02/2026",
+      "ora": "17:40",
+      "paese": "Ecuador",
+      "km": "1091.2",
+      "testo": "Strada verso Baños con nuvole basse e pioggia. Una di quelle giornate in cui vai piano ma ti resta dentro tutto. #Pioggia #Paesaggi",
+      "tags": [
+        "Pioggia",
+        "Paesaggi"
+      ],
+      "geo": {
+        "lat": -1.396,
+        "lon": -78.424
+      },
+      "videoUrl": null,
+      "videoPlanned": true,
       "fotoUrl": null,
       "foto": null
     }
