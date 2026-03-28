@@ -332,6 +332,19 @@ button.btn-host {
         Compila il modulo
       </button>
 
+
+            <div style="height:1px; background:#333; margin:18px 0;"></div>
+
+      <h3 id="vespaClubTitle" style="margin:0 0 8px 0; color:#00bcd4; text-align:center;">🛵 Clubes de Vespa</h3>
+
+      <div id="vespaClubText" style="font-size:13px; color:#aaa; margin-bottom:12px; line-height:1.4; text-align:center;">
+        Si tiene un club de vespa o un parche vespista, contácteme para planear una visita a su ciudad y organizar una rodada o un paseo.
+      </div>
+
+      <button id="vespaClubBtn" onclick="goToVespaClubForm()" style="width:100%; background:#00bcd4; color:#000; border:none; border-radius:10px; padding:12px; font-size:15px; font-weight:bold; cursor:pointer;">
+        Abrir formulario Vespa Club
+      </button>
+
       <div style="height:1px; background:#333; margin:18px 0;"></div>
 
       <h3 id="thanksModalTitle" style="margin:0 0 8px 0; color:var(--accent); text-align:center;">🙏 Ringraziamenti</h3>
@@ -370,6 +383,7 @@ let layerMarkers = null;
 let canvasRenderer = null;
 
 let HOST_FORM_URL = '';
+let VESPA_CLUB_FORM_URL = '';
 let THANKS_DATA = [];
 
 
@@ -446,7 +460,10 @@ statsWorkshopCost: 'SPESA OFFICINA',
 statsFuelCost: 'SPESA BENZINA',
 statsOilCost: 'SPESA OLIO 2T',
 statsAvgConsumption: 'CONSUMO MEDIO'
-
+vespaClubTitle: '🛵 Club di Vespa',
+vespaClubText: 'Se fai parte di un Vespa Club o di un gruppo vespista, contattami per pianificare una visita nella tua città e organizzare un giro o un incontro.',
+vespaClubBtn: 'Apri modulo Vespa Club',
+vespaClubFormUnavailable: 'Link del modulo Vespa Club non disponibile al momento'
       
     },
 
@@ -512,6 +529,12 @@ statsWorkshopCost: 'WORKSHOP COST',
 statsFuelCost: 'FUEL COST',
 statsOilCost: '2T OIL COST',
 statsAvgConsumption: 'AVERAGE CONSUMPTION'
+
+vespaClubTitle: '🛵 Vespa Clubs',
+vespaClubText: 'If you are part of a Vespa Club or a Vespa riders group, contact me to plan a visit to your city and organize a ride or meetup.',
+vespaClubBtn: 'Open Vespa Club form',
+vespaClubFormUnavailable: 'Vespa Club form link is currently unavailable'
+      
     },
 
     es: {
@@ -576,7 +599,10 @@ statsWorkshopCost: 'GASTO DE TALLER',
 statsFuelCost: 'GASTO DE GASOLINA',
 statsOilCost: 'GASTO DE ACEITE 2T',
 statsAvgConsumption: 'CONSUMO MEDIO'
-
+vespaClubTitle: '🛵 Clubes de Vespa',
+vespaClubText: 'Si tiene un club de vespa o un parche vespista, contácteme para planear una visita a su ciudad y organizar una rodada o un paseo.',
+vespaClubBtn: 'Abrir formulario Vespa Club',
+vespaClubFormUnavailable: 'El enlace del formulario Vespa Club no está disponible en este momento'
       
     }
   };
@@ -722,20 +748,21 @@ renderThanksModalList();
 
 async function loadHostConfig() {
   try {
-    const urlParams = new URLSearchParams(window.location.search);
-    const srcHostCfg = urlParams.get('hostcfg') || 'public/host_config.json';
-
-    const res = await fetch(srcHostCfg);
+    const res = await fetch('public/host_config.json');
     if (!res.ok) throw new Error('Errore caricamento host_config.json');
 
     const cfg = await res.json();
     HOST_FORM_URL = String(cfg.hostFormUrl || '').trim();
+    VESPA_CLUB_FORM_URL = String(cfg.vespaClubFormUrl || '').trim();
   } catch (e) {
     console.error(e);
     HOST_FORM_URL = '';
+    VESPA_CLUB_FORM_URL = '';
   }
 }
 
+
+  
 async function loadThanksData() {
   try {
     const urlParams = new URLSearchParams(window.location.search);
@@ -1443,6 +1470,17 @@ function updateHostModalTexts() {
 
   const hostOpenFormBtn = document.getElementById('hostOpenFormBtn');
   if (hostOpenFormBtn) hostOpenFormBtn.innerText = T('hostOpenForm');
+
+const vespaClubTitle = document.getElementById('vespaClubTitle');
+if (vespaClubTitle) vespaClubTitle.innerText = T('vespaClubTitle');
+
+const vespaClubText = document.getElementById('vespaClubText');
+if (vespaClubText) vespaClubText.innerText = T('vespaClubText');
+
+const vespaClubBtn = document.getElementById('vespaClubBtn');
+if (vespaClubBtn) vespaClubBtn.innerText = T('vespaClubBtn');
+
+  
 }
 
 
@@ -1473,7 +1511,15 @@ function goToHostExternalForm() {
 }
 
 
+function goToVespaClubForm() {
+  if (!VESPA_CLUB_FORM_URL) {
+    alert(T('vespaClubFormUnavailable'));
+    return;
+  }
 
+  window.open(VESPA_CLUB_FORM_URL, '_blank', 'noopener');
+}
+  
 
 
 function renderThanksModalList() {
