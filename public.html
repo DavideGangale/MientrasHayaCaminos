@@ -1527,6 +1527,40 @@ function goToHostExternalForm() {
 
 
 
+
+
+function renderThanksModalList() {
+  const listEl = document.getElementById('thanksModalList');
+  if (!listEl) return;
+
+  if (!Array.isArray(THANKS_DATA) || THANKS_DATA.length === 0) {
+    listEl.innerHTML = `<div style="color:#888; font-size:13px;">${T('thanksEmpty')}</div>`;
+    return;
+  }
+
+  listEl.innerHTML = THANKS_DATA.map(item => {
+    const note =
+      LANG === 'en' ? (item.note_en || item.note_it || '') :
+      LANG === 'es' ? (item.note_es || item.note_it || '') :
+      (item.note_it || '');
+
+    const place = [item.city || '', item.country || ''].filter(Boolean).join(', ');
+
+    return `
+      <div style="background:#222; border:1px solid #333; border-radius:12px; padding:12px;">
+        <div style="font-weight:700; color:#fff;">${item.name || ''}</div>
+        ${place ? `<div style="font-size:12px; color:#aaa; margin-top:2px;">${place}</div>` : ''}
+        <div style="font-size:13px; color:#ddd; margin-top:8px;">
+          ${note}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+
+  
+
   function openLightbox(src) {
   const fixed = driveToDirectImageUrl(src);
   document.getElementById('lightboxImg').src = fixed;
