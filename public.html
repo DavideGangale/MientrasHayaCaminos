@@ -1623,26 +1623,47 @@ function renderThanksModalList() {
   initMap();
 
   try {
-   const urlParams = new URLSearchParams(window.location.search);
-const srcIndex = urlParams.get('src') || 'public/vespatrek_index.json';
+const urlParams = new URLSearchParams(window.location.search);
+const requestedIndex = urlParams.get('src');
 const srcOfficina = urlParams.get('officina') || 'public/officina.json';
 
-const [resIndex, resOfficina] = await Promise.all([
-  fetch(srcIndex),
-  fetch(srcOfficina)
-]);
+let srcIndex = requestedIndex || 'public/vespatrek_index.json';
+
+let resIndex = await fetch(srcIndex);
+if (!resIndex.ok) throw new Error('Errore caricamento index');
+
+let tempIndex = await resIndex.json();
+
+// se il file passato via ?src= non è un vero index, fallback automatico
+if (!Array.isArray(tempIndex?.paesi)) {
+  console.warn('File src non valido come index, uso public/vespatrek_index.json:', srcIndex);
+  srcIndex = 'public/vespatrek_index.json';
+
+  resIndex = await fetch(srcIndex);
+  if (!resIndex.ok) throw new Error('Errore caricamento index fallback');
+
+  tempIndex = await resIndex.json();
+}
+
+INDEX_DATA = tempIndex;
+
+const resOfficina = await fetch(srcOfficina);
+if (!resOfficina.ok) throw new Error('Errore caricamento officina');
+
+OFFICINA_DATA = await resOfficina.json();
 
 await Promise.all([
   loadHostConfig(),
   loadThanksData()
 ]);
 
+
+
     if (!resIndex.ok) throw new Error('Errore caricamento index');
     if (!resOfficina.ok) throw new Error('Errore caricamento officina');
 
     
-INDEX_DATA = await resIndex.json();
-OFFICINA_DATA = await resOfficina.json();
+
 
 // carica tutti i paesi in background PRIMA del primo render globale
 await caricaTuttiIPaesiInCache();
