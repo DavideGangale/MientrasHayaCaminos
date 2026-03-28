@@ -32,7 +32,7 @@
       color: var(--text);
       height: 100%;
       height: 100dvh;
-      overflow: hidden;
+      overflow: auto;
       display: flex;
       flex-direction: column;
     }
@@ -257,12 +257,22 @@ button.btn-host {
       </select>
 
       <button id="btnStats" class="btn-filter" onclick="apriStats()">📊 Statistiche</button>
-      <button id="btnHost" class="btn-host" onclick="openHostForm()">🏠 Offri ospitalità</button>
+     
+      
+      <button id="btnHost" class="btn-host" onclick="openHostForm()">🏠 Offri supporto</button>
     </div>
   </div>
 
   <!-- MAPPA -->
-  <div id="mapPub"></div>
+ <div id="mapPub"></div>
+
+<div id="thanksSection" style="background:#181818; border-top:1px solid var(--border); padding:18px; overflow-y:auto; max-height:35vh;">
+  <h3 id="thanksTitle" style="margin:0 0 8px 0; color:var(--accent);">🙏 Ringraziamenti</h3>
+  <div id="thanksIntro" style="font-size:13px; color:#aaa; margin-bottom:12px;">
+    Persone che hanno aiutato o supportato il viaggio.
+  </div>
+  <div id="thanksList" style="display:grid; gap:10px;"></div>
+</div>
 
   <!-- MODALE STATISTICHE -->
   <div id="statsModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:8000; align-items:center; justify-content:center; padding:15px;">
@@ -326,7 +336,30 @@ button.btn-host {
     </div>
   </div>
 
-  
+    <!-- MODALE OSPITALITÀ -->
+  <div id="hostModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:8400; align-items:center; justify-content:center; padding:15px;">
+    <div style="background:var(--card); width:100%; max-width:520px; border-radius:15px; border:2px solid #4caf50; padding:20px; position:relative; max-height:90vh; overflow-y:auto;">
+      <button onclick="closeHostForm()" style="position:absolute; top:10px; right:10px; background:#f44336; color:#fff; border:none; border-radius:50%; width:30px; height:30px; font-weight:bold; cursor:pointer;">×</button>
+
+      <h2 id="hostModalTitle" style="color:#4caf50; margin-top:0; text-align:center;">🏠 Offri supporto al viaggio</h2>
+
+      <div style="font-size:14px; color:#ddd; line-height:1.5;">
+        <p id="hostText1">
+          Se vivi lungo il percorso e vuoi dare una mano al viaggio, puoi inviarmi una proposta di ospitalità o supporto.
+        </p>
+        <p id="hostText2">
+          Anche una sola notte, un posto sicuro per la Vespa, uno spazio tenda, un pasto o un consiglio locale possono fare la differenza.
+        </p>
+        <p id="hostText3" style="color:#aaa; font-size:13px;">
+          L’invio della proposta non garantisce una conferma: valuterò in base a percorso, tempi e organizzazione reale del viaggio.
+        </p>
+      </div>
+
+      <button id="hostOpenFormBtn" onclick="goToHostExternalForm()" style="margin-top:15px; width:100%; background:#4caf50; color:#fff; border:none; border-radius:10px; padding:12px; font-size:15px; font-weight:bold; cursor:pointer;">
+        Compila il modulo
+      </button>
+    </div>
+  </div>
 
   <!-- LIGHTBOX FOTO -->
   <div id="lightbox" onclick="closeLightbox()">
@@ -344,6 +377,33 @@ let map = null;
 let layerTracce = null;
 let layerMarkers = null;
 let canvasRenderer = null;
+
+
+
+
+let HOST_FORM_URL = 'https://docs.google.com/forms/d/e/https://docs.google.com/forms/d/1u8cgL7giNLZHkLZCxcf7IDPF4Z_TPO3VPa8Ez0TaxK8/edit/viewform';
+
+let THANKS_DATA = [
+  {
+    name: 'Famiglia Rossi',
+    country: 'Argentina',
+    city: 'Mendoza',
+    type: 'ospitalità',
+    note_it: 'Per l’accoglienza e il posto sicuro per la Vespa.',
+    note_en: 'For the warm welcome and the safe place for the Vespa.',
+    note_es: 'Por la cálida bienvenida y el lugar seguro para la Vespa.'
+  },
+  {
+    name: 'Carlos',
+    country: 'Perù',
+    city: 'Cusco',
+    type: 'aiuto meccanico',
+    note_it: 'Per l’aiuto pratico e i consigli sulla strada.',
+    note_en: 'For the practical help and road advice.',
+    note_es: 'Por la ayuda práctica y los consejos sobre la ruta.'
+  }
+];
+  
   
   let currentMode = 'TUTTO';
   let currentCountry = '';
@@ -395,7 +455,17 @@ let canvasRenderer = null;
       cost: 'Costo',
 
       carbSetup: '🌬️ Setup Carburatore',
-      altitude: 'Altitudine'
+      altitude: 'Altitudine',
+
+hostBtn: '🏠 Offri supporto',
+hostTitle: '🏠 Offri supporto al viaggio',
+hostText1: 'Se vivi lungo il percorso e vuoi dare una mano al viaggio, puoi inviarmi una proposta di ospitalità o supporto.',
+hostText2: 'Anche una sola notte, un posto sicuro per la Vespa, uno spazio tenda, un pasto o un consiglio locale possono fare la differenza.',
+hostText3: 'L’invio della proposta non garantisce una conferma: valuterò in base a percorso, tempi e organizzazione reale del viaggio.',
+hostOpenForm: 'Compila il modulo',
+thanksTitle: '🙏 Ringraziamenti',
+thanksEmpty: 'Nessun ringraziamento pubblicato per ora.',
+thanksIntro: 'Persone che hanno aiutato o supportato il viaggio.'
     },
 
     en: {
@@ -439,7 +509,17 @@ let canvasRenderer = null;
       cost: 'Cost',
 
       carbSetup: '🌬️ Carb setup',
-      altitude: 'Altitude'
+      altitude: 'Altitude',
+
+hostBtn: '🏠 Offer support',
+hostTitle: '🏠 Offer support to the journey',
+hostText1: 'If you live along the route and would like to help the journey, you can send me an offer of hospitality or support.',
+hostText2: 'Even just one night, a safe place for the Vespa, a tent space, a meal or local advice can make a big difference.',
+hostText3: 'Sending a proposal does not guarantee confirmation: I will evaluate it based on route, timing and real travel logistics.',
+hostOpenForm: 'Fill out the form',
+thanksTitle: '🙏 Thanks',
+thanksEmpty: 'No public thanks yet.',
+thanksIntro: 'People who helped or supported the journey.'
     },
 
     es: {
@@ -483,7 +563,17 @@ let canvasRenderer = null;
       cost: 'Costo',
 
       carbSetup: '🌬️ Carburación',
-      altitude: 'Altitud'
+      altitude: 'Altitud',
+
+hostBtn: '🏠 Ofrecer apoyo',
+hostTitle: '🏠 Ofrece apoyo al viaje',
+hostText1: 'Si vives a lo largo de la ruta y quieres apoyar el viaje, puedes enviarme una propuesta de hospedaje o ayuda.',
+hostText2: 'Incluso una sola noche, un lugar seguro para la Vespa, espacio para la tienda, una comida o un consejo local pueden marcar la diferencia.',
+hostText3: 'Enviar una propuesta no garantiza confirmación: la evaluaré según la ruta, los tiempos y la logística real del viaje.',
+hostOpenForm: 'Completa el formulario',
+thanksTitle: '🙏 Agradecimientos',
+thanksEmpty: 'Todavía no hay agradecimientos públicos.',
+thanksIntro: 'Personas que ayudaron o apoyaron el viaje.'
     }
   };
 
@@ -661,7 +751,25 @@ if (monthSel) {
   monthSel.value = v;
 }
 
+const btnHost = document.getElementById('btnHost');
+if (btnHost) btnHost.innerText = T('hostBtn');
 
+const hostModalTitle = document.getElementById('hostModalTitle');
+if (hostModalTitle) hostModalTitle.innerText = T('hostTitle');
+
+const hostText1 = document.getElementById('hostText1');
+if (hostText1) hostText1.innerText = T('hostText1');
+
+const hostText2 = document.getElementById('hostText2');
+if (hostText2) hostText2.innerText = T('hostText2');
+
+const hostText3 = document.getElementById('hostText3');
+if (hostText3) hostText3.innerText = T('hostText3');
+
+const hostOpenFormBtn = document.getElementById('hostOpenFormBtn');
+if (hostOpenFormBtn) hostOpenFormBtn.innerText = T('hostOpenForm');
+
+renderThanksSection();
     
   }
 
@@ -1357,6 +1465,54 @@ function goToHostExternalForm() {
   window.open('https://docs.google.com/forms/d/e/1FAIpQLScB7HXHmFUhyDbCCJBQG5l1hH1U61ut7jD_h0deJd-NKqnnEA/viewform?usp=publish-editor/viewform', '_blank', 'noopener');
 }
 
+
+  function openHostForm() {
+  const el = document.getElementById('hostModal');
+  if (el) el.style.display = 'flex';
+}
+
+function closeHostForm() {
+  const el = document.getElementById('hostModal');
+  if (el) el.style.display = 'none';
+}
+
+function goToHostExternalForm() {
+  window.open(HOST_FORM_URL, '_blank', 'noopener');
+}
+
+function renderThanksSection() {
+  const titleEl = document.getElementById('thanksTitle');
+  const introEl = document.getElementById('thanksIntro');
+  const listEl = document.getElementById('thanksList');
+
+  if (titleEl) titleEl.innerText = T('thanksTitle');
+  if (introEl) introEl.innerText = T('thanksIntro');
+  if (!listEl) return;
+
+  if (!Array.isArray(THANKS_DATA) || THANKS_DATA.length === 0) {
+    listEl.innerHTML = `<div style="color:#888; font-size:13px;">${T('thanksEmpty')}</div>`;
+    return;
+  }
+
+  listEl.innerHTML = THANKS_DATA.map(item => {
+    const note =
+      LANG === 'en' ? (item.note_en || item.note_it || '') :
+      LANG === 'es' ? (item.note_es || item.note_it || '') :
+      (item.note_it || '');
+
+    return `
+      <div style="background:#222; border:1px solid #333; border-radius:12px; padding:12px;">
+        <div style="font-weight:700; color:#fff;">${item.name || ''}</div>
+        <div style="font-size:12px; color:#aaa; margin-top:2px;">
+          ${item.city || ''}${item.city && item.country ? ', ' : ''}${item.country || ''}
+        </div>
+        <div style="font-size:13px; color:#ddd; margin-top:8px;">
+          ${note}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
   
 
   function openLightbox(src) {
@@ -1500,6 +1656,7 @@ updateStatsMini();
 popolaPaesi();
 popolaMesi();
 renderMap();
+renderThanksSection();
 
     
   } catch (e) {
