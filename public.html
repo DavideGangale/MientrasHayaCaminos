@@ -32,7 +32,7 @@
       color: var(--text);
       height: 100%;
       height: 100dvh;
-      overflow: auto;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
     }
@@ -308,7 +308,7 @@ button.btn-host {
 
  
 
-  <
+  
    <!-- MODALE SUPPORTO -->
   <div id="hostModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:8400; align-items:center; justify-content:center; padding:15px;">
     <div style="background:var(--card); width:100%; max-width:560px; border-radius:15px; border:2px solid #4caf50; padding:20px; position:relative; max-height:90vh; overflow-y:auto;">
@@ -428,7 +428,7 @@ let THANKS_DATA = [];
       carbSetup: '🌬️ Setup Carburatore',
       altitude: 'Altitudine',
 
-hostBtn: '🤝 Supporto',
+hostBtn: '🤝 Supporto & 🙏 Ringraziamenti',
 hostTitle: '🤝 Supporto al viaggio',
 hostText1: 'Se vivi lungo il percorso e vuoi dare una mano al viaggio, puoi inviarmi una proposta di ospitalità o supporto.',
 hostText2: 'Anche una sola notte, un posto sicuro per la Vespa, uno spazio tenda, un pasto o un consiglio locale possono fare la differenza.',
@@ -437,7 +437,7 @@ hostOpenForm: 'Compila il modulo',
 thanksTitle: '🙏 Ringraziamenti',
 thanksEmpty: 'Nessun ringraziamento pubblicato per ora.',
 thanksIntro: 'Persone che hanno aiutato o supportato il viaggio.',
-thanksBtn: '🙏 Ringraziamenti',
+
 hostFormUnavailable: 'Link del modulo non disponibile al momento'
     },
 
@@ -484,7 +484,7 @@ hostFormUnavailable: 'Link del modulo non disponibile al momento'
       carbSetup: '🌬️ Carb setup',
       altitude: 'Altitude',
 
-hostBtn: '🤝 Support',
+hostBtn: '🤝 Support & 🙏 Thanks',
 hostTitle: '🤝 Support the journey',
 hostText1: 'If you live along the route and would like to help the journey, you can send me an offer of hospitality or support.',
 hostText2: 'Even just one night, a safe place for the Vespa, a tent space, a meal or local advice can make a big difference.',
@@ -493,7 +493,7 @@ hostOpenForm: 'Fill out the form',
 thanksTitle: '🙏 Thanks',
 thanksEmpty: 'No public thanks yet.',
 thanksIntro: 'People who helped or supported the journey.',
-thanksBtn: '🙏 Thanks',
+
 hostFormUnavailable: 'Form link is currently unavailable'
     },
 
@@ -540,7 +540,7 @@ hostFormUnavailable: 'Form link is currently unavailable'
       carbSetup: '🌬️ Carburación',
       altitude: 'Altitud',
 
-hostBtn: '🤝 Apoyo',
+hostBtn: '🤝 Apoyo & 🙏 Agradecimientos',
 hostTitle: '🤝 Apoya el viaje',
 hostText1: 'Si vives a lo largo de la ruta y quieres apoyar el viaje, puedes enviarme una propuesta de hospedaje o ayuda.',
 hostText2: 'Incluso una sola noche, un lugar seguro para la Vespa, espacio para la tienda, una comida o un consejo local pueden marcar la diferencia.',
@@ -549,7 +549,7 @@ hostOpenForm: 'Completa el formulario',
 thanksTitle: '🙏 Agradecimientos',
 thanksEmpty: 'Todavía no hay agradecimientos públicos.',
 thanksIntro: 'Personas que ayudaron o apoyaron el viaje.',
-thanksBtn: '🙏 Agradecimientos',
+
 hostFormUnavailable: 'El enlace del formulario no está disponible en este momento'
     }
   };
@@ -611,56 +611,6 @@ function getYearMonthFromPublicEntry(entry) {
 
 
 
-  
-  // ===== Stats helpers (benzina bruciata da tappe/giri) =====
-  const CONSUMO_FALLBACK_KM_L = 28;
-
-  function getAllPercorsiPublic() {
-    const tappe = Array.isArray(DATA?.tappe) ? DATA.tappe : [];
-    const tur   = Array.isArray(DATA?.turismo) ? DATA.turismo : [];
-    return tappe.concat(tur);
-  }
-
-  function calcFuelBurnedFromPercorsi(countryOrNull) {
-    const all = getAllPercorsiPublic();
-    let kmSum = 0;
-    let litriSum = 0;
-
-    for (const p of all) {
-      if (!p) continue;
-      if (countryOrNull && p.paese !== countryOrNull) continue;
-
-      const km = Number(p.km || 0);
-      if (!isFinite(km) || km <= 0) continue;
-
-      kmSum += km;
-
-      const realL = Number(p.benzinaRealeLitri);
-      const stimL = Number(p.benzinaStimataLitri ?? p.benzina ?? 0);
-
-      if (isFinite(realL) && realL > 0) litriSum += realL;
-      else if (isFinite(stimL) && stimL > 0) litriSum += stimL;
-      else litriSum += km / CONSUMO_FALLBACK_KM_L;
-    }
-
-    return { km: kmSum, litri: litriSum };
-  }
-
-  function getOlioUsatoLitriPublic(countryOrNull) {
-    if (!DATA) return null;
-
-    if (!countryOrNull) {
-      return Number(DATA?.stats?.olioTotaleLitri || 0);
-    }
-
-    const dp = (DATA.datiPaesi && DATA.datiPaesi[countryOrNull]) ? DATA.datiPaesi[countryOrNull] : null;
-    if (!dp) return null;
-
-    if (dp.olioTotaleLitri != null) return Number(dp.olioTotaleLitri || 0);
-    if (dp.olioMl != null) return Number(dp.olioMl || 0) / 1000;
-
-    return null;
-  }
 
   function setLang(l) {
     LANG = l || 'it';
@@ -745,7 +695,10 @@ renderThanksModalList();
 
 async function loadHostConfig() {
   try {
-    const res = await fetch('public/host_config.json');
+    const urlParams = new URLSearchParams(window.location.search);
+    const srcHostCfg = urlParams.get('hostcfg') || 'public/host_config.json';
+
+    const res = await fetch(srcHostCfg);
     if (!res.ok) throw new Error('Errore caricamento host_config.json');
 
     const cfg = await res.json();
@@ -758,7 +711,10 @@ async function loadHostConfig() {
 
 async function loadThanksData() {
   try {
-    const res = await fetch('public/thanks.json');
+    const urlParams = new URLSearchParams(window.location.search);
+    const srcThanks = urlParams.get('thanks') || 'public/thanks.json';
+
+    const res = await fetch(srcThanks);
     if (!res.ok) throw new Error('Errore caricamento thanks.json');
 
     const json = await res.json();
@@ -772,10 +728,6 @@ async function loadThanksData() {
   
   
 
-function getCurrentDataSource() {
-  return DATA || INDEX_DATA || null;
-}
-
 function getIndexStats() {
   return (INDEX_DATA && INDEX_DATA.stats) ? INDEX_DATA.stats : {};
 }
@@ -784,10 +736,7 @@ function getIndexPaesiList() {
   return Array.isArray(INDEX_DATA?.paesi) ? INDEX_DATA.paesi : [];
 }
 
-function getCurrentCountryMeta() {
-  if (!currentCountry) return null;
-  return getIndexPaesiList().find(x => x.paese === currentCountry) || null;
-}
+
 
 
 
@@ -1678,7 +1627,7 @@ updateStatsMini();
 popolaPaesi();
 popolaMesi();
 renderMap();
-renderThanksModalList();
+
 
 
     
