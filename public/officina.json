@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-03-28T18:25:20.194Z",
+  "_exportDate": "2026-03-29T14:50:03.442Z",
   "tipo": "officina",
   "stats": {
     "spesaRicambiUsd": 0,
@@ -48,7 +48,7 @@
     {
       "id": "inv5",
       "nome": "Cavo Acceleratore",
-      "qta": 1,
+      "qta": 0,
       "wear": "interval",
       "intervalKm": 6000,
       "usedKm": 2300,
