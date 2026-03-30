@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-03-29T13:33:39.547Z",
+  "exportedAt": "2026-03-30T21:38:53.613Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -188,6 +188,23 @@
         "lon": -74.13138238345299
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1vB8Ydf1eG6zrbYmCh0iRiWTo0FTSxrNA"
+    },
+    {
+      "ts": 1774906730307,
+      "id": 1774906730307,
+      "paese": "",
+      "km": "",
+      "testo": "Se me había soltado la cruceta",
+      "tags": [
+        "ProblemasTecnicos"
+      ],
+      "videoUrl": "https://youtu.be/AbqCsDj8c3Q?si=8NHyrqwlQ1MorEhh",
+      "videoPlanned": false,
+      "geo": {
+        "lat": 4.806001608636656,
+        "lon": -74.36063540086325
+      },
+      "fotoUrl": null
     }
   ]
 }
