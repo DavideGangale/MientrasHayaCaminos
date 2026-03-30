@@ -1302,13 +1302,12 @@ const lat = Number(c.geo.lat);
 const lon = Number(c.geo.lon ?? c.geo.lng);
 if (!isFinite(lat) || !isFinite(lon)) return;
 
-creaMarker(lat, lon, iconCarb, ``
+creaMarker(lat, lon, iconCarb, `
         <div class="popup-title" style="color:var(--carb)">${T('carbSetup')}</div>
         <div class="popup-meta">📅 ${c.data} | ⛰️ ${T('altitude')}: ${c.alt}m</div>
         <div>Max: <b>${c.chicMax}</b> | Min: <b>${c.chicMin}</b></div>
         ${c.nota ? `<div style="margin-top:5px; font-style:italic;">"${c.nota}"</div>` : ''}
       `);
-    });
 
     if (drawnLines > 0 || layerMarkers.getLayers().length > 0) {
       map.fitBounds(bounds.pad(0.1));
