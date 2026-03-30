@@ -1,16 +1,16 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-03-30T22:46:16.663Z",
+  "_exportDate": "2026-03-30T23:53:56.090Z",
   "tipo": "paese",
   "paese": "Colombia",
   "slug": "colombia",
   "stats": {
     "km": 5.8918922511954674,
-    "benzina": 9.7187742,
+    "benzina": 10.0893152,
     "benzinaFuori": 0,
-    "olioMl": 199,
-    "spesaBenzinaUsd": 11.401847959470047,
-    "spesaOlioUsd": 3.1125696932031577,
+    "olioMl": 207,
+    "spesaBenzinaUsd": 11.800966572999272,
+    "spesaOlioUsd": 3.237703276224381,
     "spesaRicambiUsd": 0,
     "spesaManodoperaUsd": 0
   },
