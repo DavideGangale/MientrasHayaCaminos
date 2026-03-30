@@ -2884,7 +2884,7 @@ if (carica('vt_mig_checklist_preride_v1', '') !== '1') {
     'Livello benzina/scorta'
   ]);
 
-  const list = caricaJSON('vt_checklist', []);
+  const list = 'vt_checklist', []);
   if (Array.isArray(list) && list.length) {
     const filtered = list.filter(x => x && !removeNames.has(String(x.nome || '').trim()));
     salva('vt_checklist', filtered);
@@ -9260,13 +9260,35 @@ async function costruisciArchivioPubblicoSpezzato() {
     fotoCandela: e.fotoCandela || null
   }));
 
+
+  const rifornimentiPub = logCarburanti.map(e => ({
+  id: e.id,
+  ts: e.ts || e.id || Date.now(),
+  data: e.data || '',
+  ora: e.ora || '',
+  paese: (e.paese || '').trim(),
+  luogo: e.luogo || '',
+  km: e.km || '',
+  qta: e.qta ?? 0,
+  dest: e.dest || '',
+  mix: e.mix || '',
+  prezzoUnit: e.prezzoUnit ?? null,
+  costoBenzLocal: e.costoBenzLocal ?? null,
+  costoBenzUsd: e.costoBenzUsd ?? e.costoBenz ?? 0,
+  costoOlio: e.costoOlio ?? 0,
+  geo: e.geo || null
+}));
+
+console.log('RIFORNIMENTI PUB:', rifornimentiPub);
+  
 let paesiNomi = Array.from(new Set([
   ...Object.keys(datiPaesi || {}),
   ...tappePub.map(x => x.paese).filter(Boolean),
   ...turismoPub.map(x => x.paese).filter(Boolean),
   ...diarioPub.map(x => x.paese).filter(Boolean),
   ...logbookPub.map(x => x.paese).filter(Boolean),
-  ...logCarburanti.map(x => x.paese).filter(Boolean)
+  //...logCarburanti.map(x => x.paese).filter(Boolean)
+  ...rifornimentiPub.map(x => x.paese).filter(Boolean)
 ])).sort();
 
 // se tutto è vuoto, lascia almeno Colombia
@@ -9328,7 +9350,9 @@ if (!paesiNomi.length) {
     const tappePaese = filtraPerPaese(tappePub, paese);
     const turismoPaese = filtraPerPaese(turismoPub, paese);
     const diarioPaese = filtraPerPaese(diarioPub, paese);
-    const rifornimentiPaese = filtraPerPaese(logCarburanti, paese);
+    //const rifornimentiPaese = filtraPerPaese(logCarburanti, paese);
+    const rifornimentiPaese = filtraPerPaese(rifornimentiPub, paese);
+    console.log('PAESE:', paese, 'RIFORNIMENTI PAESE:', rifornimentiPaese);
     const carburazioniPaese = filtraPerPaese(carburazionePub, paese);
     const manutenzioniPaese = filtraPerPaese(logbookPub, paese);
 
