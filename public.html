@@ -1200,8 +1200,10 @@ diario.forEach(d => {
   const lon = Number(d.geo.lon ?? d.geo.lng);
   if (!isFinite(lat) || !isFinite(lon)) return;
 
-  const ytId = getYouTubeId(d.videoUrl);
-  const hasVideo = !!ytId;
+const ytId = getYouTubeId(d.videoUrl);
+const hasVideoUrl = !!ytId;
+const hasVideoPlanned = !!d.videoPlanned;
+const hasVideo = hasVideoUrl || hasVideoPlanned;
 
   const rawFoto = d.fotoUrl || d.foto;
   const fotoSrc = driveToDirectImageUrl(rawFoto);
@@ -1213,24 +1215,30 @@ diario.forEach(d => {
     if (currentMarkerFilter !== 'VIDEO' && currentMarkerFilter !== 'FOTO') return;
   }
 
-  let mediaHtml = '';
+let mediaHtml = '';
 
-  if (hasPhoto) {
-    const safe = String(fotoSrc).replace(/'/g, "\\'");
-    mediaHtml += `
-      <div style="margin-top:8px;">
-        <img class="popup-img" src="${fotoSrc}" onclick="openLightbox('${safe}')">
-      </div>
-    `;
-  }
+if (hasPhoto) {
+  const safe = String(fotoSrc).replace(/'/g, "\\'");
+  mediaHtml += `
+    <div style="margin-top:8px;">
+      <img class="popup-img" src="${fotoSrc}" onclick="openLightbox('${safe}')">
+    </div>
+  `;
+}
 
-  if (hasVideo) {
-    mediaHtml += `
-      <div class="popup-video" style="margin-top:10px;">
-        <iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe>
-      </div>
-    `;
-  }
+if (hasVideoUrl) {
+  mediaHtml += `
+    <div class="popup-video" style="margin-top:10px;">
+      <iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe>
+    </div>
+  `;
+} else if (hasVideoPlanned) {
+  mediaHtml += `
+    <div style="margin-top:10px; color:#ff9800; font-weight:900;">
+      🎬 Video in arrivo
+    </div>
+  `;
+}
 
   const icon = hasVideo ? iconVideo : (hasPhoto ? iconFoto : iconNote);
 
@@ -1248,11 +1256,14 @@ diario.forEach(d => {
 manutenzioni.forEach(m => {
   if (currentCountry && m.paese !== currentCountry) return;
   if (currentMonthFilter && getYearMonthFromPublicEntry(m) !== currentMonthFilter) return;
-  if (!m.geo) return;
-  if (currentMarkerFilter !== 'ALL' && currentMarkerFilter !== 'MAINT') return;
-    
+if (!m.geo) return;
+if (currentMarkerFilter !== 'ALL' && currentMarkerFilter !== 'MAINT') return;
 
-      creaMarker(m.geo.lat, m.geo.lon, iconMaint, `
+const lat = Number(m.geo.lat);
+const lon = Number(m.geo.lon ?? m.geo.lng);
+if (!isFinite(lat) || !isFinite(lon)) return;
+
+creaMarker(lat, lon, iconMaint, `
         <div class="popup-title" style="color:var(--maint)">${T('workshop')}: ${m.nome}</div>
         <div class="popup-meta">📅 ${m.data} | 📏 km ${m.km}</div>
         <div>${m.desc || ''}</div>
@@ -1264,10 +1275,14 @@ manutenzioni.forEach(m => {
 rifornimenti.forEach(r => {
   if (currentCountry && r.paese !== currentCountry) return;
   if (currentMonthFilter && getYearMonthFromPublicEntry(r) !== currentMonthFilter) return;
-  if (!r.geo) return;
-  if (currentMarkerFilter !== 'ALL' && currentMarkerFilter !== 'FUEL') return;
+if (!r.geo) return;
+if (currentMarkerFilter !== 'ALL' && currentMarkerFilter !== 'FUEL') return;
 
-      creaMarker(r.geo.lat, r.geo.lon, iconFuel, `
+const lat = Number(r.geo.lat);
+const lon = Number(r.geo.lon ?? r.geo.lng);
+if (!isFinite(lat) || !isFinite(lon)) return;
+
+creaMarker(lat, lon, iconFuel, `
         <div class="popup-title" style="color:var(--fuel)">${T('refuel')}</div>
         <div class="popup-meta">📅 ${r.data} | 📏 km ${r.km}</div>
         <div>📦 <b>${r.qta} L</b> (${T('destination')}: ${r.dest})</div>
@@ -1280,10 +1295,14 @@ rifornimenti.forEach(r => {
 carburazioni.forEach(c => {
   if (currentCountry && c.paese !== currentCountry) return;
   if (currentMonthFilter && getYearMonthFromPublicEntry(c) !== currentMonthFilter) return;
-  if (!c.geo) return;
-  if (currentMarkerFilter !== 'ALL' && currentMarkerFilter !== 'CARB') return;
+if (!c.geo) return;
+if (currentMarkerFilter !== 'ALL' && currentMarkerFilter !== 'CARB') return;
 
-      creaMarker(c.geo.lat, c.geo.lon, iconCarb, `
+const lat = Number(c.geo.lat);
+const lon = Number(c.geo.lon ?? c.geo.lng);
+if (!isFinite(lat) || !isFinite(lon)) return;
+
+creaMarker(lat, lon, iconCarb, ``
         <div class="popup-title" style="color:var(--carb)">${T('carbSetup')}</div>
         <div class="popup-meta">📅 ${c.data} | ⛰️ ${T('altitude')}: ${c.alt}m</div>
         <div>Max: <b>${c.chicMax}</b> | Min: <b>${c.chicMin}</b></div>
