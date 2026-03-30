@@ -1318,6 +1318,7 @@ $$
   });
 
   const rifornimenti = Array.isArray(DATA.rifornimenti) ? DATA.rifornimenti : [];
+    console.log('RIFORNIMENTI DATA:', rifornimenti);
   rifornimenti.forEach(r => {
     if (currentCountry && r.paese !== currentCountry) return;
     if (currentMonthFilter && getYearMonthFromPublicEntry(r) !== currentMonthFilter) return;
