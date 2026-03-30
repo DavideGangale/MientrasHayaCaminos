@@ -1,10 +1,28 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-03-30T15:35:21.598Z",
+  "_exportDate": "2026-03-30T21:39:15.841Z",
   "tipo": "diario_mese",
   "mese": "2026-03",
-  "count": 1,
+  "count": 2,
   "entries": [
+    {
+      "id": 1774904153857,
+      "ts": 1774904153857,
+      "data": "30/03/2026",
+      "ora": "15:55",
+      "paese": "Colombia",
+      "km": "77.7",
+      "testo": "Encuentro Vespa Club Bogotá",
+      "tags": [],
+      "geo": {
+        "lat": 4.8061317,
+        "lon": -74.360625
+      },
+      "videoUrl": "https://youtu.be/kkkKYY1VIgE",
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
     {
       "id": 1774884525450,
       "ts": 1774884525450,
