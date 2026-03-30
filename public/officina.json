@@ -1,12 +1,29 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-03-30T15:29:30.215Z",
+  "_exportDate": "2026-03-30T15:35:21.598Z",
   "tipo": "officina",
   "stats": {
     "spesaRicambiUsd": 0,
     "spesaManodoperaUsd": 0
   },
   "manutenzioni": [
+    {
+      "id": 1774884684180,
+      "data": "30/03/2026",
+      "ora": "10:31",
+      "paese": "Colombia",
+      "km": "77.7",
+      "nome": "caaaaa",
+      "desc": "taaaaa",
+      "costoLocal": 0,
+      "valuta": "COP",
+      "costoUsd": 0,
+      "fotoUrl": null,
+      "geo": {
+        "lat": 4.8197633,
+        "lon": -74.35554
+      }
+    },
     {
       "id": 1774881487255,
       "data": "30/03/2026",
@@ -25,7 +42,25 @@
       }
     }
   ],
-  "carburazioni": [],
+  "carburazioni": [
+    {
+      "id": 1774884720591,
+      "data": "30/03/2026",
+      "ora": "10:32",
+      "alt": 2674,
+      "chicMax": 110,
+      "chicMin": 75,
+      "viteAria": "1.25",
+      "viteMinimo": "1.75",
+      "candela": "",
+      "nota": "prova getti altezza",
+      "geo": {
+        "lat": 4.8197633,
+        "lon": -74.35554
+      },
+      "fotoCandela": null
+    }
+  ],
   "inventario": [
     {
       "id": "inv1",
