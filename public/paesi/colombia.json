@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-03-30T15:29:30.216Z",
+  "_exportDate": "2026-03-30T15:35:21.599Z",
   "tipo": "paese",
   "paese": "Colombia",
   "slug": "colombia",
@@ -3264,6 +3264,23 @@
   "rifornimenti": [],
   "carburazioni": [],
   "manutenzioni": [
+    {
+      "id": 1774884684180,
+      "data": "30/03/2026",
+      "ora": "10:31",
+      "paese": "Colombia",
+      "km": "77.7",
+      "nome": "caaaaa",
+      "desc": "taaaaa",
+      "costoLocal": 0,
+      "valuta": "COP",
+      "costoUsd": 0,
+      "fotoUrl": null,
+      "geo": {
+        "lat": 4.8197633,
+        "lon": -74.35554
+      }
+    },
     {
       "id": 1774881487255,
       "data": "30/03/2026",
