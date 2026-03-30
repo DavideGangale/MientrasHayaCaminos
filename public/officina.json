@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-03-30T22:46:16.663Z",
+  "_exportDate": "2026-03-30T23:53:56.089Z",
   "tipo": "officina",
   "stats": {
     "spesaRicambiUsd": 0,
@@ -58,7 +58,8 @@
         "lat": 4.8059166,
         "lon": -74.3606878
       },
-      "fotoCandela": null
+      "fotoCandela": null,
+      "paese": ""
     },
     {
       "id": 1774884720591,
@@ -75,7 +76,8 @@
         "lat": 4.8197633,
         "lon": -74.35554
       },
-      "fotoCandela": null
+      "fotoCandela": null,
+      "paese": ""
     }
   ],
   "inventario": [
