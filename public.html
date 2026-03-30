@@ -1077,242 +1077,258 @@ function getYouTubeId(url) {
   const iconNote = L.divIcon({ className: 'custom-marker marker-foto', html: '📝' });
 
   function renderMap() {
-    if (!layerTracce || !layerMarkers) return;
+  if (!layerTracce || !layerMarkers) return;
 
-    layerTracce.clearLayers();
-    layerMarkers.clearLayers();
-    if (!DATA) return;
+  layerTracce.clearLayers();
+  layerMarkers.clearLayers();
+  if (!DATA) return;
 
-    let bounds = L.latLngBounds();
-    let drawnLines = 0;
+  let bounds = L.latLngBounds();
+  let drawnLines = 0;
 
-    const tappe = Array.isArray(DATA.tappe) ? DATA.tappe : [];
-    const turismo = Array.isArray(DATA.turismo) ? DATA.turismo : [];
+  const tappe = Array.isArray(DATA.tappe) ? DATA.tappe : [];
+  const turismo = Array.isArray(DATA.turismo) ? DATA.turismo : [];
 
-    let tracceDaMostrare = [];
-    if (currentMode === 'TUTTO' || currentMode === 'TAPPE') tracceDaMostrare.push(...tappe);
-    if (currentMode === 'TUTTO' || currentMode === 'GIRI') tracceDaMostrare.push(...turismo);
+  let tracceDaMostrare = [];
+  if (currentMode === 'TUTTO' || currentMode === 'TAPPE') tracceDaMostrare.push(...tappe);
+  if (currentMode === 'TUTTO' || currentMode === 'GIRI') tracceDaMostrare.push(...turismo);
 
-    
-tracceDaMostrare.forEach(t => {
-  if (currentCountry && t.paese !== currentCountry) return;
-  if (currentMonthFilter && getYearMonthFromPercorso(t) !== currentMonthFilter) return;
-  if (!t.traccia || t.traccia.length < 2) return;
+  tracceDaMostrare.forEach(t => {
+    if (currentCountry && t.paese !== currentCountry) return;
+    if (currentMonthFilter && getYearMonthFromPercorso(t) !== currentMonthFilter) return;
+    if (!t.traccia || t.traccia.length < 2) return;
 
-      const latlngs = t.traccia.map(p => Array.isArray(p) ? [p[0], p[1]] : [p.lat, p.lon || p.lng]);
-      const color = t.tipo === 'Turismo' ? '#2196F3' : '#d32f2f';
+    const latlngs = t.traccia.map(p =>
+      Array.isArray(p) ? [p[0], p[1]] : [p.lat, p.lon || p.lng]
+    );
 
-     const poly = L.polyline(latlngs, { color, weight: 5, opacity: 0.85, interactive: true, renderer: canvasRenderer }).addTo(layerTracce);
+    const color = t.tipo === 'Turismo' ? '#2196F3' : '#d32f2f';
 
-      bounds.extend(poly.getBounds());
-      drawnLines++;
+    const poly = L.polyline(latlngs, {
+      color,
+      weight: 5,
+      opacity: 0.85,
+      interactive: true,
+      renderer: canvasRenderer
+    }).addTo(layerTracce);
 
-      const h = Math.floor((t.durata || 0) / 3600);
-      const m = Math.floor(((t.durata || 0) % 3600) / 60);
+    bounds.extend(poly.getBounds());
+    drawnLines++;
 
-      const tipo = t.tipo || 'Tappa';
-      const isGiro = (tipo === 'Turismo');
+    const h = Math.floor((t.durata || 0) / 3600);
+    const m = Math.floor(((t.durata || 0) % 3600) / 60);
 
-      const benzStim = Number(t.benzinaStimataLitri ?? t.benzina ?? 0);
-      const benzReal = Number(t.benzinaRealeLitri ?? 0);
+    const tipo = t.tipo || 'Tappa';
+    const isGiro = (tipo === 'Turismo');
 
-      const consStim = (benzStim > 0) ? (t.km / benzStim).toFixed(2) : '--';
-      const consReal = (benzReal > 0) ? (t.km / benzReal).toFixed(2) : '--';
+    const benzStim = Number(t.benzinaStimataLitri ?? t.benzina ?? 0);
+    const benzReal = Number(t.benzinaRealeLitri ?? 0);
 
-      const hasGraph = Array.isArray(t.telemetry) && t.telemetry.length >= 3;
+    const consStim = (benzStim > 0) ? (t.km / benzStim).toFixed(2) : '--';
+    const consReal = (benzReal > 0) ? (t.km / benzReal).toFixed(2) : '--';
 
-      const titoloTop = (t.titolo && String(t.titolo).trim())
-        ? `📍 ${t.titolo}`
-        : `${isGiro ? '🛵 ' + T('giri') : '🏁 ' + T('tappa')}`;
+    const hasGraph = Array.isArray(t.telemetry) && t.telemetry.length >= 3;
 
-      const infoEstesa = `
-        <div class="popup-title">${titoloTop}</div>
+    const titoloTop = (t.titolo && String(t.titolo).trim())
+      ? `📍 ${t.titolo}`
+      : `${isGiro ? '🛵 ' + T('giri') : '🏁 ' + T('tappa')}`;
 
-        <div class="popup-meta">
-          🌎 <b>${t.paese || ''}</b><br>
-          📅 ${t.data} ${t.ora || ''} &nbsp;|&nbsp; 📏 <b>${Number(t.km || 0).toFixed(1)} km</b>
+    const infoEstesa = `
+      <div class="popup-title">${titoloTop}</div>
+
+      <div class="popup-meta">
+        🌎 <b>${t.paese || ''}</b><br>
+        📅 ${t.data || ''} ${t.ora || ''} &nbsp;|&nbsp; 📏 <b>${Number(t.km || 0).toFixed(1)} km</b>
+      </div>
+
+      <div style="font-size:13px; margin-bottom:8px; line-height:1.45;">
+        <div>${T('time')}: ${h}h ${m}m</div>
+        <div>${T('alt')}: ${t.altMin || 0}m → ${t.altMax || 0}m</div>
+        <div>
+          ${T('speedMax')}: <b>${t.velMax || 0}</b> km/h
+          ${t.velMedia ? ` (${T('speedAvg')}: <b>${t.velMedia}</b>)` : ''}
         </div>
 
-        <div style="font-size:13px; margin-bottom:8px; line-height:1.45;">
-          <div>${T('time')}: ${h}h ${m}m</div>
-          <div>${T('alt')}: ${t.altMin || 0}m → ${t.altMax || 0}m</div>
-          <div>
-            ${T('speedMax')}: <b>${t.velMax || 0}</b> km/h
-            ${t.velMedia ? ` (${T('speedAvg')}: <b>${t.velMedia}</b>)` : ''}
-          </div>
-
-          <div style="margin-top:8px;">
-            ${T('fuelEst')}: <b>${benzStim.toFixed(2)} L</b> —
-            <b style="color:var(--accent)">${consStim} km/L</b>
-          </div>
-
-          ${benzReal > 0 ? `
-            <div style="margin-top:4px;">
-              ${T('fuelReal')}: <b>${benzReal.toFixed(2)} L</b> —
-              <b style="color:#4caf50">${consReal} km/L</b>
-            </div>
-          ` : `<div style="margin-top:4px;color:#777;">${T('fuelReal')}: --</div>`}
+        <div style="margin-top:8px;">
+          ${T('fuelEst')}: <b>${benzStim.toFixed(2)} L</b> —
+          <b style="color:var(--accent)">${consStim} km/L</b>
         </div>
 
-        ${t.note ? `<div style="color:#bbb; font-style:italic; margin-bottom:10px;">${t.note}</div>` : ''}
+        ${benzReal > 0 ? `
+          <div style="margin-top:4px;">
+            ${T('fuelReal')}: <b>${benzReal.toFixed(2)} L</b> —
+            <b style="color:#4caf50">${consReal} km/L</b>
+          </div>
+        ` : `<div style="margin-top:4px;color:#777;">${T('fuelReal')}: --</div>`}
+      </div>
 
-        <button
-          style="background:var(--brand); border:none; color:white; padding:8px 10px; border-radius:8px; font-size:12px; cursor:pointer; width:100%;"
-          onclick="window.apriGraficoPercorsoPublic(${t.id})"
-          ${hasGraph ? '' : 'disabled'}
-        >
-          ${T('graph')}
-        </button>
-      `;
+      ${t.note ? `<div style="color:#bbb; font-style:italic; margin-bottom:10px;">${t.note}</div>` : ''}
 
-      poly.bindPopup(infoEstesa);
+      <button
+        style="background:var(--brand); border:none; color:white; padding:8px 10px; border-radius:8px; font-size:12px; cursor:pointer; width:100%;"
+        onclick="window.apriGraficoPercorsoPublic(${t.id})"
+        ${hasGraph ? '' : 'disabled'}
+      >
+        ${T('graph')}
+      </button>
+    `;
 
-      const lastPoint = latlngs[latlngs.length - 1];
-      const markerFine = L.marker(lastPoint, {
-        icon: L.divIcon({ className: 'custom-marker', html: t.tipo === 'Turismo' ? '🛵' : '🏁', iconSize:[30,30] })
-      }).addTo(layerTracce);
+    poly.bindPopup(infoEstesa);
 
-      markerFine.bindPopup(infoEstesa);
-    });
+    const lastPoint = latlngs[latlngs.length - 1];
+    const markerFine = L.marker(lastPoint, {
+      icon: L.divIcon({
+        className: 'custom-marker',
+        html: t.tipo === 'Turismo' ? '🛵' : '🏁',
+        iconSize: [30, 30]
+      })
+    }).addTo(layerTracce);
 
+    markerFine.bindPopup(infoEstesa);
+  });
 
-if (currentMarkerFilter === 'NONE') {
-  if (drawnLines > 0) {
-    map.fitBounds(bounds.pad(0.1));
-  }
-  return;
-}
-    
-    function creaMarker(lat, lon, icona, popupHTML) {
-      if (!isFinite(lat) || !isFinite(lon)) return;
-      const m = L.marker([lat, lon], { icon: icona }).addTo(layerMarkers);
-      bounds.extend(m.getLatLng());
-      m.bindPopup(popupHTML, { minWidth: 250 });
-    }
-
- const diario = Array.isArray(DATA.diario) ? DATA.diario : [];
-diario.forEach(d => {
-  if (currentCountry && d.paese !== currentCountry) return;
-  if (currentMonthFilter && getYearMonthFromPublicEntry(d) !== currentMonthFilter) return;
-  if (!d.geo) return;
-
-  const lat = Number(d.geo.lat);
-  const lon = Number(d.geo.lon ?? d.geo.lng);
-  if (!isFinite(lat) || !isFinite(lon)) return;
-
-const ytId = getYouTubeId(d.videoUrl);
-const hasVideoUrl = !!ytId;
-const hasVideoPlanned = !!d.videoPlanned;
-const hasVideo = hasVideoUrl || hasVideoPlanned;
-
-  const rawFoto = d.fotoUrl || d.foto;
-  const fotoSrc = driveToDirectImageUrl(rawFoto);
-  const hasPhoto = !!fotoSrc;
-
-  if (currentMarkerFilter !== 'ALL') {
-    if (currentMarkerFilter === 'VIDEO' && !hasVideo) return;
-    if (currentMarkerFilter === 'FOTO' && !hasPhoto) return;
-    if (currentMarkerFilter !== 'VIDEO' && currentMarkerFilter !== 'FOTO') return;
-  }
-
-let mediaHtml = '';
-
-if (hasPhoto) {
-  const safe = String(fotoSrc).replace(/'/g, "\\'");
-  mediaHtml += `
-    <div style="margin-top:8px;">
-      <img class="popup-img" src="${fotoSrc}" onclick="openLightbox('${safe}')">
-    </div>
-  `;
-}
-
-if (hasVideoUrl) {
-  mediaHtml += `
-    <div class="popup-video" style="margin-top:10px;">
-      <iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe>
-    </div>
-  `;
-} else if (hasVideoPlanned) {
-  mediaHtml += `
-    <div style="margin-top:10px; color:#ff9800; font-weight:900;">
-      🎬 Video in arrivo
-    </div>
-  `;
-}
-
-  const icon = hasVideo ? iconVideo : (hasPhoto ? iconFoto : iconNote);
-
-  creaMarker(lat, lon, icon, `
-    <div class="popup-title">📍 ${d.paese || ''}</div>
-    <div class="popup-meta">📅 ${d.data || ''} ${d.ora || ''} | 📏 km ${d.km || ''}</div>
-    <div>${d.testo || ''}</div>
-    ${mediaHtml}
-  `);
-});
-
-    const manutenzioni = Array.isArray(DATA.manutenzioni) ? DATA.manutenzioni : [];
-    
-
-manutenzioni.forEach(m => {
-  if (currentCountry && m.paese !== currentCountry) return;
-  if (currentMonthFilter && getYearMonthFromPublicEntry(m) !== currentMonthFilter) return;
-if (!m.geo) return;
-if (currentMarkerFilter !== 'ALL' && currentMarkerFilter !== 'MAINT') return;
-
-const lat = Number(m.geo.lat);
-const lon = Number(m.geo.lon ?? m.geo.lng);
-if (!isFinite(lat) || !isFinite(lon)) return;
-
-creaMarker(lat, lon, iconMaint, `
-        <div class="popup-title" style="color:var(--maint)">${T('workshop')}: ${m.nome}</div>
-        <div class="popup-meta">📅 ${m.data} | 📏 km ${m.km}</div>
-        <div>${m.desc || ''}</div>
-        ${Number(m.costoUsd || 0) > 0 ? `<div style="margin-top:5px; color:#4caf50;">💰 ${T('cost')}: <b>$${Number(m.costoUsd).toFixed(2)}</b></div>` : ''}
-      `);
-    });
-
-    const rifornimenti = Array.isArray(DATA.rifornimenti) ? DATA.rifornimenti : [];
-rifornimenti.forEach(r => {
-  if (currentCountry && r.paese !== currentCountry) return;
-  if (currentMonthFilter && getYearMonthFromPublicEntry(r) !== currentMonthFilter) return;
-if (!r.geo) return;
-if (currentMarkerFilter !== 'ALL' && currentMarkerFilter !== 'FUEL') return;
-
-const lat = Number(r.geo.lat);
-const lon = Number(r.geo.lon ?? r.geo.lng);
-if (!isFinite(lat) || !isFinite(lon)) return;
-
-creaMarker(lat, lon, iconFuel, `
-        <div class="popup-title" style="color:var(--fuel)">${T('refuel')}</div>
-        <div class="popup-meta">📅 ${r.data} | 📏 km ${r.km}</div>
-        <div>📦 <b>${r.qta} L</b> (${T('destination')}: ${r.dest})</div>
-       ${Number(r.costoBenzUsd || 0) > 0 ? `<div style="margin-top:5px; color:#4caf50;">💰 ${T('paid')}: <b>$${Number(r.costoBenzUsd).toFixed(2)}</b></div>` : ''}
-
-      `);
-    });
-
-    const carburazioni = Array.isArray(DATA.carburazioni) ? DATA.carburazioni : [];
-carburazioni.forEach(c => {
-  if (currentCountry && c.paese !== currentCountry) return;
-  if (currentMonthFilter && getYearMonthFromPublicEntry(c) !== currentMonthFilter) return;
-if (!c.geo) return;
-if (currentMarkerFilter !== 'ALL' && currentMarkerFilter !== 'CARB') return;
-
-const lat = Number(c.geo.lat);
-const lon = Number(c.geo.lon ?? c.geo.lng);
-if (!isFinite(lat) || !isFinite(lon)) return;
-
-creaMarker(lat, lon, iconCarb, `
-        <div class="popup-title" style="color:var(--carb)">${T('carbSetup')}</div>
-        <div class="popup-meta">📅 ${c.data} | ⛰️ ${T('altitude')}: ${c.alt}m</div>
-        <div>Max: <b>${c.chicMax}</b> | Min: <b>${c.chicMin}</b></div>
-        ${c.nota ? `<div style="margin-top:5px; font-style:italic;">"${c.nota}"</div>` : ''}
-      `);
-
-    if (drawnLines > 0 || layerMarkers.getLayers().length > 0) {
+  if (currentMarkerFilter === 'NONE') {
+    if (drawnLines > 0) {
       map.fitBounds(bounds.pad(0.1));
     }
+    return;
   }
+
+  function creaMarker(lat, lon, icona, popupHTML) {
+    if (!isFinite(lat) || !isFinite(lon)) return;
+    const m = L.marker([lat, lon], { icon: icona }).addTo(layerMarkers);
+    bounds.extend(m.getLatLng());
+    m.bindPopup(popupHTML, { minWidth: 250 });
+  }
+
+  const diario = Array.isArray(DATA.diario) ? DATA.diario : [];
+  diario.forEach(d => {
+    if (currentCountry && d.paese !== currentCountry) return;
+    if (currentMonthFilter && getYearMonthFromPublicEntry(d) !== currentMonthFilter) return;
+    if (!d.geo) return;
+
+    const lat = Number(d.geo.lat);
+    const lon = Number(d.geo.lon ?? d.geo.lng);
+    if (!isFinite(lat) || !isFinite(lon)) return;
+
+    const ytId = getYouTubeId(d.videoUrl);
+    const hasVideoUrl = !!ytId;
+    const hasVideoPlanned = !!d.videoPlanned;
+    const hasVideo = hasVideoUrl || hasVideoPlanned;
+
+    const rawFoto = d.fotoUrl || d.foto;
+    const fotoSrc = driveToDirectImageUrl(rawFoto);
+    const hasPhoto = !!fotoSrc;
+
+    if (currentMarkerFilter !== 'ALL') {
+      if (currentMarkerFilter === 'VIDEO' && !hasVideo) return;
+      if (currentMarkerFilter === 'FOTO' && !hasPhoto) return;
+      if (currentMarkerFilter !== 'VIDEO' && currentMarkerFilter !== 'FOTO') return;
+    }
+
+    let mediaHtml = '';
+
+    if (hasPhoto) {
+      const safe = String(fotoSrc)
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '&quot;');
+
+      mediaHtml += `
+        <div style="margin-top:8px;">
+          <img class="popup-img" src="${fotoSrc}" onclick="openLightbox('${safe}')">
+        </div>
+      `;
+    }
+
+    if (hasVideoUrl) {
+      mediaHtml += `
+        <div class="popup-video" style="margin-top:10px;">
+          <iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe>
+        </div>
+      `;
+    } else if (hasVideoPlanned) {
+      mediaHtml += `
+        <div style="margin-top:10px; color:#ff9800; font-weight:900;">
+          🎬 Video in arrivo
+        </div>
+      `;
+    }
+
+    const icon = hasVideo ? iconVideo : (hasPhoto ? iconFoto : iconNote);
+
+    creaMarker(lat, lon, icon, `
+      <div class="popup-title">📍 ${d.paese || ''}</div>
+      <div class="popup-meta">📅 ${d.data || ''} ${d.ora || ''} | 📏 km ${d.km || ''}</div>
+      <div>${d.testo || ''}</div>
+      ${mediaHtml}
+    `);
+  });
+
+  const manutenzioni = Array.isArray(DATA.manutenzioni) ? DATA.manutenzioni : [];
+  manutenzioni.forEach(m => {
+    if (currentCountry && m.paese !== currentCountry) return;
+    if (currentMonthFilter && getYearMonthFromPublicEntry(m) !== currentMonthFilter) return;
+    if (!m.geo) return;
+    if (currentMarkerFilter !== 'ALL' && currentMarkerFilter !== 'MAINT') return;
+
+    const lat = Number(m.geo.lat);
+    const lon = Number(m.geo.lon ?? m.geo.lng);
+    if (!isFinite(lat) || !isFinite(lon)) return;
+
+    creaMarker(lat, lon, iconMaint, `
+      <div class="popup-title" style="color:var(--maint)">${T('workshop')}: ${m.nome || ''}</div>
+      <div class="popup-meta">📅 ${m.data || ''} | 📏 km ${m.km || ''}</div>
+      <div>${m.desc || ''}</div>
+      ${Number(m.costoUsd || 0) > 0 ? `<div style="margin-top:5px; color:#4caf50;">💰 ${T('cost')}: <b>
+$$
+{Number(m.costoUsd).toFixed(2)}</b></div>` : ''}
+    `);
+  });
+
+  const rifornimenti = Array.isArray(DATA.rifornimenti) ? DATA.rifornimenti : [];
+  rifornimenti.forEach(r => {
+    if (currentCountry && r.paese !== currentCountry) return;
+    if (currentMonthFilter && getYearMonthFromPublicEntry(r) !== currentMonthFilter) return;
+    if (!r.geo) return;
+    if (currentMarkerFilter !== 'ALL' && currentMarkerFilter !== 'FUEL') return;
+
+    const lat = Number(r.geo.lat);
+    const lon = Number(r.geo.lon ?? r.geo.lng);
+    if (!isFinite(lat) || !isFinite(lon)) return;
+
+    creaMarker(lat, lon, iconFuel, `
+      <div class="popup-title" style="color:var(--fuel)">${T('refuel')}</div>
+      <div class="popup-meta">📅 ${r.data || ''} | 📏 km ${r.km || ''}</div>
+      <div>📦 <b>${r.qta || 0} L</b> (${T('destination')}: ${r.dest || ''})</div>
+      ${Number(r.costoBenzUsd || 0) > 0 ? `<div style="margin-top:5px; color:#4caf50;">💰 ${T('paid')}: <b>
+$$
+{Number(r.costoBenzUsd).toFixed(2)}</b></div>` : ''}
+    `);
+  });
+
+  const carburazioni = Array.isArray(DATA.carburazioni) ? DATA.carburazioni : [];
+  carburazioni.forEach(c => {
+    if (currentCountry && c.paese !== currentCountry) return;
+    if (currentMonthFilter && getYearMonthFromPublicEntry(c) !== currentMonthFilter) return;
+    if (!c.geo) return;
+    if (currentMarkerFilter !== 'ALL' && currentMarkerFilter !== 'CARB') return;
+
+    const lat = Number(c.geo.lat);
+    const lon = Number(c.geo.lon ?? c.geo.lng);
+    if (!isFinite(lat) || !isFinite(lon)) return;
+
+    creaMarker(lat, lon, iconCarb, `
+      <div class="popup-title" style="color:var(--carb)">${T('carbSetup')}</div>
+      <div class="popup-meta">📅 ${c.data || ''} | ⛰️ ${T('altitude')}: ${c.alt || 0}m</div>
+      <div>Max: <b>${c.chicMax || ''}</b> | Min: <b>${c.chicMin || ''}</b></div>
+      ${c.nota ? `<div style="margin-top:5px; font-style:italic;">"${c.nota}"</div>` : ''}
+    `);
+  });
+
+  if (drawnLines > 0 || layerMarkers.getLayers().length > 0) {
+    map.fitBounds(bounds.pad(0.1));
+  }
+}
 
   function setMode(mode) {
     currentMode = mode;
