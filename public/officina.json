@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-03-30T22:36:00.476Z",
+  "_exportDate": "2026-03-30T22:45:54.577Z",
   "tipo": "officina",
   "stats": {
     "spesaRicambiUsd": 0,
@@ -43,6 +43,23 @@
     }
   ],
   "carburazioni": [
+    {
+      "id": 1774910721890,
+      "data": "30/03/2026",
+      "ora": "17:45",
+      "alt": 2674,
+      "chicMax": 666,
+      "chicMin": 111,
+      "viteAria": "6",
+      "viteMinimo": "12",
+      "candela": "de merda",
+      "nota": "na merda",
+      "geo": {
+        "lat": 4.8059166,
+        "lon": -74.3606878
+      },
+      "fotoCandela": null
+    },
     {
       "id": 1774884720591,
       "data": "30/03/2026",
