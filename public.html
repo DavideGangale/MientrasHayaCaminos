@@ -1318,26 +1318,41 @@ $$
   });
 
   const rifornimenti = Array.isArray(DATA.rifornimenti) ? DATA.rifornimenti : [];
-    console.log('RIFORNIMENTI DATA:', rifornimenti);
-  rifornimenti.forEach(r => {
-    if (currentCountry && r.paese !== currentCountry) return;
-    if (currentMonthFilter && getYearMonthFromPublicEntry(r) !== currentMonthFilter) return;
-    if (!r.geo) return;
-    if (currentMarkerFilter !== 'ALL' && currentMarkerFilter !== 'FUEL') return;
+console.log('RIFORNIMENTI DATA:', rifornimenti);
 
-    const lat = Number(r.geo.lat);
-    const lon = Number(r.geo.lon ?? r.geo.lng);
-    if (!isFinite(lat) || !isFinite(lon)) return;
+rifornimenti.forEach(r => {
+  if (currentCountry && r.paese !== currentCountry) return;
+  if (currentMonthFilter && getYearMonthFromPublicEntry(r) !== currentMonthFilter) return;
+  if (currentMarkerFilter !== 'ALL' && currentMarkerFilter !== 'FUEL') return;
 
-    creaMarker(lat, lon, iconFuel, `
-      <div class="popup-title" style="color:var(--fuel)">${T('refuel')}</div>
-      <div class="popup-meta">📅 ${r.data || ''} | 📏 km ${r.km || ''}</div>
-      <div>📦 <b>${r.qta || 0} L</b> (${T('destination')}: ${r.dest || ''})</div>
-      ${Number(r.costoBenzUsd || 0) > 0 ? `<div style="margin-top:5px; color:#4caf50;">💰 ${T('paid')}: <b>
+  const lat = Number(
+    r?.geo?.lat ??
+    r?.lat ??
+    r?.latitude
+  );
+
+  const lon = Number(
+    r?.geo?.lon ??
+    r?.geo?.lng ??
+    r?.lon ??
+    r?.lng ??
+    r?.longitude
+  );
+
+  if (!isFinite(lat) || !isFinite(lon)) {
+    console.warn('Rifornimento senza coordinate valide:', r);
+    return;
+  }
+
+  creaMarker(lat, lon, iconFuel, `
+    <div class="popup-title" style="color:var(--fuel)">${T('refuel')}</div>
+    <div class="popup-meta">📅 ${r.data || ''} | 📏 km ${r.km || ''}</div>
+    <div>📦 <b>${r.qta ?? r.litri ?? 0} L</b> (${T('destination')}: ${r.dest || r.note || ''})</div>
+    ${Number(r.costoBenzUsd || r.costo || 0) > 0 ? `<div style="margin-top:5px; color:#4caf50;">💰 ${T('paid')}: <b>
 $$
-{Number(r.costoBenzUsd).toFixed(2)}</b></div>` : ''}
-    `);
-  });
+{Number(r.costoBenzUsd || r.costo || 0).toFixed(2)}</b></div>` : ''}
+  `);
+});
 
   const carburazioni = Array.isArray(DATA.carburazioni) ? DATA.carburazioni : [];
   carburazioni.forEach(c => {
