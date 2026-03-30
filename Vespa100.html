@@ -2884,7 +2884,7 @@ if (carica('vt_mig_checklist_preride_v1', '') !== '1') {
     'Livello benzina/scorta'
   ]);
 
-  const list = 'vt_checklist', []);
+  const list = caricaJSON('vt_checklist', []);
   if (Array.isArray(list) && list.length) {
     const filtered = list.filter(x => x && !removeNames.has(String(x.nome || '').trim()));
     salva('vt_checklist', filtered);
@@ -9246,20 +9246,20 @@ async function costruisciArchivioPubblicoSpezzato() {
   }));
 
   const carburazionePub = carburazione.map(e => ({
-    id: e.id,
-    data: e.data,
-    ora: e.ora,
-    alt: e.alt,
-    chicMax: e.chicMax,
-    chicMin: e.chicMin,
-    viteAria: e.viteAria,
-    viteMinimo: e.viteMinimo,
-    candela: e.candela,
-    nota: e.nota,
-    geo: e.geo || null,
-    fotoCandela: e.fotoCandela || null
-  }));
-
+  id: e.id,
+  data: e.data,
+  ora: e.ora,
+  alt: e.alt,
+  chicMax: e.chicMax,
+  chicMin: e.chicMin,
+  viteAria: e.viteAria,
+  viteMinimo: e.viteMinimo,
+  candela: e.candela,
+  nota: e.nota,
+  geo: e.geo || null,
+  fotoCandela: e.fotoCandela || null,
+  paese: (e.paese || '').trim()
+}));
 
   const rifornimentiPub = logCarburanti.map(e => ({
   id: e.id,
