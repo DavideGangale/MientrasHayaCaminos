@@ -429,6 +429,7 @@ let map = null;
 let layerTracce = null;
 let layerMarkers = null;
 let canvasRenderer = null;
+  let MARKER_POSITION_COUNT = {};
 
 let HOST_FORM_URL = '';
 let VESPA_CLUB_FORM_URL = '';
@@ -1069,6 +1070,32 @@ function getYouTubeId(url) {
   }
 }
 
+
+
+function resetMarkerOffsetCache() {
+  MARKER_POSITION_COUNT = {};
+}
+
+function getOffsetLatLon(lat, lon) {
+  const key = `${Number(lat).toFixed(5)},${Number(lon).toFixed(5)}`;
+
+  const count = MARKER_POSITION_COUNT[key] || 0;
+  MARKER_POSITION_COUNT[key] = count + 1;
+
+  if (count === 0) {
+    return [lat, lon];
+  }
+
+  const angle = count * 0.9;
+  const radius = 0.00012 * (1 + Math.floor(count / 6));
+
+  const latOffset = Math.sin(angle) * radius;
+  const lonOffset = Math.cos(angle) * radius;
+
+  return [lat + latOffset, lon + lonOffset];
+}
+  
+  
   const iconFoto = L.divIcon({ className: 'custom-marker marker-foto', html: '📷' });
   const iconVideo = L.divIcon({ className: 'custom-marker marker-video', html: '▶️' });
   const iconMaint = L.divIcon({ className: 'custom-marker marker-maint', html: '🔧' });
@@ -1083,6 +1110,8 @@ function getYouTubeId(url) {
   layerMarkers.clearLayers();
   if (!DATA) return;
 
+resetMarkerOffsetCache();
+    
   let bounds = L.latLngBounds();
   let drawnLines = 0;
 
@@ -1194,12 +1223,15 @@ function getYouTubeId(url) {
     return;
   }
 
-  function creaMarker(lat, lon, icona, popupHTML) {
-    if (!isFinite(lat) || !isFinite(lon)) return;
-    const m = L.marker([lat, lon], { icon: icona }).addTo(layerMarkers);
-    bounds.extend(m.getLatLng());
-    m.bindPopup(popupHTML, { minWidth: 250 });
-  }
+function creaMarker(lat, lon, icona, popupHTML) {
+  if (!isFinite(lat) || !isFinite(lon)) return;
+
+  const [adjLat, adjLon] = getOffsetLatLon(lat, lon);
+
+  const m = L.marker([adjLat, adjLon], { icon: icona }).addTo(layerMarkers);
+  bounds.extend(m.getLatLng());
+  m.bindPopup(popupHTML, { minWidth: 250 });
+}
 
   const diario = Array.isArray(DATA.diario) ? DATA.diario : [];
   diario.forEach(d => {
