@@ -1078,6 +1078,11 @@ let HOST_FORM_URL = '';
 let VESPA_CLUB_FORM_URL = '';
 let THANKS_DATA = [];
 
+  function noCacheUrl(url) {
+  const sep = String(url).includes('?') ? '&' : '?';
+  return String(url) + sep + 'v=' + Date.now();
+}
+
 let currentMode = 'TUTTO';
 let currentCountry = '';
 let currentMarkerFilter = 'ALL';
@@ -1409,7 +1414,7 @@ function applyLang() {
 
 async function loadHostConfig() {
   try {
-    const res = await fetch('public/host_config.json');
+    const res = await fetch(noCacheUrl('public/host_config.json?v=' + Date.now());
     if (!res.ok) throw new Error('Errore caricamento host_config.json');
     const cfg = await res.json();
     HOST_FORM_URL = String(cfg.hostFormUrl || '').trim();
@@ -1425,7 +1430,7 @@ async function loadThanksData() {
   try {
     const urlParams = new URLSearchParams(window.location.search);
     const srcThanks = urlParams.get('thanks') || 'public/thanks.json';
-    const res = await fetch(srcThanks);
+    const res = await fetch(noCacheUrl(srcThanks + '?v=' + Date.now());
     if (!res.ok) throw new Error('Errore caricamento thanks.json');
     const json = await res.json();
     THANKS_DATA = Array.isArray(json.items) ? json.items : [];
@@ -1448,7 +1453,7 @@ async function caricaTuttiIPaesiInCache() {
   for (const meta of paesi) {
     if (!meta || !meta.paese || !meta.path) continue;
     if (PAESI_CACHE[meta.paese]) continue;
-    const res = await fetch(meta.path + '?v=' + Date.now());
+    const res = await fetch(noCacheUrl(meta.path + '?v=' + Date.now());
     if (!res.ok) throw new Error('Errore caricamento file paese: ' + meta.path);
     PAESI_CACHE[meta.paese] = await res.json();
   }
@@ -1468,7 +1473,7 @@ async function caricaPaeseSeServe(paese) {
   }
 
   if (!PAESI_CACHE[paese]) {
-    const res = await fetch(meta.path + '?v=' + Date.now());
+    const res = await fetch(noCacheUrl(meta.path + '?v=' + Date.now());
     if (!res.ok) throw new Error('Errore caricamento file paese: ' + meta.path);
     PAESI_CACHE[paese] = await res.json();
   }
@@ -2408,7 +2413,7 @@ async function loadData() {
 
     let srcIndex = requestedIndex || 'public/vespatrek_index.json';
 
-    let resIndex = await fetch(srcIndex);
+    let resIndex = await fetch(noCacheUrl(srcIndex + '?v=' + Date.now());
     if (!resIndex.ok) throw new Error('Errore caricamento index');
 
     let tempIndex = await resIndex.json();
@@ -2417,7 +2422,7 @@ async function loadData() {
       console.warn('File src non valido come index, uso public/vespatrek_index.json:', srcIndex);
       srcIndex = 'public/vespatrek_index.json';
 
-      resIndex = await fetch(srcIndex);
+      resIndex = await fetch(noCacheUrl(srcIndex + '?v=' + Date.now());
       if (!resIndex.ok) throw new Error('Errore caricamento index fallback');
 
       tempIndex = await resIndex.json();
@@ -2425,7 +2430,7 @@ async function loadData() {
 
     INDEX_DATA = tempIndex;
 
-    const resOfficina = await fetch(srcOfficina);
+   const resOfficina = await fetch(noCacheUrl(srcOfficina + '?v=' + Date.now());
     if (!resOfficina.ok) throw new Error('Errore caricamento officina');
     OFFICINA_DATA = await resOfficina.json();
 
