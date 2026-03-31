@@ -1430,7 +1430,7 @@ async function loadThanksData() {
   try {
     const urlParams = new URLSearchParams(window.location.search);
     const srcThanks = urlParams.get('thanks') || 'public/thanks.json';
-    const res = await fetch(noCacheUrl(srcThanks + '?v=' + Date.now());
+    const res = await fetch(noCacheUrl(srcThanks + '?v=' + Date.now()));
     if (!res.ok) throw new Error('Errore caricamento thanks.json');
     const json = await res.json();
     THANKS_DATA = Array.isArray(json.items) ? json.items : [];
