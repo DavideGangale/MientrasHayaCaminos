@@ -5003,44 +5003,46 @@ salva('vt_scortaLitri', nuovaScorta);
 
         salva('vt_datiPaesi', datiPaesi);
 
-    // Log carburanti
+        // Log carburanti
     let geoFuel = null;
     try {
-      if (typeof lastLat !== 'undefined' && lastLat != null) geoFuel = { lat: lastLat, lon: lastLon };
-      else if (typeof marker !== 'undefined' && marker.getLatLng) {
+      if (typeof lastLat !== 'undefined' && lastLat != null) {
+        geoFuel = { lat: lastLat, lon: lastLon };
+      } else if (typeof marker !== 'undefined' && marker.getLatLng) {
         const ll = marker.getLatLng();
         if (ll && isFinite(ll.lat)) geoFuel = { lat: ll.lat, lon: ll.lng };
       }
-    } catch(e) {}
+    } catch (e) {}
 
+    const logCarb = caricaJSON('vt_logCarburanti', []);
     logCarb.unshift({
-  id: Date.now(),
-  geo: geoFuel,
-  data: now.toLocaleDateString('it-IT'),
-  ora: now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }),
-  paese,
-  qta: qtaLitri.toFixed(2),
-  dest: (dest === 'V') ? 'Vespa' : 'Tanica',
-  mix: (dest === 'V') ? (mixC + '%') : '--',
+      id: Date.now(),
+      geo: geoFuel,
+      data: now.toLocaleDateString('it-IT'),
+      ora: now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }),
+      paese,
+      qta: qtaLitri.toFixed(2),
+      dest: (dest === 'V') ? 'Vespa' : 'Tanica',
+      mix: (dest === 'V') ? (mixC + '%') : '--',
 
-  // prezzo unitario in valuta locale / L
-  prezzoUnit: prezzoUnitario ? prezzoUnitario.toFixed(3) : null,
+      // prezzo unitario in valuta locale / L
+      prezzoUnit: prezzoUnitario ? prezzoUnitario.toFixed(3) : null,
 
-  // local + usd
-  valuta: cur,
-  fxToUsd: (totaleBenzLocal > 0) ? fx : getFxToUsd(cur),
-  costoBenzLocal: (totaleBenzLocal > 0) ? totaleBenzLocal.toFixed(2) : null,
-  costoBenzUsd: (totaleBenzLocal > 0) ? totaleBenzUsd.toFixed(2) : null,
+      // local + usd
+      valuta: cur,
+      fxToUsd: (totaleBenzLocal > 0) ? fx : getFxToUsd(cur),
+      costoBenzLocal: (totaleBenzLocal > 0) ? totaleBenzLocal.toFixed(2) : null,
+      costoBenzUsd: (totaleBenzLocal > 0) ? totaleBenzUsd.toFixed(2) : null,
 
-  // compatibilità (USD)
-  costoBenz: (totaleBenzLocal > 0) ? totaleBenzUsd.toFixed(2) : null,
+      // compatibilità (USD)
+      costoBenz: (totaleBenzLocal > 0) ? totaleBenzUsd.toFixed(2) : null,
 
-  // olio da stock (USD)
-  costoOlio: (costoOlioUsatoUsd !== null) ? costoOlioUsatoUsd.toFixed(2) : null,
+      // olio da stock (USD)
+      costoOlio: (costoOlioUsatoUsd !== null) ? costoOlioUsatoUsd.toFixed(2) : null,
 
-  luogo,
-  km: (parseFloat(carica('vt_kmTotali', '0')) || 0).toFixed(1)
-});
+      luogo,
+      km: (parseFloat(carica('vt_kmTotali', '0')) || 0).toFixed(1)
+    });
     salva('vt_logCarburanti', logCarb);
 
     // Reset input
@@ -9545,7 +9547,10 @@ function raggruppaDiarioPerMese(diarioList) {
 }
 
 function filtraPerPaese(lista, paese) {
-  return (Array.isArray(lista) ? lista : []).filter(x => String(x?.paese || '') === String(paese));
+  const p = String(paese || '').trim().toLowerCase();
+  return (Array.isArray(lista) ? lista : []).filter(x =>
+    String(x?.paese || '').trim().toLowerCase() === p
+  );
 }
 
 function prendiUltimi(arr, n) {
