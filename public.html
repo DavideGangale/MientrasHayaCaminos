@@ -32,20 +32,6 @@
       --note: #4fc3f7;
 
       --shadow: 0 10px 30px rgba(0,0,0,0.35);
-      --radius: 16px;
-      --radius-sm: 12px;
-
-      --fs-xs: 12px;
-      --fs-sm: 13px;
-      --fs-md: 15px;
-      --fs-lg: 18px;
-      --fs-xl: 22px;
-
-      --sp-1: 6px;
-      --sp-2: 10px;
-      --sp-3: 14px;
-      --sp-4: 18px;
-      --sp-5: 24px;
     }
 
     * { box-sizing: border-box; }
@@ -71,7 +57,6 @@
       flex-direction: column;
     }
 
-    /* ===== HEADER ===== */
     #topBar {
       position: relative;
       z-index: 1200;
@@ -214,12 +199,6 @@
       border: 1px solid #3a3a3a;
     }
 
-    .btn-ghost {
-      background: rgba(30,30,30,0.9);
-      color: var(--text);
-      border: 1px solid #3a3a3a;
-    }
-
     .stats-pills {
       display: flex;
       gap: 8px;
@@ -250,7 +229,6 @@
       font-weight: 900;
     }
 
-    /* ===== MAP ===== */
     #mapWrap {
       position: relative;
       flex: 1 1 auto;
@@ -264,7 +242,6 @@
       z-index: 1;
     }
 
-    /* ===== FLOATING ACTIONS ===== */
     .map-actions {
       position: absolute;
       top: 14px;
@@ -300,7 +277,6 @@
       font-weight: 900;
     }
 
-    /* ===== FILTERS DRAWER ===== */
     #filtersBackdrop {
       position: fixed;
       inset: 0;
@@ -404,7 +380,6 @@
       background: #313131;
       color: var(--text);
       border-color: #555;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
     }
 
     .chip-grid {
@@ -452,7 +427,6 @@
       background: #1d1d1d;
     }
 
-    /* ===== MODALS ===== */
     .modal {
       display: none;
       position: fixed;
@@ -598,7 +572,6 @@
       max-height: 240px;
     }
 
-    /* ===== STATS ===== */
     .stats-filter-row {
       margin-top: 12px;
       margin-bottom: 16px;
@@ -638,7 +611,6 @@
       color: var(--text);
     }
 
-    /* ===== LEAFLET POPUP ===== */
     .leaflet-popup-content-wrapper {
       background: #232323;
       color: var(--text);
@@ -706,7 +678,6 @@
       color: white;
     }
 
-    /* ===== MARKERS ===== */
     .custom-marker {
       display: flex;
       align-items: center;
@@ -730,7 +701,6 @@
     .marker-carb  { background: var(--carb); }
     .marker-note  { background: var(--note); }
 
-    /* ===== LIGHTBOX ===== */
     #lightbox {
       display: none;
       position: fixed;
@@ -1824,7 +1794,7 @@ function renderMap() {
     m.bindPopup(popupHTML, { minWidth: 250 });
   }
 
-<script>
+
   const diario = Array.isArray(DATA.diario) ? DATA.diario : [];
   diario.forEach(d => {
     if (currentCountry && d.paese !== currentCountry) return;
@@ -2122,12 +2092,12 @@ function popolaPaesi() {
 
     const optMap = document.createElement('option');
     optMap.value = nome;
-    optMap.innerText = "📍 " + nome;
+    optMap.innerText = '📍 ' + nome;
     selectMap.appendChild(optMap);
 
     const optStats = document.createElement('option');
     optStats.value = nome;
-    optStats.innerText = "📍 " + nome;
+    optStats.innerText = '📍 ' + nome;
     selectStats.appendChild(optStats);
   });
 }
@@ -2361,7 +2331,10 @@ function drawSeriesPub(canvasId, points, color, valueKey) {
   ctx.lineWidth = 1;
   for (let i=0;i<=4;i++){
     const y = padT + (plotH*i/4);
-    ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(padL,y);
+    ctx.lineTo(W-padR,y);
+    ctx.stroke();
   }
 
   function X(x){ return padL + ((x - xMin) / (xMax - xMin)) * plotW; }
@@ -2390,7 +2363,10 @@ window.apriGraficoPercorsoPublic = function(id) {
   const all = tappe.concat(tur);
 
   const t = all.find(x => String(x.id) === String(id));
-  if (!t) { alert('Percorso non trovato'); return; }
+  if (!t) {
+    alert('Percorso non trovato');
+    return;
+  }
 
   const telem = Array.isArray(t.telemetry) ? t.telemetry : [];
   if (telem.length < 3) {
