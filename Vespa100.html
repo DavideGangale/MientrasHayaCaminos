@@ -9161,11 +9161,7 @@ async function costruisciArchivioPubblicoSpezzato() {
   const datiPaesi = caricaJSON('vt_datiPaesi', {}) || {};
   const logCarburanti = caricaJSON('vt_logCarburanti', []) || [];
 
-///prova debug
-console.log('DEBUG logCarburanti RAW:', logCarburanti);
-console.log('DEBUG paesi logCarburanti:', logCarburanti.map(x => x?.paese));
-console.log('DEBUG primi rifornimenti:', logCarburanti.slice(0, 5));
-///prova debug
+
   
   const carburazione = caricaJSON('vt_carburazione', []) || [];
   const inventario = caricaJSON('vt_inventario', []) || [];
@@ -9288,7 +9284,6 @@ const rifornimentiPub = logCarburanti.map(e => ({
   geo: e.geo || null
 }));
 
-console.log('RIFORNIMENTI PUB:', rifornimentiPub);
   
 let paesiNomi = Array.from(new Set([
   ...Object.keys(datiPaesi || {}),
@@ -9364,13 +9359,7 @@ if (!paesiNomi.length) {
   String(x?.paese || '').trim().toLowerCase() === paeseNorm
 );
     
-///prova debug ////
-console.log('DEBUG paese raw:', JSON.stringify(paese));
-console.log('DEBUG paesi rifornimenti raw:', rifornimentiPub.map(x => JSON.stringify(x.paese)));
-console.log('DEBUG rifornimentiPaese dopo filter:', rifornimentiPaese);
-///prova debug ////
-    
-    console.log('PAESE:', paese, 'RIFORNIMENTI PAESE:', rifornimentiPaese);
+
     const carburazioniPaese = filtraPerPaese(carburazionePub, paese);
     const manutenzioniPaese = filtraPerPaese(logbookPub, paese);
 
