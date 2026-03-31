@@ -1716,10 +1716,7 @@ function buildFuelPopup(r) {
     <div class="popup-title" style="color:var(--fuel)">${T('refuel')}</div>
     <div class="popup-meta">📅 ${r?.data || ''} | 📏 km ${r?.km || ''}</div>
     <div>📦 <b>${qta.toFixed(2)} L</b> (${T('destination')}: ${r?.dest || r?.note || ''})</div>
-    ${costoRif > 0 ? `<div style="margin-top:5px; color:#4caf50;">💰 ${T('paid')}: <b>
-$$
-{costoRif.toFixed(2)}</b></div>` : ''}
-  `;
+    ${costoRif > 0 ? `<div style="margin-top:5px; color:#4caf50;">💰 ${T('paid')}: <b>${costoRif.toFixed(2)}</b></div>` : ''}  `;
 }
 
 function buildCarbPopup(c) {
