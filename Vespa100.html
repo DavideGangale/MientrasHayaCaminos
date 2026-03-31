@@ -9270,12 +9270,12 @@ console.log('DEBUG primi rifornimenti:', logCarburanti.slice(0, 5));
   paese: (e.paese || '').trim()
 }));
 
-  const rifornimentiPub = logCarburanti.map(e => ({
+const rifornimentiPub = logCarburanti.map(e => ({
   id: e.id,
   ts: e.ts || e.id || Date.now(),
   data: e.data || '',
   ora: e.ora || '',
-  ppaese: String(e.paese || carica('vt_paeseAttuale', 'Colombia') || '').trim(),
+  paese: String(e.paese || '').trim(),
   luogo: e.luogo || '',
   km: e.km || '',
   qta: e.qta ?? 0,
