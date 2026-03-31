@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-03-30T21:38:53.613Z",
+  "exportedAt": "2026-03-31T20:01:44.258Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -205,6 +205,23 @@
         "lon": -74.36063540086325
       },
       "fotoUrl": null
+    },
+    {
+      "ts": 1774987295323,
+      "id": 1774987295323,
+      "paese": "",
+      "km": "",
+      "testo": "Prova iphone",
+      "tags": [
+        "Hhh"
+      ],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 4.805939283628216,
+        "lon": -74.36065475789874
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1F6lmkMKYYZBC29cxqzTtMm1iZLc9jJiU"
     }
   ]
 }
