@@ -9158,6 +9158,13 @@ async function costruisciArchivioPubblicoSpezzato() {
   const logbook = caricaJSON('vt_logbook', []) || [];
   const datiPaesi = caricaJSON('vt_datiPaesi', {}) || {};
   const logCarburanti = caricaJSON('vt_logCarburanti', []) || [];
+
+///prova debug
+console.log('DEBUG logCarburanti RAW:', logCarburanti);
+console.log('DEBUG paesi logCarburanti:', logCarburanti.map(x => x?.paese));
+console.log('DEBUG primi rifornimenti:', logCarburanti.slice(0, 5));
+///prova debug
+  
   const carburazione = caricaJSON('vt_carburazione', []) || [];
   const inventario = caricaJSON('vt_inventario', []) || [];
 
@@ -9352,6 +9359,12 @@ if (!paesiNomi.length) {
     const diarioPaese = filtraPerPaese(diarioPub, paese);
     //const rifornimentiPaese = filtraPerPaese(logCarburanti, paese);
     const rifornimentiPaese = filtraPerPaese(rifornimentiPub, paese);
+    
+///prova debug ////
+console.log('DEBUG paese export:', paese);
+console.log('DEBUG rifornimentiPaese:', rifornimentiPaese);
+///prova debug ////
+    
     console.log('PAESE:', paese, 'RIFORNIMENTI PAESE:', rifornimentiPaese);
     const carburazioniPaese = filtraPerPaese(carburazionePub, paese);
     const manutenzioniPaese = filtraPerPaese(logbookPub, paese);
