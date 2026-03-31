@@ -1704,13 +1704,16 @@ $$
 }
 
 function buildFuelPopup(r) {
+  const costoRif = Number(r?.costoBenzUsd || r?.costo || 0);
+  const qta = Number(r?.qta || r?.litri || 0);
+
   return `
-    <div class="popup-title">${T('refuel')}</div>
-    <div class="popup-meta">📅 ${r.data || ''}${r.km ? ` · 📏 km ${r.km}` : ''}</div>
-    <div class="popup-text">📦 <b>${r.qta ?? r.litri ?? 0} L</b>${(r.dest || r.note) ? ` · ${T('destination')}: ${r.dest || r.note || ''}` : ''}</div>
-    ${Number(r.costoBenzUsd || r.costo || 0) > 0 ? `<div class="popup-meta" style="margin-top:8px;color:#9be28d;">💰 ${T('paid')}: <b>
+    <div class="popup-title" style="color:var(--fuel)">${T('refuel')}</div>
+    <div class="popup-meta">📅 ${r?.data || ''} | 📏 km ${r?.km || ''}</div>
+    <div>📦 <b>${qta.toFixed(2)} L</b> (${T('destination')}: ${r?.dest || r?.note || ''})</div>
+    ${costoRif > 0 ? `<div style="margin-top:5px; color:#4caf50;">💰 ${T('paid')}: <b>
 $$
-{Number(r.costoBenzUsd || r.costo || 0).toFixed(2)}</b></div>` : ''}
+{costoRif.toFixed(2)}</b></div>` : ''}
   `;
 }
 
