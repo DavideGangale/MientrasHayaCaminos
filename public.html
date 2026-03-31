@@ -1414,7 +1414,7 @@ function applyLang() {
 
 async function loadHostConfig() {
   try {
-    const res = await fetch(noCacheUrl('public/host_config.json?v=' + Date.now());
+    const res = await fetch(noCacheUrl('public/host_config.json?v=' + Date.now()));
     if (!res.ok) throw new Error('Errore caricamento host_config.json');
     const cfg = await res.json();
     HOST_FORM_URL = String(cfg.hostFormUrl || '').trim();
