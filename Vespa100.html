@@ -9273,7 +9273,7 @@ console.log('DEBUG primi rifornimenti:', logCarburanti.slice(0, 5));
   ts: e.ts || e.id || Date.now(),
   data: e.data || '',
   ora: e.ora || '',
-  paese: (e.paese || '').trim(),
+  ppaese: String(e.paese || carica('vt_paeseAttuale', 'Colombia') || '').trim(),
   luogo: e.luogo || '',
   km: e.km || '',
   qta: e.qta ?? 0,
