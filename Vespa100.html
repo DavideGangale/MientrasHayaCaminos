@@ -9390,9 +9390,7 @@ const spesaBenzinaPaeseCalcolata =
   rifornimentiPaese.reduce((sum, r) => sum + Number(r.costoBenzUsd || r.costo || 0), 0);
 
     
-const kmPaeseCalcolati =
-  [...tappePaese, ...turismoPaese]
-    .reduce((sum, x) => sum + Number(x.km || 0), 0);
+
   const dp = datiPaesi[paese] || {
   km: 0,
   benzina: 0,
