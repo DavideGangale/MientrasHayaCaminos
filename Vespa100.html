@@ -9373,6 +9373,23 @@ console.log('DEBUG rifornimentiPaese dopo filter:', rifornimentiPaese);
     console.log('PAESE:', paese, 'RIFORNIMENTI PAESE:', rifornimentiPaese);
     const carburazioniPaese = filtraPerPaese(carburazionePub, paese);
     const manutenzioniPaese = filtraPerPaese(logbookPub, paese);
+
+const percorsiPaese = [...tappePaese, ...turismoPaese];
+
+const kmPaeseCalcolati =
+  percorsiPaese.reduce((sum, x) => sum + Number(x.km || 0), 0);
+
+const benzinaPaeseCalcolata =
+  percorsiPaese.reduce((sum, x) => {
+    const reale = Number(x.benzinaRealeLitri || 0);
+    const stimata = Number(x.benzinaStimataLitri || x.benzina || 0);
+    return sum + (reale > 0 ? reale : stimata);
+  }, 0);
+
+const spesaBenzinaPaeseCalcolata =
+  rifornimentiPaese.reduce((sum, r) => sum + Number(r.costoBenzUsd || r.costo || 0), 0);
+
+    
 const kmPaeseCalcolati =
   [...tappePaese, ...turismoPaese]
     .reduce((sum, x) => sum + Number(x.km || 0), 0);
@@ -9419,6 +9436,7 @@ const kmPaeseCalcolati =
         km: Number(kmPaeseCalcolati || 0),
         benzina: Number(dp.benzina || 0),
         spesaBenzinaUsd: Number(dp.spesaBenzinaUsd || 0),
+        olioMl: Number(dp.olioMl || 0),
         spesaOlioUsd: Number(dp.spesaOlioUsd || 0),
         spesaRicambiUsd: Number(dp.spesaRicambiUsd || 0),
         spesaManodoperaUsd: Number(dp.spesaManodoperaUsd || 0)
