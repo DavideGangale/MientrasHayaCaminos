@@ -1892,7 +1892,7 @@ function renderMap() {
     );
 
     if (!isFinite(lat) || !isFinite(lon)) return;
-console.log('FUEL MARKER DRAW', r, lat, lon);
+
     creaMarker(lat, lon, iconFuel, buildFuelPopup(r));
   });
 
