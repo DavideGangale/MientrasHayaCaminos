@@ -9373,7 +9373,9 @@ console.log('DEBUG rifornimentiPaese dopo filter:', rifornimentiPaese);
     console.log('PAESE:', paese, 'RIFORNIMENTI PAESE:', rifornimentiPaese);
     const carburazioniPaese = filtraPerPaese(carburazionePub, paese);
     const manutenzioniPaese = filtraPerPaese(logbookPub, paese);
-
+const kmPaeseCalcolati =
+  [...tappePaese, ...turismoPaese]
+    .reduce((sum, x) => sum + Number(x.km || 0), 0);
   const dp = datiPaesi[paese] || {
   km: 0,
   benzina: 0,
@@ -9392,7 +9394,7 @@ console.log('DEBUG rifornimentiPaese dopo filter:', rifornimentiPaese);
       paese: paese,
       slug: slug,
       stats: {
-        km: Number(dp.km || 0),
+       km: Number(kmPaeseCalcolati || 0),
         benzina: Number(dp.benzina || 0),
         benzinaFuori: Number(dp.benzinaFuori || 0),
         olioMl: Number(dp.olioMl || 0),
@@ -9414,7 +9416,7 @@ console.log('DEBUG rifornimentiPaese dopo filter:', rifornimentiPaese);
       slug: slug,
       path: path,
       stats: {
-        km: Number(dp.km || 0),
+        km: Number(kmPaeseCalcolati || 0),
         benzina: Number(dp.benzina || 0),
         spesaBenzinaUsd: Number(dp.spesaBenzinaUsd || 0),
         spesaOlioUsd: Number(dp.spesaOlioUsd || 0),
