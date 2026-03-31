@@ -9582,7 +9582,22 @@ function utf8_to_b64(str) {
   return btoa(unescape(encodeURIComponent(str)));
 }
 
-  async function pubblicaFileSingoloSuGitHub(path, jsonObject) {
+  async function fetchWithTimeout(url, options = {}, timeoutMs = 20000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const res = await fetch(url, {
+      ...options,
+      signal: controller.signal
+    });
+    return res;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function pubblicaFileSingoloSuGitHub(path, jsonObject) {
   const token = carica('vt_gh_token', '');
   const repo = carica('vt_gh_repo', '');
 
@@ -9601,10 +9616,28 @@ function utf8_to_b64(str) {
 
   let sha = null;
 
-  const getRes = await fetch(apiUrl, { method: 'GET', headers });
-  if (getRes.ok) {
-    const getData = await getRes.json();
-    sha = getData.sha;
+  // ===== GET SHA con retry =====
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const getRes = await fetchWithTimeout(apiUrl, {
+        method: 'GET',
+        headers
+      }, 20000);
+
+      if (getRes.ok) {
+        const getData = await getRes.json();
+        sha = getData.sha || null;
+      } else if (getRes.status !== 404) {
+        const txt = await getRes.text();
+        throw new Error(`GET ${path}: ${getRes.status} ${txt}`);
+      }
+
+      break;
+    } catch (e) {
+      console.warn(`GET GitHub tentativo ${attempt}/3 fallito per ${path}`, e);
+      if (attempt === 3) throw e;
+      await new Promise(r => setTimeout(r, 1200 * attempt));
+    }
   }
 
   const body = {
@@ -9614,18 +9647,34 @@ function utf8_to_b64(str) {
 
   if (sha) body.sha = sha;
 
-  const putRes = await fetch(apiUrl, {
-    method: 'PUT',
-    headers,
-    body: JSON.stringify(body)
-  });
+  // ===== PUT con retry =====
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const putRes = await fetchWithTimeout(apiUrl, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(body)
+      }, 30000);
 
-  if (!putRes.ok) {
-    const err = await putRes.json();
-    throw new Error(`${path}: ${err.message || 'Errore API GitHub'}`);
+      if (!putRes.ok) {
+        let errText = '';
+        try {
+          const err = await putRes.json();
+          errText = err.message || JSON.stringify(err);
+        } catch {
+          errText = await putRes.text();
+        }
+        throw new Error(`${path}: ${errText || 'Errore API GitHub'}`);
+      }
+
+      console.log('✅ GitHub OK:', path);
+      return true;
+    } catch (e) {
+      console.warn(`PUT GitHub tentativo ${attempt}/3 fallito per ${path}`, e);
+      if (attempt === 3) throw e;
+      await new Promise(r => setTimeout(r, 1500 * attempt));
+    }
   }
-
-  return true;
 }
 
 async function pubblicaArchivioSpezzatoSuGitHub(filesMap) {
@@ -9634,8 +9683,14 @@ async function pubblicaArchivioSpezzatoSuGitHub(filesMap) {
 
   for (let i = 0; i < paths.length; i++) {
     const path = paths[i];
-    showToast(`🐙 Pubblico ${i+1}/${paths.length}: ${path}`, 1800);
-    await pubblicaFileSingoloSuGitHub(path, filesMap[path]);
+    try {
+      showToast(`🐙 Pubblico ${i + 1}/${paths.length}: ${path}`, 1800);
+      console.log(`🚀 Pubblico ${i + 1}/${paths.length}: ${path}`);
+      await pubblicaFileSingoloSuGitHub(path, filesMap[path]);
+    } catch (e) {
+      console.error('❌ Errore pubblicazione file:', path, e);
+      throw new Error(`Errore pubblicazione ${path}: ${e.message || e}`);
+    }
   }
 
   showToast('🚀 Archivio pubblico spezzato pubblicato!', 4000);
