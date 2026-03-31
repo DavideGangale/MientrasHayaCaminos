@@ -3501,7 +3501,44 @@
       }
     }
   ],
-  "carburazioni": [],
+  "carburazioni": [
+    {
+      "id": 1774910721890,
+      "data": "30/03/2026",
+      "ora": "17:45",
+      "alt": 2674,
+      "chicMax": 666,
+      "chicMin": 111,
+      "viteAria": "6",
+      "viteMinimo": "12",
+      "candela": "de merda",
+      "nota": "na merda",
+      "geo": {
+        "lat": 4.8059166,
+        "lon": -74.3606878
+      },
+      "fotoCandela": null,
+      "paese": ""
+    },
+    {
+      "id": 1774884720591,
+      "data": "30/03/2026",
+      "ora": "10:32",
+      "alt": 2674,
+      "chicMax": 110,
+      "chicMin": 75,
+      "viteAria": "1.25",
+      "viteMinimo": "1.75",
+      "candela": "",
+      "nota": "prova getti altezza",
+      "geo": {
+        "lat": 4.8197633,
+        "lon": -74.35554
+      },
+      "fotoCandela": null,
+      "paese": ""
+    }
+  ],
   "manutenzioni": [
     {
       "id": 1774884684180,
