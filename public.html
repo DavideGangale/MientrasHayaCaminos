@@ -389,22 +389,28 @@
     }
 
     .chip-btn {
-      border: 1px solid #3a3a3a;
-      background: #262626;
-      color: var(--text-muted);
-      border-radius: 12px;
-      padding: 11px 10px;
-      font-size: 13px;
-      font-weight: 800;
-      cursor: pointer;
-      text-align: center;
-    }
+  background: #2b2b2b;
+  color: #ddd;
+  border: 1px solid #555;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
 
-    .chip-btn.active {
-      background: #313131;
-      color: var(--text);
-      border-color: #555;
-    }
+.chip-btn:hover {
+  background: #3a3a3a;
+  border-color: #777;
+}
+
+.chip-btn.active {
+  background: linear-gradient(180deg, #ffb74d 0%, #ff9800 100%);
+  color: #111;
+  border-color: #ffcc80;
+  box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.22), 0 4px 14px rgba(255, 152, 0, 0.22);
+}
 
     .drawer-select {
       width: 100%;
@@ -1813,62 +1819,72 @@ if (noMarkerVisible) {
   }
 
 
-  const diario = Array.isArray(DATA.diario) ? DATA.diario : [];
-  diario.forEach(d => {
-    if (currentCountry && d.paese !== currentCountry) return;
-    if (currentMonthFilter && getYearMonthFromPublicEntry(d) !== currentMonthFilter) return;
-    if (!d.geo) return;
+const diario = Array.isArray(DATA.diario) ? DATA.diario : [];
 
-    const lat = Number(d.geo.lat);
-    const lon = Number(d.geo.lon ?? d.geo.lng);
-    if (!isFinite(lat) || !isFinite(lon)) return;
+function drawDiaryMarker(d, onlyVideos = false) {
+  if (currentCountry && d.paese !== currentCountry) return;
+  if (currentMonthFilter && getYearMonthFromPublicEntry(d) !== currentMonthFilter) return;
+  if (!d.geo) return;
 
-    const ytId = getYouTubeId(d.videoUrl);
-    const hasVideoUrl = !!ytId;
-    const hasVideoPlanned = !!d.videoPlanned;
-    const hasVideo = hasVideoUrl || hasVideoPlanned;
+  const lat = Number(d.geo.lat);
+  const lon = Number(d.geo.lon ?? d.geo.lng);
+  if (!isFinite(lat) || !isFinite(lon)) return;
 
-    const rawFoto = d.fotoUrl || d.foto;
-    const fotoSrc = driveToDirectImageUrl(rawFoto);
-    const hasPhoto = !!fotoSrc;
+  const ytId = getYouTubeId(d.videoUrl);
+  const hasVideoUrl = !!ytId;
+  const hasVideoPlanned = !!d.videoPlanned;
+  const hasVideo = hasVideoUrl || hasVideoPlanned;
 
-   const showVideo = hasVideo && isMarkerTypeVisible('VIDEO');
-const showPhoto = hasPhoto && isMarkerTypeVisible('FOTO');
-const showNote = !hasVideo && !hasPhoto && (isMarkerTypeVisible('FOTO') || isMarkerTypeVisible('VIDEO'));
+  const rawFoto = d.fotoUrl || d.foto;
+  const fotoSrc = driveToDirectImageUrl(rawFoto);
+  const hasPhoto = !!fotoSrc;
 
-if (!showVideo && !showPhoto && !showNote) return;
+  if (onlyVideos && !hasVideo) return;
+  if (!onlyVideos && hasVideo) return;
 
-    let mediaHtml = '';
+  const showVideo = hasVideo && isMarkerTypeVisible('VIDEO');
+  const showPhoto = hasPhoto && isMarkerTypeVisible('FOTO');
+  const showNote = !hasVideo && !hasPhoto && (isMarkerTypeVisible('FOTO') || isMarkerTypeVisible('VIDEO'));
 
-    if (hasPhoto) {
-      const safe = String(fotoSrc)
-        .replace(/'/g, "\\'")
-        .replace(/"/g, '&quot;');
+  if (!showVideo && !showPhoto && !showNote) return;
 
-      mediaHtml += `
-        <div style="margin-top:8px;">
-          <img class="popup-img" src="${fotoSrc}" onclick="openLightbox('${safe}')">
-        </div>
-      `;
-    }
+  let mediaHtml = '';
 
-    if (hasVideoUrl) {
-      mediaHtml += `
-        <div class="popup-video" style="margin-top:10px;">
-          <iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe>
-        </div>
-      `;
-    } else if (hasVideoPlanned) {
-      mediaHtml += `
-        <div style="margin-top:10px; color:#ffb74d; font-weight:900;">
-          ${T('videoComing')}
-        </div>
-      `;
-    }
+  if (hasPhoto) {
+    const safe = String(fotoSrc)
+      .replace(/'/g, "\\'")
+      .replace(/"/g, '&quot;');
 
-    const icon = showVideo ? iconVideo : (showPhoto ? iconFoto : iconNote);
-    creaMarker(lat, lon, icon, buildDiaryPopup(d, mediaHtml));
-  });
+    mediaHtml += `
+      <div style="margin-top:8px;">
+        <img class="popup-img" src="${fotoSrc}" onclick="openLightbox('${safe}')">
+      </div>
+    `;
+  }
+
+  if (hasVideoUrl) {
+    mediaHtml += `
+      <div class="popup-video" style="margin-top:10px;">
+        <iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe>
+      </div>
+    `;
+  } else if (hasVideoPlanned) {
+    mediaHtml += `
+      <div style="margin-top:10px; color:#ffb74d; font-weight:900;">
+        ${T('videoComing')}
+      </div>
+    `;
+  }
+
+  const icon = showVideo ? iconVideo : (showPhoto ? iconFoto : iconNote);
+  creaMarker(lat, lon, icon, buildDiaryPopup(d, mediaHtml));
+}
+
+// prima foto/note
+diario.forEach(d => drawDiaryMarker(d, false));
+
+// poi video per ultimi
+diario.forEach(d => drawDiaryMarker(d, true));
 
   const manutenzioni = Array.isArray(DATA.manutenzioni) ? DATA.manutenzioni : [];
   manutenzioni.forEach(m => {
