@@ -3339,28 +3339,7 @@
       "foto": null
     }
   ],
-  "rifornimenti": [
-  {
-    "id": 1775000000001,
-    "ts": 1775000000001,
-    "data": "31/03/2026",
-    "ora": "14:20",
-    "paese": "Colombia",
-    "luogo": "Bogotá",
-    "km": "80.5",
-    "qta": "4.20",
-    "dest": "Vespa",
-    "mix": "2%",
-    "prezzoUnit": "3200.000",
-    "costoBenzLocal": "13440.00",
-    "costoBenzUsd": "3.25",
-    "costoOlio": "0.20",
-    "geo": {
-      "lat": 4.8197633,
-      "lon": -74.35554
-    }
-  }
-],
+  "rifornimenti": [],
   "carburazioni": [],
   "manutenzioni": [
     {
