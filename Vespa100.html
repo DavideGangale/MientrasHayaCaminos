@@ -9296,9 +9296,8 @@ let paesiNomi = Array.from(new Set([
   ...turismoPub.map(x => x.paese).filter(Boolean),
   ...diarioPub.map(x => x.paese).filter(Boolean),
   ...logbookPub.map(x => x.paese).filter(Boolean),
-  //...logCarburanti.map(x => x.paese).filter(Boolean)
   ...rifornimentiPub.map(x => x.paese).filter(Boolean)
-])).sort();
+].map(x => String(x || '').trim()).filter(Boolean))).sort();
 
 // se tutto è vuoto, lascia almeno Colombia
 if (!paesiNomi.length) {
@@ -9360,11 +9359,15 @@ if (!paesiNomi.length) {
     const turismoPaese = filtraPerPaese(turismoPub, paese);
     const diarioPaese = filtraPerPaese(diarioPub, paese);
     //const rifornimentiPaese = filtraPerPaese(logCarburanti, paese);
-    const rifornimentiPaese = filtraPerPaese(rifornimentiPub, paese);
+    const paeseNorm = String(paese || '').trim().toLowerCase();
+    const rifornimentiPaese = rifornimentiPub.filter(x =>
+  String(x?.paese || '').trim().toLowerCase() === paeseNorm
+);
     
 ///prova debug ////
-console.log('DEBUG paese export:', paese);
-console.log('DEBUG rifornimentiPaese:', rifornimentiPaese);
+console.log('DEBUG paese raw:', JSON.stringify(paese));
+console.log('DEBUG paesi rifornimenti raw:', rifornimentiPub.map(x => JSON.stringify(x.paese)));
+console.log('DEBUG rifornimentiPaese dopo filter:', rifornimentiPaese);
 ///prova debug ////
     
     console.log('PAESE:', paese, 'RIFORNIMENTI PAESE:', rifornimentiPaese);
