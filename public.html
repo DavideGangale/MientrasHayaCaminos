@@ -1453,7 +1453,7 @@ async function caricaTuttiIPaesiInCache() {
   for (const meta of paesi) {
     if (!meta || !meta.paese || !meta.path) continue;
     if (PAESI_CACHE[meta.paese]) continue;
-    const res = await fetch(noCacheUrl(meta.path + '?v=' + Date.now());
+    const res = await fetch(noCacheUrl(meta.path + '?v=' + Date.now()));
     if (!res.ok) throw new Error('Errore caricamento file paese: ' + meta.path);
     PAESI_CACHE[meta.paese] = await res.json();
   }
@@ -1473,7 +1473,7 @@ async function caricaPaeseSeServe(paese) {
   }
 
   if (!PAESI_CACHE[paese]) {
-    const res = await fetch(noCacheUrl(meta.path + '?v=' + Date.now());
+    const res = await fetch(noCacheUrl(meta.path + '?v=' + Date.now()));
     if (!res.ok) throw new Error('Errore caricamento file paese: ' + meta.path);
     PAESI_CACHE[paese] = await res.json();
   }
@@ -2413,7 +2413,7 @@ async function loadData() {
 
     let srcIndex = requestedIndex || 'public/vespatrek_index.json';
 
-    let resIndex = await fetch(noCacheUrl(srcIndex + '?v=' + Date.now());
+    let resIndex = await fetch(noCacheUrl(srcIndex + '?v=' + Date.now()));
     if (!resIndex.ok) throw new Error('Errore caricamento index');
 
     let tempIndex = await resIndex.json();
@@ -2422,7 +2422,7 @@ async function loadData() {
       console.warn('File src non valido come index, uso public/vespatrek_index.json:', srcIndex);
       srcIndex = 'public/vespatrek_index.json';
 
-      resIndex = await fetch(noCacheUrl(srcIndex + '?v=' + Date.now());
+      resIndex = await fetch(noCacheUrl(srcIndex + '?v=' + Date.now()));
       if (!resIndex.ok) throw new Error('Errore caricamento index fallback');
 
       tempIndex = await resIndex.json();
@@ -2430,7 +2430,7 @@ async function loadData() {
 
     INDEX_DATA = tempIndex;
 
-   const resOfficina = await fetch(noCacheUrl(srcOfficina + '?v=' + Date.now());
+   const resOfficina = await fetch(noCacheUrl(srcOfficina + '?v=' + Date.now()));
     if (!resOfficina.ok) throw new Error('Errore caricamento officina');
     OFFICINA_DATA = await resOfficina.json();
 
