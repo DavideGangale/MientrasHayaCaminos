@@ -1085,7 +1085,13 @@ let THANKS_DATA = [];
 
 let currentMode = 'TUTTO';
 let currentCountry = '';
-let currentMarkerFilter = 'ALL';
+let currentMarkerFilters = {
+  FOTO: true,
+  VIDEO: true,
+  MAINT: true,
+  FUEL: true,
+  CARB: true
+};
 let currentMonthFilter = '';
 
 let LANG = localStorage.getItem('vt_pub_lang') || 'it';
@@ -1784,12 +1790,19 @@ function renderMap() {
     markerFine.bindPopup(popupHtml);
   });
 
-  if (currentMarkerFilter === 'NONE') {
-    if (drawnLines > 0 && bounds.isValid()) {
-      map.fitBounds(bounds.pad(0.1));
-    }
-    return;
+const noMarkerVisible =
+  !currentMarkerFilters.FOTO &&
+  !currentMarkerFilters.VIDEO &&
+  !currentMarkerFilters.MAINT &&
+  !currentMarkerFilters.FUEL &&
+  !currentMarkerFilters.CARB;
+
+if (noMarkerVisible) {
+  if (drawnLines > 0) {
+    map.fitBounds(bounds.pad(0.1));
   }
+  return;
+}
 
   function creaMarker(lat, lon, icona, popupHTML) {
     if (!isFinite(lat) || !isFinite(lon)) return;
@@ -1819,11 +1832,11 @@ function renderMap() {
     const fotoSrc = driveToDirectImageUrl(rawFoto);
     const hasPhoto = !!fotoSrc;
 
-    if (currentMarkerFilter !== 'ALL') {
-      if (currentMarkerFilter === 'VIDEO' && !hasVideo) return;
-      if (currentMarkerFilter === 'FOTO' && !hasPhoto) return;
-      if (currentMarkerFilter !== 'VIDEO' && currentMarkerFilter !== 'FOTO') return;
-    }
+   const showVideo = hasVideo && isMarkerTypeVisible('VIDEO');
+const showPhoto = hasPhoto && isMarkerTypeVisible('FOTO');
+const showNote = !hasVideo && !hasPhoto && (isMarkerTypeVisible('FOTO') || isMarkerTypeVisible('VIDEO'));
+
+if (!showVideo && !showPhoto && !showNote) return;
 
     let mediaHtml = '';
 
@@ -1853,7 +1866,7 @@ function renderMap() {
       `;
     }
 
-    const icon = hasVideo ? iconVideo : (hasPhoto ? iconFoto : iconNote);
+    const icon = showVideo ? iconVideo : (showPhoto ? iconFoto : iconNote);
     creaMarker(lat, lon, icon, buildDiaryPopup(d, mediaHtml));
   });
 
@@ -1862,7 +1875,7 @@ function renderMap() {
     if (currentCountry && m.paese !== currentCountry) return;
     if (currentMonthFilter && getYearMonthFromPublicEntry(m) !== currentMonthFilter) return;
     if (!m.geo) return;
-    if (currentMarkerFilter !== 'ALL' && currentMarkerFilter !== 'MAINT') return;
+    if (!isMarkerTypeVisible('MAINT')) return;
 
     const lat = Number(m.geo.lat);
     const lon = Number(m.geo.lon ?? m.geo.lng);
@@ -1875,7 +1888,7 @@ function renderMap() {
   rifornimenti.forEach(r => {
     if (currentCountry && r.paese !== currentCountry) return;
     if (currentMonthFilter && getYearMonthFromPublicEntry(r) !== currentMonthFilter) return;
-    if (currentMarkerFilter !== 'ALL' && currentMarkerFilter !== 'FUEL') return;
+    if (!isMarkerTypeVisible('FUEL')) return;
 
     const lat = Number(
       r?.geo?.lat ??
@@ -1901,7 +1914,7 @@ function renderMap() {
     if (currentCountry && c.paese !== currentCountry) return;
     if (currentMonthFilter && getYearMonthFromPublicEntry(c) !== currentMonthFilter) return;
     if (!c.geo) return;
-    if (currentMarkerFilter !== 'ALL' && currentMarkerFilter !== 'CARB') return;
+    if (!isMarkerTypeVisible('CARB')) return;
 
     const lat = Number(c.geo.lat);
     const lon = Number(c.geo.lon ?? c.geo.lng);
@@ -1916,20 +1929,7 @@ function renderMap() {
 }
 
 function syncFilterButtonsUI() {
-  const modeMap = {
-    TUTTO: 'modeBtnAll',
-    TAPPE: 'modeBtnTappe',
-    GIRI: 'modeBtnGiri'
-  };
-
-  Object.values(modeMap).forEach(id => {
-    document.getElementById(id)?.classList.remove('active');
-  });
-  document.getElementById(modeMap[currentMode])?.classList.add('active');
-
-  const markerMap = {
-    ALL: 'markerBtnAll',
-    NONE: 'markerBtnNone',
+  const map = {
     FOTO: 'markerBtnFoto',
     VIDEO: 'markerBtnVideo',
     MAINT: 'markerBtnMaint',
@@ -1937,16 +1937,22 @@ function syncFilterButtonsUI() {
     CARB: 'markerBtnCarb'
   };
 
-  Object.values(markerMap).forEach(id => {
-    document.getElementById(id)?.classList.remove('active');
+  Object.entries(map).forEach(([type, id]) => {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+
+    btn.classList.toggle('active', !!currentMarkerFilters[type]);
   });
-  document.getElementById(markerMap[currentMarkerFilter])?.classList.add('active');
 
-  const countrySel = document.getElementById('selectCountry');
-  if (countrySel) countrySel.value = currentCountry || '';
+  const allBtn = document.getElementById('markerBtnAll');
+  const noneBtn = document.getElementById('markerBtnNone');
 
-  const monthSel = document.getElementById('monthSelect');
-  if (monthSel) monthSel.value = currentMonthFilter || '';
+  const values = Object.values(currentMarkerFilters);
+  const allOn = values.every(Boolean);
+  const allOff = values.every(v => !v);
+
+  if (allBtn) allBtn.classList.toggle('active', allOn);
+  if (noneBtn) noneBtn.classList.toggle('active', allOff);
 }
 
 function setMode(mode, onlyUI = false) {
@@ -1976,11 +1982,37 @@ function setMonthFilter(month, onlyUI = false) {
 }
 
 function setMarkerFilter(filterType, onlyUI = false) {
-  currentMarkerFilter = filterType;
+  if (filterType === 'ALL') {
+    currentMarkerFilters = {
+      FOTO: true,
+      VIDEO: true,
+      MAINT: true,
+      FUEL: true,
+      CARB: true
+    };
+  } else if (filterType === 'NONE') {
+    currentMarkerFilters = {
+      FOTO: false,
+      VIDEO: false,
+      MAINT: false,
+      FUEL: false,
+      CARB: false
+    };
+  } else {
+    currentMarkerFilters[filterType] = !currentMarkerFilters[filterType];
+  }
+
   syncFilterButtonsUI();
   if (!onlyUI) renderMap();
 }
 
+
+function isMarkerTypeVisible(type) {
+  return !!currentMarkerFilters[type];
+}
+
+
+  
 function applyFiltersAndClose() {
   renderMap();
   closeFiltersDrawer();
