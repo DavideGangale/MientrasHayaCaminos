@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-03-31T15:02:47.866Z",
+  "_exportDate": "2026-03-31T15:12:13.911Z",
   "tipo": "paese",
   "paese": "Colombia",
   "slug": "colombia",
@@ -3398,6 +3398,106 @@
       "geo": {
         "lat": 4.8060033,
         "lon": -74.360735
+      }
+    },
+    {
+      "id": 1774960525021,
+      "ts": 1774960525021,
+      "data": "31/03/2026",
+      "ora": "07:35",
+      "paese": "Colombia",
+      "luogo": "N/D",
+      "km": "77.7",
+      "qta": "1.89",
+      "dest": "Vespa",
+      "mix": "2%",
+      "prezzoUnit": "4015.417",
+      "costoBenzLocal": "7600.00",
+      "costoBenzUsd": "2.05",
+      "costoOlio": "0.59",
+      "geo": {
+        "lat": 4.8059883,
+        "lon": -74.360645
+      }
+    },
+    {
+      "id": 1774914826180,
+      "ts": 1774914826180,
+      "data": "30/03/2026",
+      "ora": "18:53",
+      "paese": "Colombia",
+      "luogo": "N/D",
+      "km": "77.7",
+      "qta": "0.38",
+      "dest": "Vespa",
+      "mix": "2%",
+      "prezzoUnit": "3909.748",
+      "costoBenzLocal": "1480.00",
+      "costoBenzUsd": "0.40",
+      "costoOlio": "0.13",
+      "geo": {
+        "lat": 4.8059476,
+        "lon": -74.360684
+      }
+    },
+    {
+      "id": 1774910150511,
+      "ts": 1774910150511,
+      "data": "30/03/2026",
+      "ora": "17:35",
+      "paese": "Colombia",
+      "luogo": "N/D",
+      "km": "77.7",
+      "qta": "0.38",
+      "dest": "Vespa",
+      "mix": "2%",
+      "prezzoUnit": "3909.748",
+      "costoBenzLocal": "1480.00",
+      "costoBenzUsd": "0.40",
+      "costoOlio": "0.13",
+      "geo": {
+        "lat": 4.8059419,
+        "lon": -74.3606853
+      }
+    },
+    {
+      "id": 1774819871799,
+      "ts": 1774819871799,
+      "data": "29/03/2026",
+      "ora": "16:31",
+      "paese": "Colombia",
+      "luogo": "N/D",
+      "km": "74.5",
+      "qta": "3.86",
+      "dest": "Vespa",
+      "mix": "2%",
+      "prezzoUnit": "4092.079",
+      "costoBenzLocal": "15800.00",
+      "costoBenzUsd": "4.26",
+      "costoOlio": "1.20",
+      "geo": {
+        "lat": 4.81264,
+        "lon": -74.35763
+      }
+    },
+    {
+      "id": 1774786873229,
+      "ts": 1774786873229,
+      "data": "29/03/2026",
+      "ora": "07:21",
+      "paese": "Colombia",
+      "luogo": "N/D",
+      "km": "0.0",
+      "qta": "5.68",
+      "dest": "Vespa",
+      "mix": "2%",
+      "prezzoUnit": "4402.870",
+      "costoBenzLocal": "25000.00",
+      "costoBenzUsd": "6.74",
+      "costoOlio": "1.78",
+      "geo": {
+        "lat": 4.8060371,
+        "lon": -74.3607589
       }
     }
   ],
