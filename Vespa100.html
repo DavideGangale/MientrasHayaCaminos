@@ -8159,11 +8159,24 @@ function renderLogCarburanti() {
         ${(costoOlioUsd != null && costoOlioUsd > 0)
           ? `<div>🧪 Costo olio 2T (da stock): <b style="color:#00bcd4;">${fmtUsd(costoOlioUsd)}</b></div>`
           : ''}
+
+          <button onclick="eliminaRifornimento(${l.id})"
+  style="background:none; border:none; color:#666; font-size:12px; cursor:pointer; margin-top:8px;">
+  🗑️ Elimina
+</button>
       </div>
     `;
   }).join('');
 }
 
+function eliminaRifornimento(id) {
+  if (!confirm('Eliminare questo rifornimento?')) return;
+  const log = caricaJSON('vt_logCarburanti', []).filter(x => String(x.id) !== String(id));
+  salva('vt_logCarburanti', log);
+  renderLogCarburanti();
+  showToast('🗑️ Rifornimento eliminato');
+}
+  
 /* ============================================================
    STATS PER PAESE — RENDER MODAL
 ============================================================ */
@@ -9229,10 +9242,22 @@ function renderStoricoCarbur() {
       ${e.candela ? `<div>🔥 Candela: <b>${e.candela}</b></div>` : ''}
       ${e.fotoCandela ? `<img src="${e.fotoCandela}" class="log-img" loading="lazy">` : ''}
       ${e.nota ? `<div class="log-note">📝 ${e.nota}</div>` : ''}
+      <button onclick="eliminaCarburazione(${e.id})"
+  style="background:none; border:none; color:#666; font-size:12px; cursor:pointer; margin-top:8px;">
+  🗑️ Elimina
+</button>
     </div>
   `).join('');
 }
 
+  function eliminaCarburazione(id) {
+  if (!confirm('Eliminare questo setup carburazione?')) return;
+  const storico = caricaJSON('vt_carburazione', []).filter(x => String(x.id) !== String(id));
+  salva('vt_carburazione', storico);
+  renderStoricoCarbur();
+  showToast('🗑️ Setup eliminato');
+}
+  
 /* ============================================================
    INTERVENTI MANUTENZIONE
 ============================================================ */
