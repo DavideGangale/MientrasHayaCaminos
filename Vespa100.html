@@ -5234,70 +5234,84 @@ salva('vt_datiPaesi', datiPaesi);
 ============================================================ */
 function calcolaConsumoDaTappe() {
   const tappe = caricaJSON('vt_tappe', []);
-  if (!Array.isArray(tappe) || tappe.length === 0) return null;
+  const tur   = caricaJSON('vt_turismo', []);
+
+  const all = []
+    .concat(Array.isArray(tappe) ? tappe : [])
+    .concat(Array.isArray(tur) ? tur : []);
+
+  if (!all.length) return null;
 
   let kmSum = 0;
   let benzSum = 0;
+  let valid = 0;
 
-  for (const t of tappe) {
+  for (const t of all) {
     const km = Number(t.km || 0);
-    const bz = Number(t.benzina || 0);
 
-    if (km < 20) continue;
-    if (bz < 0.3) continue;
+    // stimato (nuovo campo)
+    const stimL = Number(t.benzinaStimataLitri ?? t.benzina ?? 0);
+
+    if (!isFinite(km) || km < 40) continue;
+    if (!isFinite(stimL) || stimL < 0.8) continue;
+
+    const consumo = km / stimL;
+    if (!isFinite(consumo) || consumo < 10 || consumo > 60) continue;
 
     kmSum += km;
-    benzSum += bz;
-    if (kmSum >= 150) break;
+    benzSum += stimL;
+    valid++;
+
+    if (valid >= 6) break; // ultime 6 valide bastano
   }
 
   if (benzSum <= 0) return null;
 
-  const consumo = kmSum / benzSum;
-  if (consumo < 10 || consumo > 60) return null;
+  const out = kmSum / benzSum;
+  if (out < 10 || out > 60) return null;
 
-  return consumo;
+  return out;
 }
 
 
 
 function calcolaConsumoRealeDaTappe() {
   const tappe = caricaJSON('vt_tappe', []);
-  if (!Array.isArray(tappe) || tappe.length === 0) return null;
+  const tur   = caricaJSON('vt_turismo', []);
+
+  const all = []
+    .concat(Array.isArray(tappe) ? tappe : [])
+    .concat(Array.isArray(tur) ? tur : []);
+
+  if (!all.length) return null;
 
   let kmSum = 0;
   let benzSum = 0;
-  let tappeValide = 0;
+  let valid = 0;
 
-  for (const t of tappe) {
+  for (const t of all) {
     const km = Number(t.km || 0);
     const realL = Number(t.benzinaRealeLitri);
 
-    // scarta tappe troppo corte
-    if (km < 40) continue;
-
-    // serve un consumo reale sensato
+    if (!isFinite(km) || km < 40) continue;
     if (!isFinite(realL) || realL <= 0.8) continue;
 
     const consumo = km / realL;
-
-    // scarta valori assurdi
     if (!isFinite(consumo) || consumo < 10 || consumo > 45) continue;
 
     kmSum += km;
     benzSum += realL;
-    tappeValide++;
+    valid++;
 
-    // bastano le ultime 6 tappe valide
-    if (tappeValide >= 6) break;
+    if (valid >= 6) break;
   }
 
   if (benzSum <= 0 || kmSum <= 0) return null;
 
-  const consumoMedio = kmSum / benzSum;
-  if (!isFinite(consumoMedio) || consumoMedio < 10 || consumoMedio > 45) return null;
+  const out = kmSum / benzSum;
+  if (!isFinite(out) || out < 10 || out > 45) return null;
 
-  return consumoMedio;
+  return out;
 }
 
 function getConsumoUsatoKmPerL() {
@@ -8751,20 +8765,24 @@ function salvaCarburazione() {
     }
   } catch(e) {}
 
-  const entry = {
-    id: Date.now(),
-    geo: geoCarb,
-    data: now.toLocaleDateString('it-IT'),
-    ora: now.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' }),
-    alt: altitudineAttuale,
-    chicMax,
-    chicMin,
-    viteAria,
-    viteMinimo,
-    candela,
-    nota,
-    fotoCandela
-  };
+const entry = {
+  id: Date.now(),
+  ts: Date.now(), // ✅ utile per inferenze e filtri
+  paese: carica('vt_paeseAttuale','Colombia'), // ✅ FIX: salva paese
+
+  geo: geoCarb,
+  data: now.toLocaleDateString('it-IT'),
+  ora: now.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' }),
+  alt: altitudineAttuale,
+
+  chicMax,
+  chicMin,
+  viteAria,
+  viteMinimo,
+  candela,
+  nota,
+  fotoCandela
+};
 
   const storico = caricaJSON('vt_carburazione', []);
   storico.unshift(entry);
@@ -10281,7 +10299,7 @@ async function setLoadingProgress(pct, label) {
 async function inizializzaApp() {
   await setLoadingProgress(10, '🗄️ Database...');
   initAllData();
-  
+  migrateCarburazionePaeseFromPercorsi();
 const g = parseFloat(carica('vt_spesaBenzinaUsd','0')) || 0;
 if (g <= 0.0001) ricostruisciSpeseGlobaliDaPaesi();
   
@@ -10361,6 +10379,51 @@ if (navigator.onLine && carica('vt_driveAutoSync','1') === '1') {
 /* ============================================================
    AVVIO
 ============================================================ */
+function migrateCarburazionePaeseFromPercorsi() {
+  if (carica('vt_mig_carb_paese_v1','') === '1') return;
+
+  const storico = caricaJSON('vt_carburazione', []);
+  if (!Array.isArray(storico) || !storico.length) {
+    salva('vt_mig_carb_paese_v1','1');
+    return;
+  }
+
+  const tappe = caricaJSON('vt_tappe', []);
+  const tur   = caricaJSON('vt_turismo', []);
+
+  const percorsi = []
+    .concat(Array.isArray(tappe) ? tappe : [])
+    .concat(Array.isArray(tur) ? tur : [])
+    .filter(p => p && p.startTs && p.endTs && p.paese);
+
+  const margin = 30 * 60 * 1000; // 30 min di tolleranza
+  let changed = false;
+
+  for (const e of storico) {
+    if (!e) continue;
+
+    // ts (se manca): usa id come fallback (di solito è Date.now())
+    if (!e.ts) { e.ts = e.id || Date.now(); changed = true; }
+
+    // paese (se manca): prova a dedurre dalla tappa/giro vicino nel tempo
+    if (!e.paese || !String(e.paese).trim()) {
+      const ts = Number(e.ts || e.id || 0);
+      if (isFinite(ts) && percorsi.length) {
+        const p = percorsi.find(p =>
+          ts >= (Number(p.startTs) - margin) && ts <= (Number(p.endTs) + margin)
+        );
+        if (p && p.paese) {
+          e.paese = p.paese;
+          changed = true;
+        }
+      }
+    }
+  }
+
+  if (changed) salva('vt_carburazione', storico);
+  salva('vt_mig_carb_paese_v1','1');
+}
+  
 function disattivaAutoFillCampi() {
   const campi = document.querySelectorAll('input, textarea');
   campi.forEach(el => {
