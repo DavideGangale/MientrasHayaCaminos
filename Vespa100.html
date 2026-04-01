@@ -606,21 +606,38 @@ color:#fff;
 /* HUD velocità sopra la mappa */
 #mapFullHud{
   position: fixed;
-  left: 50%;
+  left: 0;
+  right: 0;
   bottom: 22px;
-  top: auto;
-  transform: translateX(-50%);
   z-index: 10050;
 
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
+  display:flex;
+  justify-content: space-between;
+  align-items: flex-end;
 
+  padding: 0 16px;
   pointer-events: none;
 }
 
+#mapFullCompass{
+  font-size: 18px;
+  font-weight: 1000;
+  color: #fff;
+  background: rgba(0,0,0,0.55);
+  border: 1px solid #333;
+  padding: 10px 12px;
+  border-radius: 14px;
+  line-height: 1;
+}
+
+#mapFullSpeedWrap{
+  display:flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
 #mapFullSpeed{
-  font-size: 72px;          /* ✅ più grande */
+  font-size: 72px;     /* circa doppio rispetto a prima */
   font-weight: 1000;
   color: var(--verde);
   background: rgba(0,0,0,0.55);
@@ -632,7 +649,7 @@ color:#fff;
 }
 
 #mapFullSpeedUnit{
-  font-size: 14px;          /* ✅ resta piccolo */
+  font-size: 14px;
   font-weight: 900;
   color: var(--verde);
   background: rgba(0,0,0,0.55);
@@ -1727,9 +1744,13 @@ color:#fff;
 
     <!-- HUD: velocità -->
     <div id="mapFullHud">
-      <div id="mapFullSpeed">0</div>
-      <div id="mapFullSpeedUnit">km/h</div>
-    </div>
+  <div id="mapFullCompass">N ↑</div>
+
+  <div id="mapFullSpeedWrap">
+    <div id="mapFullSpeed">0</div>
+    <div id="mapFullSpeedUnit">km/h</div>
+  </div>
+</div>
 
     <!-- mappa full screen -->
     <div id="mapFull"></div>
@@ -2520,7 +2541,17 @@ color:#fff;
         <h4 style="margin-top:0; color:#fff;">🐙 Sincronizzazione GitHub</h4>
 
         <label class="inp-label">GitHub Token</label>
-        <input type="password" id="set-gh-token" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Incolla qui il token">
+        <input type="text"
+       id="set-gh-token"
+       name="vt-gh-token"
+       inputmode="text"
+       autocomplete="off"
+       autocorrect="off"
+       autocapitalize="off"
+       spellcheck="false"
+       data-lpignore="true"
+       data-1p-ignore="true"
+       placeholder="Incolla qui il token">
 
         <label class="inp-label">Utente / Repository</label>
         <input type="text" id="set-gh-repo" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="es. davidegangale/MientrasHayaCaminos">
