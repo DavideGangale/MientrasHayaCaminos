@@ -633,14 +633,13 @@ color:#fff;
 /* Z-INDEX MODALI (ordine sopra/sotto) */
 #modalTappe    { z-index: 6000; }
     
-   #modalMediaPercorso { z-index: 8950; }
-    
-#modalDettagli { z-index: 6600; }
-#modalConsumo  { z-index: 6500; }
-#modalMapFull  { z-index: 7000; }
+#modalMediaPercorso { z-index: 9600; }  /* sopra Diario */
+#modalDettagli      { z-index: 9700; }  /* sopra Diario */
+#modalConsumo       { z-index: 9650; }  /* sopra Diario */
+#modalMapFull       { z-index: 9800; }  /* sopra Diario */
 
-#modalDiarioEditVideo { z-index: 9200; }
-#modalDiario          { z-index: 9100; } /* opzionale ma utile */
+#modalDiarioEditVideo { z-index: 9850; } /* sopra MapFull */
+#modalDiario          { z-index: 9100; }
     
     #modalAddRicambio { z-index: 6700; }
     #modalCarbSetup { z-index: 6750; }
@@ -1076,7 +1075,7 @@ color:#fff;
 }
     
 /* ===== LIGHTBOX FOTO ===== */
-#photoLightbox.modal-overlay { z-index: 9000; }
+#photoLightbox.modal-overlay { z-index: 99999; }
 #photoLightbox .modal-content{
   border-color:#ff9800;
   max-width: 980px;
@@ -2127,6 +2126,51 @@ color:#fff;
   </div>
 </div>
 
+<!-- ADD MEDIA A TAPPA/TURISMO (modal) -->
+<div id="modalAddMediaToPercorso" class="modal-overlay">
+  <div class="modal-content" style="border-color:#ff9800; max-width:700px;">
+    <button class="close-modal" onclick="chiudiModal('modalAddMediaToPercorso')">×</button>
+
+    <h2 id="addMediaTitolo" style="color:#ff9800; text-align:center; margin-top:0;">
+      ➕ Aggiungi media al percorso
+    </h2>
+
+    <div class="dash-card" style="padding:12px; border:2px solid #333;">
+      <div id="addMediaInfo" style="font-size:12px;color:#aaa;text-align:left;margin-bottom:10px;">--</div>
+
+      <!-- FOTO -->
+      <input type="file" id="tappa-media-foto-input" accept="image/*" multiple capture="environment"
+             style="display:none;"
+             onchange="anteprimaMulti('tappa-media-foto-input','tappa-media-preview')">
+
+      <button class="btn-azione btn-yellow" onclick="document.getElementById('tappa-media-foto-input').click()">
+        📷 Aggiungi Foto (anche multiple)
+      </button>
+      <div id="tappa-media-preview" style="margin-top:10px; display:none;"></div>
+
+      <!-- VIDEO -->
+      <input type="text" id="tappa-media-video"
+             placeholder="📺 Link YouTube (opzionale)"
+             style="margin-top:10px; background:#222; border-color:#444; color:white;">
+
+      <label class="checklist-item tagpick planned-video" style="margin-top:8px;">
+        <input type="checkbox" id="tappa-media-video-planned">
+        <span class="checklist-text">🎬 Video da aggiungere dopo (link non ancora disponibile)</span>
+      </label>
+
+      <!-- TESTO -->
+      <textarea id="tappa-media-testo"
+                placeholder="Note/descrizione (opzionale). Puoi usare hashtag: #Paesaggi #Frontiera"
+                rows="3"
+                style="margin-top:10px;"></textarea>
+
+      <button class="btn-azione" style="background:#ff9800;color:black;" onclick="salvaMediaSuPercorso()">
+        💾 Salva media nel Diario (collegato alla tappa)
+      </button>
+    </div>
+  </div>
+</div>
+  
 <!-- DIARIO EDIT VIDEO (modal) -->
 <div id="modalDiarioEditVideo" class="modal-overlay">
   <div class="modal-content" style="border-color:#e91e63; max-width:560px;">
@@ -5700,6 +5744,79 @@ const DIARIO_TAGS_PRESET = [
   'Animali'
 ];
 
+// Preview MULTI (salva array base64 in div.dataset.list)
+async function anteprimaMulti(inputId, containerID) {
+  const input = document.getElementById(inputId);
+  const files = input && input.files ? Array.from(input.files) : [];
+  if (!files.length) return;
+
+  const div = document.getElementById(containerID);
+  if (!div) return;
+
+  div.style.display = 'block';
+  div.innerHTML = `<div style="color:#aaa;">⏳ Elaboro ${files.length} foto...</div>`;
+  div.dataset.list = '[]';
+
+  const out = [];
+
+  for (const file of files) {
+    try {
+      const url = URL.createObjectURL(file);
+
+      const dataUrlJpeg = await new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          try {
+            const MAX_W = 900;
+            const quality = 0.70;
+
+            const ratio = Math.min(1, MAX_W / img.width);
+            const w = Math.max(1, Math.round(img.width * ratio));
+            const h = Math.max(1, Math.round(img.height * ratio));
+
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          } catch (e) { reject(e); }
+        };
+        img.onerror = () => reject(new Error('Immagine non caricabile'));
+        img.src = url;
+      });
+
+      try { URL.revokeObjectURL(url); } catch {}
+
+      out.push(dataUrlJpeg);
+    } catch (e) {
+      console.warn('anteprimaMulti file error:', e);
+    }
+  }
+
+  div.dataset.list = JSON.stringify(out);
+
+  if (!out.length) {
+    div.innerHTML = `<div style="color:#f44336;">❌ Nessuna foto valida</div>`;
+    return;
+  }
+
+  // preview a griglia usando lo stile gallery già presente
+  div.innerHTML = `
+    <div style="color:#bbb;font-size:12px;margin-bottom:8px;">✅ Foto pronte: ${out.length}</div>
+    <div class="diario-gallery">
+      ${out.map(src => `
+        <div class="diario-thumb" onclick="openPhotoLightbox(${JSON.stringify(src)}, '')">
+          <img src="${src}" loading="lazy">
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  showToast(`📷 ${out.length} foto pronte`);
+}
+    
 function escSQ(s){ return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
 
 function getCustomDiarioTags() {
@@ -6050,22 +6167,37 @@ function getAllPercorsiSorted() {
 }
 
 // prende entry diario dentro range start/end (NON richiede geo)
-function getDiarioEntriesByRange(startTs, endTs, onlyMedia = false) {
+function getDiarioEntriesByRange(startTs, endTs, onlyMedia = false, ctx = null) {
   const diario = caricaJSON('vt_diario', []);
-  if (!Array.isArray(diario) || !startTs || !endTs) return [];
+  if (!Array.isArray(diario)) return [];
+
+  // ✅ 1) se ho ctx, includo SEMPRE quelli collegati esplicitamente
+  const ctxId = ctx?.id;
+  const ctxTipo = ctx?.tipoRef; // 'tappa'|'turismo'
 
   const margin = 15 * 60 * 1000; // 15 min
-  const a = Number(startTs) - margin;
-  const b = Number(endTs) + margin;
+  const a = (startTs && endTs) ? (Number(startTs) - margin) : null;
+  const b = (startTs && endTs) ? (Number(endTs) + margin) : null;
 
   return diario.filter(e => {
-    const ts = Number(e.ts || e.id || 0);
-    if (!(ts >= a && ts <= b)) return false;
+    if (!e) return false;
+
+    const linked = (ctxId && String(e.percorsoRefId || '') === String(ctxId) &&
+                    (!ctxTipo || String(e.percorsoRefTipo || '') === String(ctxTipo)));
+
+    let inRange = false;
+    if (a != null && b != null) {
+      const ts = Number(e.ts || e.id || 0);
+      inRange = (ts >= a && ts <= b);
+    }
+
+    if (!linked && !inRange) return false;
 
     if (onlyMedia) {
       const hasMedia = !!(e.fotoUrl || e.foto || e.videoUrl || e.videoPlanned);
       if (!hasMedia) return false;
     }
+
     return true;
   });
 }
@@ -6122,7 +6254,8 @@ function renderDiarioByTappa() {
 
     // se manca start/end => vecchio record
     const hasRange = !!(p.startTs && p.endTs);
-    const mediaEntries = hasRange ? getDiarioEntriesByRange(p.startTs, p.endTs, true) : [];
+    const ctx = { id: p.id, tipoRef: (String(p.tipo||'').toLowerCase()==='turismo' ? 'turismo' : 'tappa') };
+    const mediaEntries = getDiarioEntriesByRange(p.startTs, p.endTs, true, ctx);
 
     // thumbs: mostra prime 9 (foto o “tile video”)
     const thumbs = mediaEntries.slice(0, 9).map(e => {
@@ -6206,7 +6339,161 @@ function renderDiarioFull() {
   renderDiarioList('lista-diario-modal', null);
 }
 
+let pendingAddMediaCtx = null; // { id, tipoRef:'tappa'|'turismo', paese, data, ora, km, startTs, endTs, traccia }
 
+function getGeoFromPercorsoCtx(ctx) {
+  // prova: ultimo punto traccia del percorso, altrimenti GPS/marker attuale
+  try {
+    const tr = ctx && Array.isArray(ctx.traccia) ? ctx.traccia : null;
+    if (tr && tr.length) {
+      const last = tr[tr.length - 1];
+      if (Array.isArray(last) && isFinite(last[0]) && isFinite(last[1])) return { lat:last[0], lon:last[1] };
+    }
+  } catch {}
+
+  try {
+    if (lastLat != null && lastLon != null) return { lat:lastLat, lon:lastLon };
+    const ll = marker?.getLatLng?.();
+    if (ll && isFinite(ll.lat) && isFinite(ll.lng)) return { lat: ll.lat, lon: ll.lng };
+  } catch {}
+
+  return null;
+}
+
+function apriAddMediaToPercorso(tipo, id) {
+  const found = window.trovaPercorsoById ? window.trovaPercorsoById(id) : null;
+  if (!found || !found.item) { showToast('⚠️ Percorso non trovato'); return; }
+
+  const p = found.item;
+  const tipoRef = (String(found.key) === 'vt_turismo') ? 'turismo' : 'tappa';
+
+  pendingAddMediaCtx = {
+    id: p.id,
+    tipoRef,
+    paese: p.paese || carica('vt_paeseAttuale','Colombia'),
+    data: p.data || '',
+    ora: p.ora || '',
+    km: p.km || '',
+    startTs: p.startTs || null,
+    endTs: p.endTs || null,
+    traccia: p.traccia || []
+  };
+
+  // reset UI modal
+  const tit = document.getElementById('addMediaTitolo');
+  const info = document.getElementById('addMediaInfo');
+  const txt = document.getElementById('tappa-media-testo');
+  const vid = document.getElementById('tappa-media-video');
+  const chk = document.getElementById('tappa-media-video-planned');
+
+  const prev = document.getElementById('tappa-media-preview');
+  const fi = document.getElementById('tappa-media-foto-input');
+
+  if (tit) tit.innerText = `➕ Media — ${String(p.tipo || 'Percorso')} — ${p.data || ''} ${p.ora || ''}`;
+  if (info) info.innerHTML = `📍 <b>${pendingAddMediaCtx.paese}</b> — 📏 <b>${pendingAddMediaCtx.km}</b> km<br>Collego queste foto/video a questa tappa (anche se aggiunti dopo).`;
+
+  if (txt) txt.value = '';
+  if (vid) vid.value = '';
+  if (chk) chk.checked = false;
+
+  if (prev) {
+    prev.style.display = 'none';
+    prev.innerHTML = '';
+    prev.dataset.list = '[]';
+  }
+  if (fi) fi.value = '';
+
+  apriModal('modalAddMediaToPercorso');
+}
+
+function salvaMediaSuPercorso() {
+  if (!pendingAddMediaCtx || !pendingAddMediaCtx.id) {
+    showToast('⚠️ Nessun percorso selezionato');
+    return;
+  }
+
+  const txt = (document.getElementById('tappa-media-testo')?.value || '').trim();
+  const videoUrl = (document.getElementById('tappa-media-video')?.value || '').trim() || null;
+  const planned = !!document.getElementById('tappa-media-video-planned')?.checked;
+
+  const prev = document.getElementById('tappa-media-preview');
+  let photos = [];
+  try { photos = JSON.parse(prev?.dataset?.list || '[]'); } catch { photos = []; }
+  if (!Array.isArray(photos)) photos = [];
+
+  const hasAny = (photos.length > 0) || !!videoUrl || !!planned;
+  if (!hasAny) { showToast('⚠️ Aggiungi almeno una foto o un video'); return; }
+
+  const paese = pendingAddMediaCtx.paese || carica('vt_paeseAttuale','Colombia');
+  const now = new Date();
+  const geo = getGeoFromPercorsoCtx(pendingAddMediaCtx);
+
+  // tags estratti dal testo (#...)
+  const tagsFromText = extractHashtagsFromText(txt);
+
+  const diario = caricaJSON('vt_diario', []);
+  const list = Array.isArray(diario) ? diario : [];
+
+  const base = {
+    ts: Date.now(),
+    data: now.toLocaleDateString('it-IT'),
+    ora: now.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' }),
+    paese,
+    km: String(pendingAddMediaCtx.km || (parseFloat(carica('vt_kmTotali','0')) || 0).toFixed(1)),
+    testo: txt,
+    tags: tagsFromText,
+    geo: geo,
+
+    // ✅ COLLEGAMENTO ESPLICITO AL PERCORSO
+    percorsoRefId: pendingAddMediaCtx.id,
+    percorsoRefTipo: pendingAddMediaCtx.tipoRef, // 'tappa' | 'turismo'
+
+    fotoUrl: null,
+    videoUrl: videoUrl,
+    videoPlanned: (!!planned && !videoUrl)
+  };
+
+  const createdIds = [];
+
+  // caso: solo video (senza foto)
+  if (!photos.length) {
+    const entry = { ...base, id: Date.now(), foto: null };
+    list.unshift(entry);
+    createdIds.push(entry.id);
+  } else {
+    // una entry per ogni foto (così puoi aggiungerne infinite)
+    for (const src of photos) {
+      const entry = { ...base, id: Date.now() + Math.floor(Math.random()*1000), foto: src };
+      list.unshift(entry);
+      createdIds.push(entry.id);
+    }
+  }
+
+  salva('vt_diario', list);
+
+  // enqueue Drive per ogni entry con foto
+  for (const id of createdIds) {
+    const e = list.find(x => String(x.id) === String(id));
+    if (e && e.foto) enqueueFoto?.('diario', e.id);
+  }
+  updateDriveSyncInfo?.();
+
+  chiudiModal('modalAddMediaToPercorso');
+  showToast('✅ Media aggiunti alla tappa');
+
+  // refresh viste
+  try { renderDiarioFull?.(); } catch {}
+  try { renderTappe?.(); } catch {}
+
+  // se MapFull aperta su quella tappa, refresh marker
+  try {
+    const isOpen = document.getElementById('modalMapFull')?.classList.contains('open');
+    if (isOpen && typeof renderMapFullPhotoMarkersForContext === 'function') {
+      renderMapFullPhotoMarkersForContext(mapFullCtx);
+    }
+  } catch {}
+}
+  
 let editDiarioId = null;
 
 function apriModificaVideoDiario(id) {
@@ -6346,6 +6633,11 @@ function renderTappe() {
           🗺️ Vedi traccia
         </button>
 
+  <button onclick="apriAddMediaToPercorso('${(String(t.tipo||'').toLowerCase()==='turismo') ? 'turismo' : 'tappa'}', ${t.id})"
+  style="background:#4caf50;border:none;color:#000;padding:8px 10px;border-radius:8px;font-size:12px;cursor:pointer;margin-top:8px;">
+  ➕ Aggiungi Media
+</button>
+
 <button onclick="apriMediaPercorso(${t.id})"
   style="background:#ff9800;border:none;color:black;padding:8px 10px;border-radius:8px;font-size:12px;cursor:pointer;margin-top:8px;">
   📸 Foto/Video
@@ -6398,7 +6690,8 @@ function apriMediaPercorso(id) {
   const listEl = document.getElementById('media-percorso-list');
   if (!listEl) return;
 
-  const entries = getDiarioMediaEntriesByRange(p.startTs, p.endTs);
+const ctx = { id: p.id, tipoRef: (String(p.tipo||'').toLowerCase()==='turismo' ? 'turismo' : 'tappa') };
+const entries = getDiarioEntriesByRange(p.startTs, p.endTs, true, ctx);
 
   if (!entries.length) {
     listEl.innerHTML = `<div style="color:#888;text-align:center;padding:20px;">
