@@ -1589,6 +1589,11 @@ function initMap() {
 
   layerTracce = L.layerGroup().addTo(map);
   layerMarkers = L.layerGroup().addTo(map);
+
+    // Ridisegna i marker quando cambia lo zoom (senza rifare fitBounds)
+  map.on('zoomend', () => {
+    renderMap(true);
+  });
 }
 
 function driveToDirectImageUrl(url) {
@@ -1637,18 +1642,55 @@ function resetMarkerOffsetCache() {
   MARKER_POSITION_COUNT = {};
 }
 
+function markerKeyPrecisionForZoom(z) {
+  // Zoom lontano = raggruppa coordinate simili (così si "vede" che ci sono più marker)
+  if (z <= 5) return 1;
+  if (z <= 7) return 2;
+  if (z <= 9) return 3;
+  if (z <= 11) return 4;
+  return 5;
+}
+
+function markerSpreadPxForZoom(z) {
+  // Zoom lontano = separazione grande, zoom vicino = separazione piccola
+  if (z <= 5) return 90;
+  if (z <= 7) return 70;
+  if (z <= 9) return 55;
+  if (z <= 11) return 40;
+  if (z <= 13) return 25;
+  if (z <= 15) return 14;
+  return 8;
+}
+  
 function getOffsetLatLon(lat, lon) {
-  const key = `${Number(lat).toFixed(5)},${Number(lon).toFixed(5)}`;
+  const zoom = map ? map.getZoom() : 10;
+
+  // A zoom basso usiamo meno decimali => più marker "vicini" vengono trattati come stesso punto
+  const prec = markerKeyPrecisionForZoom(zoom);
+  const key = `${Number(lat).toFixed(prec)},${Number(lon).toFixed(prec)}`;
+
   const count = MARKER_POSITION_COUNT[key] || 0;
   MARKER_POSITION_COUNT[key] = count + 1;
 
   if (count === 0) return [lat, lon];
+  if (!map) return [lat, lon];
 
-  const angle = count * 0.9;
-  const radius = 0.00012 * (1 + Math.floor(count / 6));
-  const latOffset = Math.sin(angle) * radius;
-  const lonOffset = Math.cos(angle) * radius;
-  return [lat + latOffset, lon + lonOffset];
+  // Spiral offset in pixel
+  const spread = markerSpreadPxForZoom(zoom);
+
+  // Ogni 10 marker aumenta l'anello (così non si schiacciano)
+  const ring = Math.floor((count - 1) / 10) + 1;
+  const angle = count * 0.9; // radianti
+  const radius = spread * ring;
+
+  const base = map.project(L.latLng(lat, lon), zoom);
+  const dx = Math.cos(angle) * radius;
+  const dy = Math.sin(angle) * radius;
+
+  const shifted = base.add(L.point(dx, dy));
+  const ll = map.unproject(shifted, zoom);
+
+  return [ll.lat, ll.lng];
 }
 
 const iconFoto = L.divIcon({ className: 'custom-marker marker-foto', html: '📷' });
@@ -1740,7 +1782,7 @@ function buildCarbPopup(c) {
   `;
 }
 
-function renderMap() {
+function renderMap(skipAutoFit = false) {
   if (!layerTracce || !layerMarkers) return;
 
   layerTracce.clearLayers();
@@ -1804,7 +1846,7 @@ const noMarkerVisible =
   !currentMarkerFilters.CARB;
 
 if (noMarkerVisible) {
-  if (drawnLines > 0) {
+  if (!skipAutoFit && drawnLines > 0 && bounds.isValid()) {
     map.fitBounds(bounds.pad(0.1));
   }
   return;
@@ -1939,9 +1981,9 @@ diario.forEach(d => drawDiaryMarker(d, true));
     creaMarker(lat, lon, iconCarb, buildCarbPopup(c));
   });
 
-  if ((drawnLines > 0 || layerMarkers.getLayers().length > 0) && bounds.isValid()) {
-    map.fitBounds(bounds.pad(0.1));
-  }
+if (!skipAutoFit && (drawnLines > 0 || layerMarkers.getLayers().length > 0) && bounds.isValid()) {
+  map.fitBounds(bounds.pad(0.1));
+}
 }
 
 function syncFilterButtonsUI() {
@@ -2037,7 +2079,13 @@ function applyFiltersAndClose() {
 function resetFilters() {
   currentMode = 'TUTTO';
   currentCountry = '';
-  currentMarkerFilter = 'ALL';
+  currentMarkerFilters = {
+  FOTO: true,
+  VIDEO: true,
+  MAINT: true,
+  FUEL: true,
+  CARB: true
+};
   currentMonthFilter = '';
 
   DATA = unisciDatasetGlobale();
