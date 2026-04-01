@@ -1642,19 +1642,6 @@ function resetMarkerOffsetCache() {
   MARKER_POSITION_COUNT = {};
 }
 
-function markerKeyPrecisionForZoom(z) {
-  // Zoom lontano: raggruppa di più
-  if (z <= 5) return 1;
-  if (z <= 7) return 2;
-  if (z <= 9) return 3;
-
-  // Zoom medio-alto: raggruppa ancora un po' (evita sovrapposizioni in città)
-  if (z <= 16) return 4;
-
-  // Zoom molto vicino: torna preciso
-  return 5;
-}
-
 function markerSpreadPxForZoom(z) {
   // Obiettivo: separazione piccola (circa mezzo marker), senza "esplodere" a zoom out
   if (z <= 5) return 26;
@@ -1666,35 +1653,44 @@ function markerSpreadPxForZoom(z) {
 return 34;
 }
   
-function getOffsetLatLon(lat, lon) {
-  const zoom = map ? map.getZoom() : 10;
+function markerKeyCellPxForZoom(z) {
+  // dimensione “griglia” per decidere quando i marker sono troppo vicini sullo schermo
+  if (z <= 5) return 90;
+  if (z <= 7) return 80;
+  if (z <= 9) return 70;
+  if (z <= 11) return 60;
+  if (z <= 13) return 50;
+  if (z <= 15) return 42;
+  return 36; // a zoom massimo: se stanno entro ~36px, li separiamo
+}
 
-  // A zoom basso usiamo meno decimali => più marker "vicini" vengono trattati come stesso punto
-  const prec = markerKeyPrecisionForZoom(zoom);
-  const key = `${Number(lat).toFixed(prec)},${Number(lon).toFixed(prec)}`;
+function getOffsetLatLon(lat, lon) {
+  if (!map) return [lat, lon];
+  const zoom = map.getZoom();
+
+  const base = map.project(L.latLng(lat, lon), zoom);
+
+  // KEY basata su pixel (non su decimali lat/lon)
+  const cell = markerKeyCellPxForZoom(zoom);
+  const key = `${Math.round(base.x / cell)},${Math.round(base.y / cell)}`;
 
   const count = MARKER_POSITION_COUNT[key] || 0;
   MARKER_POSITION_COUNT[key] = count + 1;
 
   if (count === 0) return [lat, lon];
-  if (!map) return [lat, lon];
 
-  // Spiral offset in pixel
   const spread = markerSpreadPxForZoom(zoom);
 
-  // Ogni 10 marker aumenta l'anello (così non si schiacciano)
+  // spirale “compatta” ma cliccabile
   const ring = Math.floor((count - 1) / 8) + 1;
-  const angle = count * 0.9; // radianti
-  // cresce piano: 1° anello = spread, poi +10px per anello
-const radius = spread + (ring - 1) * 16;
+  const angle = count * 0.9;
+  const radius = spread + (ring - 1) * 16;
 
-  const base = map.project(L.latLng(lat, lon), zoom);
   const dx = Math.cos(angle) * radius;
   const dy = Math.sin(angle) * radius;
 
   const shifted = base.add(L.point(dx, dy));
   const ll = map.unproject(shifted, zoom);
-
   return [ll.lat, ll.lng];
 }
 
@@ -2116,6 +2112,75 @@ function closeFiltersDrawer() {
   }, 260);
 }
 
+  function monthHasVisibleData(mese) {
+  if (!DATA || !mese) return false;
+
+  // helper: filtra per paese + mese
+  const okCountry = (x) => !currentCountry || (x && x.paese === currentCountry);
+
+  // TRACCE
+  const tappe = Array.isArray(DATA.tappe) ? DATA.tappe : [];
+  const turismo = Array.isArray(DATA.turismo) ? DATA.turismo : [];
+
+  if (currentMode === 'TUTTO' || currentMode === 'TAPPE') {
+    for (const t of tappe) {
+      if (!okCountry(t)) continue;
+      if (getYearMonthFromPercorso(t) !== mese) continue;
+      if (Array.isArray(t.traccia) && t.traccia.length >= 2) return true;
+    }
+  }
+
+  if (currentMode === 'TUTTO' || currentMode === 'GIRI') {
+    for (const t of turismo) {
+      if (!okCountry(t)) continue;
+      if (getYearMonthFromPercorso(t) !== mese) continue;
+      if (Array.isArray(t.traccia) && t.traccia.length >= 2) return true;
+    }
+  }
+
+  // MARKER (rispettano i filtri attuali)
+  const diario = Array.isArray(DATA.diario) ? DATA.diario : [];
+  if (isMarkerTypeVisible('FOTO') || isMarkerTypeVisible('VIDEO')) {
+    for (const d of diario) {
+      if (!okCountry(d)) continue;
+      if (getYearMonthFromPublicEntry(d) !== mese) continue;
+      if (d && d.geo && isFinite(Number(d.geo.lat)) && isFinite(Number(d.geo.lon ?? d.geo.lng))) return true;
+    }
+  }
+
+  const manut = Array.isArray(DATA.manutenzioni) ? DATA.manutenzioni : [];
+  if (isMarkerTypeVisible('MAINT')) {
+    for (const m of manut) {
+      if (!okCountry(m)) continue;
+      if (getYearMonthFromPublicEntry(m) !== mese) continue;
+      if (m && m.geo && isFinite(Number(m.geo.lat)) && isFinite(Number(m.geo.lon ?? m.geo.lng))) return true;
+    }
+  }
+
+  const rif = Array.isArray(DATA.rifornimenti) ? DATA.rifornimenti : [];
+  if (isMarkerTypeVisible('FUEL')) {
+    for (const r of rif) {
+      if (!okCountry(r)) continue;
+      if (getYearMonthFromPublicEntry(r) !== mese) continue;
+
+      const lat = Number(r?.geo?.lat ?? r?.lat ?? r?.latitude);
+      const lon = Number(r?.geo?.lon ?? r?.geo?.lng ?? r?.lon ?? r?.lng ?? r?.longitude);
+      if (isFinite(lat) && isFinite(lon)) return true;
+    }
+  }
+
+  const carb = Array.isArray(DATA.carburazioni) ? DATA.carburazioni : [];
+  if (isMarkerTypeVisible('CARB')) {
+    for (const c of carb) {
+      if (!okCountry(c)) continue;
+      if (getYearMonthFromPublicEntry(c) !== mese) continue;
+      if (c && c.geo && isFinite(Number(c.geo.lat)) && isFinite(Number(c.geo.lon ?? c.geo.lng))) return true;
+    }
+  }
+
+  return false;
+}
+  
 function popolaMesi() {
   const sel = document.getElementById('monthSelect');
   if (!sel || !DATA) return;
@@ -2171,15 +2236,23 @@ function popolaMesi() {
   });
 
   if (mesi.length > 0) {
-    const ultimoMese = mesi[mesi.length - 1];
-    if (!currentMonthFilter || !mesi.includes(currentMonthFilter)) {
-      currentMonthFilter = ultimoMese;
-    }
+  // 1) se il mese attuale è valido e ha dati visibili, lo teniamo
+  if (currentMonthFilter && mesi.includes(currentMonthFilter) && monthHasVisibleData(currentMonthFilter)) {
+    // ok, non cambiare
   } else {
-    currentMonthFilter = '';
+    // 2) altrimenti scegliamo l’ultimo mese che ha davvero qualcosa da mostrare
+    let chosen = '';
+    for (let i = mesi.length - 1; i >= 0; i--) {
+      if (monthHasVisibleData(mesi[i])) { chosen = mesi[i]; break; }
+    }
+    // 3) fallback: se non troviamo niente (filtri troppo stretti), prendiamo comunque l’ultimo mese esistente
+    currentMonthFilter = chosen || mesi[mesi.length - 1];
   }
+} else {
+  currentMonthFilter = '';
+}
 
-  sel.value = currentMonthFilter || '';
+sel.value = currentMonthFilter || '';
 }
 
 function popolaPaesi() {
