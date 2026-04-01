@@ -2180,6 +2180,21 @@ color:#fff;
 
   <div id="anteprima-log-foto" style="margin-bottom:10px; display:none;"></div>
 
+     <!-- FOTO 2 (opzionale) -->
+<input type="file" id="log-foto2-input" accept="image/*" style="width:100%; margin-bottom:10px;"
+       onchange="anteprima('log-foto2-input','anteprima-log-foto2')">
+<div id="anteprima-log-foto2" style="margin-bottom:10px; display:none;"></div>
+
+<!-- VIDEO YOUTUBE (opzionale) -->
+<input type="text" id="log-video"
+       placeholder="📺 Link YouTube (opzionale)"
+       style="margin-top:10px; background:#222; border-color:#444; color:white;">
+
+<label class="checklist-item tagpick planned-video" style="margin-top:8px;">
+  <input type="checkbox" id="log-video-planned">
+  <span class="checklist-text">🎬 Video in arrivo (nessun link ancora)</span>
+</label>
+
   <button class="btn-azione" onclick="salvaIntervento()">💾 Salva Intervento</button>
 </div>
   </div>
@@ -2203,6 +2218,25 @@ color:#fff;
            onchange="anteprima('edit-log-foto-input','anteprima-edit-log-foto')">
 
     <div id="anteprima-edit-log-foto" style="margin-top:10px; display:none;"></div>
+
+
+    <!-- FOTO 2 (opzionale) -->
+<div id="edit-log-foto2-attuale" style="margin-top:10px;"></div>
+
+<input type="file" id="edit-log-foto2-input" accept="image/*" style="width:100%; margin-top:10px;"
+       onchange="anteprima('edit-log-foto2-input','anteprima-edit-log-foto2')">
+
+<div id="anteprima-edit-log-foto2" style="margin-top:10px; display:none;"></div>
+
+<!-- VIDEO YOUTUBE (opzionale) -->
+<input type="text" id="edit-log-video"
+       placeholder="📺 Link YouTube (opzionale)"
+       style="margin-top:10px; background:#222; border-color:#444; color:white;">
+
+<label class="checklist-item tagpick planned-video" style="margin-top:8px;">
+  <input type="checkbox" id="edit-log-video-planned">
+  <span class="checklist-text">🎬 Video in arrivo (nessun link ancora)</span>
+</label>
 
     <button class="btn-azione" onclick="salvaModificaIntervento()">💾 Salva modifiche</button>
   </div>
@@ -5978,24 +6012,46 @@ const url = await uploadFotoToDrive(entry.foto, key, key);
 
       if (job.kind === 'logbook') {
         const log = caricaJSON('vt_logbook', []);
-        const idx = log.findIndex(x => x.id === job.id);
+        const idx = log.findIndex(x => String(x.id) === String(job.id));
         if (idx === -1) continue;
         const entry = log[idx];
 
-        if (entry.fotoUrl) continue;
-        if (!entry.foto) { continue; }
+        // se non ho nessuna foto locale da caricare, skip
+        const need1 = (!entry.fotoUrl && entry.foto);
+        const need2 = (!entry.fotoUrl2 && entry.foto2);
 
-        const key = 'logbook_' + entry.id;
-const url = await uploadFotoToDrive(entry.foto, key, key);;
-        if (url) {
-          entry.fotoUrl = url;
-          entry.foto = null;
-          log[idx] = entry;
-          salva('vt_logbook', log);
-          done++;
-        } else {
-          keep.push(job);
+        if (!need1 && !need2) continue;
+
+        // carica foto 1
+        if (need1) {
+          const key1 = 'logbook_' + entry.id + '_1';
+          const url1 = await uploadFotoToDrive(entry.foto, key1, key1);
+          if (url1) {
+            entry.fotoUrl = url1;
+            entry.foto = null; // alleggerisce
+            done++;
+          } else {
+            keep.push(job);
+            continue;
+          }
         }
+
+        // carica foto 2
+        if (need2) {
+          const key2 = 'logbook_' + entry.id + '_2';
+          const url2 = await uploadFotoToDrive(entry.foto2, key2, key2);
+          if (url2) {
+            entry.fotoUrl2 = url2;
+            entry.foto2 = null;
+            done++;
+          } else {
+            keep.push(job);
+            continue;
+          }
+        }
+
+        log[idx] = entry;
+        salva('vt_logbook', log);
       }
     } catch (e) {
       console.warn('processUploadQueue job error', e);
@@ -9352,6 +9408,13 @@ const costoUsd = (costoLocal > 0) ? convertLocalToUsd(costoLocal, cur) : 0;
     const ante = document.getElementById('anteprima-log-foto');
   const foto = (ante && ante.dataset) ? (ante.dataset.src || null) : null;
 
+  const ante2 = document.getElementById('anteprima-log-foto2');
+const foto2 = (ante2 && ante2.dataset) ? (ante2.dataset.src || null) : null;
+
+const videoUrlRaw = (document.getElementById('log-video')?.value || '').trim();
+const videoUrl = videoUrlRaw || null;
+const videoPlanned = !!document.getElementById('log-video-planned')?.checked;
+
   const now = new Date();
   
   const ricambioSel = document.getElementById('log-ricambio-select');
@@ -9382,7 +9445,13 @@ const costoUsd = (costoLocal > 0) ? convertLocalToUsd(costoLocal, cur) : 0;
 
   costoLocal: costoLocal,
   costoUsd: costoUsd,
+    
+foto2: foto2,
+fotoUrl2: null,
 
+videoUrl: videoUrl,
+videoPlanned: (!!videoPlanned && !videoUrl),
+    
   foto: foto,
   fotoUrl: null
 };
@@ -9391,9 +9460,10 @@ const costoUsd = (costoLocal > 0) ? convertLocalToUsd(costoLocal, cur) : 0;
   log.unshift(entry);
   salva('vt_logbook', log);
 
-if (entry.foto && !entry.fotoUrl) {
+if ((entry.foto && !entry.fotoUrl) || (entry.foto2 && !entry.fotoUrl2)) {
   enqueueFoto('logbook', entry.id);
 }
+  
 updateDriveSyncInfo();
   
   if (costoLocal > 0 && costoUsd > 0) {
@@ -9419,6 +9489,14 @@ updateDriveSyncInfo();
   const f = document.getElementById('log-foto-input');
   if (f) f.value = '';
 
+  if (ante2) { ante2.style.display = 'none'; ante2.dataset.src = ''; ante2.innerHTML = ''; }
+const f2 = document.getElementById('log-foto2-input');
+if (f2) f2.value = '';
+
+const v = document.getElementById('log-video');
+if (v) v.value = '';
+const vp = document.getElementById('log-video-planned');
+if (vp) vp.checked = false;
 
   // ✅ Se stavo montando un pezzo dall’inventario, reset usura a km attuali
 // ✅ Se stavo montando un pezzo dall’inventario, reset usura a km attuali
@@ -9525,7 +9603,29 @@ function renderLogManutenzione() {
       <div style="font-size:12px; color:#888;">${e.data} ${e.ora} — ${e.km} km — ${e.paese}</div>
       ${e.desc ? `<div class="log-note">📝 ${e.desc}</div>` : ''}
       ${(e.costoLocal > 0) ? `<div style="color:var(--verde); margin-top:5px;">💰 Costo: ${e.costoLocal} ${e.valuta || ''} (≈ $${Number(e.costoUsd||0).toFixed(2)})</div>` : ''}
-      ${(e.fotoUrl || e.foto) ? `<img src="${e.fotoUrl || e.foto}" class="log-img" loading="lazy">` : ''}
+     ${(e.videoUrl)
+  ? `<div style="margin-top:10px;">
+       <a href="${e.videoUrl}" target="_blank" rel="noopener"
+          style="display:inline-block;padding:10px 12px;border-radius:12px;background:#2196F3;color:#000;text-decoration:none;font-weight:900;">
+         ▶ Apri video YouTube
+       </a>
+     </div>`
+  : (e.videoPlanned
+      ? `<div style="margin-top:10px;color:#ff9800;font-weight:900;">🎬 Video in arrivo (senza link)</div>`
+      : '')
+}
+
+${(e.fotoUrl || e.foto) ? `
+  <img src="${driveToDirectImageUrl(e.fotoUrl || e.foto)}" class="log-img" loading="lazy"
+       style="cursor:pointer;"
+       onclick='openPhotoLightbox(${JSON.stringify(e.fotoUrl || e.foto)}, ${JSON.stringify("🔧 " + (e.nome||""))})'>
+` : ''}
+
+${(e.fotoUrl2 || e.foto2) ? `
+  <img src="${driveToDirectImageUrl(e.fotoUrl2 || e.foto2)}" class="log-img" loading="lazy"
+       style="cursor:pointer; margin-top:10px;"
+       onclick='openPhotoLightbox(${JSON.stringify(e.fotoUrl2 || e.foto2)}, ${JSON.stringify("🔧 " + (e.nome||""))})'>
+` : ''}
      
 
 <div style="display:flex; justify-content:space-between; gap:10px; margin-top:10px;">
@@ -9584,6 +9684,29 @@ function apriEditIntervento(id) {
     }
   }
 
+  const box2 = document.getElementById('edit-log-foto2-attuale');
+  if (box2) {
+    const srcRaw2 = e.fotoUrl2 || e.foto2;
+    if (srcRaw2) {
+      const src2 = driveToDirectImageUrl(srcRaw2);
+      box2.innerHTML = `
+        <div style="color:#aaa;font-size:12px;margin-bottom:6px;">Foto 2 attuale:</div>
+        <img src="${src2}" style="width:100%;border-radius:12px;max-height:220px;object-fit:cover;">
+      `;
+    } else {
+      box2.innerHTML = `<div style="color:#777;font-size:12px;">Nessuna Foto 2.</div>`;
+    }
+  }
+
+  document.getElementById('edit-log-video').value = e.videoUrl || '';
+  document.getElementById('edit-log-video-planned').checked = !!e.videoPlanned;
+
+  const prev2 = document.getElementById('anteprima-edit-log-foto2');
+  if (prev2) { prev2.style.display = 'none'; prev2.innerHTML = ''; prev2.dataset.src = ''; }
+  const fi2 = document.getElementById('edit-log-foto2-input');
+  if (fi2) fi2.value = '';
+
+  
   // reset input nuova foto
   const prev = document.getElementById('anteprima-edit-log-foto');
   if (prev) { prev.style.display = 'none'; prev.innerHTML = ''; prev.dataset.src = ''; }
@@ -9611,6 +9734,18 @@ function salvaModificaIntervento() {
   // foto nuova (se scelta)
   const prev = document.getElementById('anteprima-edit-log-foto');
   const newFoto = (prev?.dataset?.src || '').trim();
+
+
+  const prev2 = document.getElementById('anteprima-edit-log-foto2');
+  const newFoto2 = (prev2?.dataset?.src || '').trim();
+
+  const videoUrlRaw = (document.getElementById('edit-log-video')?.value || '').trim();
+  const videoUrl = videoUrlRaw || null;
+  const planned = !!document.getElementById('edit-log-video-planned')?.checked;
+
+  e.videoUrl = videoUrl;
+  e.videoPlanned = (!!planned && !videoUrl);
+  
 
   // aggiorna campi base
   e.nome = nome;
@@ -9644,6 +9779,14 @@ function salvaModificaIntervento() {
     updateDriveSyncInfo?.();
   }
 
+  if (newFoto2) {
+    e.foto2 = newFoto2;
+    e.fotoUrl2 = null;
+    enqueueFoto?.('logbook', e.id);
+    updateDriveSyncInfo?.();
+  }
+
+  
   log[idx] = e;
   salva('vt_logbook', log);
 
@@ -10225,6 +10368,9 @@ async function costruisciArchivioPubblicoSpezzato() {
     valuta: e.valuta ?? carica('vt_valuta','USD'),
     costoUsd: e.costoUsd ?? 0,
     fotoUrl: e.fotoUrl || null,
+    fotoUrl2: e.fotoUrl2 || null,
+    videoUrl: e.videoUrl || null,
+    videoPlanned: !!e.videoPlanned,
     geo: e.geo || null
   }));
 
