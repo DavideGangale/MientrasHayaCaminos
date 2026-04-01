@@ -640,6 +640,8 @@ color:#fff;
 
 #modalDiarioEditVideo { z-index: 9850; } /* sopra MapFull */
 #modalDiario          { z-index: 9100; }
+
+    #modalAddMediaToPercorso { z-index: 9750; } /* sopra Diario, sotto MapFull */
     
     #modalAddRicambio { z-index: 6700; }
     #modalCarbSetup { z-index: 6750; }
@@ -2138,6 +2140,29 @@ color:#fff;
     <div class="dash-card" style="padding:12px; border:2px solid #333;">
       <div id="addMediaInfo" style="font-size:12px;color:#aaa;text-align:left;margin-bottom:10px;">--</div>
 
+<!-- GEO: come assegno la posizione al media -->
+<div class="dash-card" style="padding:10px; margin-top:10px; border:1px solid #333;">
+  <div style="font-size:12px;color:#aaa;text-align:left;margin-bottom:8px;">
+    Posizione media (serve per marker sulla mappa):
+  </div>
+
+  <div id="addMediaGeoInfo" style="font-size:12px;color:#bbb;text-align:left;">
+    Nessuna selezione (default: fine tappa)
+  </div>
+
+  <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+    <button class="btn-secondary" style="margin:0; flex:1;" onclick="useGeoCurrentForAddMedia()">
+      📍 Posizione attuale
+    </button>
+    <button class="btn-secondary" style="margin:0; flex:1;" onclick="useGeoEndOfTraceForAddMedia()">
+      🏁 Fine tappa
+    </button>
+    <button class="btn-secondary" style="margin:0; flex:1;" onclick="pickGeoOnTraceForAddMedia()">
+      🗺️ Scegli sulla traccia
+    </button>
+  </div>
+</div>
+      
       <!-- FOTO -->
       <input type="file" id="tappa-media-foto-input" accept="image/*" multiple capture="environment"
              style="display:none;"
@@ -3877,7 +3902,8 @@ var mapFullMarker = null;
 var mapFullPolyline = null;
 var mapFullPhotoLayer = null;
 var mapFullCtx = null; // ✅ ultima tappa/giro aperta in mappa full (per refresh marker)
-
+var mapFullPickMode = null;     // { kind:'addMedia', trace:[...], onPick:(geo)=>{} }
+var mapFullPickMarker = null;   // marker del punto scelto
   let mapFullClickNavigateEnabled = true;
   
 /* ============================================================
@@ -4191,21 +4217,38 @@ function apriMappaFull(coordsOverride = null, ctx = null) {
 
 
       // ✅ TAP SULLA MAPPA FULL = NAVIGA QUI (una sola volta)
-if (!mapFullInstance._vtNavBound) {
-  mapFullInstance.on('click', (ev) => {
-    if (!mapFullClickNavigateEnabled) return;
+mapFullInstance.on('click', (ev) => {
+  const ll = ev?.latlng;
+  if (!ll || !isFinite(ll.lat) || !isFinite(ll.lng)) return;
 
-    const ll = ev?.latlng;
-    if (!ll || !isFinite(ll.lat) || !isFinite(ll.lng)) return;
+  // ✅ 1) PICK MODE (se attivo): scegli punto su traccia / mappa
+  if (mapFullPickMode && mapFullPickMode.kind === 'addMedia') {
+    const geo = pickNearestGeoOnTrace({ lat: ll.lat, lon: ll.lng }, mapFullPickMode.trace || []);
+    if (!geo) { showToast('⚠️ Non riesco a scegliere un punto (traccia vuota?)'); return; }
 
-    const ok = confirm(`Aprire Google Maps verso:\n${ll.lat.toFixed(6)}, ${ll.lng.toFixed(6)} ?`);
-    if (!ok) return;
+    // marker visivo
+    try {
+      if (mapFullPickMarker) mapFullPickMarker.remove();
+      mapFullPickMarker = L.marker([geo.lat, geo.lon]).addTo(mapFullInstance);
+    } catch {}
 
-    openGoogleMapsToLatLon(ll.lat, ll.lng);
-  });
+    // salva in modal AddMedia
+    try { mapFullPickMode.onPick?.(geo); } catch {}
 
-  mapFullInstance._vtNavBound = true;
-}
+    showToast('✅ Punto selezionato sulla traccia');
+    // chiudi la mappa e torna al modal add-media
+    chiudiModal('modalMapFull');
+    mapFullPickMode = null;
+    return;
+  }
+
+  // ✅ 2) NAVIGAZIONE (comportamento originale)
+  if (!mapFullClickNavigateEnabled) return;
+
+  const ok = confirm(`Aprire Google Maps verso:\n${ll.lat.toFixed(6)}, ${ll.lng.toFixed(6)} ?`);
+  if (!ok) return;
+  openGoogleMapsToLatLon(ll.lat, ll.lng);
+});
      
     }
 
@@ -4227,6 +4270,39 @@ if (!mapFullInstance._vtNavBound) {
 
   }, 300);
 }
+
+function pickNearestGeoOnTrace(clickGeo, traccia) {
+  const pts = Array.isArray(traccia) ? traccia : [];
+  if (!pts.length) return null;
+
+  // pts è [lat, lon]
+  let best = null;
+  let bestD2 = Infinity;
+
+  const lat0 = Number(clickGeo?.lat);
+  const lon0 = Number(clickGeo?.lon);
+  if (!isFinite(lat0) || !isFinite(lon0)) return null;
+
+  for (const p of pts) {
+    if (!Array.isArray(p) || p.length < 2) continue;
+    const lat = Number(p[0]), lon = Number(p[1]);
+    if (!isFinite(lat) || !isFinite(lon)) continue;
+
+    // distanza “pseudo” (ok per confronto, veloce)
+    const dLat = lat - lat0;
+    const dLon = lon - lon0;
+    const d2 = dLat*dLat + dLon*dLon;
+
+    if (d2 < bestD2) {
+      bestD2 = d2;
+      best = { lat, lon };
+    }
+  }
+
+  return best;
+}
+
+  
 function apriMappaFullDaPercorso(tipo, id) {
   // tipo: 'tappa' | 'turismo'
   const key = (tipo === 'turismo') ? 'vt_turismo' : 'vt_tappe';
@@ -6360,6 +6436,64 @@ function getGeoFromPercorsoCtx(ctx) {
   return null;
 }
 
+function setAddMediaGeoOverride(geo, label = '') {
+  if (!pendingAddMediaCtx) return;
+  pendingAddMediaCtx.geoOverride = geo || null;
+  pendingAddMediaCtx.geoOverrideLabel = label || '';
+
+  const el = document.getElementById('addMediaGeoInfo');
+  if (el) {
+    if (pendingAddMediaCtx.geoOverride && isFinite(pendingAddMediaCtx.geoOverride.lat) && isFinite(pendingAddMediaCtx.geoOverride.lon)) {
+      el.innerHTML = `✅ <b>${label || 'Posizione selezionata'}</b><br>${pendingAddMediaCtx.geoOverride.lat.toFixed(6)}, ${pendingAddMediaCtx.geoOverride.lon.toFixed(6)}`;
+    } else {
+      el.innerHTML = `Nessuna selezione (default: fine tappa)`;
+    }
+  }
+}
+
+function useGeoCurrentForAddMedia() {
+  const g = getCurrentLatLon();
+  if (!g) { showToast('⚠️ Posizione attuale non disponibile'); return; }
+  setAddMediaGeoOverride({ lat: g.lat, lon: g.lon }, 'Posizione attuale');
+  showToast('📍 Usata posizione attuale');
+}
+
+function useGeoEndOfTraceForAddMedia() {
+  if (!pendingAddMediaCtx) return;
+
+  const tr = Array.isArray(pendingAddMediaCtx.traccia) ? pendingAddMediaCtx.traccia : [];
+  if (!tr.length) { showToast('⚠️ Traccia vuota: non posso usare fine tappa'); return; }
+
+  const last = tr[tr.length - 1];
+  if (!Array.isArray(last) || !isFinite(last[0]) || !isFinite(last[1])) {
+    showToast('⚠️ Ultimo punto traccia non valido');
+    return;
+  }
+
+  setAddMediaGeoOverride({ lat: Number(last[0]), lon: Number(last[1]) }, 'Fine tappa (ultimo punto traccia)');
+  showToast('🏁 Usata fine tappa');
+}
+
+function pickGeoOnTraceForAddMedia() {
+  if (!pendingAddMediaCtx) { showToast('⚠️ Nessun contesto tappa'); return; }
+
+  const trace = Array.isArray(pendingAddMediaCtx.traccia) ? pendingAddMediaCtx.traccia : [];
+  if (!trace.length) { showToast('⚠️ Traccia vuota: non posso scegliere sulla traccia'); return; }
+
+  // attiva pick-mode
+  mapFullPickMode = {
+    kind: 'addMedia',
+    trace: trace,
+    onPick: (geo) => {
+      setAddMediaGeoOverride(geo, 'Punto scelto sulla traccia');
+    }
+  };
+
+  // apri la mappa full con la traccia; ctx non nullo => niente “tap to navigate”
+  apriMappaFull(trace, pendingAddMediaCtx);
+  showToast('🗺️ Tocca la mappa per scegliere il punto (aggancio sulla traccia)', 3500);
+}
+  
 function apriAddMediaToPercorso(tipo, id) {
   const found = window.trovaPercorsoById ? window.trovaPercorsoById(id) : null;
   if (!found || !found.item) { showToast('⚠️ Percorso non trovato'); return; }
@@ -6426,8 +6560,7 @@ function salvaMediaSuPercorso() {
 
   const paese = pendingAddMediaCtx.paese || carica('vt_paeseAttuale','Colombia');
   const now = new Date();
-  const geo = getGeoFromPercorsoCtx(pendingAddMediaCtx);
-
+  const geo = pendingAddMediaCtx.geoOverride || getGeoFromPercorsoCtx(pendingAddMediaCtx);
   // tags estratti dal testo (#...)
   const tagsFromText = extractHashtagsFromText(txt);
 
