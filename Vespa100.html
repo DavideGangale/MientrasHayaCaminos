@@ -592,36 +592,39 @@ color:#fff;
 /* HUD velocità sopra la mappa */
 #mapFullHud{
   position: fixed;
-  top: 12px;
-  left: 12px;
+  left: 50%;
+  bottom: 22px;
+  top: auto;
+  transform: translateX(-50%);
   z-index: 10050;
 
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 10px;
 
-  pointer-events: none; /* così i tocchi vanno alla mappa */
+  pointer-events: none;
 }
 
 #mapFullSpeed{
-  font-size: 34px;
+  font-size: 72px;          /* ✅ più grande */
   font-weight: 1000;
   color: var(--verde);
   background: rgba(0,0,0,0.55);
   border: 1px solid #333;
-  padding: 8px 12px;
-  border-radius: 12px;
+  padding: 10px 16px;
+  border-radius: 16px;
   line-height: 1;
+  letter-spacing: 1px;
 }
 
 #mapFullSpeedUnit{
-  font-size: 14px;
+  font-size: 14px;          /* ✅ resta piccolo */
   font-weight: 900;
   color: var(--verde);
   background: rgba(0,0,0,0.55);
   border: 1px solid #333;
-  padding: 8px 10px;
-  border-radius: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
   line-height: 1;
 }
     
