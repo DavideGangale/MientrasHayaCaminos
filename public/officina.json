@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-04-01T23:18:52.992Z",
+  "_exportDate": "2026-04-01T23:59:19.828Z",
   "tipo": "officina",
   "stats": {
     "spesaRicambiUsd": 0,
@@ -8,34 +8,20 @@
   },
   "manutenzioni": [
     {
-      "id": 1774884684180,
-      "data": "30/03/2026",
-      "ora": "10:31",
-      "paese": "Colombia",
-      "km": "77.7",
-      "nome": "caaaaa",
-      "desc": "taaaaa",
-      "costoLocal": 0,
-      "valuta": "COP",
-      "costoUsd": 0,
-      "fotoUrl": null,
-      "geo": {
-        "lat": 4.8197633,
-        "lon": -74.35554
-      }
-    },
-    {
       "id": 1774881487255,
       "data": "30/03/2026",
       "ora": "09:38",
       "paese": "Colombia",
       "km": "77.7",
       "nome": "La crucetaaaa",
-      "desc": "se me solto la cruceta",
+      "desc": "Se soltó la cruceta!!! meno mal estaba René y en 5 minutos ya estabamos en marcha",
       "costoLocal": 0,
       "valuta": "COP",
       "costoUsd": 0,
       "fotoUrl": null,
+      "fotoUrl2": null,
+      "videoUrl": "https://youtu.be/AbqCsDj8c3Q?si=gJWrPnE6aThp7xIV",
+      "videoPlanned": false,
       "geo": {
         "lat": 4.8197633,
         "lon": -74.35554
