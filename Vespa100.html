@@ -6256,6 +6256,15 @@ async function anteprimaMulti(inputId, containerID) {
     
 function escSQ(s){ return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
 
+function escHtml(s){
+  return String(s ?? '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#039;');
+}
+  
 function getCustomDiarioTags() {
   const arr = caricaJSON('vt_diarioTagsCustom', []);
   return Array.isArray(arr) ? arr.map(x => String(x||'').trim()).filter(Boolean) : [];
@@ -6528,7 +6537,7 @@ function renderDiarioList(containerId, limit = null) {
     const caption = `
       <div style="font-weight:900;color:#ff9800;">📍 ${e.paese || ''}</div>
       <div style="color:#bbb;">${e.data || ''} ${e.ora || ''} — km ${e.km || '--'}</div>
-      ${e.testo ? `<div style="margin-top:6px;color:#ddd;line-height:1.35;">${(e.testo || '').slice(0, 220)}${(e.testo || '').length > 220 ? '…' : ''}</div>` : ''}
+      ${e.testo ? `<div style="margin-top:6px;color:#ddd;line-height:1.35;">${escHtml((e.testo || '').slice(0, 220))}${(e.testo || '').length > 220 ? '…' : ''}</div>` : ''}
     `;
 
     const fotoHtml = fotoSrc
@@ -6741,8 +6750,8 @@ function renderDiarioByTappa() {
       `;
     }).join('');
 
-    const titolo = p.titolo ? `<div style="margin-top:6px;font-weight:1000;color:#fff;">📍 ${p.titolo}</div>` : '';
-    const note = p.note ? `<div style="margin-top:6px;color:#bbb;">${p.note}</div>` : '';
+    const titolo = p.titolo ? `<div style="margin-top:6px;font-weight:1000;color:#fff;">📍 ${escHtml(p.titolo)}</div>` : '';
+    const note = p.note ? `<div style="margin-top:6px;color:#bbb;">${escHtml(p.note)}</div>` : '';
 
     const h = Math.floor((p.durata || 0) / 3600);
     const m = Math.floor(((p.durata || 0) % 3600) / 60);
