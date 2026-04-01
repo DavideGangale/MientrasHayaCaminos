@@ -1241,8 +1241,8 @@ color:#fff;
 
 
     <!-- input file nascosto -->
-    <input type="file" id="foto-input" accept="image/*" capture="environment" style="display:none;"
-           onchange="anteprima('foto-input','anteprima-foto')">
+    <input type="file" id="foto-input" accept="image/*" style="display:none;"
+       onchange="anteprima('foto-input','anteprima-foto')">
 
     <!-- 3) FOTO -->
     <button class="btn-azione btn-yellow" onclick="document.getElementById('foto-input').click()">
@@ -1692,7 +1692,7 @@ color:#fff;
       <input type="text" id="carbCandela" placeholder="Es. nocciola / nera / bianca">
 
       <label class="inp-label">Foto candela (opzionale)</label>
-      <input type="file" id="carb-foto-input" accept="image/*" capture="environment"
+      <input type="file" id="carb-foto-input" accept="image/*"
              onchange="anteprima('carb-foto-input','anteprima-carb-foto')">
       <div id="anteprima-carb-foto" style="margin-top:10px; display:none;"></div>
 
@@ -2164,9 +2164,9 @@ color:#fff;
 </div>
       
       <!-- FOTO -->
-      <input type="file" id="tappa-media-foto-input" accept="image/*" multiple capture="environment"
-             style="display:none;"
-             onchange="anteprimaMulti('tappa-media-foto-input','tappa-media-preview')">
+     <input type="file" id="tappa-media-foto-input" accept="image/*" multiple
+       style="display:none;"
+       onchange="anteprimaMulti('tappa-media-foto-input','tappa-media-preview')">
 
       <button class="btn-azione btn-yellow" onclick="document.getElementById('tappa-media-foto-input').click()">
         📷 Aggiungi Foto (anche multiple)
