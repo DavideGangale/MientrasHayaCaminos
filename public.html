@@ -1686,7 +1686,7 @@ function getOffsetLatLon(lat, lon) {
   const ring = Math.floor((count - 1) / 8) + 1;
   const angle = count * 0.9; // radianti
   // cresce piano: 1° anello = spread, poi +10px per anello
-const radius = spread + (ring - 1) * 10;
+const radius = spread + (ring - 1) * 16;
 
   const base = map.project(L.latLng(lat, lon), zoom);
   const dx = Math.cos(angle) * radius;
