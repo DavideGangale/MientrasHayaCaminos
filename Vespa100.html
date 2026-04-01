@@ -5388,98 +5388,47 @@ let driveUploadChain = Promise.resolve();
 
  
 
- window.addEventListener('message', (ev) => {
-  const msg = ev && ev.data;
-  if (!msg || msg.type !== 'VESPA_UPLOAD_RESULT') return;
-  if (!driveUploadPending) return;
-
-  const data = msg.data || {};
-
+// window.addEventListener('message', (ev) => {
+//  const msg = ev && ev.data;
+//  if (!msg || msg.type !== 'VESPA_UPLOAD_RESULT') return;
+//  if (!driveUploadPending) return;
+//
+//  const data = msg.data || {};
+//
   // reqId deve combaciare (anti-messaggi “sporchi”)
-  if (!data.reqId || data.reqId !== driveUploadPending.reqId) return;
+//  if (!data.reqId || data.reqId !== driveUploadPending.reqId) return;
 
-  try {
-    if (driveUploadPending.timer) clearTimeout(driveUploadPending.timer);
-  } catch (e) {}
+//  try {
+//    if (driveUploadPending.timer) clearTimeout(driveUploadPending.timer);
+//  } catch (e) {}
 
-  console.log('[DRIVE UPLOAD RESULT]', data);
-  driveUploadPending.resolve(data);
-  driveUploadPending = null;
-});
+//  console.log('[DRIVE UPLOAD RESULT]', data);
+//  driveUploadPending.resolve(data);
+//  driveUploadPending = null;
+//});
 
 
 
 
   
 
-function uploadViaFormIframe(dataUrl, filename, folderId, endpoint, clientKey = '') {
-  return new Promise((resolve, reject) => {
-    if (driveUploadPending) {
-      return reject(new Error('Upload in corso'));
-    }
+async function uploadViaFormIframe(dataUrl, filename, folderId, endpoint, clientKey = '') {
+  // mantengo il nome per non toccare il resto del codice
+  const reqId = 'r' + Date.now() + '_' + Math.random().toString(16).slice(2);
 
-    const reqId = 'r' + Date.now() + '_' + Math.random().toString(16).slice(2);
+  const fd = new FormData();
+  fd.append('dataUrl', dataUrl);
+  fd.append('filename', filename);
+  fd.append('folderId', folderId || '');
+  fd.append('reqId', reqId);
+  fd.append('clientKey', clientKey || '');
+  fd.append('format', 'json'); // <-- IMPORTANTISSIMO: dice allo script di rispondere JSON
 
-    driveUploadPending = { resolve, reject, reqId, timer: null };
+  const res = await fetch(endpoint, { method: 'POST', body: fd });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
 
-    const form = document.createElement('form');
-    form.method = 'POST';
-
-    const actionUrl = endpoint + (endpoint.includes('?') ? '&' : '?') + 'reqId=' + encodeURIComponent(reqId);
-    form.action = actionUrl;
-
-    form.target = 'driveUploadFrame';
-    form.style.display = 'none';
-
-    // ✅ crea input in ordine e metti hidden subito (così NON può capitare inp2 prima di init)
-    const inp1 = document.createElement('input');
-    inp1.type = 'hidden';
-    inp1.name = 'dataUrl';
-    inp1.value = dataUrl;
-
-    const inp2 = document.createElement('input');
-    inp2.type = 'hidden';
-    inp2.name = 'filename';
-    inp2.value = filename;
-
-    const inp3 = document.createElement('input');
-    inp3.type = 'hidden';
-    inp3.name = 'folderId';
-    inp3.value = folderId || '';
-
-    const inp4 = document.createElement('input');
-inp4.type = 'hidden';
-inp4.name = 'reqId';
-inp4.value = reqId;
-
-const inp5 = document.createElement('input');
-inp5.type = 'hidden';
-inp5.name = 'clientKey';
-inp5.value = clientKey || '';
-
-form.appendChild(inp1);
-form.appendChild(inp2);
-form.appendChild(inp3);
-form.appendChild(inp4);
-form.appendChild(inp5);
-    document.body.appendChild(form);
-
-    // ✅ timeout vero: se non arriva postMessage, sblocca tutto
-    driveUploadPending.timer = setTimeout(() => {
-      if (driveUploadPending) {
-        const rej = driveUploadPending.reject;
-        driveUploadPending = null;
-        try { rej(new Error('Upload timeout')); } catch (e) {}
-      }
-    }, 120000);
-
-    form.submit();
-
-    // pulizia form (non toccare il timeout)
-    setTimeout(() => {
-      try { form.remove(); } catch (e) {}
-    }, 1200);
-  });
+  const out = await res.json();
+  return out;
 }
 
 function uploadFotoToDrive(dataUrl, filenameBase='foto', clientKey='') {
