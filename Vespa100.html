@@ -1219,8 +1219,8 @@ color:#fff;
 #lightbox-zoom-wrap{
   position:absolute;
   inset: 0;
-  overflow:auto;
-  -webkit-overflow-scrolling: touch;
+  overflow:hidden;
+  touch-action: none; /* importantissimo: abilita pinch/pan custom */
 }
 
 #lightbox-img{
@@ -1229,6 +1229,8 @@ color:#fff;
   height: auto;
   max-width: none;      /* importante per lo zoom */
   margin: 0 auto;
+ transform-origin: 50% 50%;
+  will-change: transform;
 }
 
 #lightbox-caption{
@@ -1248,24 +1250,7 @@ color:#fff;
   overflow:auto;
 }
 
-.lb-zoom-btn{
-  position: fixed;
-  top: 12px;
-  z-index: 100100;
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  border: 1px solid #333;
-  background: rgba(0,0,0,0.55);
-  color:#fff;
-  font-weight: 1000;
-  font-size: 20px;
-}
 
-#lb-zoom-out{ right: 120px; }
-#lb-zoom-in { right: 72px; }
-#lb-zoom-reset{ right: 12px; }
-    
   </style>
 </head>
 
@@ -2219,11 +2204,7 @@ color:#fff;
   <div class="modal-content">
     <button class="close-modal" onclick="chiudiModal('photoLightbox')">×</button>
 
-    <button id="lb-zoom-out" class="lb-zoom-btn" onclick="lightboxZoomOut()" type="button">−</button>
-    <button id="lb-zoom-in" class="lb-zoom-btn" onclick="lightboxZoomIn()" type="button">+</button>
-    <button id="lb-zoom-reset" class="lb-zoom-btn" onclick="lightboxZoomReset()" type="button">⟲</button>
-
-    <div id="lightbox-zoom-wrap">
+     <div id="lightbox-zoom-wrap">
       <img id="lightbox-img" src="" alt="Foto">
     </div>
 
@@ -4244,45 +4225,195 @@ function driveToDirectImageUrl(url){
   return `https://www.youtube-nocookie.com/embed/${id}`;
 }
 
-let lightboxZoom = 1;
+// ===== LIGHTBOX (pinch + swipe) =====
+const lightboxAlbums = {}; // albumId -> { list:[srcRaw], captions:[html] }
+let lbAlbumId = '__single';
+let lbIndex = 0;
 
-function applyLightboxZoom() {
+// transform (zoom/pan)
+let lbScale = 1;
+let lbTx = 0, lbTy = 0;
+let lbPointers = new Map(); // pointerId -> {x,y}
+let lbPinchStart = null;    // { dist, scale, tx, ty }
+
+function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+
+function registerLightboxAlbum(id, list, captions = []) {
+  const arr = Array.isArray(list) ? list.filter(Boolean) : [];
+  const caps = Array.isArray(captions) ? captions : [];
+  lightboxAlbums[id] = { list: arr, captions: caps };
+}
+
+function setLightboxTransform() {
   const img = document.getElementById('lightbox-img');
-  const wrap = document.getElementById('lightbox-zoom-wrap');
-  if (!img || !wrap) return;
-
-  // zoom = larghezza in % (1 = 100%, 2 = 200%, ecc.)
-  img.style.width = (lightboxZoom * 100) + '%';
+  if (!img) return;
+  img.style.transform = `translate(${lbTx}px, ${lbTy}px) scale(${lbScale})`;
 }
 
-function lightboxZoomIn() {
-  lightboxZoom = Math.min(4, lightboxZoom + 0.5);
-  applyLightboxZoom();
+function resetLightboxTransform() {
+  lbScale = 1;
+  lbTx = 0; lbTy = 0;
+  lbPointers = new Map();
+  lbPinchStart = null;
+  setLightboxTransform();
 }
-function lightboxZoomOut() {
-  lightboxZoom = Math.max(1, lightboxZoom - 0.5);
-  applyLightboxZoom();
-}
-function lightboxZoomReset() {
-  lightboxZoom = 1;
-  applyLightboxZoom();
-  const wrap = document.getElementById('lightbox-zoom-wrap');
-  if (wrap) { wrap.scrollTop = 0; wrap.scrollLeft = 0; }
-}
-  
-function openPhotoLightbox(src, caption = '') {
+
+function renderLightboxFrame() {
   const img = document.getElementById('lightbox-img');
   const cap = document.getElementById('lightbox-caption');
+  if (!img) return;
 
-  const fixed = driveToDirectImageUrl(src);   // ✅ conversione qui
-  
-  lightboxZoom = 1;
-  setTimeout(applyLightboxZoom, 0);
-  
-  if (img) img.src = fixed || '';
-  if (cap) cap.innerHTML = caption || '';
+  const alb = lightboxAlbums[lbAlbumId] || { list: [], captions: [] };
+  const list = alb.list || [];
+  if (!list.length) return;
+
+  lbIndex = clamp(lbIndex, 0, list.length - 1);
+
+  const raw = list[lbIndex];
+  const fixed = driveToDirectImageUrl(raw);
+
+  img.src = fixed || '';
+  if (cap) cap.innerHTML = (alb.captions && alb.captions[lbIndex]) ? alb.captions[lbIndex] : '';
+}
+
+function openPhotoLightbox(src, caption = '') {
+  registerLightboxAlbum('__single', [src], [caption]);
+  openPhotoLightboxAlbum('__single', 0);
+}
+
+function openPhotoLightboxAlbum(albumId, index = 0) {
+  lbAlbumId = albumId || '__single';
+  lbIndex = Number(index || 0) || 0;
+
+  resetLightboxTransform();
+  renderLightboxFrame();
   apriModal('photoLightbox');
 }
+
+function lightboxNext() {
+  const alb = lightboxAlbums[lbAlbumId];
+  if (!alb || !alb.list || alb.list.length <= 1) return;
+  lbIndex = (lbIndex + 1) % alb.list.length;
+  resetLightboxTransform();
+  renderLightboxFrame();
+}
+
+function lightboxPrev() {
+  const alb = lightboxAlbums[lbAlbumId];
+  if (!alb || !alb.list || alb.list.length <= 1) return;
+  lbIndex = (lbIndex - 1 + alb.list.length) % alb.list.length;
+  resetLightboxTransform();
+  renderLightboxFrame();
+}
+
+// init gesture handlers (una volta sola)
+(function initLightboxGestures(){
+  const wrap = document.getElementById('lightbox-zoom-wrap');
+  const img  = document.getElementById('lightbox-img');
+  if (!wrap || !img) return;
+
+  // Swipe (solo quando non zoomato)
+  let swipeX0 = null;
+  let swipeT0 = 0;
+
+  wrap.addEventListener('touchstart', (e) => {
+    if (lbScale !== 1) return;
+    const t = e.touches && e.touches[0];
+    if (!t) return;
+    swipeX0 = t.clientX;
+    swipeT0 = Date.now();
+  }, { passive:true });
+
+  wrap.addEventListener('touchend', (e) => {
+    if (lbScale !== 1) return;
+    if (swipeX0 == null) return;
+
+    const t = e.changedTouches && e.changedTouches[0];
+    if (!t) return;
+
+    const dx = t.clientX - swipeX0;
+    const dt = Date.now() - swipeT0;
+
+    swipeX0 = null;
+
+    // gesto abbastanza deciso
+    if (Math.abs(dx) > 45 && dt < 650) {
+      if (dx < 0) lightboxNext();
+      else lightboxPrev();
+    }
+  }, { passive:true });
+
+  // Pointer events: pan + pinch
+  wrap.addEventListener('pointerdown', (e) => {
+    try { wrap.setPointerCapture(e.pointerId); } catch {}
+    lbPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    // se diventano 2 dita: inizio pinch
+    if (lbPointers.size === 2) {
+      const pts = Array.from(lbPointers.values());
+      const dx = pts[0].x - pts[1].x;
+      const dy = pts[0].y - pts[1].y;
+      const dist = Math.hypot(dx, dy);
+
+      lbPinchStart = { dist, scale: lbScale, tx: lbTx, ty: lbTy };
+    }
+  });
+
+  wrap.addEventListener('pointermove', (e) => {
+    if (!lbPointers.has(e.pointerId)) return;
+
+    const prev = lbPointers.get(e.pointerId);
+    lbPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    // PINCH (2 dita)
+    if (lbPointers.size === 2 && lbPinchStart) {
+      const pts = Array.from(lbPointers.values());
+      const dx = pts[0].x - pts[1].x;
+      const dy = pts[0].y - pts[1].y;
+      const dist = Math.hypot(dx, dy);
+
+      const factor = dist / (lbPinchStart.dist || dist);
+      lbScale = clamp(lbPinchStart.scale * factor, 1, 4);
+
+      // nota: tx/ty restano quelli, poi puoi “pan”
+      setLightboxTransform();
+      return;
+    }
+
+    // PAN (1 dito) solo se zoomato
+    if (lbPointers.size === 1 && lbScale > 1 && prev) {
+      const dx = e.clientX - prev.x;
+      const dy = e.clientY - prev.y;
+      lbTx += dx;
+      lbTy += dy;
+      setLightboxTransform();
+    }
+  });
+
+  function onPointerUp(e){
+    lbPointers.delete(e.pointerId);
+    if (lbPointers.size < 2) lbPinchStart = null;
+
+    // se torni a 1x, recentra
+    if (lbScale === 1) {
+      lbTx = 0; lbTy = 0;
+      setLightboxTransform();
+    }
+  }
+
+  wrap.addEventListener('pointerup', onPointerUp);
+  wrap.addEventListener('pointercancel', onPointerUp);
+
+  // doppio tap = reset (comodo)
+  let lastTap = 0;
+  wrap.addEventListener('click', () => {
+    const now = Date.now();
+    if (now - lastTap < 320) {
+      resetLightboxTransform();
+    }
+    lastTap = now;
+  });
+})();
 
 function getDiarioMediaEntriesByRange(startTs, endTs) {
   const diario = caricaJSON('vt_diario', []);
@@ -6586,6 +6717,18 @@ function renderDiarioByTappa() {
     const ctx = { id: p.id, tipoRef: (String(p.tipo||'').toLowerCase()==='turismo' ? 'turismo' : 'tappa') };
     const mediaEntries = getDiarioEntriesByRange(p.startTs, p.endTs, true, ctx);
 
+    // ===== album lightbox per questa tappa/giro (solo foto) =====
+    const photosOnly = mediaEntries.filter(x => !!(x && (x.fotoUrl || x.foto)));
+    const albumId = 'percorso_' + String(p.id);
+
+    const albumList = photosOnly.map(x => (x.fotoUrl || x.foto));
+    const albumCaps = photosOnly.map(x => `📍 ${(x.paese||'')} — ${(x.data||'')} ${(x.ora||'')}`);
+
+    registerLightboxAlbum(albumId, albumList, albumCaps);
+
+    const photoIndexById = new Map();
+    photosOnly.forEach((x, idx) => photoIndexById.set(String(x.id), idx));
+  
     // thumbs: mostra prime 9 (foto o “tile video”)
     const thumbs = mediaEntries.slice(0, 9).map(e => {
       const hasPhoto = !!(e.fotoUrl || e.foto);
@@ -6599,7 +6742,15 @@ function renderDiarioByTappa() {
         const caption = `📍 ${(e.paese||'')} — ${(e.data||'')} ${(e.ora||'')}`;
         return `
           <div class="diario-thumb"
-               onclick='openPhotoLightbox(${JSON.stringify(raw)}, ${JSON.stringify(caption)})'>
+          
+const idxPhoto = photoIndexById.get(String(e.id)) ?? 0;
+return `
+  <div class="diario-thumb"
+       onclick="openPhotoLightboxAlbum('${albumId}', ${idxPhoto})">
+    ${badge}
+    <img src="${src}" loading="lazy">
+  </div>
+`;
             ${badge}
             <img src="${src}" loading="lazy">
           </div>
