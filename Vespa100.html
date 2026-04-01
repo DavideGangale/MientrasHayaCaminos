@@ -6735,22 +6735,18 @@ function renderDiarioByTappa() {
       const hasVideo = !!e.videoUrl;
       const planned  = !!(e.videoPlanned && !e.videoUrl);
 
-      if (hasPhoto) {
+           if (hasPhoto) {
         const raw = e.fotoUrl || e.foto;
         const src = driveToDirectImageUrl(raw);
-        const badge = hasVideo ? `<span class="badge video">🎥</span>` : (planned ? `<span class="badge planned">🎬</span>` : '');
-        const caption = `📍 ${(e.paese||'')} — ${(e.data||'')} ${(e.ora||'')}`;
+        const badge = hasVideo
+          ? `<span class="badge video">🎥</span>`
+          : (planned ? `<span class="badge planned">🎬</span>` : '');
+
+        const idxPhoto = photoIndexById.get(String(e.id)) ?? 0;
+
         return `
           <div class="diario-thumb"
-          
-const idxPhoto = photoIndexById.get(String(e.id)) ?? 0;
-return `
-  <div class="diario-thumb"
-       onclick="openPhotoLightboxAlbum('${albumId}', ${idxPhoto})">
-    ${badge}
-    <img src="${src}" loading="lazy">
-  </div>
-`;
+               onclick="openPhotoLightboxAlbum('${albumId}', ${idxPhoto})">
             ${badge}
             <img src="${src}" loading="lazy">
           </div>
