@@ -5395,6 +5395,12 @@ window.addEventListener('message', (ev) => {
 
   const data = msg.data || {};
 
+console.log('[MSG]', msg, 'origin=', ev.origin);
+  if (data.reqId !== driveUploadPending.reqId) {
+  console.warn('REQID mismatch', { got: data.reqId, expected: driveUploadPending.reqId, data });
+  return;
+}
+  
   // reqId deve combaciare
   if (!data.reqId || data.reqId !== driveUploadPending.reqId) return;
 
@@ -5420,7 +5426,8 @@ function uploadViaFormIframe(dataUrl, filename, folderId, endpoint, clientKey = 
 
     const form = document.createElement('form');
     form.method = 'POST';
-    form.action = endpoint;              // <-- niente format=json
+    const actionUrl = endpoint + (endpoint.includes('?') ? '&' : '?') + 'reqId=' + encodeURIComponent(reqId);
+form.action = actionUrl;
     form.target = 'driveUploadFrame';
     form.style.display = 'none';
 
