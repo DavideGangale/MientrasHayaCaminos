@@ -1222,6 +1222,10 @@ color:#fff;
 
   <!-- BOTTONI VIAGGIO -->
   <div class="dash-card">
+    <button class="btn-azione" style="background:#4caf50; color:#000;"
+        onclick="syncDriveGithubOneClick()">
+  🚀 1-2-3 Sync iPhone → Drive → GitHub
+</button>
     <button class="btn-azione btn-yellow" onclick="apriModal('modalTappe')">🗺️ Apri Diario Tappe</button>
     <button class="btn-azione btn-yellow" onclick="apriModalPaesi()">🌎 Statistiche per Paese</button>
     <button class="btn-azione btn-yellow" onclick="apriModal('modalStats'); aggiornaUI();">📊 Statistiche</button>
@@ -7166,6 +7170,63 @@ async function syncInboxNowJSONP() {
   }
 }
 
+let oneClickRunning = false;
+
+function hasGitHubConfig() {
+  const token = (carica('vt_gh_token','') || '').trim();
+  const repo  = (carica('vt_gh_repo','') || '').trim();
+  const path  = (carica('vt_gh_path','') || '').trim();
+  return !!(token && repo && path);
+}
+
+async function syncDriveGithubOneClick() {
+  if (oneClickRunning) { showToast('⏳ Operazione già in corso...'); return; }
+  oneClickRunning = true;
+
+  try {
+    if (!navigator.onLine) {
+      showToast('📴 Sei offline: impossibile fare sync/pubblicazione', 3500);
+      return;
+    }
+
+    // 0) controlli configurazione
+    const feed = (carica('vt_inboxFeedUrl','') || '').trim();
+    if (!feed) { showToast('⚠️ Manca URL Inbox feed (Settings)'); return; }
+
+    if (!getDriveConfigured?.()) { showToast('⚠️ Drive non configurato (Settings)'); return; }
+
+    if (!hasGitHubConfig()) { showToast('⚠️ GitHub non configurato (Settings → Backup)'); return; }
+
+    showToast('📲 1/3 Sync Inbox (iPhone)...', 2500);
+    await syncInboxNowJSONP();
+
+    // piccolo refresh UI (non obbligatorio)
+    try { renderDiarioFull?.(); } catch {}
+    try { renderSelectedTagsInline?.(); } catch {}
+
+    // 2) Drive: carica tutta la coda
+    const q0 = (getUploadQueue?.() || []).length;
+    if (q0 > 0) {
+      showToast(`☁️ 2/3 Sync Drive... (${q0} foto in coda)`, 3000);
+      await processUploadQueue(999); // tenta di caricarle tutte
+    } else {
+      showToast('☁️ 2/3 Drive: nessuna foto in coda', 2200);
+    }
+
+    // 3) GitHub publish
+    showToast('🐙 3/3 Pubblico su GitHub...', 3000);
+    await esportaDatiPubblici('github');
+
+    showToast('✅ Fatto: Inbox + Drive + GitHub', 4000);
+
+  } catch (e) {
+    console.warn('syncDriveGithubOneClick error:', e);
+    showToast('❌ Errore one-click: ' + (e?.message || e), 5000);
+  } finally {
+    oneClickRunning = false;
+  }
+}
+  
 function resetInboxCursor(){
   salva('vt_inboxLastTs','0');
   showToast('✅ vt_inboxLastTs resettato a 0', 3500);
