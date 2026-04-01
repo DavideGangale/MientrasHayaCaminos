@@ -754,28 +754,6 @@ color:#fff;
     #modalCarb      { z-index: 6900; }
     #modalGrafico  { z-index: 6800; }
 
-  
-<div id="modalDiarioEditPost" class="modal-overlay">
-  <div class="modal-content" style="border-color:#e91e63; max-width:560px;">
-    <button class="close-modal" onclick="chiudiModal('modalDiarioEditPost')">×</button>
-    <h2 style="color:#e91e63; text-align:center; margin-top:0;">✏️ Modifica post (Diario)</h2>
-
-    <textarea id="edit-diario-testo" rows="5"
-      placeholder="Testo del post..."></textarea>
-
-    <input id="edit-diario-video2" type="text" placeholder="📺 Link YouTube (opzionale)">
-
-    <label class="checklist-item tagpick planned-video" style="margin-top:10px;">
-      <input type="checkbox" id="edit-diario-video-planned2">
-      <span class="checklist-text">🎬 Video in arrivo (nessun link ancora)</span>
-    </label>
-
-    <button class="btn-azione btn-yellow" onclick="salvaModificaPostDiario()">
-      💾 Salva modifiche
-    </button>
-  </div>
-</div>
-
     
     /* DIARIO */
     .diario-entry{
@@ -2370,16 +2348,18 @@ color:#fff;
 <div id="modalDiarioEditVideo" class="modal-overlay">
   <div class="modal-content" style="border-color:#e91e63; max-width:560px;">
     <button class="close-modal" onclick="chiudiModal('modalDiarioEditVideo')">×</button>
-    <h2 style="color:#e91e63; text-align:center; margin-top:0;">🎬 Modifica video (Diario)</h2>
+    <h2 style="color:#e91e63; text-align:center; margin-top:0;">✏️ Modifica post (Diario)</h2>
 
-    <input id="edit-diario-video" type="text" placeholder="📺 Incolla link YouTube">
+    <textarea id="edit-diario-testo" rows="5" placeholder="Testo del post..."></textarea>
 
-<label class="checklist-item tagpick planned-video" style="margin-top:10px;">
-  <input type="checkbox" id="edit-diario-video-planned">
-  <span class="checklist-text">Video in arrivo (nessun link ancora)</span>
-</label>
+    <input id="edit-diario-video" type="text" placeholder="📺 Link YouTube (opzionale)">
 
-    <button class="btn-azione btn-yellow" onclick="salvaModificaVideoDiario()">
+    <label class="checklist-item tagpick planned-video" style="margin-top:10px;">
+      <input type="checkbox" id="edit-diario-video-planned">
+      <span class="checklist-text">🎬 Video in arrivo (nessun link ancora)</span>
+    </label>
+
+    <button class="btn-azione btn-yellow" onclick="salvaModificaDiario()">
       💾 Salva
     </button>
   </div>
@@ -4533,7 +4513,7 @@ function renderMapFullPhotoMarkersForContext(ctx) {
         <div style="margin-top:10px;">
           <div style="color:#ff9800;font-weight:900;">🎬 Video in arrivo (nessun link)</div>
           <button class="btn-secondary" style="margin-top:8px;width:100%;"
-                  onclick="apriModificaVideoDiario(${e.id});">
+                  onclick="apriModificaDiario(${e.id});">
             🎬 Inserisci link
           </button>
         </div>
@@ -6569,24 +6549,17 @@ function renderDiarioList(containerId, limit = null) {
           <span class="diario-paese">${e.paese || ''}</span>
         </div>
 
-        <div class="diario-testo">${e.testo || ''}</div>
-        ${tagsHtml}
-        ${videoHtml}
-        ${fotoHtml}
+      <div style="display:flex; justify-content:space-between; gap:10px; margin-top:12px;">
+  <button onclick="apriModificaDiario(${e.id})"
+    style="background:none; border:none; color:#ff9800; font-size:12px; cursor:pointer;">
+    ✏️ Modifica
+  </button>
 
-        <button onclick="apriModificaVideoDiario(${e.id})"
-          style="background:none; border:none; color:#ff9800; font-size:12px; cursor:pointer; margin-top:10px;">
-          🎬 Modifica Video
-        </button>
-<button onclick="apriModificaPostDiario(${e.id})"
-  style="background:none; border:none; color:#e91e63; font-size:12px; cursor:pointer; margin-top:6px;">
-  ✏️ Modifica Post (testo/video)
-</button>
-        <button onclick="eliminaDiario(${e.id})"
-          style="background:none; border:none; color:#666; font-size:12px; cursor:pointer; margin-top:5px;">
-          🗑️ Elimina
-        </button>
-      </div>
+  <button onclick="eliminaDiario(${e.id})"
+    style="background:none; border:none; color:#666; font-size:12px; cursor:pointer;">
+    🗑️ Elimina
+  </button>
+</div>
     `;
   }
 
@@ -6757,7 +6730,7 @@ function renderDiarioByTappa() {
       const badge = hasVideo ? `<span class="badge video">🎥</span>` : `<span class="badge planned">🎬</span>`;
       const click = hasVideo
         ? `window.open(${JSON.stringify(e.videoUrl)}, '_blank')`
-        : `apriModificaVideoDiario(${Number(e.id)})`;
+        : `apriModificaDiario(${Number(e.id)})`;
 
       return `
         <div class="diario-thumb" style="display:flex;align-items:center;justify-content:center;color:#fff;"
@@ -7029,107 +7002,68 @@ function salvaMediaSuPercorso() {
     }
   } catch {}
 }
-  
 let editDiarioId = null;
+let editDiarioGroupId = null;
 
-function apriModificaVideoDiario(id) {
+function apriModificaDiario(id) {
   const diario = caricaJSON('vt_diario', []);
   const idx = Array.isArray(diario) ? diario.findIndex(x => String(x.id) === String(id)) : -1;
   if (idx === -1) { showToast('⚠️ Voce diario non trovata'); return; }
 
-  editDiarioId = id;
-
   const e = diario[idx];
-  const inp = document.getElementById('edit-diario-video');
-  const chk = document.getElementById('edit-diario-video-planned');
 
-  if (inp) inp.value = e.videoUrl || '';
-  if (chk) chk.checked = !!e.videoPlanned;
+  editDiarioId = e.id;
+  editDiarioGroupId = e.groupId || null;
+
+  document.getElementById('edit-diario-testo').value = e.testo || '';
+  document.getElementById('edit-diario-video').value = e.videoUrl || '';
+  document.getElementById('edit-diario-video-planned').checked = !!e.videoPlanned;
 
   apriModal('modalDiarioEditVideo');
 }
 
-function salvaModificaVideoDiario() {
+function salvaModificaDiario() {
   if (!editDiarioId) return;
 
-  const diario = caricaJSON('vt_diario', []);
-  const idx = Array.isArray(diario) ? diario.findIndex(x => String(x.id) === String(editDiarioId)) : -1;
-  if (idx === -1) { showToast('⚠️ Voce diario non trovata'); return; }
-
-  const inp = document.getElementById('edit-diario-video');
-  const chk = document.getElementById('edit-diario-video-planned');
-
-  const url = (inp?.value || '').trim();
-  const planned = chk ? chk.checked : false;
-
-  diario[idx].videoUrl = url || null;
-  diario[idx].videoPlanned = (!!planned && !url); // ✅ se hai link, planned diventa false
-
-  salva('vt_diario', diario);
-
-  chiudiModal('modalDiarioEditVideo');
-  renderDiarioFull();
-  showToast('✅ Video aggiornato');
-
-// ✅ se mappa full è aperta, aggiorna subito i marker (planned -> video)
-try {
-  const isOpen = document.getElementById('modalMapFull')?.classList.contains('open');
-  if (isOpen && typeof renderMapFullPhotoMarkersForContext === 'function') {
-    renderMapFullPhotoMarkersForContext(mapFullCtx);
-  }
-} catch (e) {
-  console.warn('refresh marker error:', e);
-}  
-}
-
-let editDiarioPostId = null;
-let editDiarioGroupId = null;
-
-function apriModificaPostDiario(id) {
-  const diario = caricaJSON('vt_diario', []);
-  const idx = Array.isArray(diario) ? diario.findIndex(x => String(x.id) === String(id)) : -1;
-  if (idx === -1) { showToast('⚠️ Voce diario non trovata'); return; }
-
-  const e = diario[idx];
-  editDiarioPostId = e.id;
-  editDiarioGroupId = e.groupId || null;
-
-  document.getElementById('edit-diario-testo').value = e.testo || '';
-  document.getElementById('edit-diario-video2').value = e.videoUrl || '';
-  document.getElementById('edit-diario-video-planned2').checked = !!e.videoPlanned;
-
-  apriModal('modalDiarioEditPost');
-}
-
-function salvaModificaPostDiario() {
-  if (!editDiarioPostId) return;
-
   const testo = (document.getElementById('edit-diario-testo')?.value || '').trim();
-  const url = (document.getElementById('edit-diario-video2')?.value || '').trim();
-  const planned = !!document.getElementById('edit-diario-video-planned2')?.checked;
+  const url = (document.getElementById('edit-diario-video')?.value || '').trim();
+  const planned = !!document.getElementById('edit-diario-video-planned')?.checked;
 
   const diario = caricaJSON('vt_diario', []);
   if (!Array.isArray(diario)) return;
 
-  // se è un gruppo (multi-foto), aggiorna tutte le entry del gruppo
   for (const e of diario) {
     if (!e) continue;
 
     const same =
       (editDiarioGroupId && e.groupId === editDiarioGroupId) ||
-      (!editDiarioGroupId && String(e.id) === String(editDiarioPostId));
+      (!editDiarioGroupId && String(e.id) === String(editDiarioId));
 
     if (!same) continue;
 
     e.testo = testo;
     e.videoUrl = url || null;
     e.videoPlanned = (!!planned && !url);
+
+    // opzionale ma consigliato: aggiorna hashtag presi dal testo
+    const tagsFromText = extractHashtagsFromText(testo);
+    const old = Array.isArray(e.tags) ? e.tags : [];
+    e.tags = Array.from(new Set([...old, ...tagsFromText]));
   }
 
   salva('vt_diario', diario);
-  chiudiModal('modalDiarioEditPost');
+
+  chiudiModal('modalDiarioEditVideo');
   renderDiarioFull?.();
   showToast('✅ Post aggiornato');
+
+  // se mappa full è aperta, aggiorna marker
+  try {
+    const isOpen = document.getElementById('modalMapFull')?.classList.contains('open');
+    if (isOpen && typeof renderMapFullPhotoMarkersForContext === 'function') {
+      renderMapFullPhotoMarkersForContext(mapFullCtx);
+    }
+  } catch {}
 }
   
 function eliminaDiario(id) {
@@ -7316,7 +7250,7 @@ const entries = getDiarioEntriesByRange(p.startTs, p.endTs, true, ctx);
         🎬 Video in arrivo (senza link)
       </div>
       <button class="btn-secondary" style="margin-top:10px;"
-              onclick="apriModificaVideoDiario(${e.id});">
+              onclick="apriModificaDiario(${e.id});">
         🎬 Inserisci link video
       </button>
     ` : '');
