@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-04-01T17:40:14.415Z",
+  "_exportDate": "2026-04-01T21:03:06.171Z",
   "tipo": "paese",
   "paese": "Colombia",
   "slug": "colombia",
@@ -3242,6 +3242,24 @@
     }
   ],
   "diario": [
+    {
+      "id": 1775069095798,
+      "ts": 1775069095798,
+      "data": "",
+      "ora": "",
+      "paese": "Colombia",
+      "km": "",
+      "testo": "Ttt",
+      "tags": [],
+      "geo": {
+        "lat": 4.806000978890526,
+        "lon": -74.36063569216664
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1DDfLpI_kvTHhpU0sJrPYCwA_T2V1aDMF",
+      "foto": null
+    },
     {
       "id": 1775065192751,
       "ts": 1775065192109,
