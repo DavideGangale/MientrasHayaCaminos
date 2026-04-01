@@ -2184,7 +2184,30 @@ color:#fff;
 </div>
   </div>
 
+<!-- EDIT INTERVENTO (modal) -->
+<div id="modalEditIntervento" class="modal-overlay fullscreen">
+  <div class="modal-content" style="border-color:#ff9800; max-width:500px;">
+    <button class="close-modal" onclick="chiudiModal('modalEditIntervento')">×</button>
+    <h2 style="color:#ff9800; text-align:center;">✏️ Modifica Intervento</h2>
 
+    <input type="text" id="edit-log-nome" placeholder="Nome intervento" autocomplete="off">
+
+    <textarea id="edit-log-descrizione" placeholder="Descrizione dettagliata..." rows="3"
+              style="width:100%;" autocomplete="off"></textarea>
+
+    <input type="number" id="edit-log-costo" placeholder="Costo (valuta dell'intervento)" step="0.01" min="0">
+
+    <div id="edit-log-foto-attuale" style="margin-top:10px;"></div>
+
+    <input type="file" id="edit-log-foto-input" accept="image/*" style="width:100%; margin-top:10px;"
+           onchange="anteprima('edit-log-foto-input','anteprima-edit-log-foto')">
+
+    <div id="anteprima-edit-log-foto" style="margin-top:10px; display:none;"></div>
+
+    <button class="btn-azione" onclick="salvaModificaIntervento()">💾 Salva modifiche</button>
+  </div>
+</div>
+  
 <!-- ===== LIGHTBOX FOTO (popup) ===== -->
 <div id="photoLightbox" class="modal-overlay">
   <div class="modal-content">
@@ -9503,8 +9526,21 @@ function renderLogManutenzione() {
       ${e.desc ? `<div class="log-note">📝 ${e.desc}</div>` : ''}
       ${(e.costoLocal > 0) ? `<div style="color:var(--verde); margin-top:5px;">💰 Costo: ${e.costoLocal} ${e.valuta || ''} (≈ $${Number(e.costoUsd||0).toFixed(2)})</div>` : ''}
       ${(e.fotoUrl || e.foto) ? `<img src="${e.fotoUrl || e.foto}" class="log-img" loading="lazy">` : ''}
-      <button onclick="eliminaIntervento(${e.id})"
-        style="background:none; border:none; color:#666; font-size:12px; cursor:pointer; margin-top:5px;">🗑️ Elimina</button>
+     
+
+<div style="display:flex; justify-content:space-between; gap:10px; margin-top:10px;">
+  <button onclick="apriEditIntervento(${e.id})"
+    style="background:none; border:none; color:#ff9800; font-size:12px; cursor:pointer;">
+    ✏️ Modifica
+  </button>
+
+  <button onclick="eliminaIntervento(${e.id})"
+    style="background:none; border:none; color:#666; font-size:12px; cursor:pointer;">
+    🗑️ Elimina
+  </button>
+</div>
+
+      
     </div>
   `).join('');
 }
@@ -9516,6 +9552,119 @@ function eliminaIntervento(id) {
   renderLogManutenzione();
 }
 
+  let editInterventoId = null;
+
+function apriEditIntervento(id) {
+  const log = caricaJSON('vt_logbook', []);
+  const idx = Array.isArray(log) ? log.findIndex(e => String(e.id) === String(id)) : -1;
+  if (idx === -1) { showToast('⚠️ Intervento non trovato'); return; }
+
+  const e = log[idx];
+  editInterventoId = e.id;
+
+  document.getElementById('edit-log-nome').value = e.nome || '';
+  document.getElementById('edit-log-descrizione').value = e.desc || '';
+  document.getElementById('edit-log-costo').value = Number(e.costoLocal || 0) || 0;
+
+  // mostra foto attuale (se c’è)
+  const box = document.getElementById('edit-log-foto-attuale');
+  if (box) {
+    const srcRaw = e.fotoUrl || e.foto;
+    if (srcRaw) {
+      const src = driveToDirectImageUrl(srcRaw);
+      box.innerHTML = `
+        <div style="color:#aaa;font-size:12px;margin-bottom:6px;">Foto attuale:</div>
+        <img src="${src}" style="width:100%;border-radius:12px;max-height:220px;object-fit:cover;">
+        <div style="color:#777;font-size:12px;margin-top:6px;">
+          (Se scegli una nuova foto sotto, questa verrà sostituita)
+        </div>
+      `;
+    } else {
+      box.innerHTML = `<div style="color:#777;font-size:12px;">Nessuna foto attuale.</div>`;
+    }
+  }
+
+  // reset input nuova foto
+  const prev = document.getElementById('anteprima-edit-log-foto');
+  if (prev) { prev.style.display = 'none'; prev.innerHTML = ''; prev.dataset.src = ''; }
+  const fi = document.getElementById('edit-log-foto-input');
+  if (fi) fi.value = '';
+
+  apriModal('modalEditIntervento');
+}
+
+function salvaModificaIntervento() {
+  if (!editInterventoId) return;
+
+  const log = caricaJSON('vt_logbook', []);
+  const idx = Array.isArray(log) ? log.findIndex(e => String(e.id) === String(editInterventoId)) : -1;
+  if (idx === -1) { showToast('⚠️ Intervento non trovato'); return; }
+
+  const e = log[idx];
+
+  const nome = (document.getElementById('edit-log-nome')?.value || '').trim();
+  if (!nome) { showToast('⚠️ Inserisci un nome'); return; }
+
+  const desc = (document.getElementById('edit-log-descrizione')?.value || '').trim();
+  const costoLocalNew = parseFloat(document.getElementById('edit-log-costo')?.value || '0') || 0;
+
+  // foto nuova (se scelta)
+  const prev = document.getElementById('anteprima-edit-log-foto');
+  const newFoto = (prev?.dataset?.src || '').trim();
+
+  // aggiorna campi base
+  e.nome = nome;
+  e.desc = desc;
+
+  // costo: aggiorno anche USD usando la valuta già salvata nell’intervento
+  // (così non dipendi dalla valuta attuale dell’app)
+  const cur = e.valuta || (valutaAttuale || 'USD');
+  const fx = getFxToUsd(cur) || e.fxToUsd || (cur === 'USD' ? 1 : null);
+
+  const oldUsd = Number(e.costoUsd || 0) || 0;
+  let newUsd = 0;
+  if (costoLocalNew > 0) {
+    if (!fx) {
+      showToast(`⚠️ Manca cambio per ${cur}. Vai in Settings.`);
+      return;
+    }
+    newUsd = costoLocalNew * fx;
+  }
+
+  e.costoLocal = costoLocalNew;
+  e.costoUsd = newUsd;
+  e.fxToUsd = fx;
+  e.valuta = cur;
+
+  // se c’è una nuova foto: sostituisci (e rimetti in coda per Drive)
+  if (newFoto) {
+    e.foto = newFoto;
+    e.fotoUrl = null;
+    enqueueFoto?.('logbook', e.id);
+    updateDriveSyncInfo?.();
+  }
+
+  log[idx] = e;
+  salva('vt_logbook', log);
+
+  // aggiorna totali manodopera (delta) — opzionale ma utile
+  const delta = newUsd - oldUsd;
+  if (Math.abs(delta) > 0.0001) {
+    salva('vt_spesaManodoperaUsd', (parseFloat(carica('vt_spesaManodoperaUsd','0')) || 0) + delta);
+
+    const paese = e.paese || carica('vt_paeseAttuale','Colombia');
+    const datiPaesi = caricaJSON('vt_datiPaesi', {});
+    if (!datiPaesi[paese]) datiPaesi[paese] = {};
+    datiPaesi[paese].spesaManodoperaUsd = (datiPaesi[paese].spesaManodoperaUsd || 0) + delta;
+    salva('vt_datiPaesi', datiPaesi);
+  }
+
+  chiudiModal('modalEditIntervento');
+  renderLogManutenzione();
+  aggiornaUI?.();
+  showToast('✅ Intervento aggiornato');
+}
+  
 /* ============================================================
    CHECKLIST
 ============================================================ */
