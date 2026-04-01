@@ -1643,23 +1643,27 @@ function resetMarkerOffsetCache() {
 }
 
 function markerKeyPrecisionForZoom(z) {
-  // Zoom lontano = raggruppa coordinate simili (così si "vede" che ci sono più marker)
+  // Zoom lontano: raggruppa di più
   if (z <= 5) return 1;
   if (z <= 7) return 2;
   if (z <= 9) return 3;
-  if (z <= 11) return 4;
+
+  // Zoom medio-alto: raggruppa ancora un po' (evita sovrapposizioni in città)
+  if (z <= 16) return 4;
+
+  // Zoom molto vicino: torna preciso
   return 5;
 }
 
 function markerSpreadPxForZoom(z) {
-  // Zoom lontano = separazione grande, zoom vicino = separazione piccola
-  if (z <= 5) return 90;
-  if (z <= 7) return 70;
-  if (z <= 9) return 55;
-  if (z <= 11) return 40;
-  if (z <= 13) return 25;
-  if (z <= 15) return 14;
-  return 8;
+  // Obiettivo: separazione piccola (circa mezzo marker), senza "esplodere" a zoom out
+  if (z <= 5) return 26;
+  if (z <= 7) return 24;
+  if (z <= 9) return 22;
+  if (z <= 11) return 20;
+  if (z <= 13) return 18;
+  if (z <= 15) return 16;
+  return 14;
 }
   
 function getOffsetLatLon(lat, lon) {
@@ -1679,9 +1683,10 @@ function getOffsetLatLon(lat, lon) {
   const spread = markerSpreadPxForZoom(zoom);
 
   // Ogni 10 marker aumenta l'anello (così non si schiacciano)
-  const ring = Math.floor((count - 1) / 10) + 1;
+  const ring = Math.floor((count - 1) / 8) + 1;
   const angle = count * 0.9; // radianti
-  const radius = spread * ring;
+  // cresce piano: 1° anello = spread, poi +10px per anello
+const radius = spread + (ring - 1) * 10;
 
   const base = map.project(L.latLng(lat, lon), zoom);
   const dx = Math.cos(angle) * radius;
