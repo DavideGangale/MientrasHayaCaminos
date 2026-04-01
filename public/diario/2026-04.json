@@ -1,44 +1,44 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-04-01T15:43:43.030Z",
+  "_exportDate": "2026-04-01T15:45:39.128Z",
   "tipo": "diario_mese",
   "mese": "2026-04",
   "count": 2,
   "entries": [
     {
-      "id": 1775056282241,
-      "ts": 1775056282241,
+      "id": 1775055091898,
+      "ts": 1775055091898,
       "data": "01/04/2026",
-      "ora": "10:11",
+      "ora": "09:51",
       "paese": "Colombia",
       "km": "77.7",
-      "testo": "lenti si, ma da lontano",
+      "testo": "prova 2 pc",
       "tags": [],
       "geo": {
-        "lat": 4.8061249,
-        "lon": -74.3606281
+        "lat": 4.8079121353058545,
+        "lon": -74.35632542075793
       },
       "videoUrl": null,
       "videoPlanned": false,
-      "fotoUrl": "https://drive.google.com/uc?export=view&id=1sxC8SK27BNjN7-JSwvcJmTQTc6mzfmqE",
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=13PyCd4VI7DiwVRxfS4yMyHcVxLZ78Xz6",
       "foto": null
     },
     {
-      "id": 1775055058750,
-      "ts": 1775055058750,
+      "id": 1775054970236,
+      "ts": 1775054970236,
       "data": "01/04/2026",
-      "ora": "09:50",
+      "ora": "09:49",
       "paese": "Colombia",
       "km": "77.7",
-      "testo": "prova cellular",
+      "testo": "PROVOLA",
       "tags": [],
       "geo": {
-        "lat": 4.8061636,
-        "lon": -74.3605944
+        "lat": 4.809636863036689,
+        "lon": -74.35620699907713
       },
       "videoUrl": null,
       "videoPlanned": false,
-      "fotoUrl": "https://drive.google.com/uc?export=view&id=1cxBBeIlVMAPJvrKlAq4jERfMBttiacci",
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1t5ib3FHMhbJZfMynXvvTxBRmJPQEX_hC",
       "foto": null
     }
   ]
