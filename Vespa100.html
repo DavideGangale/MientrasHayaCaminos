@@ -6558,17 +6558,25 @@ function renderDiarioList(containerId, limit = null) {
           <span class="diario-paese">${e.paese || ''}</span>
         </div>
 
-      <div style="display:flex; justify-content:space-between; gap:10px; margin-top:12px;">
-  <button onclick="apriModificaDiario(${e.id})"
-    style="background:none; border:none; color:#ff9800; font-size:12px; cursor:pointer;">
-    ✏️ Modifica
-  </button>
+        <div class="diario-testo">${escHtml(e.testo || '')}</div>
+        ${tagsHtml}
+        ${videoHtml}
+        ${fotoHtml}
 
-  <button onclick="eliminaDiario(${e.id})"
-    style="background:none; border:none; color:#666; font-size:12px; cursor:pointer;">
-    🗑️ Elimina
-  </button>
-</div>
+        <div style="display:flex; justify-content:space-between; gap:10px; margin-top:12px;">
+          <button onclick="apriModificaDiario(${e.id})"
+            style="background:none; border:none; color:#ff9800; font-size:12px; cursor:pointer;">
+            ✏️ Modifica
+          </button>
+
+          <button onclick="eliminaDiario(${e.id})"
+            style="background:none; border:none; color:#666; font-size:12px; cursor:pointer;">
+            🗑️ Elimina
+          </button>
+        </div>
+      </div>
+
+      <div class="diario-divider"></div>
     `;
   }
 
