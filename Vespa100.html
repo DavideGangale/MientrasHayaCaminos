@@ -668,6 +668,89 @@ color:#fff;
     .diario-testo{font-size:16px;line-height:1.5;margin-bottom:10px;text-align:left;}
     .diario-foto{width:100%;height:auto;display:block;border-radius:10px;margin-top:10px;}
 
+
+/* ===== DIARIO: UI più attrattiva ===== */
+.diario-entry{ overflow:hidden; }
+
+/* foto più “hero” (al posto di auto-height) */
+.diario-foto{
+  width:100%;
+  height:260px;
+  object-fit:cover;
+  border-radius:12px;
+  margin-top:10px;
+  cursor:pointer;
+  border:1px solid #333;
+}
+
+/* toolbar vista diario */
+.diario-toolbar{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+  margin:10px 0 14px 0;
+}
+.diario-toolbar .seg-btn{
+  flex:1;
+  min-width:140px;
+  padding:10px 12px;
+  border-radius:12px;
+  border:2px solid #444;
+  background:#111;
+  color:#bbb;
+  font-weight:1000;
+  cursor:pointer;
+}
+.diario-toolbar .seg-btn.active{
+  background:var(--giallo);
+  border-color:var(--giallo);
+  color:#000;
+}
+
+/* galleria thumbs (3 colonne su mobile) */
+.diario-gallery{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:8px;
+  margin-top:10px;
+}
+@media (min-width:768px){
+  .diario-gallery{ grid-template-columns:repeat(5, 1fr); }
+}
+
+.diario-thumb{
+  position:relative;
+  border-radius:12px;
+  overflow:hidden;
+  background:#000;
+  border:1px solid #333;
+  aspect-ratio:1/1;
+  cursor:pointer;
+}
+.diario-thumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  filter:saturate(1.05) contrast(1.05);
+}
+.diario-thumb .badge{
+  position:absolute;
+  left:8px;
+  top:8px;
+  background:rgba(0,0,0,0.65);
+  color:#fff;
+  font-weight:1000;
+  font-size:12px;
+  padding:4px 8px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,0.18);
+}
+.diario-thumb .badge.video{ background:rgba(33,150,243,0.75); }
+.diario-thumb .badge.planned{ background:rgba(255,152,0,0.80); color:#000; }
+
+    
     /* NAV */
     .nav{
       position:fixed;
@@ -1999,14 +2082,36 @@ color:#fff;
   </div>
 </div>
 
-
-
 <!-- DIARIO FULL (modal) -->
 <div id="modalDiario" class="modal-overlay">
   <div class="modal-content" style="border-color:#e91e63; max-width:900px;">
     <button class="close-modal" onclick="chiudiModal('modalDiario')">×</button>
     <h2 style="color:#e91e63; text-align:center; margin-top:0;">📖 Diario di Viaggio</h2>
-    <div id="lista-diario-modal"></div>
+
+    <!-- toolbar viste -->
+    <div class="diario-toolbar">
+      <button id="btn-diario-view-timeline"
+              class="seg-btn active"
+              onclick="setDiarioView('timeline')"
+              type="button">🕒 Cronologico</button>
+
+      <button id="btn-diario-view-tappe"
+              class="seg-btn"
+              onclick="setDiarioView('tappe')"
+              type="button">🏁 Per tappa</button>
+    </div>
+
+    <!-- VISTA 1: CRONOLOGICO -->
+    <div id="diario-view-timeline" style="display:block;">
+      <div id="diario-top-gallery"></div>
+      <div id="lista-diario-modal"></div>
+    </div>
+
+    <!-- VISTA 2: PER TAPPA -->
+    <div id="diario-view-tappe" style="display:none;">
+      <div id="diario-tappe-container"></div>
+    </div>
+
   </div>
 </div>
 
@@ -5844,28 +5949,43 @@ function renderDiarioList(containerId, limit = null) {
     const tagsHtml = (Array.isArray(e.tags) && e.tags.length)
       ? `<div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:6px;">
           ${e.tags.map(t =>
-            `<span style="font-size:11px; padding:4px 8px; border-radius:999px; background:#222; border:1px solid #444; color:var(--giallo); font-weight:bold;">#${t}</span>`
+            `<span style="font-size:11px; padding:4px 8px; border-radius:999px; background:#222; border:1px solid #444; color:var(--giallo); font-weight:1000;">#${t}</span>`
           ).join('')}
          </div>`
       : '';
 
     const fotoSrcRaw = (e.fotoUrl || e.foto) ? (e.fotoUrl || e.foto) : null;
     const fotoSrc = fotoSrcRaw ? driveToDirectImageUrl(fotoSrcRaw) : null;
+
     const videoHtml = e.videoUrl
-  ? `<div style="margin-top:10px;">
-       <a href="${e.videoUrl}" target="_blank" rel="noopener"
-          style="display:inline-block;padding:10px 12px;border-radius:12px;
-                 background:#c62828;color:#fff;text-decoration:none;font-weight:900;">
-         ▶ Guarda Video YouTube
-       </a>
-     </div>`
-  : (e.videoPlanned
-      ? `<div style="margin-top:10px;color:#ff9800;font-weight:900;">
-           🎬 Video in arrivo (aggiungerai il link dopo)
+      ? `<div style="margin-top:10px;">
+           <a href="${e.videoUrl}" target="_blank" rel="noopener"
+              style="display:inline-block;padding:10px 12px;border-radius:12px;
+                     background:#2196F3;color:#000;text-decoration:none;font-weight:1000;">
+             ▶ Guarda Video YouTube
+           </a>
          </div>`
-      : '');
+      : (e.videoPlanned
+          ? `<div style="margin-top:10px;color:#ff9800;font-weight:1000;">
+               🎬 Video in arrivo (aggiungerai il link dopo)
+             </div>`
+          : '');
+
+    const caption = `
+      <div style="font-weight:900;color:#ff9800;">📍 ${e.paese || ''}</div>
+      <div style="color:#bbb;">${e.data || ''} ${e.ora || ''} — km ${e.km || '--'}</div>
+      ${e.testo ? `<div style="margin-top:6px;color:#ddd;line-height:1.35;">${(e.testo || '').slice(0, 220)}${(e.testo || '').length > 220 ? '…' : ''}</div>` : ''}
+    `;
+
     const fotoHtml = fotoSrc
-      ? `<img src="${fotoSrc}" class="diario-foto" loading="lazy">`
+      ? `
+        <img src="${fotoSrc}" class="diario-foto" loading="lazy"
+             onclick='openPhotoLightbox(${JSON.stringify(fotoSrcRaw)}, ${JSON.stringify(caption)})'>
+        <button class="btn-secondary" style="margin-top:10px;"
+                onclick='openPhotoLightbox(${JSON.stringify(fotoSrcRaw)}, ${JSON.stringify(caption)})'>
+          📷 Apri foto
+        </button>
+      `
       : '';
 
     html += `
@@ -5877,16 +5997,13 @@ function renderDiarioList(containerId, limit = null) {
 
         <div class="diario-testo">${e.testo || ''}</div>
         ${tagsHtml}
-${videoHtml}
-${fotoHtml}
+        ${videoHtml}
+        ${fotoHtml}
 
-
-<button onclick="apriModificaVideoDiario(${e.id})"
-  style="background:none; border:none; color:#ff9800; font-size:12px; cursor:pointer; margin-top:10px;">
-  🎬 Modifica Video
-</button>
-
-
+        <button onclick="apriModificaVideoDiario(${e.id})"
+          style="background:none; border:none; color:#ff9800; font-size:12px; cursor:pointer; margin-top:10px;">
+          🎬 Modifica Video
+        </button>
 
         <button onclick="eliminaDiario(${e.id})"
           style="background:none; border:none; color:#666; font-size:12px; cursor:pointer; margin-top:5px;">
@@ -5896,7 +6013,6 @@ ${fotoHtml}
     `;
   }
 
-  // ✅ IMPORTANTE: nessun carattere extra viene aggiunto tra i post
   container.innerHTML = html;
 }
 
@@ -5905,8 +6021,188 @@ function renderDiario() {
  // renderDiarioList('lista-diario-preview', 4);
 }
 
+let diarioViewMode = 'timeline'; // 'timeline' | 'tappe'
+
+function setDiarioView(mode) {
+  diarioViewMode = mode;
+
+  // bottoni
+  document.getElementById('btn-diario-view-timeline')?.classList.toggle('active', mode === 'timeline');
+  document.getElementById('btn-diario-view-tappe')?.classList.toggle('active', mode === 'tappe');
+
+  // container
+  const a = document.getElementById('diario-view-timeline');
+  const b = document.getElementById('diario-view-tappe');
+  if (a) a.style.display = (mode === 'timeline') ? 'block' : 'none';
+  if (b) b.style.display = (mode === 'tappe') ? 'block' : 'none';
+
+  renderDiarioFull();
+}
+
+function getAllPercorsiSorted() {
+  const tappe = caricaJSON('vt_tappe', []);
+  const tur   = caricaJSON('vt_turismo', []);
+  return []
+    .concat(Array.isArray(tappe) ? tappe : [])
+    .concat(Array.isArray(tur) ? tur : [])
+    .filter(p => p && p.id)
+    .sort((x, y) => (Number(y.id || 0) - Number(x.id || 0)));
+}
+
+// prende entry diario dentro range start/end (NON richiede geo)
+function getDiarioEntriesByRange(startTs, endTs, onlyMedia = false) {
+  const diario = caricaJSON('vt_diario', []);
+  if (!Array.isArray(diario) || !startTs || !endTs) return [];
+
+  const margin = 15 * 60 * 1000; // 15 min
+  const a = Number(startTs) - margin;
+  const b = Number(endTs) + margin;
+
+  return diario.filter(e => {
+    const ts = Number(e.ts || e.id || 0);
+    if (!(ts >= a && ts <= b)) return false;
+
+    if (onlyMedia) {
+      const hasMedia = !!(e.fotoUrl || e.foto || e.videoUrl || e.videoPlanned);
+      if (!hasMedia) return false;
+    }
+    return true;
+  });
+}
+
+function renderDiarioTopGallery() {
+  const box = document.getElementById('diario-top-gallery');
+  if (!box) return;
+
+  const diario = caricaJSON('vt_diario', []);
+  const arr = Array.isArray(diario) ? diario : [];
+
+  // ultime 12 FOTO (solo foto, per avere una galleria “bella”)
+  const photos = arr
+    .filter(e => !!(e && (e.fotoUrl || e.foto)))
+    .slice(0, 12);
+
+  if (!photos.length) {
+    box.innerHTML = '';
+    return;
+  }
+
+  box.innerHTML = `
+    <div style="color:#ff9800;font-weight:1000;margin:8px 0 6px 0;">📸 Ultime foto</div>
+    <div class="diario-gallery">
+      ${photos.map(e => {
+        const raw = e.fotoUrl || e.foto;
+        const src = driveToDirectImageUrl(raw);
+        const caption = `📍 ${(e.paese||'')} — ${(e.data||'')} ${(e.ora||'')}`;
+        return `
+          <div class="diario-thumb"
+               onclick='openPhotoLightbox(${JSON.stringify(raw)}, ${JSON.stringify(caption)})'>
+            <img src="${src}" loading="lazy">
+          </div>
+        `;
+      }).join('')}
+    </div>
+    <hr style="border:0;border-top:1px solid #333; margin:14px 0;">
+  `;
+}
+
+function renderDiarioByTappa() {
+  const box = document.getElementById('diario-tappe-container');
+  if (!box) return;
+
+  const percorsi = getAllPercorsiSorted();
+  if (!percorsi.length) {
+    box.innerHTML = `<div style="color:#888;text-align:center;padding:20px;">Nessuna tappa/giro salvato</div>`;
+    return;
+  }
+
+  box.innerHTML = percorsi.map(p => {
+    const tipo = p.tipo || 'Tappa';
+    const badgeColor = (tipo === 'Turismo') ? '#2196F3' : '#9c27b0';
+
+    // se manca start/end => vecchio record
+    const hasRange = !!(p.startTs && p.endTs);
+    const mediaEntries = hasRange ? getDiarioEntriesByRange(p.startTs, p.endTs, true) : [];
+
+    // thumbs: mostra prime 9 (foto o “tile video”)
+    const thumbs = mediaEntries.slice(0, 9).map(e => {
+      const hasPhoto = !!(e.fotoUrl || e.foto);
+      const hasVideo = !!e.videoUrl;
+      const planned  = !!(e.videoPlanned && !e.videoUrl);
+
+      if (hasPhoto) {
+        const raw = e.fotoUrl || e.foto;
+        const src = driveToDirectImageUrl(raw);
+        const badge = hasVideo ? `<span class="badge video">🎥</span>` : (planned ? `<span class="badge planned">🎬</span>` : '');
+        const caption = `📍 ${(e.paese||'')} — ${(e.data||'')} ${(e.ora||'')}`;
+        return `
+          <div class="diario-thumb"
+               onclick='openPhotoLightbox(${JSON.stringify(raw)}, ${JSON.stringify(caption)})'>
+            ${badge}
+            <img src="${src}" loading="lazy">
+          </div>
+        `;
+      }
+
+      // no foto ma video / planned
+      const badge = hasVideo ? `<span class="badge video">🎥</span>` : `<span class="badge planned">🎬</span>`;
+      const click = hasVideo
+        ? `window.open(${JSON.stringify(e.videoUrl)}, '_blank')`
+        : `apriModificaVideoDiario(${Number(e.id)})`;
+
+      return `
+        <div class="diario-thumb" style="display:flex;align-items:center;justify-content:center;color:#fff;"
+             onclick='${click}'>
+          ${badge}
+          <div style="font-size:26px;font-weight:1000;">${hasVideo ? '▶' : '🎬'}</div>
+        </div>
+      `;
+    }).join('');
+
+    const titolo = p.titolo ? `<div style="margin-top:6px;font-weight:1000;color:#fff;">📍 ${p.titolo}</div>` : '';
+    const note = p.note ? `<div style="margin-top:6px;color:#bbb;">${p.note}</div>` : '';
+
+    const h = Math.floor((p.durata || 0) / 3600);
+    const m = Math.floor(((p.durata || 0) % 3600) / 60);
+
+    return `
+      <div class="diario-entry" style="border-left-color:${badgeColor};">
+        <div class="diario-header">
+          <span class="diario-data">🏁 ${p.data || ''} ${p.ora || ''} — ${p.paese || ''}</span>
+          <span class="diario-paese" style="background:${badgeColor};color:#fff;">${String(tipo).toUpperCase()}</span>
+        </div>
+
+        <div style="color:#ddd;">📏 <b>${p.km || 0} km</b> &nbsp;|&nbsp; ⏱️ ${h}h ${m}m</div>
+        ${titolo}
+        ${note}
+
+        ${hasRange
+          ? (thumbs
+              ? `<div class="diario-gallery">${thumbs}</div>`
+              : `<div style="margin-top:10px;color:#777;">Nessuna foto/video trovata in questa tappa (nel range timestamp).</div>`)
+          : `<div style="margin-top:10px;color:#777;">Tappa vecchia: manca start/end timestamp → non posso associare automaticamente le foto.</div>`
+        }
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
+          <button class="btn-secondary" onclick="apriMediaPercorso(${p.id})">📸 Apri Foto/Video</button>
+          <button class="btn-secondary" onclick="apriTracciaPercorso(${p.id})">🗺️ Traccia</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
 function renderDiarioFull() {
-  // lista completa nel modal
+  // sincronizza UI in base alla vista
+  const mode = diarioViewMode || 'timeline';
+
+  if (mode === 'tappe') {
+    renderDiarioByTappa();
+    return;
+  }
+
+  // timeline
+  renderDiarioTopGallery();
   renderDiarioList('lista-diario-modal', null);
 }
 
