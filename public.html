@@ -3525,10 +3525,10 @@ async function loadData() {
     updateStatsMini();
     syncFilterButtonsUI();
     renderMap();
-
-        // Se URL contiene ?view=diary, apri direttamente il diario
-    const view = urlParams.get('view');
-    if (view === 'diary') showDiaryOverlay(true);
+    // Se URL contiene ?view=diary, apri direttamente il diario
+    const view = new URLSearchParams(window.location.search).get('view');
+    if (view === 'diary' && typeof showDiaryOverlay === 'function') showDiaryOverlay(true);
+      
 
   } catch (e) {
     console.error(e);
