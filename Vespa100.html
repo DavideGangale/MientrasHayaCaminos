@@ -10861,7 +10861,7 @@ const turismoPub = turismoPublicSrc.map(t => ({
     traccia: simplifyTrace(t.traccia, 3)
   }));
 
-  const diarioSorted = [...diarioPublicSrc].sort(...);
+  const diarioSorted = (...diarioPublicSrc).sort(...);
   const idsConFoto = diarioSorted.filter(d => !!d.foto).map(d => d.id);
   const keepFotoIds = new Set(idsConFoto.slice(0, MAX_FOTO_DIARIO));
 
