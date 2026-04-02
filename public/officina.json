@@ -48,7 +48,7 @@
         "lon": -74.3606878
       },
       "fotoCandela": null,
-      "paese": ""
+      "paese": "Colombia"
     },
     {
       "id": 1774884720591,
@@ -59,7 +59,7 @@
       "chicMin": 75,
       "viteAria": "1.25",
       "viteMinimo": "1.75",
-      "candela": "",
+      "candela": "Colombia",
       "nota": "prova getti altezza",
       "geo": {
         "lat": 4.8197633,
