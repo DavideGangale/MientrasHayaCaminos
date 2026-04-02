@@ -2192,15 +2192,13 @@ color:#fff;
 
   <input type="number" id="log-costo" placeholder="Costo in valuta locale (opzionale)" step="0.01" min="0">
 
-  <input type="file" id="log-foto-input" accept="image/*" style="width:100%; margin-bottom:10px;"
-         onchange="anteprima('log-foto-input','anteprima-log-foto')">
+ <input type="file" id="log-foto-input" accept="image/*" multiple style="width:100%; margin-bottom:10px;"
+       onchange="anteprimaMulti('log-foto-input','anteprima-log-foto')">
 
   <div id="anteprima-log-foto" style="margin-bottom:10px; display:none;"></div>
 
-     <!-- FOTO 2 (opzionale) -->
-<input type="file" id="log-foto2-input" accept="image/*" style="width:100%; margin-bottom:10px;"
-       onchange="anteprima('log-foto2-input','anteprima-log-foto2')">
-<div id="anteprima-log-foto2" style="margin-bottom:10px; display:none;"></div>
+
+
 
 <!-- VIDEO YOUTUBE (opzionale) -->
 <input type="text" id="log-video"
@@ -3331,6 +3329,42 @@ initDB('vt_inventario', JSON.stringify([
   coordinateTracciato = caricaJSON('vt_coordinateTracciato', []);
   lastCountry = carica('vt_paeseAttuale', 'Colombia');
 
+  
+function migraLogbookMultiFotoV1(){
+  if (carica('vt_mig_logbook_multifoto_v1','') === '1') return;
+
+  const log = caricaJSON('vt_logbook', []);
+  if (!Array.isArray(log)) { salva('vt_mig_logbook_multifoto_v1','1'); return; }
+
+  let changed = false;
+
+  for (const e of log) {
+    if (!e || typeof e !== 'object') continue;
+
+    // crea arrays se mancano
+    if (!Array.isArray(e.fotoList)) {
+      const list = [];
+      if (e.foto) list.push(e.foto);
+      if (e.foto2) list.push(e.foto2);
+      e.fotoList = list;
+      changed = true;
+    }
+    if (!Array.isArray(e.fotoUrlList)) {
+      const urls = [];
+      if (e.fotoUrl) urls.push(e.fotoUrl);
+      if (e.fotoUrl2) urls.push(e.fotoUrl2);
+      e.fotoUrlList = urls;
+      changed = true;
+    }
+
+    // normalizza lunghezze
+    while (e.fotoUrlList.length < e.fotoList.length) e.fotoUrlList.push(null);
+    while (e.fotoList.length < e.fotoUrlList.length) e.fotoList.push(null);
+  }
+
+  if (changed) salva('vt_logbook', log);
+  salva('vt_mig_logbook_multifoto_v1','1');
+}
 
 function migraPublicFlagsV1(){
   if (carica('vt_mig_public_flags_v1','') === '1') return;
@@ -6176,30 +6210,57 @@ const url = await uploadFotoToDrive(entry.foto, key, key);
         }
       }
 
-      if (job.kind === 'logbook') {
-        const log = caricaJSON('vt_logbook', []);
-        const idx = log.findIndex(x => String(x.id) === String(job.id));
-        if (idx === -1) continue;
-        const entry = log[idx];
+    if (job.kind === 'logbook') {
+  const log = caricaJSON('vt_logbook', []);
+  const idx = log.findIndex(x => String(x.id) === String(job.id));
+  if (idx === -1) continue;
+  const entry = log[idx];
 
-        // se non ho nessuna foto locale da caricare, skip
-        const need1 = (!entry.fotoUrl && entry.foto);
-        const need2 = (!entry.fotoUrl2 && entry.foto2);
+  // Normalizza arrays
+  if (!Array.isArray(entry.fotoList)) entry.fotoList = [];
+  if (!Array.isArray(entry.fotoUrlList)) entry.fotoUrlList = [];
+  while (entry.fotoUrlList.length < entry.fotoList.length) entry.fotoUrlList.push(null);
+  while (entry.fotoList.length < entry.fotoUrlList.length) entry.fotoList.push(null);
 
-        if (!need1 && !need2) continue;
+  // Trova la prossima foto locale da caricare
+  let uploadedOne = false;
 
-        // carica foto 1
-        if (need1) {
-          const key1 = 'logbook_' + entry.id + '_1';
-          const url1 = await uploadFotoToDrive(entry.foto, key1, key1);
-          if (url1) {
-            entry.fotoUrl = url1;
-            entry.foto = null; // alleggerisce
-            done++;
-          } else {
-            keep.push(job);
-            continue;
-          }
+  for (let pi = 0; pi < entry.fotoList.length; pi++) {
+    if (done >= maxItems) break;
+
+    const local = entry.fotoList[pi];
+    const urlAlready = entry.fotoUrlList[pi];
+
+    if (!local || urlAlready) continue;
+
+    const key = `logbook_${entry.id}_${pi+1}`;
+    const url = await uploadFotoToDrive(local, key, key);
+
+    if (url) {
+      entry.fotoUrlList[pi] = url;
+      entry.fotoList[pi] = null; // alleggerisce
+      done++;
+      uploadedOne = true;
+
+      // compatibilità: prime 2
+      if (pi === 0) { entry.fotoUrl = url; entry.foto = null; }
+      if (pi === 1) { entry.fotoUrl2 = url; entry.foto2 = null; }
+
+      log[idx] = entry;
+      salva('vt_logbook', log);
+    } else {
+      keep.push(job);
+      uploadedOne = true;
+      break;
+    }
+  }
+
+  // se non ho caricato niente e ci sono ancora locali -> resta in coda
+  const stillPending = entry.fotoList.some((x,i) => !!x && !entry.fotoUrlList[i]);
+  if (stillPending) keep.push(job);
+
+  continue;
+}
         }
 
         // carica foto 2
@@ -7133,10 +7194,20 @@ ${galleryHtml}
       const gh = e.ghSynced ? '🐙' : '⏳';
       const pub = e.isPublic ? 'checked' : '';
 
-      // gallery: foto 1, foto 2, video thumbnail
-      const photos = [];
-      if (e.fotoUrl || e.foto) photos.push(e.fotoUrl || e.foto);
-      if (e.fotoUrl2 || e.foto2) photos.push(e.fotoUrl2 || e.foto2);
+  let photos = [];
+
+if (Array.isArray(e.fotoUrlList) && e.fotoUrlList.length) {
+  photos = photos.concat(e.fotoUrlList.filter(Boolean));
+}
+if (Array.isArray(e.fotoList) && e.fotoList.length) {
+  photos = photos.concat(e.fotoList.filter(Boolean));
+}
+
+// fallback vecchio
+if (!photos.length) {
+  if (e.fotoUrl || e.foto) photos.push(e.fotoUrl || e.foto);
+  if (e.fotoUrl2 || e.foto2) photos.push(e.fotoUrl2 || e.foto2);
+}
 
       const albumId = 'logbook_tl_' + String(e.id);
       registerLightboxAlbum(
@@ -10359,11 +10430,12 @@ function salvaIntervento() {
 const cur = valutaAttuale || 'USD';
 const costoUsd = (costoLocal > 0) ? convertLocalToUsd(costoLocal, cur) : 0;
 
-    const ante = document.getElementById('anteprima-log-foto');
-  const foto = (ante && ante.dataset) ? (ante.dataset.src || null) : null;
+const ante = document.getElementById('anteprima-log-foto');
+let fotoList = [];
+try { fotoList = JSON.parse(ante?.dataset?.list || '[]'); } catch { fotoList = []; }
+if (!Array.isArray(fotoList)) fotoList = [];
 
-  const ante2 = document.getElementById('anteprima-log-foto2');
-const foto2 = (ante2 && ante2.dataset) ? (ante2.dataset.src || null) : null;
+
 
 const videoUrlRaw = (document.getElementById('log-video')?.value || '').trim();
 const videoUrl = videoUrlRaw || null;
@@ -10399,6 +10471,15 @@ const videoPlanned = !!document.getElementById('log-video-planned')?.checked;
   ghSyncedAt: null,
   valuta: cur,
   fxToUsd: getFxToUsd(cur),
+    
+ fotoList: fotoList,                 // molte foto (locali)
+fotoUrlList: (fotoList || []).map(() => null),
+
+// compatibilità (prime 2)
+foto: fotoList[0] || null,
+foto2: fotoList[1] || null,
+fotoUrl: null,
+fotoUrl2: null,
 
   costoLocal: costoLocal,
   costoUsd: costoUsd,
@@ -10442,9 +10523,9 @@ updateDriveSyncInfo();
   if (selRic) selRic.value = '';
 
   
-  if (ante) { ante.style.display = 'none'; ante.dataset.src = ''; }
-  const f = document.getElementById('log-foto-input');
-  if (f) f.value = '';
+ if (ante) { ante.style.display = 'none'; ante.innerHTML = ''; ante.dataset.list = '[]'; }
+const f = document.getElementById('log-foto-input');
+if (f) f.value = '';
 
   if (ante2) { ante2.style.display = 'none'; ante2.dataset.src = ''; ante2.innerHTML = ''; }
 const f2 = document.getElementById('log-foto2-input');
@@ -10677,6 +10758,12 @@ function salvaModificaIntervento() {
   // foto nuova (se scelta)
   const prev = document.getElementById('anteprima-edit-log-foto');
 let newFotos = [];
+
+if (!Array.isArray(e.fotoList)) e.fotoList = [];
+if (!Array.isArray(e.fotoUrlList)) e.fotoUrlList = [];
+while (e.fotoUrlList.length < e.fotoList.length) e.fotoUrlList.push(null);
+while (e.fotoList.length < e.fotoUrlList.length) e.fotoList.push(null);
+  
 try { newFotos = JSON.parse(prev?.dataset?.list || '[]'); } catch { newFotos = []; }
 if (!Array.isArray(newFotos)) newFotos = [];
 
@@ -10722,12 +10809,22 @@ if (!Array.isArray(newFotos)) newFotos = [];
   updateDriveSyncInfo?.();
 }
 
-if (newFotos.length >= 2 && newFotos[1]) {
-  e.foto2 = newFotos[1];
-  e.fotoUrl2 = null;
+if (newFotos.length) {
+  for (const src of newFotos) {
+    if (!src) continue;
+    e.fotoList.push(src);
+    e.fotoUrlList.push(null);
+  }
+
+  // compatibilità: aggiorna prime 2 se mancavano
+  if (!e.foto && e.fotoList[0]) e.foto = e.fotoList[0];
+  if (!e.foto2 && e.fotoList[1]) e.foto2 = e.fotoList[1];
+
   enqueueFoto?.('logbook', e.id);
   updateDriveSyncInfo?.();
 }
+
+  
 
   
   log[idx] = e;
@@ -11319,6 +11416,7 @@ const turismoPub = turismoPublicSrc.map(t => ({
     costoUsd: e.costoUsd ?? 0,
     fotoUrl: e.fotoUrl || null,
     fotoUrl2: e.fotoUrl2 || null,
+   fotoUrlList: Array.isArray(e.fotoUrlList) ? e.fotoUrlList.filter(Boolean) : [],
     videoUrl: e.videoUrl || null,
     videoPlanned: !!e.videoPlanned,
     geo: e.geo || null
@@ -12001,6 +12099,7 @@ async function setLoadingProgress(pct, label) {
 async function inizializzaApp() {
   await setLoadingProgress(10, '🗄️ Database...');
   initAllData();
+  migraLogbookMultiFotoV1();
   migrateCarburazionePaeseFromPercorsi();
 const g = parseFloat(carica('vt_spesaBenzinaUsd','0')) || 0;
 if (g <= 0.0001) ricostruisciSpeseGlobaliDaPaesi();
