@@ -755,6 +755,7 @@ color:#fff;
    #modalGrafico  { z-index: 9900; }
 #modalEditIntervento { z-index: 9850; }
 #videoLightbox       { z-index: 9950; }
+
     
     /* DIARIO */
     .diario-entry{
@@ -1040,6 +1041,14 @@ color:#fff;
   flex:0 0 auto;          /* bottoni sempre compatti a destra */
 }
 
+
+    .diario-thumb.is-video{ border:2px solid #2196F3; }
+.diario-thumb.is-photo{ border:2px solid #ff9800; }
+
+.diario-thumb .badge.tr{
+  left:auto;
+  right:8px;
+}
     
 .checklist-actions{
   margin-left:auto;
@@ -2332,12 +2341,24 @@ color:#fff;
 
     <!-- VISTA 1: CRONOLOGICO -->
     <div id="diario-view-timeline" style="display:block;">
-      
+      <div class="diario-toolbar" style="margin-top:0;">
+  <button class="seg-btn active" id="btn-tl-all" onclick="setTimelineFilter('all')" type="button">🧾 Tutto</button>
+  <button class="seg-btn" id="btn-tl-perc" onclick="setTimelineFilter('percorso')" type="button">🏁 Percorsi</button>
+  <button class="seg-btn" id="btn-tl-post" onclick="setTimelineFilter('diario')" type="button">📝 Post</button>
+  <button class="seg-btn" id="btn-tl-off" onclick="setTimelineFilter('manutenzione')" type="button">🔧 Officina</button>
+  <button class="seg-btn" id="btn-tl-fuel" onclick="setTimelineFilter('rifornimento')" type="button">⛽ Benzina</button>
+  <button class="seg-btn" id="btn-tl-carb" onclick="setTimelineFilter('carburazione')" type="button">🌬️ Carb</button>
+</div>
       <div id="lista-diario-modal"></div>
     </div>
 
     <!-- VISTA 2: PER TAPPA -->
     <div id="diario-view-tappe" style="display:none;">
+      <div class="diario-toolbar" style="margin-top:0;">
+  <button class="seg-btn active" id="btn-byt-all" onclick="setByTappaFilter('all')" type="button">🧾 Tutto</button>
+  <button class="seg-btn" id="btn-byt-tappe" onclick="setByTappaFilter('tappe')" type="button">🏁 Tappe</button>
+  <button class="seg-btn" id="btn-byt-giri" onclick="setByTappaFilter('giri')" type="button">🔁 Giri</button>
+</div>
       <div id="diario-tappe-container"></div>
     </div>
 
@@ -2346,14 +2367,7 @@ color:#fff;
 </button>
 <div id="timelineFiltersBox" style="display:none; margin-top:10px;">
   
-<div class="diario-toolbar" style="margin-top:0;">
-  <button class="seg-btn active" id="btn-tl-all" onclick="setTimelineFilter('all')" type="button">🧾 Tutto</button>
-  <button class="seg-btn" id="btn-tl-perc" onclick="setTimelineFilter('percorso')" type="button">🏁 Percorsi</button>
-  <button class="seg-btn" id="btn-tl-post" onclick="setTimelineFilter('diario')" type="button">📝 Post</button>
-  <button class="seg-btn" id="btn-tl-off" onclick="setTimelineFilter('manutenzione')" type="button">🔧 Officina</button>
-  <button class="seg-btn" id="btn-tl-fuel" onclick="setTimelineFilter('rifornimento')" type="button">⛽ Benzina</button>
-  <button class="seg-btn" id="btn-tl-carb" onclick="setTimelineFilter('carburazione')" type="button">🌬️ Carb</button>
-</div>
+
 
 </div>
     
@@ -2455,6 +2469,17 @@ color:#fff;
       <span class="checklist-text">🎬 Video in arrivo (nessun link ancora)</span>
     </label>
 
+<input type="file" id="edit-diario-foto-input" accept="image/*" multiple style="display:none;"
+       onchange="anteprimaMulti('edit-diario-foto-input','anteprima-edit-diario-foto')">
+
+<button class="btn-secondary" style="margin-top:10px;"
+        onclick="document.getElementById('edit-diario-foto-input').click()">
+  📷 Aggiungi foto al post
+</button>
+<div id="anteprima-edit-diario-foto" style="margin-top:10px; display:none;"></div>
+
+
+    
     <button class="btn-azione btn-yellow" onclick="salvaModificaDiario()">
       💾 Salva
     </button>
@@ -4367,23 +4392,24 @@ function youtubeThumbUrl(url){
 
   function vtThumbPhoto(srcRaw, albumId, idx, badgeHtml = '') {
   const src = driveToDirectImageUrl(srcRaw);
-  return `
-    <div class="diario-thumb" onclick="openPhotoLightboxAlbum('${albumId}', ${idx})">
-      ${badgeHtml || ''}
-      <img src="${src}" loading="lazy">
-    </div>
-  `;
+ return `
+  <div class="diario-thumb is-photo" onclick="openPhotoLightboxAlbum('${albumId}', ${idx})">
+    <span class="badge tr">📷</span>
+    ${badgeHtml || ''}
+    <img src="${src}" loading="lazy">
+  </div>
+`;
 }
 
 function vtThumbVideo(videoUrl) {
   const th = youtubeThumbUrl(videoUrl);
   return `
-    <div class="diario-thumb" onclick="openVideoLightbox(${JSON.stringify(videoUrl)})">
-      <span class="badge video">🎥</span>
-      ${th ? `<img src="${th}" loading="lazy">`
-           : `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:26px;font-weight:1000;">▶</div>`}
-    </div>
-  `;
+  <div class="diario-thumb is-video" onclick="openVideoLightbox(${JSON.stringify(videoUrl)})">
+    <span class="badge video tr">🎥</span>
+    ${th ? `<img src="${th}" loading="lazy">`
+         : `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:26px;font-weight:1000;">▶</div>`}
+  </div>
+`;
 }
 
 function vtThumbPlanned(onclickJs) {
@@ -7533,17 +7559,35 @@ function renderDiarioTopGallery() {
   `;
 }
 
+let byTappaFilter = 'all'; // all | tappe | giri
+
+function setByTappaFilter(k){
+  byTappaFilter = k || 'all';
+  document.getElementById('btn-byt-all')?.classList.toggle('active', byTappaFilter==='all');
+  document.getElementById('btn-byt-tappe')?.classList.toggle('active', byTappaFilter==='tappe');
+  document.getElementById('btn-byt-giri')?.classList.toggle('active', byTappaFilter==='giri');
+  renderDiarioByTappa();
+}
+  
 function renderDiarioByTappa() {
   const box = document.getElementById('diario-tappe-container');
   if (!box) return;
 
   const percorsi = getAllPercorsiSorted();
+
+
+  const percorsiFiltrati = percorsi.filter(p => {
+  const isGiro = String(p.tipo || '').toLowerCase() === 'turismo';
+  if (byTappaFilter === 'tappe') return !isGiro;
+  if (byTappaFilter === 'giri') return isGiro;
+  return true;
+});
   if (!percorsi.length) {
     box.innerHTML = `<div style="color:#888;text-align:center;padding:20px;">Nessuna tappa/giro salvato</div>`;
     return;
   }
 
-  box.innerHTML = percorsi.map(p => {
+  box.innerHTML = percorsiFiltrati.map(p => {
     const tipo = p.tipo || 'Tappa';
     const badgeColor = (tipo === 'Turismo') ? '#2196F3' : '#9c27b0';
 
@@ -7880,7 +7924,10 @@ function apriModificaDiario(id) {
   document.getElementById('edit-diario-testo').value = e.testo || '';
   document.getElementById('edit-diario-video').value = e.videoUrl || '';
   document.getElementById('edit-diario-video-planned').checked = !!e.videoPlanned;
-
+const prev = document.getElementById('anteprima-edit-diario-foto');
+if (prev) { prev.style.display='none'; prev.innerHTML=''; prev.dataset.list='[]'; }
+const fi = document.getElementById('edit-diario-foto-input');
+if (fi) fi.value = '';
   apriModal('modalDiarioEditVideo');
 }
 
@@ -7913,8 +7960,59 @@ function salvaModificaDiario() {
     e.tags = Array.from(new Set([...old, ...tagsFromText]));
   }
 
+  // ---- aggiunta nuove foto al post (stesso groupId) ----
+const prev = document.getElementById('anteprima-edit-diario-foto');
+let fotos = [];
+try { fotos = JSON.parse(prev?.dataset?.list || '[]'); } catch { fotos = []; }
+if (!Array.isArray(fotos)) fotos = [];
+
+if (fotos.length) {
+  const now = new Date();
+  const groupId = editDiarioGroupId || ('solo_' + String(editDiarioId));
+
+  // prendo una entry "base" del gruppo per copiare paese/km/geo
+  const leader = diario.find(x => x && ((x.groupId||('solo_'+x.id)) === groupId)) || {};
+
+  for (const src of fotos) {
+    const entry = {
+      id: Date.now() + Math.floor(Math.random()*1000),
+      ts: Date.now(),
+      groupId: leader.groupId || null,
+
+      data: now.toLocaleDateString('it-IT'),
+      ora: now.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' }),
+
+      paese: leader.paese || carica('vt_paeseAttuale','Colombia'),
+      km: leader.km || (parseFloat(carica('vt_kmTotali','0')) || 0).toFixed(1),
+
+      testo: leader.testo || testo,
+      tags: Array.isArray(leader.tags) ? leader.tags : [],
+      geo: leader.geo || null,
+
+      videoUrl: leader.videoUrl || null,
+      videoPlanned: !!leader.videoPlanned,
+
+      foto: src,
+      fotoUrl: null,
+
+      isPublic: !!leader.isPublic,
+      ghSynced: false,
+      ghSyncedAt: null
+    };
+
+    diario.unshift(entry);
+    enqueueFoto?.('diario', entry.id);
+  }
+}
+
+  
   salva('vt_diario', diario);
 
+  const prev2 = document.getElementById('anteprima-edit-diario-foto');
+if (prev2) { prev2.style.display='none'; prev2.innerHTML=''; prev2.dataset.list='[]'; }
+const fi2 = document.getElementById('edit-diario-foto-input');
+if (fi2) fi2.value = '';
+  
   chiudiModal('modalDiarioEditVideo');
   renderDiarioFull?.();
   showToast('✅ Post aggiornato');
