@@ -2823,20 +2823,27 @@ function escapeHtml(s) {
     .replaceAll("'", '&#039;');
 }
 
-function buildDiaryMediaBlockFromDiary(d) {
+function buildDiaryMediaBlockFromDiary(d) function buildMediaBlockFromAny(obj) {
+  // Prova a prendere foto/video da vari campi possibili.
+  // Supporta: fotoUrls (array), fotoUrl (string), foto (string/array)
+  //           videoUrls (array), videoUrl (string), video (string/array)
   const photosRaw =
-    normalizeToArray(d?.fotoUrls).length ? normalizeToArray(d?.fotoUrls)
-    : normalizeToArray(d?.fotoUrl || d?.foto);
+    (normalizeToArray(obj?.fotoUrls).length ? normalizeToArray(obj?.fotoUrls) : [])
+      .concat(normalizeToArray(obj?.fotoUrl))
+      .concat(normalizeToArray(obj?.foto))
+      .filter(Boolean);
 
   const videosRaw =
-    normalizeToArray(d?.videoUrls).length ? normalizeToArray(d?.videoUrls)
-    : normalizeToArray(d?.videoUrl);
+    (normalizeToArray(obj?.videoUrls).length ? normalizeToArray(obj?.videoUrls) : [])
+      .concat(normalizeToArray(obj?.videoUrl))
+      .concat(normalizeToArray(obj?.video))
+      .filter(Boolean);
 
-  const planned = !!d?.videoPlanned;
+  const planned = !!obj?.videoPlanned;
 
   const media = [];
 
-  // foto
+  // FOTO
   for (const p of photosRaw) {
     const src = driveToDirectImageUrl(p);
     if (!src) continue;
@@ -2845,7 +2852,7 @@ function buildDiaryMediaBlockFromDiary(d) {
     media.push(`<img class="diary-thumb" src="${src}" onclick="openLightbox('${safe}')">`);
   }
 
-  // video (YouTube)
+  // VIDEO (YouTube)
   for (const v of videosRaw) {
     const id = getYouTubeId(v);
     if (!id) continue;
@@ -2853,8 +2860,8 @@ function buildDiaryMediaBlockFromDiary(d) {
     media.push(`<div class="video-thumb" style="background-image:url('${thumb}')" onclick="openVideoModal('${id}')"></div>`);
   }
 
+  // Placeholder “video in arrivo”
   if (planned && videosRaw.length === 0) {
-    // mostra solo un “placeholder”
     media.push(`<div class="diary-card" style="padding:10px;border-style:dashed;color:#ffb74d;font-weight:900;">${T('videoComing')}</div>`);
   }
 
@@ -3010,13 +3017,14 @@ function renderDiaryList() {
       badgeText = '📝 Diario';
       const d = it.raw || {};
       bodyHtml = `<div class="diary-text">${escapeHtml(d.testo || '')}</div>`;
-      mediaHtml = buildDiaryMediaBlockFromDiary(d);
+      mediaHtml = buildMediaBlockFromAny(d);
     }
 
     if (it.kind === 'MAINT') {
       badgeClass = 'badge-maint';
       badgeText = '🔧 Officina';
       const m = it.raw || {};
+            mediaHtml = buildMediaBlockFromAny(m);
       const costo = Number(m?.costoUsd || 0);
       bodyHtml = `
         <div class="diary-text"><b>${escapeHtml(m.nome || '')}</b></div>
@@ -3057,6 +3065,7 @@ $$
       badgeClass = (it.kind === 'GIRO') ? 'badge-giro' : 'badge-tappa';
       badgeText = (it.kind === 'GIRO') ? '🛵 Giro' : '🏁 Tappa';
       const t = it.raw || {};
+            mediaHtml = buildMediaBlockFromAny(t);
       const h = Math.floor((t.durata || 0) / 3600);
       const mm = Math.floor(((t.durata || 0) % 3600) / 60);
       bodyHtml = `
