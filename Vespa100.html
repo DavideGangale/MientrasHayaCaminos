@@ -3329,42 +3329,8 @@ initDB('vt_inventario', JSON.stringify([
   coordinateTracciato = caricaJSON('vt_coordinateTracciato', []);
   lastCountry = carica('vt_paeseAttuale', 'Colombia');
 
-  
-function migraLogbookMultiFotoV1(){
-  if (carica('vt_mig_logbook_multifoto_v1','') === '1') return;
+} 
 
-  const log = caricaJSON('vt_logbook', []);
-  if (!Array.isArray(log)) { salva('vt_mig_logbook_multifoto_v1','1'); return; }
-
-  let changed = false;
-
-  for (const e of log) {
-    if (!e || typeof e !== 'object') continue;
-
-    // crea arrays se mancano
-    if (!Array.isArray(e.fotoList)) {
-      const list = [];
-      if (e.foto) list.push(e.foto);
-      if (e.foto2) list.push(e.foto2);
-      e.fotoList = list;
-      changed = true;
-    }
-    if (!Array.isArray(e.fotoUrlList)) {
-      const urls = [];
-      if (e.fotoUrl) urls.push(e.fotoUrl);
-      if (e.fotoUrl2) urls.push(e.fotoUrl2);
-      e.fotoUrlList = urls;
-      changed = true;
-    }
-
-    // normalizza lunghezze
-    while (e.fotoUrlList.length < e.fotoList.length) e.fotoUrlList.push(null);
-    while (e.fotoList.length < e.fotoUrlList.length) e.fotoList.push(null);
-  }
-
-  if (changed) salva('vt_logbook', log);
-  salva('vt_mig_logbook_multifoto_v1','1');
-}
 
 function migraPublicFlagsV1(){
   if (carica('vt_mig_public_flags_v1','') === '1') return;
@@ -6158,154 +6124,127 @@ function enqueueFoto(kind, id) {
   let driveSyncRunning = false;
   let lastErrMsg = '';
 // carica la foto base64 dall'entry e la carica su Drive
-async function processUploadQueue(maxItems = 4) {
+
+
+  async function processUploadQueue(maxItems = 4) {
   if (!navigator.onLine) { showToast('📴 Offline: sync rimandato'); return; }
   if (!getDriveConfigured()) { showToast('⚠️ Configura Drive in Settings'); return; }
 
   let q = getUploadQueue();
   if (!q.length) { showToast('✅ Nessuna foto in coda'); updateDriveSyncInfo(); return; }
 
-if (driveSyncRunning) {
-  showToast('☁️ Sync già in corso...');
-  return;
-}
-
-  
-driveSyncRunning = true;
-lastErrMsg = '';
-
-
+  if (driveSyncRunning) { showToast('☁️ Sync già in corso...'); return; }
+  driveSyncRunning = true;
+  lastErrMsg = '';
 
   try {
-  
-  showToast(`☁️ Sync in corso... (${q.length} in coda)`, 2500);
+    showToast(`☁️ Sync in corso... (${q.length} in coda)`, 2500);
 
-  let done = 0;
-  const keep = [];
+    let done = 0;
+    const keep = [];
 
-  for (const job of q) {
-    try {
+    for (const job of q) {
       if (done >= maxItems) { keep.push(job); continue; }
 
-      if (job.kind === 'diario') {
-        const diario = caricaJSON('vt_diario', []);
-        const idx = diario.findIndex(x => String(x.id) === String(job.id));
-        if (idx === -1) continue; // entry sparita
-        const entry = diario[idx];
+      try {
+        // ===================== DIARIO =====================
+        if (job.kind === 'diario') {
+          const diario = caricaJSON('vt_diario', []);
+          const idx = Array.isArray(diario) ? diario.findIndex(x => String(x.id) === String(job.id)) : -1;
+          if (idx === -1) continue;
 
-        // se già caricata, ok
-        if (entry.fotoUrl) continue;
-        if (!entry.foto) { continue; } // non ho base64: impossibile caricare
+          const entry = diario[idx];
+          if (entry.fotoUrl) continue;      // già uploadata
+          if (!entry.foto) { continue; }    // non ho base64, non posso
 
-        const key = 'diario_' + entry.id;
-const url = await uploadFotoToDrive(entry.foto, key, key);
-        if (url) {
-          entry.fotoUrl = url;
-          entry.foto = null; // ✅ alleggerisce
-          diario[idx] = entry;
-          salva('vt_diario', diario);
-          done++;
-        } else {
-          keep.push(job);
-        }
-      }
+          const key = 'diario_' + entry.id;
+          const url = await uploadFotoToDrive(entry.foto, key, key);
 
-    if (job.kind === 'logbook') {
-  const log = caricaJSON('vt_logbook', []);
-  const idx = log.findIndex(x => String(x.id) === String(job.id));
-  if (idx === -1) continue;
-  const entry = log[idx];
-
-  // Normalizza arrays
-  if (!Array.isArray(entry.fotoList)) entry.fotoList = [];
-  if (!Array.isArray(entry.fotoUrlList)) entry.fotoUrlList = [];
-  while (entry.fotoUrlList.length < entry.fotoList.length) entry.fotoUrlList.push(null);
-  while (entry.fotoList.length < entry.fotoUrlList.length) entry.fotoList.push(null);
-
-  // Trova la prossima foto locale da caricare
-  let uploadedOne = false;
-
-  for (let pi = 0; pi < entry.fotoList.length; pi++) {
-    if (done >= maxItems) break;
-
-    const local = entry.fotoList[pi];
-    const urlAlready = entry.fotoUrlList[pi];
-
-    if (!local || urlAlready) continue;
-
-    const key = `logbook_${entry.id}_${pi+1}`;
-    const url = await uploadFotoToDrive(local, key, key);
-
-    if (url) {
-      entry.fotoUrlList[pi] = url;
-      entry.fotoList[pi] = null; // alleggerisce
-      done++;
-      uploadedOne = true;
-
-      // compatibilità: prime 2
-      if (pi === 0) { entry.fotoUrl = url; entry.foto = null; }
-      if (pi === 1) { entry.fotoUrl2 = url; entry.foto2 = null; }
-
-      log[idx] = entry;
-      salva('vt_logbook', log);
-    } else {
-      keep.push(job);
-      uploadedOne = true;
-      break;
-    }
-  }
-
-  // se non ho caricato niente e ci sono ancora locali -> resta in coda
-  const stillPending = entry.fotoList.some((x,i) => !!x && !entry.fotoUrlList[i]);
-  if (stillPending) keep.push(job);
-
-  continue;
-}
-        }
-
-        // carica foto 2
-        if (need2) {
-          const key2 = 'logbook_' + entry.id + '_2';
-          const url2 = await uploadFotoToDrive(entry.foto2, key2, key2);
-          if (url2) {
-            entry.fotoUrl2 = url2;
-            entry.foto2 = null;
+          if (url) {
+            entry.fotoUrl = url;
+            entry.foto = null;              // alleggerisce
+            diario[idx] = entry;
+            salva('vt_diario', diario);
             done++;
           } else {
             keep.push(job);
-            continue;
           }
+          continue;
         }
 
-        log[idx] = entry;
-        salva('vt_logbook', log);
+        // ===================== LOGBOOK (MANUTENZIONE) =====================
+        if (job.kind === 'logbook') {
+          const log = caricaJSON('vt_logbook', []);
+          const idx = Array.isArray(log) ? log.findIndex(x => String(x.id) === String(job.id)) : -1;
+          if (idx === -1) continue;
+
+          const entry = log[idx];
+
+          if (!Array.isArray(entry.fotoList)) entry.fotoList = [];
+          if (!Array.isArray(entry.fotoUrlList)) entry.fotoUrlList = [];
+
+          while (entry.fotoUrlList.length < entry.fotoList.length) entry.fotoUrlList.push(null);
+          while (entry.fotoList.length < entry.fotoUrlList.length) entry.fotoList.push(null);
+
+          for (let pi = 0; pi < entry.fotoList.length; pi++) {
+            if (done >= maxItems) break;
+
+            const local = entry.fotoList[pi];
+            const urlAlready = entry.fotoUrlList[pi];
+            if (!local || urlAlready) continue;
+
+            const key = `logbook_${entry.id}_${pi + 1}`;
+            const url = await uploadFotoToDrive(local, key, key);
+
+            if (url) {
+              entry.fotoUrlList[pi] = url;
+              entry.fotoList[pi] = null;
+
+              // compatibilità: prime 2
+              if (pi === 0) { entry.fotoUrl = url; entry.foto = null; }
+              if (pi === 1) { entry.fotoUrl2 = url; entry.foto2 = null; }
+
+              log[idx] = entry;
+              salva('vt_logbook', log);
+              done++;
+            } else {
+              break;
+            }
+          }
+
+          // se resta ancora roba locale da caricare, rimetto in coda
+          const stillPending = entry.fotoList.some((x, i) => !!x && !entry.fotoUrlList[i]);
+          if (stillPending) keep.push(job);
+
+          continue;
+        }
+
+        // altri job non gestiti → tienili
+        keep.push(job);
+
+      } catch (e) {
+        console.warn('processUploadQueue job error', e);
+        lastErrMsg = (e && e.message) ? e.message : String(e);
+        keep.push(job);
       }
-    } catch (e) {
-      console.warn('processUploadQueue job error', e);
-lastErrMsg = (e && e.message) ? e.message : String(e);
-keep.push(job);
     }
+
+    setUploadQueue(keep);
+    updateDriveSyncInfo();
+
+    if (done > 0) {
+      renderDiarioFull?.();
+      renderLogManutenzione?.();
+      showToast(`✅ Sync completato: ${done} foto caricate`);
+    } else {
+      showToast('ℹ️ Nessuna foto caricata' + (lastErrMsg ? (': ' + lastErrMsg.slice(0, 80)) : ''), 5000);
+    }
+
+  } finally {
+    driveSyncRunning = false;
   }
-
-  setUploadQueue(keep);
-  updateDriveSyncInfo();
-
-  if (done > 0) {
-    renderDiario?.();
-    renderLogManutenzione?.();
-    showToast(`✅ Sync completato: ${done} foto caricate`);
-  } else {
-  showToast('ℹ️ Nessuna foto caricata' + (lastErrMsg ? (': ' + lastErrMsg.slice(0,80)) : ''), 5000);
 }
-
- } finally {
-  driveSyncRunning = false;
-};
-}
-
-function syncFotoDriveNow() {
-  processUploadQueue(999); // prova a caricarle tutte
-}
+  
 
 async function testDriveUpload() {
   try {
@@ -10455,50 +10394,47 @@ const videoPlanned = !!document.getElementById('log-video-planned')?.checked;
     }
   } catch(e) {}
 
-  const entry = {
-    id: Date.now(),
-    ts: Date.now(),
-    geo: geoMaint,
-    data: now.toLocaleDateString('it-IT'),
-    ora: now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
+  const entry = {const entry = {
+  id: Date.now(),
+  ts: Date.now(),
+  geo: geoMaint,
+  data: now.toLocaleDateString('it-IT'),
+  ora: now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
   paese: carica('vt_paeseAttuale','Colombia'),
   km: (parseFloat(carica('vt_kmTotali','0')) || 0).toFixed(1),
 
   nome,
   desc,
+
   isPublic: false,
   ghSynced: false,
   ghSyncedAt: null,
+
   valuta: cur,
   fxToUsd: getFxToUsd(cur),
-    
- fotoList: fotoList,                 // molte foto (locali)
-fotoUrlList: (fotoList || []).map(() => null),
 
-// compatibilità (prime 2)
-foto: fotoList[0] || null,
-foto2: fotoList[1] || null,
-fotoUrl: null,
-fotoUrl2: null,
+  // molte foto
+  fotoList: fotoList,
+  fotoUrlList: (fotoList || []).map(() => null),
+
+  // compatibilità (prime 2)
+  foto:  fotoList[0] || null,
+  foto2: fotoList[1] || null,
+  fotoUrl: null,
+  fotoUrl2: null,
 
   costoLocal: costoLocal,
   costoUsd: costoUsd,
-    
-foto2: foto2,
-fotoUrl2: null,
 
-videoUrl: videoUrl,
-videoPlanned: (!!videoPlanned && !videoUrl),
-    
-  foto: foto,
-  fotoUrl: null
+  videoUrl: videoUrl,
+  videoPlanned: (!!videoPlanned && !videoUrl)
 };
 
   const log = caricaJSON('vt_logbook', []);
   log.unshift(entry);
   salva('vt_logbook', log);
 
-if ((entry.foto && !entry.fotoUrl) || (entry.foto2 && !entry.fotoUrl2)) {
+if (Array.isArray(entry.fotoList) && entry.fotoList.some(Boolean)) {
   enqueueFoto('logbook', entry.id);
 }
   
@@ -10527,9 +10463,7 @@ updateDriveSyncInfo();
 const f = document.getElementById('log-foto-input');
 if (f) f.value = '';
 
-  if (ante2) { ante2.style.display = 'none'; ante2.dataset.src = ''; ante2.innerHTML = ''; }
-const f2 = document.getElementById('log-foto2-input');
-if (f2) f2.value = '';
+
 
 const v = document.getElementById('log-video');
 if (v) v.value = '';
@@ -10623,6 +10557,7 @@ if (pendingManutFromChecklist && pendingManutFromChecklist.key) {
   chiudiModal('modalLogDettaglio');
   showToast('🔧 Intervento salvato!');
 }
+  
 
 
 function renderLogManutenzione() {
@@ -10732,7 +10667,7 @@ function apriEditIntervento(id) {
 
   
   // reset input nuova foto
- //const prev = document.getElementById('anteprima-edit-log-foto');
+ const prev = document.getElementById('anteprima-edit-log-foto');
 if (prev) { prev.style.display = 'none'; prev.innerHTML = ''; prev.dataset.list = '[]'; }
   const fi = document.getElementById('edit-log-foto-input');
   if (fi) fi.value = '';
@@ -12095,6 +12030,41 @@ async function setLoadingProgress(pct, label) {
   await new Promise(r => setTimeout(r, 180));
 }
 
+    function migraLogbookMultiFotoV1(){
+  if (carica('vt_mig_logbook_multifoto_v1','') === '1') return;
+
+  const log = caricaJSON('vt_logbook', []);
+  if (!Array.isArray(log)) { salva('vt_mig_logbook_multifoto_v1','1'); return; }
+
+  let changed = false;
+
+  for (const e of log) {
+    if (!e || typeof e !== 'object') continue;
+
+    // crea arrays se mancano
+    if (!Array.isArray(e.fotoList)) {
+      const list = [];
+      if (e.foto) list.push(e.foto);
+      if (e.foto2) list.push(e.foto2);
+      e.fotoList = list;
+      changed = true;
+    }
+    if (!Array.isArray(e.fotoUrlList)) {
+      const urls = [];
+      if (e.fotoUrl) urls.push(e.fotoUrl);
+      if (e.fotoUrl2) urls.push(e.fotoUrl2);
+      e.fotoUrlList = urls;
+      changed = true;
+    }
+
+    // normalizza lunghezze
+    while (e.fotoUrlList.length < e.fotoList.length) e.fotoUrlList.push(null);
+    while (e.fotoList.length < e.fotoUrlList.length) e.fotoList.push(null);
+  }
+
+  if (changed) salva('vt_logbook', log);
+  salva('vt_mig_logbook_multifoto_v1','1');
+}
  
 async function inizializzaApp() {
   await setLoadingProgress(10, '🗄️ Database...');
