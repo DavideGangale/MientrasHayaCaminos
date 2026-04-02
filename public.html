@@ -2336,74 +2336,6 @@ function closeFiltersDrawer() {
   }, 260);
 }
 
-  function monthHasVisibleData(mese) {
-  if (!DATA || !mese) return false;
-
-  // helper: filtra per paese + mese
-  const okCountry = (x) => !currentCountry || (x && x.paese === currentCountry);
-
-  // TRACCE
-  const tappe = Array.isArray(DATA.tappe) ? DATA.tappe : [];
-  const turismo = Array.isArray(DATA.turismo) ? DATA.turismo : [];
-
-  if (currentMode === 'TUTTO' || currentMode === 'TAPPE') {
-    for (const t of tappe) {
-      if (!okCountry(t)) continue;
-      if (getYearMonthFromPercorso(t) !== mese) continue;
-      if (Array.isArray(t.traccia) && t.traccia.length >= 2) return true;
-    }
-  }
-
-  if (currentMode === 'TUTTO' || currentMode === 'GIRI') {
-    for (const t of turismo) {
-      if (!okCountry(t)) continue;
-      if (getYearMonthFromPercorso(t) !== mese) continue;
-      if (Array.isArray(t.traccia) && t.traccia.length >= 2) return true;
-    }
-  }
-
-  // MARKER (rispettano i filtri attuali)
-  const diario = Array.isArray(DATA.diario) ? DATA.diario : [];
-  if (isMarkerTypeVisible('FOTO') || isMarkerTypeVisible('VIDEO')) {
-    for (const d of diario) {
-      if (!okCountry(d)) continue;
-      if (getYearMonthFromPublicEntry(d) !== mese) continue;
-      if (d && d.geo && isFinite(Number(d.geo.lat)) && isFinite(Number(d.geo.lon ?? d.geo.lng))) return true;
-    }
-  }
-
-  const manut = Array.isArray(DATA.manutenzioni) ? DATA.manutenzioni : [];
-  if (isMarkerTypeVisible('MAINT')) {
-    for (const m of manut) {
-      if (!okCountry(m)) continue;
-      if (getYearMonthFromPublicEntry(m) !== mese) continue;
-      if (m && m.geo && isFinite(Number(m.geo.lat)) && isFinite(Number(m.geo.lon ?? m.geo.lng))) return true;
-    }
-  }
-
-  const rif = Array.isArray(DATA.rifornimenti) ? DATA.rifornimenti : [];
-  if (isMarkerTypeVisible('FUEL')) {
-    for (const r of rif) {
-      if (!okCountry(r)) continue;
-      if (getYearMonthFromPublicEntry(r) !== mese) continue;
-
-      const lat = Number(r?.geo?.lat ?? r?.lat ?? r?.latitude);
-      const lon = Number(r?.geo?.lon ?? r?.geo?.lng ?? r?.lon ?? r?.lng ?? r?.longitude);
-      if (isFinite(lat) && isFinite(lon)) return true;
-    }
-  }
-
-  const carb = Array.isArray(DATA.carburazioni) ? DATA.carburazioni : [];
-  if (isMarkerTypeVisible('CARB')) {
-    for (const c of carb) {
-      if (!okCountry(c)) continue;
-      if (getYearMonthFromPublicEntry(c) !== mese) continue;
-      if (c && c.geo && isFinite(Number(c.geo.lat)) && isFinite(Number(c.geo.lon ?? c.geo.lng))) return true;
-    }
-  }
-
-  return false;
-}
   
 function popolaMesi() {
   const sel = document.getElementById('monthSelect');
@@ -2459,18 +2391,13 @@ function popolaMesi() {
     sel.appendChild(opt);
   });
 
-  if (mesi.length > 0) {
-  // 1) se il mese attuale è valido e ha dati visibili, lo teniamo
-  if (currentMonthFilter && mesi.includes(currentMonthFilter) && monthHasVisibleData(currentMonthFilter)) {
-    // ok, non cambiare
+// NON auto-selezionare un mese: default = tutti i mesi
+if (mesi.length > 0) {
+  // Se l'utente aveva già scelto un mese e quel mese esiste ancora, mantienilo
+  if (currentMonthFilter && mesi.includes(currentMonthFilter)) {
+    // ok
   } else {
-    // 2) altrimenti scegliamo l’ultimo mese che ha davvero qualcosa da mostrare
-    let chosen = '';
-    for (let i = mesi.length - 1; i >= 0; i--) {
-      if (monthHasVisibleData(mesi[i])) { chosen = mesi[i]; break; }
-    }
-    // 3) fallback: se non troviamo niente (filtri troppo stretti), prendiamo comunque l’ultimo mese esistente
-    currentMonthFilter = chosen || mesi[mesi.length - 1];
+    currentMonthFilter = '';
   }
 } else {
   currentMonthFilter = '';
