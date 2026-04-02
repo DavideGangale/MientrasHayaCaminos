@@ -2343,26 +2343,17 @@ overflow: auto;
     <h2 style="color:#e91e63; text-align:center; margin-top:0;">📖 Diario di Viaggio</h2>
 
     <!-- toolbar viste -->
-    <div class="diario-toolbar">
-      <button id="btn-diario-view-timeline"
-              class="seg-btn active"
-              onclick="setDiarioView('timeline')"
-              type="button">🕒 Cronologico</button>
-
-
-    </div>
+   
 
     <!-- VISTA 1: CRONOLOGICO -->
     <div id="diario-view-timeline" style="display:block;">
-      <div class="diario-toolbar" style="margin-top:0;">
-  <button class="seg-btn active" id="btn-tl-all" onclick="setTimelineFilter('all')" type="button">🧾 Tutto</button>
-
-  <button class="seg-btn" id="btn-tl-post" onclick="setTimelineFilter('diario')" type="button">📝 Post</button>
-  <button class="seg-btn" id="btn-tl-off" onclick="setTimelineFilter('manutenzione')" type="button">🔧 Officina</button>
-  <button class="seg-btn" id="btn-tl-fuel" onclick="setTimelineFilter('rifornimento')" type="button">⛽ Benzina</button>
-  <button class="seg-btn" id="btn-tl-carb" onclick="setTimelineFilter('carburazione')" type="button">🌬️ Carb</button>
+   
+<div style="position:sticky; top:10px; z-index:10020; background:#1e1e1e; padding-bottom:10px;">
+  <button class="btn-secondary" style="margin-top:0;" onclick="toggleTimelineFiltersUI()">
+    🔎 Filtri
+  </button>
 </div>
-
+      
 <div style="position:sticky; top:10px; z-index:10020; background:#1e1e1e; padding-bottom:10px;">
   <button class="btn-secondary" style="margin-top:0;" onclick="toggleTimelineFiltersUI()">
     🔎 Filtri
@@ -2382,9 +2373,7 @@ overflow: auto;
       <div id="diario-tappe-container"></div>
     </div>
 
-<button class="btn-secondary" style="margin-top:0;" onclick="toggleTimelineFiltersUI()">
-  🔎 Filtri
-</button>
+
 <div id="timelineFiltersBox" style="display:none; margin-top:10px;">
   
 <div class="diario-toolbar" style="margin:0;">
@@ -4451,8 +4440,8 @@ function getVideoUrlsFromAnyEntry(e) {
 
 function vtThumbVideo(videoUrl) {
   const th = youtubeThumbUrl(videoUrl);
-  return `
-  <div class="diario-thumb is-video" onclick="openVideoLightbox(${JSON.stringify(videoUrl)})">
+   return `
+  <div class="diario-thumb is-video" onclick='openVideoLightbox(${JSON.stringify(videoUrl)})'>
     <span class="badge video tr">🎥</span>
     ${th ? `<img src="${th}" loading="lazy">`
          : `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:26px;font-weight:1000;">▶</div>`}
