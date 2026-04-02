@@ -1,10 +1,82 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-04-02T00:01:18.097Z",
+  "_exportDate": "2026-04-02T17:40:50.793Z",
   "tipo": "diario_mese",
   "mese": "2026-04",
-  "count": 3,
+  "count": 7,
   "entries": [
+    {
+      "id": 1775141716541,
+      "ts": 1775141715997,
+      "data": "02/04/2026",
+      "ora": "09:55",
+      "paese": "Colombia",
+      "km": "6.17",
+      "testo": "Montaje del marcador de la gasolina",
+      "tags": [],
+      "geo": {
+        "lat": 4.812005,
+        "lon": -74.35407
+      },
+      "videoUrl": "https://youtu.be/o1d6aqREDHA?si=IGGXjOcWTMerLDJ6",
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=19bMPZXuiCjiXmccV3SipnXtUY5loM8es",
+      "foto": null
+    },
+    {
+      "id": 1775137575976,
+      "ts": 1775137575252,
+      "data": "02/04/2026",
+      "ora": "08:46",
+      "paese": "Colombia",
+      "km": "6.17",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 4.8197633,
+        "lon": -74.35554
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1MMns7b7Iz8k01GGKx9V3syWaNFG8Debv",
+      "foto": null
+    },
+    {
+      "id": 1775137576092,
+      "ts": 1775137575252,
+      "data": "02/04/2026",
+      "ora": "08:46",
+      "paese": "Colombia",
+      "km": "6.17",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 4.8197633,
+        "lon": -74.35554
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1DrwwumdnFqYAN2K62P97W1rLX17AlRAw",
+      "foto": null
+    },
+    {
+      "id": 1775137575588,
+      "ts": 1775137575252,
+      "data": "02/04/2026",
+      "ora": "08:46",
+      "paese": "Colombia",
+      "km": "6.17",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 4.8197633,
+        "lon": -74.35554
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=15GoVBvdVC5nV8X3SwV5rKeGeb3KaC2PV",
+      "foto": null
+    },
     {
       "id": 1775065192751,
       "ts": 1775065192109,
