@@ -6817,108 +6817,114 @@ function renderTravelTimeline(containerId){
 
   box.innerHTML = items.map(it => {
     if (it.kind === 'percorso') {
-      const p = it.data;
-      const tipo = (it.subkind === 'giro') ? 'GIRO' : 'TAPPA';
-      const col = (it.subkind === 'giro') ? '#2196F3' : '#9c27b0';
+  const p = it.data;
+  const isGiro = (it.subkind === 'giro');
+  const tipo = isGiro ? 'TURISMO' : 'TAPPA';
+  const col = isGiro ? '#2196F3' : '#9c27b0';
 
-      const gh = p.ghSynced ? '🐙' : '⏳';
-      const pub = p.isPublic ? 'checked' : '';
-      
-      return `
-        <div class="diario-entry" style="border-left-color:${col};">
-          <div class="diario-header">
-            <span class="diario-data">🏁 ${p.data||''} ${p.ora||''} — ${p.paese||''}</span>
-            <span class="diario-paese" style="background:${col};color:#fff;">${tipo}</span>
-          </div>
+  const gh = p.ghSynced ? '🐙' : '⏳';
+  const pub = p.isPublic ? 'checked' : '';
 
+  // helper già presenti nel tuo codice (usati in renderTappe)
+  const oraInizio = (typeof fmtHHMM === 'function') ? fmtHHMM(p.startTs) : '--:--';
+  const oraFine   = (typeof fmtHHMM === 'function') ? fmtHHMM(p.endTs) : '--:--';
+  const durataTxt = (typeof fmtDurataHM === 'function') ? fmtDurataHM(p.durata || 0) : '';
 
-<div style="display:flex;align-items:center;gap:12px;margin-top:10px;font-size:12px;color:#bbb;">
-  <label style="display:flex;align-items:center;gap:8px;">
-    <input type="checkbox" ${pub}
-           onchange="setItemPublicFlag('percorso', ${p.id}, this.checked)">
-    Pubblico
-  </label>
-  <span title="GitHub sync">${gh}</span>
-</div>
+  const altSE = (typeof getAltStartEndFromTelemetry === 'function')
+    ? getAltStartEndFromTelemetry(p)
+    : { start: (p.altMin || 0), end: (p.altMax || 0) };
 
+  const benzStim = Number(p.benzinaStimataLitri ?? p.benzina ?? 0);
+  const stimTxt = isFinite(benzStim) ? benzStim.toFixed(2) : '--';
 
-          <div style="color:#ddd;">📏 <b>${p.km||0} km</b></div>
-          ${p.titolo ? `<div style="margin-top:6px;font-weight:1000;">📍 ${escHtml(p.titolo)}</div>` : ''}
-          ${p.note ? `<div style="margin-top:6px;color:#bbb;">${escHtml(p.note)}</div>` : ''}
+  let benzRealeHtml = `<div style="color:#777;">🔥 Benzina reale: --</div>`;
+  if (p.benzinaRealeLitri != null && Number(p.benzinaRealeLitri) > 0) {
+    const real = Number(p.benzinaRealeLitri).toFixed(2);
+    const cons = p.consumoRealeKmL ? (p.consumoRealeKmL + ' km/L') : '--';
+    benzRealeHtml = `<div>🔥 Benzina reale: <b>${real} L</b> (${cons})</div>`;
+  }
 
-          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
-            <button class="btn-secondary" onclick="apriTracciaPercorso(${p.id})">🗺️ Traccia</button>
-            <button class="btn-secondary" onclick="apriMediaPercorso(${p.id})">📸 Media</button>
-            <button class="btn-secondary" onclick="apriAddMediaToPercorso('${(String(p.tipo||'').toLowerCase()==='turismo') ? 'turismo' : 'tappa'}', ${p.id})">➕ Aggiungi media</button>
-          </div>
+  const fuelEndTxt =
+    (p.fuelEndLitri != null) ? `${Number(p.fuelEndLitri).toFixed(2)} L` :
+    (p.fuelEndGal   != null) ? `${Number(p.fuelEndGal).toFixed(3)} gal` :
+    '--';
+
+  const btnSmall = (txt, onclick, bg, fg='#fff') => `
+    <button onclick="${onclick}"
+      style="flex:1; padding:10px 10px; border-radius:12px; border:1px solid #333;
+             background:${bg}; color:${fg}; font-weight:1000; font-size:12px; cursor:pointer;">
+      ${txt}
+    </button>
+  `;
+
+  return `
+    <div class="log-entry-full" style="
+      border-left:4px solid ${col};
+      border-radius:14px;
+      background:#2a2a2a;
+    ">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+        <div style="font-size:16px; font-weight:1000; color:${col};">
+          🏁 ${p.data || ''} ${p.ora || ''}
         </div>
-        <div class="diario-divider"></div>
-      `;
-    }
-
-    if (it.kind === 'diario') {
-      // riusa il tuo render “diario list” ma senza duplicare tutto: renderizziamo solo il leader + thumbs
-      const arr = it.data || [];
-      const leader = arr[0] || {};
-      const photos = arr.filter(x => x && (x.fotoUrl || x.foto));
-
-      const albumId = 'tl_' + (it.groupId || leader.id);
-      registerLightboxAlbum(
-        albumId,
-        photos.map(x => (x.fotoUrl || x.foto)),
-        photos.map(x => `📍 ${(x.paese||'')} — ${(x.data||'')} ${(x.ora||'')}`)
-      );
-
-      const gh = leader.ghSynced ? '🐙' : '⏳';
-      const pub = leader.isPublic ? 'checked' : '';
-
-      const thumbs = photos.slice(0, 9).map((e, idx) => {
-        const raw = e.fotoUrl || e.foto;
-        const src = driveToDirectImageUrl(raw);
-        return `
-          <div class="diario-thumb" onclick="openPhotoLightboxAlbum('${albumId}', ${idx})">
-            <img src="${src}" loading="lazy">
-          </div>
-        `;
-      }).join('');
-
-      const vid = leader.videoUrl
-        ? `<button class="btn-secondary" style="margin-top:10px;width:100%;"
-                   onclick="openVideoLightbox(${JSON.stringify(leader.videoUrl)})">🎥 Apri video</button>`
-        : (leader.videoPlanned ? `<div style="margin-top:10px;color:#ff9800;font-weight:900;">🎬 Video in arrivo</div>` : '');
-
-      return `
-        <div class="diario-entry" style="border-left-color:#e91e63;">
-          <div class="diario-header">
-            <span class="diario-data">📝 ${leader.data||''} ${leader.ora||''} — ${leader.km||'--'} km</span>
-            <span class="diario-paese">${leader.paese||''}</span>
-          </div>
-
-          <div class="diario-testo">${escHtml(leader.testo||'')}</div>
-
-          <div style="display:flex;align-items:center;gap:12px;margin-top:10px;font-size:12px;color:#bbb;">
-            <label style="display:flex;align-items:center;gap:8px;">
-              <input type="checkbox" ${pub}
-                     onchange="setGroupPublicFlag(${JSON.stringify(it.groupId || ('solo_' + leader.id))}, this.checked)">
-              Pubblico
-            </label>
-            <span title="GitHub sync">${gh}</span>
-          </div>
-
-          ${vid}
-          ${thumbs ? `<div class="diario-gallery" style="margin-top:10px;">${thumbs}</div>` : ''}
-
-          <div style="display:flex; justify-content:space-between; gap:10px; margin-top:12px;">
-            <button onclick="apriModificaDiario(${leader.id})"
-              style="background:none;border:none;color:#ff9800;font-size:12px;cursor:pointer;">✏️ Modifica</button>
-
-            <button onclick="eliminaDiario(${leader.id})"
-              style="background:none;border:none;color:#666;font-size:12px;cursor:pointer;">🗑️ Elimina</button>
-          </div>
+        <div style="background:${col};color:#fff;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:1000;">
+          ${tipo}
         </div>
-        <div class="diario-divider"></div>
-      `;
-    }
+      </div>
+
+      <div style="color:var(--giallo); margin-top:6px; font-weight:900;">${p.paese || ''}</div>
+
+      <div style="display:flex;align-items:center;gap:12px;margin-top:10px;font-size:12px;color:#bbb;">
+        <label style="display:flex;align-items:center;gap:8px;">
+          <input type="checkbox" ${pub}
+                 onchange="setItemPublicFlag('percorso', ${p.id}, this.checked)">
+          Pubblico
+        </label>
+        <span title="GitHub sync">${gh}</span>
+      </div>
+
+      <div style="margin-top:10px; color:#ddd; line-height:1.6;">
+        <div>📏 <b>${p.km || 0} km</b> &nbsp;|&nbsp; ⏱️ ${durataTxt}</div>
+        <div>🕒 <b>${oraInizio}</b> → <b>${oraFine}</b></div>
+        <div>⛰️ Alt: <b>${altSE.start}m</b> → <b>${altSE.end}m</b></div>
+
+        <div>⛽ Benzina stimata: <b>${stimTxt} L</b></div>
+        ${benzRealeHtml}
+
+        <div>🏎️ Vel max: <b>${p.velMax || 0}</b> km/h</div>
+        ${p.velMedia != null ? `<div>🚀 Vel media: <b>${p.velMedia}</b> km/h</div>` : ''}
+        <div>⛽ Serbatoio fine: <b>${fuelEndTxt}</b></div>
+      </div>
+
+      ${p.titolo ? `<div style="margin-top:10px; font-weight:1000; color:#fff;">📍 ${escHtml(p.titolo)}</div>` : ''}
+      ${p.note ? `<div style="margin-top:6px; color:#bbb; line-height:1.35;">${escHtml(p.note)}</div>` : ''}
+
+      <div style="display:flex; gap:10px; margin-top:12px;">
+        ${btnSmall('🗺️ Vedi traccia', `apriTracciaPercorso(${p.id})`, '#222', '#bbb')}
+        ${btnSmall('➕ Aggiungi Media', `apriAddMediaToPercorso('${(String(p.tipo||'').toLowerCase()==='turismo') ? 'turismo' : 'tappa'}', ${p.id})`, '#4caf50', '#000')}
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:10px;">
+        ${btnSmall('📸 Foto/Video', `apriMediaPercorso(${p.id})`, '#ff9800', '#000')}
+        ${btnSmall('⬇️ KML', `scaricaKML(${p.id})`, '#222', '#bbb')}
+        ${btnSmall('📈 Grafico', `apriGraficoPercorso(${p.id})`, '#222', '#bbb')}
+      </div>
+
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-top:14px;">
+        <button onclick="apriDettagliPercorso(${p.id})"
+          style="background:none;border:none;color:#ff9800;font-size:12px;font-weight:1000;cursor:pointer;">
+          ✏️ Dettagli
+        </button>
+
+        <button onclick="eliminaPercorso(${p.id})"
+          style="background:none;border:none;color:#888;font-size:12px;font-weight:1000;cursor:pointer;">
+          🗑️ Elimina
+        </button>
+      </div>
+    </div>
+    <div class="diario-divider"></div>
+  `;
+}
 
     if (it.kind === 'manutenzione') {
       const e = it.data;
