@@ -252,13 +252,7 @@ grid-template-columns:1fr 1fr 1fr;
 gap:8px;
 margin-top:10px;
 }
-.guida-mini .mini-box{
-background:#111;
-border:1px solid #333;
-border-radius:12px;
-padding:10px 8px;
-text-align:center;
-}
+ 
 .guida-mini .mini-label{
 font-size:10px;
 color:#777;
@@ -640,15 +634,45 @@ color:#fff;
   pointer-events: none;
 }
 
-#mapFullCompass{
-  font-size: 18px;
-  font-weight: 1000;
-  color: #fff;
+#mapFullCompass.vt-compass{
+  width: 58px;
+  height: 58px;
+  border-radius: 999px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
   background: rgba(0,0,0,0.55);
   border: 1px solid #333;
-  padding: 10px 12px;
-  border-radius: 14px;
-  line-height: 1;
+
+  position: relative;
+  pointer-events: none;
+}
+
+#mapFullCompass .vt-compass-n{
+  position:absolute;
+  top: 6px;
+  left: 0;
+  right: 0;
+  text-align:center;
+
+  font-size: 12px;
+  font-weight: 1000;
+  color:#fff;
+  letter-spacing: 1px;
+}
+
+#mapFullCompass .vt-compass-arrow{
+  width: 0;
+  height: 0;
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+  border-bottom: 22px solid var(--giallo);
+
+  transform: rotate(0deg);
+  transform-origin: 50% 70%;
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.55));
 }
 
 #mapFullSpeedWrap{
@@ -1175,12 +1199,7 @@ color:#fff;
     }
 
     /* TAG DIARIO */
-.tag-grid{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  margin-top:10px;
-}
+
 .tag-grid{
   display:flex;
   flex-wrap:wrap;
@@ -1241,7 +1260,7 @@ color:#fff;
     
 /* ===== LIGHTBOX FOTO ===== */
 #photoLightbox.modal-overlay { z-index: 99999; }
-#photoLightbox.modal-overlay { z-index: 99999; }
+
 
 #photoLightbox .modal-content{
   width: 100%;
@@ -1804,7 +1823,10 @@ overflow: auto;
 
     <!-- HUD: velocità -->
     <div id="mapFullHud">
-  <div id="mapFullCompass">N ↑</div>
+ <div id="mapFullCompass" class="vt-compass">
+  <div class="vt-compass-n">N</div>
+  <div id="mapFullCompassArrow" class="vt-compass-arrow"></div>
+</div>
 
   <div id="mapFullSpeedWrap">
     <div id="mapFullSpeed">0</div>
@@ -3384,12 +3406,12 @@ initDB('vt_inventario', JSON.stringify([
 
 function migraPublicFlagsV1(){
   if (carica('vt_mig_public_flags_v1','') === '1') return;
-  }
 
   function patchList(key){
     const arr = caricaJSON(key, []);
     if (!Array.isArray(arr)) return;
     let changed = false;
+
     for (const e of arr) {
       if (!e || typeof e !== 'object') continue;
       if (e.ts == null) { e.ts = e.id || Date.now(); changed = true; }
@@ -3408,7 +3430,7 @@ function migraPublicFlagsV1(){
   patchList('vt_turismo');
 
   salva('vt_mig_public_flags_v1','1');
-  migraPublicFlagsV1();
+}
   
 
 
@@ -3578,6 +3600,29 @@ function startGPS() {
     { enableHighAccuracy:true, timeout:15000, maximumAge:0 }
   );
 }
+
+function bearingDeg(lat1, lon1, lat2, lon2) {
+  const toRad = (d) => d * Math.PI / 180;
+  const toDeg = (r) => r * 180 / Math.PI;
+
+  const φ1 = toRad(lat1), φ2 = toRad(lat2);
+  const Δλ = toRad(lon2 - lon1);
+
+  const y = Math.sin(Δλ) * Math.cos(φ2);
+  const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+  const θ = Math.atan2(y, x);
+  return (toDeg(θ) + 360) % 360;
+}
+
+let lastHeading = null;
+function setMapFullHeading(deg) {
+  if (!isFinite(deg)) return;
+  lastHeading = deg;
+
+  const a = document.getElementById('mapFullCompassArrow');
+  if (a) a.style.transform = `rotate(${deg}deg)`;
+}
+  
 function calcolaDistanza(lat1, lon1, lat2, lon2) {
   const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -3635,6 +3680,19 @@ function updatePosition(pos) {
   const lat = pos.coords.latitude;
   const lon = pos.coords.longitude;
   const speed = calcolaVelocita(pos);
+
+  // ===== BUSSOLA (direzione di marcia) =====
+let hd = null;
+
+// se il GPS fornisce heading (non sempre disponibile)
+if (pos.coords.heading != null && isFinite(pos.coords.heading)) {
+  hd = Number(pos.coords.heading);
+} else if (lastLat != null && lastLon != null) {
+  // fallback: calcolo bearing tra ultimo punto e punto attuale
+  hd = bearingDeg(lastLat, lastLon, lat, lon);
+}
+
+if (hd != null) setMapFullHeading(hd);
 
   // FIX: altitude 0 è valido
   if (pos.coords.altitude != null) altitudineAttuale = Math.round(pos.coords.altitude);
@@ -7851,7 +7909,7 @@ const planned = !!document.getElementById('tappa-media-video-planned')?.checked;
   try { photos = JSON.parse(prev?.dataset?.list || '[]'); } catch { photos = []; }
   if (!Array.isArray(photos)) photos = [];
 
-  const hasAny = (photos.length > 0) || !!videoUrl || !!planned;
+  const hasAny = (photos.length > 0) || (videoUrls.length > 0) || !!planned;
   if (!hasAny) { showToast('⚠️ Aggiungi almeno una foto o un video'); return; }
 
   const paese = pendingAddMediaCtx.paese || carica('vt_paeseAttuale','Colombia');
@@ -12251,6 +12309,7 @@ async function setLoadingProgress(pct, label) {
 async function inizializzaApp() {
   await setLoadingProgress(10, '🗄️ Database...');
   initAllData();
+  migraPublicFlagsV1();
   migraLogbookMultiFotoV1();
   migrateCarburazionePaeseFromPercorsi();
 const g = parseFloat(carica('vt_spesaBenzinaUsd','0')) || 0;
