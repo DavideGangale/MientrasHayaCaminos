@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-04-02T20:37:46.309Z",
+  "_exportDate": "2026-04-02T22:23:34.028Z",
   "tipo": "officina",
   "stats": {
     "spesaRicambiUsd": 0,
@@ -59,14 +59,14 @@
       "chicMin": 75,
       "viteAria": "1.25",
       "viteMinimo": "1.75",
-      "candela": "Colombia",
+      "candela": "",
       "nota": "prova getti altezza",
       "geo": {
         "lat": 4.8197633,
         "lon": -74.35554
       },
       "fotoCandela": null,
-      "paese": ""
+      "paese": "Colombia"
     }
   ],
   "inventario": [
