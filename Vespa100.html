@@ -1435,61 +1435,16 @@ overflow: auto;
   <div class="dash-card">
 
   <!-- spazio “crea post” (diario unico) -->
-  <h3 style="margin-top:0; color:#e91e63;">✍️ Nuovo Post (Diario di viaggio)</h3>
-
-  <textarea id="diario-testo"
-            placeholder="Scrivi... (puoi usare #hashtag nel testo)"
-            rows="4"
-            style="margin-top:10px; text-align:left;"></textarea>
-
-  <!-- hashtag button piccolo sotto -->
-  <button class="btn-secondary" style="margin-top:8px; padding:10px 12px; font-size:12px;"
-          onclick="apriModal('modalTagPicker'); renderTagPicker();">
-    # Hashtag
-  </button>
-
-  <!-- hashtag selezionati (solo testo, piccoli) -->
-  <div id="diario-tags-selected-inline" style="margin-top:6px;"></div>
-
-  <!-- FOTO multiple -->
-  <input type="file" id="foto-input" accept="image/*" multiple style="display:none;"
-         onchange="anteprimaMulti('foto-input','anteprima-foto')">
-
-  <button class="btn-secondary" style="margin-top:8px; padding:10px 12px; font-size:12px;"
-          onclick="document.getElementById('foto-input').click()">
-    📷 Aggiungi foto
-  </button>
-  <div id="anteprima-foto" style="margin-top:10px; display:none;"></div>
-
-  <!-- VIDEO -->
-<textarea id="diario-video"
-          rows="2"
-          placeholder="🎬 Link YouTube (opzionale) — uno per riga"
-          style="margin-top:8px; background:#222; border:1px solid #444; color:white; border-radius:10px; padding:12px; width:100%;"></textarea>
-
-  <label class="checklist-item tagpick planned-video" style="margin-top:8px;">
-    <input type="checkbox" id="diario-video-planned">
-    <span class="checklist-text">🎬 Video in arrivo (link non ancora)</span>
-  </label>
-
-  <!-- PUBBLICO / PRIVATO -->
-  <label class="checklist-item tagpick planned-video" style="margin-top:8px;">
-    <input type="checkbox" id="diario-is-public">
-    <span class="checklist-text">🔓 Questo post è PUBBLICO (ok per GitHub)</span>
-  </label>
-
-  <button id="btn-salva-diario" class="btn-azione btn-yellow" onclick="salvaDiario()"
-          style="margin-top:10px;">
-    💾 Salva nel Diario
-  </button>
-
+ <button class="btn-azione btn-yellow" onclick="apriModal('modalNuovoPost');">
+  ✍️ Crea Post
+</button>
   <!-- bottoni accesso -->
   <button class="btn-azione btn-yellow" onclick="apriModal('modalStats'); aggiornaUI();">
     📊 Statistiche
   </button>
 
   <button class="btn-azione btn-yellow" onclick="apriModal('modalDiario'); renderDiarioFull();">
-    📖 Diario di viaggio (timeline unica)
+    📖 Diario di Viaggio
   </button>
 
   <!-- sync alla fine -->
@@ -2336,6 +2291,54 @@ overflow: auto;
   </div>
 </div>
 
+  <!-- NUOVO POST (modal) -->
+<div id="modalNuovoPost" class="modal-overlay fullscreen">
+  <div class="modal-content" style="border-color:#e91e63; max-width:700px;">
+    <button class="close-modal" onclick="chiudiModal('modalNuovoPost')">×</button>
+    <h2 style="color:#e91e63; text-align:center; margin-top:0;">✍️ Crea Post</h2>
+
+    <textarea id="diario-testo"
+              placeholder="Scrivi... (puoi usare #hashtag nel testo)"
+              rows="4"
+              style="margin-top:10px; text-align:left;"></textarea>
+
+    <button class="btn-secondary" style="margin-top:8px; padding:10px 12px; font-size:12px;"
+            onclick="apriModal('modalTagPicker'); renderTagPicker();">
+      # Hashtag
+    </button>
+
+    <div id="diario-tags-selected-inline" style="margin-top:6px;"></div>
+
+    <input type="file" id="foto-input" accept="image/*" multiple style="display:none;"
+           onchange="anteprimaMulti('foto-input','anteprima-foto')">
+
+    <button class="btn-secondary" style="margin-top:8px; padding:10px 12px; font-size:12px;"
+            onclick="document.getElementById('foto-input').click()">
+      📷 Aggiungi foto
+    </button>
+    <div id="anteprima-foto" style="margin-top:10px; display:none;"></div>
+
+    <textarea id="diario-video"
+              rows="2"
+              placeholder="🎬 Link YouTube (opzionale) — uno per riga"
+              style="margin-top:8px; background:#222; border:1px solid #444; color:white; border-radius:10px; padding:12px; width:100%;"></textarea>
+
+    <label class="checklist-item tagpick planned-video" style="margin-top:8px;">
+      <input type="checkbox" id="diario-video-planned">
+      <span class="checklist-text">🎬 Video in arrivo (link non ancora)</span>
+    </label>
+
+    <label class="checklist-item tagpick planned-video" style="margin-top:8px;">
+      <input type="checkbox" id="diario-is-public">
+      <span class="checklist-text">🔓 Questo post è PUBBLICO (ok per GitHub)</span>
+    </label>
+
+    <button id="btn-salva-diario" class="btn-azione btn-yellow" onclick="salvaDiarioAndClose()"
+            style="margin-top:10px;">
+      💾 Salva nel Diario
+    </button>
+  </div>
+</div>
     
   <!-- TAG PICKER (modal) -->
 <div id="modalTagPicker" class="modal-overlay">
@@ -2389,44 +2392,7 @@ overflow: auto;
    
 
     <!-- VISTA 1: CRONOLOGICO -->
-    <div id="diario-view-timeline" style="display:block;">
-   
-<div class="diario-filters-btn-wrap">
-  <button class="btn-secondary" style="margin:0;" onclick="toggleTimelineFiltersUI()">
-    🔎 Filtri
-  </button>
-</div>
-      
-      
-      <div id="lista-diario-modal"></div>
-    </div>
-
-    <!-- VISTA 2: PER TAPPA -->
-    <div id="diario-view-tappe" style="display:none;">
-      <div class="diario-toolbar" style="margin-top:0;">
-  <button class="seg-btn active" id="btn-byt-all" onclick="setByTappaFilter('all')" type="button">🧾 Tutto</button>
-  <button class="seg-btn" id="btn-byt-tappe" onclick="setByTappaFilter('tappe')" type="button">🏁 Tappe</button>
-  <button class="seg-btn" id="btn-byt-giri" onclick="setByTappaFilter('giri')" type="button">🔁 Giri</button>
-</div>
-      <div id="diario-tappe-container"></div>
-    </div>
-
-
-<div id="timelineFiltersBox" style="display:none; margin-top:10px;">
-  
-<div class="diario-toolbar" style="margin:0;">
-  <button class="seg-btn active" id="btn-tl-all" onclick="setTimelineFilter('all'); toggleTimelineFiltersUI();" type="button">🧾 Tutto</button>
-
-  <button class="seg-btn" id="btn-tl-tappe" onclick="setTimelineFilter('tappa'); toggleTimelineFiltersUI();" type="button">🏁 Tappe</button>
-  <button class="seg-btn" id="btn-tl-giri" onclick="setTimelineFilter('giro'); toggleTimelineFiltersUI();" type="button">🔁 Giri</button>
-
-  <button class="seg-btn" id="btn-tl-post" onclick="setTimelineFilter('diario'); toggleTimelineFiltersUI();" type="button">📝 Post</button>
-  <button class="seg-btn" id="btn-tl-off" onclick="setTimelineFilter('manutenzione'); toggleTimelineFiltersUI();" type="button">🔧 Officina</button>
-  <button class="seg-btn" id="btn-tl-fuel" onclick="setTimelineFilter('rifornimento'); toggleTimelineFiltersUI();" type="button">⛽ Benzina</button>
-  <button class="seg-btn" id="btn-tl-carb" onclick="setTimelineFilter('carburazione'); toggleTimelineFiltersUI();" type="button">🌬️ Carb</button>
-</div>
-
-</div>
+ <div id="lista-diario-modal"></div>
     
   </div>
 </div>
@@ -6892,7 +6858,17 @@ videoPlanned: (!!videoPlanned && !videoUrls.length),
   }
 }
 
-  
+function salvaDiarioAndClose(){
+  const testo = (document.getElementById('diario-testo')?.value || '').trim();
+  if (!testo) { showToast('⚠️ Scrivi qualcosa prima di salvare'); return; }
+
+  salvaDiario();
+
+  // chiudo il modal dopo il salvataggio
+  setTimeout(() => {
+    try { chiudiModal('modalNuovoPost'); } catch {}
+  }, 80);
+}  
 
 function renderDiarioList(containerId, limit = null) {
   const diario = caricaJSON('vt_diario', []);
