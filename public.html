@@ -2182,7 +2182,7 @@ function buildFuelPopup(r) {
     ${costoRif > 0 ? `<div style="margin-top:5px; color:#4caf50;">💰 ${T('paid')}: $ <b>${costoRif.toFixed(2)}</b></div>` : ''}
 
     ${oil.oilL != null ? `<div class="popup-meta" style="margin-top:6px;">🛢️ ${T('oilUsed')}: <b>${oil.oilL.toFixed(2)} L</b></div>` : ''}
-    ${oil.oilCost != null ? `<div class="popup-meta" style="margin-top:4px;color:#9be28d;">💰 $ ${T('oilCost')}: <b>${oil.oilCost.toFixed(2)}</b></div>` : ''}
+    ${oil.oilCost != null ? `<div class="popup-meta" style="margin-top:4px;color:#9be28d;">💰 ${T('oilCost')}: $<b>${oil.oilCost.toFixed(2)}</b></div>` : ''}
   `;
 }
 function pickFirst(obj, keys) {
@@ -3234,7 +3234,7 @@ $$
         ${r?.km != null ? `<div class="diary-meta" style="margin-top:6px;">📏 km ${escapeHtml(r.km)}</div>` : ''}
         ${costo > 0 ? `<div class="diary-meta" style="margin-top:8px;color:#9be28d;">💰 ${T('paid')}: <b>$${costo.toFixed(2)}</b></div>` : ''}
                 ${oil.oilL != null ? `<div class="diary-meta" style="margin-top:6px;">🛢️ ${T('oilUsed')}: <b>${oil.oilL.toFixed(2)} L</b></div>` : ''}
-        ${oil.oilCost != null ? `<div class="diary-meta" style="margin-top:4px;color:#9be28d;">💰 $ ${T('oilCost')}: <b>${oil.oilCost.toFixed(2)}</b></div>` : ''}
+        ${oil.oilCost != null ? `<div class="diary-meta" style="margin-top:4px;color:#9be28d;">💰 ${T('oilCost')}: $<b>${oil.oilCost.toFixed(2)}</b></div>` : ''}
       `;
 
       mediaHtml = buildMediaBlockFromAny(r);
