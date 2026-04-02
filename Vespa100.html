@@ -7043,16 +7043,16 @@ function renderTravelTimeline(containerId){
     //  const albumId = 'diario_group_' + String(gid);
 
       // album lightbox per swipe
-   //   registerLightboxAlbum(
- //       albumId,
-    //    photos.map(x => (x.fotoUrl || x.foto)),
-    //    photos.map(x => `
+    //  registerLightboxAlbum(
+     //  albumId,
+    //   photos.map(x => (x.fotoUrl || x.foto)),
+     //  photos.map(x => `
       
-          <div style="font-weight:900;color:#ff9800;">📍 ${x.paese || ''}</div>
-          <div style="color:#bbb;">${x.data || ''} ${x.ora || ''} — km ${x.km || '--'}</div>
-          ${x.testo ? `<div style="margin-top:6px;color:#ddd;line-height:1.35;">${escHtml((x.testo || '').slice(0, 220))}${(x.testo || '').length > 220 ? '…' : ''}</div>` : ''}
-        `)
-      );
+      //    <div style="font-weight:900;color:#ff9800;">📍 ${x.paese || ''}</div>
+     //     <div style="color:#bbb;">${x.data || ''} ${x.ora || ''} — km ${x.km || '--'}</div>
+     //     ${x.testo ? `<div style="margin-top:6px;color:#ddd;line-height:1.35;">${escHtml((x.testo || '').slice(0, 220))}${(x.testo || '').length > 220 ? '…' : ''}</div>` : ''}
+     //   `)
+ //     );
 
       const heroRaw = photos[0] ? (photos[0].fotoUrl || photos[0].foto) : null;
       //const heroSrc = heroRaw ? driveToDirectImageUrl(heroRaw) : null;
