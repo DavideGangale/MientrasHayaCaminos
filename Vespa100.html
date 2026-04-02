@@ -2345,6 +2345,18 @@ color:#fff;
       <div id="diario-tappe-container"></div>
     </div>
 
+
+<div class="diario-toolbar" style="margin-top:0;">
+  <button class="seg-btn active" id="btn-tl-all" onclick="setTimelineFilter('all')" type="button">🧾 Tutto</button>
+  <button class="seg-btn" id="btn-tl-perc" onclick="setTimelineFilter('percorso')" type="button">🏁 Percorsi</button>
+  <button class="seg-btn" id="btn-tl-post" onclick="setTimelineFilter('diario')" type="button">📝 Post</button>
+  <button class="seg-btn" id="btn-tl-off" onclick="setTimelineFilter('manutenzione')" type="button">🔧 Officina</button>
+  <button class="seg-btn" id="btn-tl-fuel" onclick="setTimelineFilter('rifornimento')" type="button">⛽ Benzina</button>
+  <button class="seg-btn" id="btn-tl-carb" onclick="setTimelineFilter('carburazione')" type="button">🌬️ Carb</button>
+</div>
+
+
+    
   </div>
 </div>
 
@@ -3941,7 +3953,9 @@ function concludiTappa() {
     traccia: compressTrace(traceRaw, 1200),
     telemetry: Array.isArray(tappaAttuale.telemetry) ? tappaAttuale.telemetry : [],
     tipo: 'Tappa',
-
+    isPublic: false,
+    ghSynced: false,
+    ghSyncedAt: null,
     startTs: tappaAttuale.startTs || null,
     endTs: Date.now(),
 
@@ -4105,6 +4119,10 @@ function concludiTurismo() {
 
 startTs: tappaAttuale.startTs || null,
 endTs: Date.now(),
+
+      isPublic: false,
+    ghSynced: false,
+    ghSyncedAt: null,
     
     fuelStartGal: tappaAttuale.fuelStartGal,
     fuelStartLitri: tappaAttuale.fuelStartLitri,
@@ -5551,6 +5569,10 @@ salva('vt_scortaLitri', nuovaScorta);
       dest: (dest === 'V') ? 'Vespa' : 'Tanica',
       mix: (dest === 'V') ? (mixC + '%') : '--',
 
+          isPublic: false,
+      ghSynced: false,
+      ghSyncedAt: null,
+
       // prezzo unitario in valuta locale / L
       prezzoUnit: prezzoUnitario ? prezzoUnitario.toFixed(3) : null,
 
@@ -6545,12 +6567,12 @@ function salvaDiario() {
     const testo = testoEl ? testoEl.value.trim() : '';
     if (!testo) { showToast('⚠️ Scrivi qualcosa prima di salvare'); return; }
 
-  const anteprimaDiv = document.getElementById('anteprima-foto');
+    const anteprimaDiv = document.getElementById('anteprima-foto');
 
-// da anteprimaMulti: dataset.list = JSON array di foto base64
-let fotoList = [];
-try { fotoList = JSON.parse(anteprimaDiv?.dataset?.list || '[]'); } catch { fotoList = []; }
-if (!Array.isArray(fotoList)) fotoList = [];
+    // da anteprimaMulti: dataset.list = JSON array di foto base64
+    let fotoList = [];
+    try { fotoList = JSON.parse(anteprimaDiv?.dataset?.list || '[]'); } catch { fotoList = []; }
+    if (!Array.isArray(fotoList)) fotoList = [];
 
     const paese = carica('vt_paeseAttuale','Colombia');
     const now = new Date();
@@ -6559,11 +6581,11 @@ if (!Array.isArray(fotoList)) fotoList = [];
     const tagsFinal = Array.from(new Set([...(diarioTagsSelezionati || []), ...tagsFromText]));
 
     const videoEl = document.getElementById('diario-video');
-    const videoUrl = videoEl ? videoEl.value.trim() : null;
+    const videoUrl = videoEl ? videoEl.value.trim() : '';
 
     const plannedEl = document.getElementById('diario-video-planned');
-const videoPlanned = plannedEl ? plannedEl.checked : false;
-    
+    const videoPlanned = plannedEl ? plannedEl.checked : false;
+
     // geo: ultima posizione (se disponibile)
     let geo = null;
     try {
@@ -6574,66 +6596,65 @@ const videoPlanned = plannedEl ? plannedEl.checked : false;
       }
     } catch {}
 
-const pubEl = document.getElementById('diario-is-public');
-const isPublic = pubEl ? !!pubEl.checked : false;
-    
-const groupId = 'g_' + Date.now();
+    const pubEl = document.getElementById('diario-is-public');
+    const isPublic = pubEl ? !!pubEl.checked : false;
 
-const base = {
-  id: Date.now(),
-  ts: Date.now(),
-  groupId,
+    const groupId = 'g_' + Date.now();
 
-  data: now.toLocaleDateString('it-IT'),
-  ora: now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }),
+    const base = {
+      ts: Date.now(),
+      groupId,
+      data: now.toLocaleDateString('it-IT'),
+      ora: now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }),
+      paese,
+      km: (parseFloat(carica('vt_kmTotali','0')) || 0).toFixed(1),
 
-  paese,
-  km: (parseFloat(carica('vt_kmTotali','0')) || 0).toFixed(1),
+      testo,
+      tags: tagsFinal,
+      geo,
 
-  testo,
-  tags: tagsFinal,
-  geo,
+      videoUrl: videoUrl ? videoUrl : null,
+      videoPlanned: (!!videoPlanned && !videoUrl),
 
-  videoUrl: videoUrl || null,
-  videoPlanned: !!videoPlanned,
+      // pubblicazione / sync
+      isPublic: isPublic,
+      ghSynced: false,
+      ghSyncedAt: null
+    };
 
-  // ✅ flag pubblicazione
-  isPublic: isPublic,
-  ghSynced: false,
-  ghSyncedAt: null
-};
+    const diario = caricaJSON('vt_diario', []);
+    const list = Array.isArray(diario) ? diario : [];
 
-const diario = caricaJSON('vt_diario', []);
-const list = Array.isArray(diario) ? diario : [];
+    const created = [];
 
-if (!fotoList.length) {
-  // solo testo/video
-  list.unshift({ ...base, foto:null, fotoUrl:null });
-} else {
-  // una entry per ogni foto (infinite foto per “lo stesso post”)
-  for (const src of fotoList) {
-    list.unshift({
-      ...base,
-      id: Date.now() + Math.floor(Math.random()*1000),
-      foto: src,
-      fotoUrl: null
-    });
-  }
-}
+    if (!fotoList.length) {
+      const entry = { ...base, id: Date.now(), foto: null, fotoUrl: null };
+      list.unshift(entry);
+      created.push(entry);
+    } else {
+      for (const src of fotoList) {
+        const entry = {
+          ...base,
+          id: Date.now() + Math.floor(Math.random() * 1000),
+          foto: src,
+          fotoUrl: null
+        };
+        list.unshift(entry);
+        created.push(entry);
+      }
+    }
 
-salva('vt_diario', list);
+    // ✅ salva UNA SOLA VOLTA (questa è la cosa importante)
+    salva('vt_diario', list);
 
-    
-    salva('vt_diario', diario);
-
-    // ✅ reset UI immediato (così non clicchi 10 volte)
+    // reset UI
     if (testoEl) testoEl.value = '';
     if (pubEl) pubEl.checked = false;
     if (videoEl) videoEl.value = '';
     if (plannedEl) plannedEl.checked = false;
+
     if (anteprimaDiv) {
       anteprimaDiv.style.display = 'none';
-      anteprimaDiv.dataset.src = '';
       anteprimaDiv.dataset.list = '[]';
       anteprimaDiv.innerHTML = '';
     }
@@ -6643,27 +6664,19 @@ salva('vt_diario', list);
 
     if (typeof clearDiarioTags === 'function') clearDiarioTags();
 
-    renderDiario();
-    showToast('📖 Salvato nel diario!');
+    // enqueue Drive per tutte le foto create
+    for (const e of created) {
+      if (e.foto) enqueueFoto?.('diario', e.id);
+    }
+    updateDriveSyncInfo?.();
 
-    // coda upload Drive (se c'è foto)
-    if (entry.foto && typeof enqueueFoto === 'function') {
-      enqueueFoto('diario', entry.id);
-      if (typeof updateDriveSyncInfo === 'function') updateDriveSyncInfo();
-
-      // se online e auto-sync attivo, prova subito (1 foto)
-      if (navigator.onLine && carica('vt_driveAutoSync','1') === '1' && typeof processUploadQueue === 'function') {
-        processUploadQueue(1);
-      }
+    // auto-sync se online
+    if (navigator.onLine && carica('vt_driveAutoSync','1') === '1') {
+      processUploadQueue?.(1);
     }
 
-    // condivisione: dopo (non blocca UI)
-    setTimeout(() => {
-      try {
-        const ok = confirm('Vuoi condividere ora questo momento?');
-        if (ok) condividiEntryDiario(entry);
-      } catch {}
-    }, 80);
+    renderDiarioFull?.();
+    showToast('📖 Salvato nel diario!');
 
   } catch (e) {
     console.error('salvaDiario error:', e);
@@ -6807,12 +6820,26 @@ function renderTravelTimeline(containerId){
       const tipo = (it.subkind === 'giro') ? 'GIRO' : 'TAPPA';
       const col = (it.subkind === 'giro') ? '#2196F3' : '#9c27b0';
 
+      const gh = p.ghSynced ? '🐙' : '⏳';
+      const pub = p.isPublic ? 'checked' : '';
+      
       return `
         <div class="diario-entry" style="border-left-color:${col};">
           <div class="diario-header">
             <span class="diario-data">🏁 ${p.data||''} ${p.ora||''} — ${p.paese||''}</span>
             <span class="diario-paese" style="background:${col};color:#fff;">${tipo}</span>
           </div>
+
+
+<div style="display:flex;align-items:center;gap:12px;margin-top:10px;font-size:12px;color:#bbb;">
+  <label style="display:flex;align-items:center;gap:8px;">
+    <input type="checkbox" ${pub}
+           onchange="setItemPublicFlag('percorso', ${p.id}, this.checked)">
+    Pubblico
+  </label>
+  <span title="GitHub sync">${gh}</span>
+</div>
+
 
           <div style="color:#ddd;">📏 <b>${p.km||0} km</b></div>
           ${p.titolo ? `<div style="margin-top:6px;font-weight:1000;">📍 ${escHtml(p.titolo)}</div>` : ''}
@@ -6871,7 +6898,7 @@ function renderTravelTimeline(containerId){
           <div style="display:flex;align-items:center;gap:12px;margin-top:10px;font-size:12px;color:#bbb;">
             <label style="display:flex;align-items:center;gap:8px;">
               <input type="checkbox" ${pub}
-                     onchange="setGroupPublicFlag(${JSON.stringify(it.groupId)}, this.checked)">
+                     onchange="setGroupPublicFlag(${JSON.stringify(it.groupId || ('solo_' + leader.id))}, this.checked)">
               Pubblico
             </label>
             <span title="GitHub sync">${gh}</span>
@@ -6894,12 +6921,27 @@ function renderTravelTimeline(containerId){
 
     if (it.kind === 'manutenzione') {
       const e = it.data;
+
+ const gh = e.ghSynced ? '🐙' : '⏳';
+const pub = e.isPublic ? 'checked' : '';
+      
       return `
         <div class="diario-entry" style="border-left-color:#ff9800;">
           <div class="diario-header">
             <span class="diario-data">🔧 ${e.data||''} ${e.ora||''} — ${e.km||'--'} km</span>
             <span class="diario-paese">${e.paese||''}</span>
           </div>
+
+<div style="display:flex;align-items:center;gap:12px;margin-top:10px;font-size:12px;color:#bbb;">
+  <label style="display:flex;align-items:center;gap:8px;">
+    <input type="checkbox" ${pub}
+           onchange="setItemPublicFlag('manutenzione', ${e.id}, this.checked)">
+    Pubblico
+  </label>
+  <span title="GitHub sync">${gh}</span>
+</div>
+
+          
           <div style="font-weight:1000;">${escHtml(e.nome||'Intervento')}</div>
           ${e.desc ? `<div style="margin-top:6px;color:#bbb;">${escHtml(e.desc)}</div>` : ''}
           ${e.videoUrl ? `<button class="btn-secondary" style="margin-top:10px;width:100%;"
@@ -6911,12 +6953,26 @@ function renderTravelTimeline(containerId){
 
     if (it.kind === 'rifornimento') {
       const e = it.data;
+
+    const gh = e.ghSynced ? '🐙' : '⏳';
+const pub = e.isPublic ? 'checked' : '';
+      
       return `
         <div class="diario-entry" style="border-left-color:#795548;">
           <div class="diario-header">
             <span class="diario-data">⛽ ${e.data||''} ${e.ora||''} — ${e.km||'--'} km</span>
             <span class="diario-paese">${e.paese||''}</span>
           </div>
+
+<div style="display:flex;align-items:center;gap:12px;margin-top:10px;font-size:12px;color:#bbb;">
+  <label style="display:flex;align-items:center;gap:8px;">
+    <input type="checkbox" ${pub}
+           onchange="setItemPublicFlag('rifornimento', ${e.id}, this.checked)"
+    Pubblico
+  </label>
+  <span title="GitHub sync">${gh}</span>
+</div>
+          
           <div>📦 ${e.qta||'--'} L → <b>${escHtml(e.dest||'')}</b></div>
           <div style="color:#888;">${escHtml(e.luogo||'')}</div>
         </div>
@@ -6926,12 +6982,25 @@ function renderTravelTimeline(containerId){
 
     if (it.kind === 'carburazione') {
       const e = it.data;
+const gh = e.ghSynced ? '🐙' : '⏳';
+const pub = e.isPublic ? 'checked' : '';
+      
       return `
         <div class="diario-entry" style="border-left-color:#00bcd4;">
           <div class="diario-header">
             <span class="diario-data">🌬️ ${e.data||''} ${e.ora||''}</span>
             <span class="diario-paese">${e.paese||''}</span>
           </div>
+
+<div style="display:flex;align-items:center;gap:12px;margin-top:10px;font-size:12px;color:#bbb;">
+  <label style="display:flex;align-items:center;gap:8px;">
+    <input type="checkbox" ${pub}
+          onchange="setItemPublicFlag('carburazione', ${e.id}, this.checked)"
+    Pubblico
+  </label>
+  <span title="GitHub sync">${gh}</span>
+</div>
+          
           <div>Max <b>${e.chicMax||'--'}</b> — Min <b>${e.chicMin||'--'}</b></div>
           <div style="color:#888;">Alt: ${e.alt||0} m</div>
         </div>
@@ -6951,6 +7020,55 @@ function setGroupPublicFlag(groupId, on){
     if ((e.groupId || ('solo_'+e.id)) === groupId) e.isPublic = !!on;
   }
   salva('vt_diario', diario);
+}
+
+
+function setItemPublicFlag(kind, id, on) {
+  const val = !!on;
+
+  if (kind === 'percorso') {
+    // può stare in vt_tappe o vt_turismo
+    const found = window.trovaPercorsoById ? window.trovaPercorsoById(id) : null;
+    if (!found) return;
+    found.list[found.idx].isPublic = val;
+    found.list[found.idx].ghSynced = false;
+    found.list[found.idx].ghSyncedAt = null;
+    salva(found.key, found.list);
+    return;
+  }
+
+  if (kind === 'manutenzione') {
+    const arr = caricaJSON('vt_logbook', []);
+    const i = Array.isArray(arr) ? arr.findIndex(x => String(x.id) === String(id)) : -1;
+    if (i === -1) return;
+    arr[i].isPublic = val;
+    arr[i].ghSynced = false;
+    arr[i].ghSyncedAt = null;
+    salva('vt_logbook', arr);
+    return;
+  }
+
+  if (kind === 'rifornimento') {
+    const arr = caricaJSON('vt_logCarburanti', []);
+    const i = Array.isArray(arr) ? arr.findIndex(x => String(x.id) === String(id)) : -1;
+    if (i === -1) return;
+    arr[i].isPublic = val;
+    arr[i].ghSynced = false;
+    arr[i].ghSyncedAt = null;
+    salva('vt_logCarburanti', arr);
+    return;
+  }
+
+  if (kind === 'carburazione') {
+    const arr = caricaJSON('vt_carburazione', []);
+    const i = Array.isArray(arr) ? arr.findIndex(x => String(x.id) === String(id)) : -1;
+    if (i === -1) return;
+    arr[i].isPublic = val;
+    arr[i].ghSynced = false;
+    arr[i].ghSyncedAt = null;
+    salva('vt_carburazione', arr);
+    return;
+  }
 }
   
 function renderDiario() {
@@ -6976,6 +7094,21 @@ function setDiarioView(mode) {
   renderDiarioFull();
 }
 
+
+  let timelineFilter = 'all'; // all | percorso | diario | manutenzione | rifornimento | carburazione
+
+function setTimelineFilter(k) {
+  timelineFilter = k || 'all';
+
+  document.getElementById('btn-tl-all')?.classList.toggle('active', timelineFilter === 'all');
+  document.getElementById('btn-tl-perc')?.classList.toggle('active', timelineFilter === 'percorso');
+  document.getElementById('btn-tl-post')?.classList.toggle('active', timelineFilter === 'diario');
+  document.getElementById('btn-tl-off')?.classList.toggle('active', timelineFilter === 'manutenzione');
+  document.getElementById('btn-tl-fuel')?.classList.toggle('active', timelineFilter === 'rifornimento');
+  document.getElementById('btn-tl-carb')?.classList.toggle('active', timelineFilter === 'carburazione');
+
+  renderDiarioFull?.();
+}
 
   function buildTravelTimelineItems(){
   const out = [];
@@ -7036,6 +7169,10 @@ function setDiarioView(mode) {
   }
 
   out.sort((a,b)=>Number(b.ts||0)-Number(a.ts||0));
+
+    if (timelineFilter && timelineFilter !== 'all') {
+    return out.filter(x => x && x.kind === timelineFilter);
+  }
   return out;
 }
 function getAllPercorsiSorted() {
@@ -9650,6 +9787,10 @@ const entry = {
   ora: now.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' }),
   alt: altitudineAttuale,
 
+    isPublic: false,
+  ghSynced: false,
+  ghSyncedAt: null,
+
   chicMax,
   chicMin,
   viteAria,
@@ -9821,7 +9962,9 @@ const videoPlanned = !!document.getElementById('log-video-planned')?.checked;
 
   nome,
   desc,
-
+  isPublic: false,
+  ghSynced: false,
+  ghSyncedAt: null,
   valuta: cur,
   fxToUsd: getFxToUsd(cur),
 
@@ -10659,17 +10802,22 @@ async function costruisciArchivioPubblicoSpezzato() {
 
   const tappe = caricaJSON('vt_tappe', []) || [];
   const turismo = caricaJSON('vt_turismo', []) || [];
+  const tappePublicSrc = tappe.filter(x => x && x.isPublic);
+const turismoPublicSrc = turismo.filter(x => x && x.isPublic);
   const diario = caricaJSON('vt_diario', []) || [];
+  const diarioPublicSrc = diario.filter(x => x && x.isPublic);
   const logbook = caricaJSON('vt_logbook', []) || [];
+  const logbookPublicSrc = logbook.filter(x => x && x.isPublic);
   const datiPaesi = caricaJSON('vt_datiPaesi', {}) || {};
   const logCarburanti = caricaJSON('vt_logCarburanti', []) || [];
-
+const logCarburantiPublicSrc = logCarburanti.filter(x => x && x.isPublic);
 
   
   const carburazione = caricaJSON('vt_carburazione', []) || [];
+  const carburazionePublicSrc = carburazione.filter(x => x && x.isPublic);
   const inventario = caricaJSON('vt_inventario', []) || [];
-
-  const tappePub = tappe.map(t => ({
+const tappePub = tappePublicSrc.map(t => ({
+  
     id: t.id,
     tipo: t.tipo || 'Tappa',
     data: t.data,
@@ -10691,7 +10839,7 @@ async function costruisciArchivioPubblicoSpezzato() {
     traccia: simplifyTrace(t.traccia, 3)
   }));
 
-  const turismoPub = turismo.map(t => ({
+const turismoPub = turismoPublicSrc.map(t => ({
     id: t.id,
     tipo: t.tipo || 'Turismo',
     data: t.data,
@@ -10713,7 +10861,7 @@ async function costruisciArchivioPubblicoSpezzato() {
     traccia: simplifyTrace(t.traccia, 3)
   }));
 
-  const diarioSorted = [...diario].sort((a,b) => (b.id || 0) - (a.id || 0));
+  const diarioSorted = [...diarioPublicSrc].sort(...)
   const idsConFoto = diarioSorted.filter(d => !!d.foto).map(d => d.id);
   const keepFotoIds = new Set(idsConFoto.slice(0, MAX_FOTO_DIARIO));
 
@@ -10738,7 +10886,7 @@ async function costruisciArchivioPubblicoSpezzato() {
     };
   }));
 
-  const logbookPub = logbook.map(e => ({
+ const logbookPub = logbookPublicSrc.map(e => ({
     id: e.id,
     data: e.data,
     ora: e.ora,
@@ -10756,7 +10904,7 @@ async function costruisciArchivioPubblicoSpezzato() {
     geo: e.geo || null
   }));
 
-  const carburazionePub = carburazione.map(e => ({
+  const carburazionePub = carburazionePublicSrc.map(e => ({
   id: e.id,
   data: e.data,
   ora: e.ora,
@@ -10772,7 +10920,7 @@ async function costruisciArchivioPubblicoSpezzato() {
   paese: (e.paese || '').trim()
 }));
 
-const rifornimentiPub = logCarburanti.map(e => ({
+const rifornimentiPub = logCarburantiPublicSrc.map(e => ({
   id: e.id,
   ts: e.ts || e.id || Date.now(),
   data: e.data || '',
@@ -11014,20 +11162,29 @@ async function esportaDatiPubblici(azione = 'download') {
 function markGithubSyncedForPublic(){
   const now = Date.now();
 
-  // diario: solo public
-  const diario = caricaJSON('vt_diario', []);
-  if (Array.isArray(diario)) {
-    for (const e of diario) {
+  function markList(key){
+    const arr = caricaJSON(key, []);
+    if (!Array.isArray(arr)) return;
+    let changed = false;
+
+    for (const e of arr) {
       if (e && e.isPublic) {
         e.ghSynced = true;
         e.ghSyncedAt = now;
+        changed = true;
       }
     }
-    salva('vt_diario', diario);
+    if (changed) salva(key, arr);
   }
 
-  // (se vuoi estendere anche a tappe/log/rifornimenti/carb: stesso schema)
-  showToast('🐙 Marcati come “pubblicati” i post pubblici');
+  markList('vt_diario');
+  markList('vt_tappe');
+  markList('vt_turismo');
+  markList('vt_logbook');
+  markList('vt_logCarburanti');
+  markList('vt_carburazione');
+
+  showToast('🐙 Marcati come “pubblicati” tutti gli elementi pubblici');
 }
   
 function slugPaese(nome) {
