@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-04-02T00:01:18.097Z",
+  "_exportDate": "2026-04-02T15:56:43.086Z",
   "tipo": "officina",
   "stats": {
     "spesaRicambiUsd": 0,
@@ -18,8 +18,14 @@
       "costoLocal": 0,
       "valuta": "COP",
       "costoUsd": 0,
-      "fotoUrl": null,
-      "fotoUrl2": null,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1bmyPGsAGeDESVEvsvgHTwyAT6FHtlhIy",
+      "fotoUrl2": "https://drive.google.com/uc?export=view&id=1olqUEzagv4Kj8lubLwxmMjzLA62_Jehs",
+      "fotoUrlList": [
+        "https://drive.google.com/uc?export=view&id=1bmyPGsAGeDESVEvsvgHTwyAT6FHtlhIy",
+        "https://drive.google.com/uc?export=view&id=1olqUEzagv4Kj8lubLwxmMjzLA62_Jehs",
+        "https://drive.google.com/uc?export=view&id=1X3E3a-7bnIPOORIyoOGFUA7P71w0nIG7",
+        "https://drive.google.com/uc?export=view&id=1ipYpMQm5srJ-zYaJMZFJJq-_pdxvncNf"
+      ],
       "videoUrl": "https://youtu.be/AbqCsDj8c3Q?si=gJWrPnE6aThp7xIV",
       "videoPlanned": false,
       "geo": {
