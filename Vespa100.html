@@ -11600,7 +11600,7 @@ const turismoPub = turismoPublicSrc.map(t => ({
   nota: e.nota,
   geo: e.geo || null,
   fotoCandela: e.fotoCandela || null,
-  paese: (e.paese || '').trim()
+  paese: String(e.paese || carica('vt_paeseAttuale', '') || 'Colombia').trim()
 }));
 
 const rifornimentiPub = logCarburantiPublicSrc.map(e => ({
@@ -11628,6 +11628,7 @@ let paesiNomi = Array.from(new Set([
   ...turismoPub.map(x => x.paese).filter(Boolean),
   ...diarioPub.map(x => x.paese).filter(Boolean),
   ...logbookPub.map(x => x.paese).filter(Boolean),
+    ...carburazionePub.map(x => x.paese).filter(Boolean),
   ...rifornimentiPub.map(x => x.paese).filter(Boolean)
 ].map(x => String(x || '').trim()).filter(Boolean))).sort();
 
