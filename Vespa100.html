@@ -4361,6 +4361,37 @@ function youtubeThumbUrl(url){
   return `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
 }
 
+  function vtThumbPhoto(srcRaw, albumId, idx, badgeHtml = '') {
+  const src = driveToDirectImageUrl(srcRaw);
+  return `
+    <div class="diario-thumb" onclick="openPhotoLightboxAlbum('${albumId}', ${idx})">
+      ${badgeHtml || ''}
+      <img src="${src}" loading="lazy">
+    </div>
+  `;
+}
+
+function vtThumbVideo(videoUrl) {
+  const th = youtubeThumbUrl(videoUrl);
+  return `
+    <div class="diario-thumb" onclick="openVideoLightbox(${JSON.stringify(videoUrl)})">
+      <span class="badge video">🎥</span>
+      ${th ? `<img src="${th}" loading="lazy">`
+           : `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:26px;font-weight:1000;">▶</div>`}
+    </div>
+  `;
+}
+
+function vtThumbPlanned(onclickJs) {
+  return `
+    <div class="diario-thumb" onclick="${onclickJs}"
+         style="display:flex;align-items:center;justify-content:center;color:#fff;">
+      <span class="badge planned">🎬</span>
+      <div style="font-size:26px;font-weight:1000;">🎬</div>
+    </div>
+  `;
+}
+
   
 function openVideoLightbox(videoUrl){
   const emb = youtubeEmbedUrl(videoUrl);
@@ -6879,6 +6910,44 @@ function renderTravelTimeline(containerId){
     </button>
   `;
 
+  const ctx = { id: p.id, tipoRef: isGiro ? 'turismo' : 'tappa' };
+  const media = (p.startTs && p.endTs)
+    ? getDiarioEntriesByRange(p.startTs, p.endTs, true, ctx)
+    : [];
+
+  const photos = media.filter(x => x && (x.fotoUrl || x.foto));
+  const albumId = 'percorso_tl_' + String(p.id);
+
+  registerLightboxAlbum(
+    albumId,
+    photos.map(x => (x.fotoUrl || x.foto)),
+    photos.map(x => `📍 ${(x.paese||'')} — ${(x.data||'')} ${(x.ora||'')}`)
+  );
+
+  const photoIndexById = new Map();
+  photos.forEach((x, i) => photoIndexById.set(String(x.id), i));
+
+  const thumbs = media.slice(0, 9).map(e => {
+    const hasPhoto = !!(e.fotoUrl || e.foto);
+    const hasVideo = !!e.videoUrl;
+    const planned  = !!(e.videoPlanned && !e.videoUrl);
+
+    if (hasPhoto) {
+      const raw = e.fotoUrl || e.foto;
+      const idxPhoto = photoIndexById.get(String(e.id)) ?? 0;
+      const badge = hasVideo ? `<span class="badge video">🎥</span>` : (planned ? `<span class="badge planned">🎬</span>` : '');
+      return vtThumbPhoto(raw, albumId, idxPhoto, badge);
+    }
+
+    if (hasVideo) return vtThumbVideo(e.videoUrl);
+    if (planned)  return vtThumbPlanned(`apriModificaDiario(${Number(e.id)})`);
+    return '';
+  }).join('');
+
+  const galleryHtml = thumbs
+    ? `<div class="diario-gallery" style="margin-top:12px;">${thumbs}</div>`
+    : '';
+  
   return `
     <div class="log-entry-full" style="
       border-left:4px solid ${col};
@@ -6894,6 +6963,8 @@ function renderTravelTimeline(containerId){
         </div>
       </div>
 
+      ${galleryHtml}
+  
       <div style="color:var(--giallo); margin-top:6px; font-weight:900;">${p.paese || ''}</div>
 
       <div style="display:flex;align-items:center;gap:12px;margin-top:10px;font-size:12px;color:#bbb;">
@@ -6928,7 +6999,8 @@ function renderTravelTimeline(containerId){
       </div>
 
       <div style="display:flex; gap:10px; margin-top:10px;">
-        ${btnSmall('📸 Foto/Video', `apriMediaPercorso(${p.id})`, '#ff9800', '#000')}
+        
+        
         ${btnSmall('⬇️ KML', `scaricaKML(${p.id})`, '#222', '#bbb')}
         ${btnSmall('📈 Grafico', `apriGraficoPercorso(${p.id})`, '#222', '#bbb')}
       </div>
@@ -6936,7 +7008,7 @@ function renderTravelTimeline(containerId){
       <div style="display:flex; align-items:center; justify-content:space-between; margin-top:14px;">
         <button onclick="apriDettagliPercorso(${p.id})"
           style="background:none;border:none;color:#ff9800;font-size:12px;font-weight:1000;cursor:pointer;">
-          ✏️ Dettagli
+          ✏️ Modifica
         </button>
 
         <button onclick="eliminaPercorso(${p.id})"
@@ -6982,7 +7054,7 @@ function renderTravelTimeline(containerId){
       );
 
       const heroRaw = photos[0] ? (photos[0].fotoUrl || photos[0].foto) : null;
-      const heroSrc = heroRaw ? driveToDirectImageUrl(heroRaw) : null;
+      //const heroSrc = heroRaw ? driveToDirectImageUrl(heroRaw) : null;
 
       const emb = leader.videoUrl ? youtubeEmbedUrl(leader.videoUrl) : '';
       const videoHtml = leader.videoUrl
@@ -6995,6 +7067,25 @@ function renderTravelTimeline(containerId){
             ? `<div style="margin-top:10px;color:#ff9800;font-weight:1000;">🎬 Video in arrivo (aggiungerai il link dopo)</div>`
             : '');
 
+const photos = arr.filter(x => x && (x.fotoUrl || x.foto));
+const albumId = 'diario_group_' + String(gid);
+
+registerLightboxAlbum(
+  albumId,
+  photos.map(x => (x.fotoUrl || x.foto)),
+  photos.map(x => `📍 ${(x.paese||'')} — ${(x.data||'')} ${(x.ora||'')}`)
+);
+
+const thumbs = []
+  .concat(photos.slice(0, 9).map((x, i) => vtThumbPhoto((x.fotoUrl || x.foto), albumId, i)))
+  .concat(leader.videoUrl ? [vtThumbVideo(leader.videoUrl)] : [])
+  .concat((leader.videoPlanned && !leader.videoUrl) ? [vtThumbPlanned(`apriModificaDiario(${leader.id})`)] : [])
+  .slice(0, 9)
+  .join('');
+
+const galleryHtml = thumbs ? `<div class="diario-gallery" style="margin-top:12px;">${thumbs}</div>` : '';
+
+      
       return `
         <div class="diario-entry" style="border-left-color:#e91e63;">
           <div class="diario-header">
@@ -7013,17 +7104,9 @@ function renderTravelTimeline(containerId){
           </div>
 
           ${testoShort ? `<div class="diario-testo">${escHtml(testoShort)}</div>` : ''}
-
+${galleryHtml}
           ${videoHtml}
 
-          ${heroSrc ? `
-            <img src="${heroSrc}" class="diario-foto" loading="lazy"
-                 onclick="openPhotoLightboxAlbum('${albumId}', 0)">
-            <button class="btn-secondary" style="margin-top:10px;"
-                    onclick="openPhotoLightboxAlbum('${albumId}', 0)">
-              📷 Apri foto
-            </button>
-          ` : ''}
 
           <div style="display:flex; justify-content:space-between; gap:10px; margin-top:12px;">
             <button onclick="apriModificaDiario(${leader.id})"
@@ -7046,7 +7129,27 @@ function renderTravelTimeline(containerId){
 
  const gh = e.ghSynced ? '' : '⏳';
 const pub = e.isPublic ? 'checked' : '';
-      
+
+  const photos = [];
+  if (e.fotoUrl || e.foto) photos.push(e.fotoUrl || e.foto);
+  if (e.fotoUrl2 || e.foto2) photos.push(e.fotoUrl2 || e.foto2);
+
+  const albumId = 'logbook_tl_' + String(e.id);
+  registerLightboxAlbum(
+    albumId,
+    photos,
+    photos.map(() => `🔧 ${(e.nome||'')}`)
+  );
+
+  const thumbs = []
+    .concat(photos.map((raw, i) => vtThumbPhoto(raw, albumId, i)))
+    .concat(e.videoUrl ? [vtThumbVideo(e.videoUrl)] : [])
+    .concat((e.videoPlanned && !e.videoUrl) ? [vtThumbPlanned(`apriEditIntervento(${e.id})`)] : [])
+    .slice(0, 9)
+    .join('');
+
+  const galleryHtml = thumbs ? `<div class="diario-gallery" style="margin-top:12px;">${thumbs}</div>` : '';
+  
       return `
         <div class="diario-entry" style="border-left-color:#ff9800;">
           <div class="diario-header">
@@ -7068,14 +7171,14 @@ const pub = e.isPublic ? 'checked' : '';
           <div style="font-weight:1000;">${escHtml(e.nome||'Intervento')}</div>
           ${e.desc ? `<div style="margin-top:6px;color:#bbb;">${escHtml(e.desc)}</div>` : ''}
           ${e.videoUrl ? `<button class="btn-secondary" style="margin-top:10px;width:100%;"
-                            onclick="openVideoLightbox(${JSON.stringify(e.videoUrl)})">🎥 Video</button>` : ''}
+                           
         </div>
 
-
+${galleryHtml}
 
   <div style="display:flex; justify-content:space-between; gap:10px; margin-top:12px;">
   <button onclick="apriEditIntervento(${e.id})"
-    style="background:none;border:none;color:#ff9800;font-size:12px;cursor:pointer;">✏️ Edit</button>
+    style="background:none;border:none;color:#ff9800;font-size:12px;cursor:pointer;">✏️ Moldifica</button>
 
   <button onclick="eliminaIntervento(${e.id})"
     style="background:none;border:none;color:#666;font-size:12px;cursor:pointer;">🗑️ Elimina</button>
@@ -7084,12 +7187,26 @@ const pub = e.isPublic ? 'checked' : '';
       `;
     }
 
-    if (it.kind === 'rifornimento') {
+       if (it.kind === 'rifornimento') {
       const e = it.data;
 
-    const gh = e.ghSynced ? '🐙' : '⏳';
-const pub = e.isPublic ? 'checked' : '';
-      
+      const gh = e.ghSynced ? '🐙' : '⏳';
+      const pub = e.isPublic ? 'checked' : '';
+
+      const qta = (e.qta != null) ? Number(e.qta) : null;
+      const cur = (e.valuta || '').trim();
+
+      const costoLocal = (e.costoBenzLocal != null) ? Number(e.costoBenzLocal) : null;
+      const costoUsdNew = (e.costoBenzUsd != null) ? Number(e.costoBenzUsd) : null;
+      const costoUsdOld = (e.costoBenz != null) ? Number(e.costoBenz) : null; // vecchi dati
+
+      const costoUsd = (costoUsdNew != null && costoUsdNew > 0) ? costoUsdNew
+                    : (costoUsdOld != null && costoUsdOld > 0) ? costoUsdOld
+                    : null;
+
+      const prezzoUnit = (e.prezzoUnit != null) ? Number(e.prezzoUnit) : null;
+      const costoOlio = (e.costoOlio != null) ? Number(e.costoOlio) : null;
+
       return `
         <div class="diario-entry" style="border-left-color:#795548;">
           <div class="diario-header">
@@ -7097,29 +7214,50 @@ const pub = e.isPublic ? 'checked' : '';
             <span class="diario-paese">${e.paese||''}</span>
           </div>
 
-<div style="display:flex;align-items:center;gap:12px;margin-top:10px;font-size:12px;color:#bbb;">
-  <label style="display:flex;align-items:center;gap:8px;">
-   <input type="checkbox" ${pub}
-       onchange="setItemPublicFlag('rifornimento', ${e.id}, this.checked)">
-Pubblico
-  </label>
-  <span title="GitHub sync">${gh}</span>
-</div>
-          
-          <div>📦 ${e.qta||'--'} L → <b>${escHtml(e.dest||'')}</b></div>
-          <div style="color:#888;">${escHtml(e.luogo||'')}</div>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:10px;font-size:12px;color:#bbb;">
+            <label style="display:flex;align-items:center;gap:8px;">
+              <input type="checkbox" ${pub}
+                     onchange="setItemPublicFlag('rifornimento', ${e.id}, this.checked)">
+              Pubblico
+            </label>
+            <span title="GitHub sync">${gh}</span>
+          </div>
+
+          <div style="margin-top:10px; color:#ddd; line-height:1.6;">
+            <div>📦 Quantità: <b>${(qta != null) ? qta.toFixed(2) : '--'} L</b></div>
+            <div>➡️ Destinazione: <b>${escHtml(e.dest||'')}</b></div>
+            ${e.mix && e.mix !== '--' ? `<div>🧪 Miscela: <b>${escHtml(e.mix)}</b></div>` : ''}
+            ${e.luogo ? `<div>📍 Luogo: <b>${escHtml(e.luogo)}</b></div>` : ''}
+
+            ${prezzoUnit && prezzoUnit > 0 && cur ? `<div>💰 Prezzo/L: <b>${prezzoUnit.toFixed(3)} ${cur}</b></div>` : ''}
+
+            ${(costoLocal != null && costoLocal > 0 && cur)
+              ? `<div>💵 Totale benzina: <b>${costoLocal.toFixed(['COP','CLP','ARS'].includes(cur) ? 0 : 2)} ${cur}</b></div>`
+              : ''}
+
+            ${(costoUsd != null && costoUsd > 0)
+              ? `<div>💵 Totale benzina (USD): <b style="color:var(--giallo);">
+$$
+{costoUsd.toFixed(2)}</b></div>`
+              : ''}
+
+            ${(costoOlio != null && costoOlio > 0)
+              ? `<div>🧪 Olio 2T (da stock): <b style="color:#00bcd4;">
+$$
+{costoOlio.toFixed(2)}</b></div>`
+              : ''}
+
+            ${e.note ? `<div style="margin-top:8px;color:#aaa;">📝 ${escHtml(e.note)}</div>` : ''}
+          </div>
+
+          <div style="display:flex; justify-content:space-between; gap:10px; margin-top:12px;">
+            <button onclick="editRifornimento(${e.id})"
+              style="background:none;border:none;color:#ff9800;font-size:12px;cursor:pointer;">✏️ Modifica</button>
+
+            <button onclick="eliminaRifornimento(${e.id})"
+              style="background:none;border:none;color:#666;font-size:12px;cursor:pointer;">🗑️ Elimina</button>
+          </div>
         </div>
-
-
-        <div style="display:flex; justify-content:space-between; gap:10px; margin-top:12px;">
-  <button onclick="editRifornimento(${e.id})"
-    style="background:none;border:none;color:#ff9800;font-size:12px;cursor:pointer;">✏️ Edit</button>
-
-  <button onclick="eliminaRifornimento(${e.id})"
-    style="background:none;border:none;color:#666;font-size:12px;cursor:pointer;">🗑️ Elimina</button>
-</div>
-
-
 
         <div class="diario-divider"></div>
       `;
@@ -7153,7 +7291,7 @@ const pub = e.isPublic ? 'checked' : '';
 
         <div style="display:flex; justify-content:space-between; gap:10px; margin-top:12px;">
   <button onclick="editCarburazione(${e.id})"
-    style="background:none;border:none;color:#ff9800;font-size:12px;cursor:pointer;">✏️ Edit</button>
+    style="background:none;border:none;color:#ff9800;font-size:12px;cursor:pointer;">✏️ Modifica</button>
 
   <button onclick="eliminaCarburazione(${e.id})"
     style="background:none;border:none;color:#666;font-size:12px;cursor:pointer;">🗑️ Elimina</button>
@@ -7945,7 +8083,8 @@ function renderTappe() {
 
         <!-- azioni principali -->
         <div style="display:flex; gap:10px; margin-top:12px;">
-          ${btnSmall('📸 Foto/Video', `apriMediaPercorso(${p.id})`, '#ff9800', '#000')}
+          
+          
           ${btnSmall('🗺️ Traccia', `apriTracciaPercorso(${p.id})`, '#222', '#bbb')}
           ${btnSmall('📈 Grafico', `apriGraficoPercorso(${p.id})`, '#222', '#bbb')}
         </div>
@@ -7965,7 +8104,7 @@ function renderTappe() {
 
           <button onclick="apriDettagliPercorso(${p.id})"
             style="background:none;border:none;color:#ff9800;font-size:12px;font-weight:1000;cursor:pointer;">
-            ✏️ Edit
+           ✏️ Modifica
           </button>
         </div>
       </div>
@@ -10345,15 +10484,16 @@ function renderLogManutenzione() {
       <div style="font-size:12px; color:#888;">${e.data} ${e.ora} — ${e.km} km — ${e.paese}</div>
       ${e.desc ? `<div class="log-note">📝 ${e.desc}</div>` : ''}
       ${(e.costoLocal > 0) ? `<div style="color:var(--verde); margin-top:5px;">💰 Costo: ${e.costoLocal} ${e.valuta || ''} (≈ $${Number(e.costoUsd||0).toFixed(2)})</div>` : ''}
-     ${(e.videoUrl)
-  ? `<div style="margin-top:10px;">
-       <a href="${e.videoUrl}" target="_blank" rel="noopener"
-          style="display:inline-block;padding:10px 12px;border-radius:12px;background:#2196F3;color:#000;text-decoration:none;font-weight:900;">
-         ▶ Apri video YouTube
-       </a>
+
+
+${(e.videoUrl)
+  ? `<div class="diario-gallery" style="margin-top:10px;">
+       ${vtThumbVideo(e.videoUrl)}
      </div>`
   : (e.videoPlanned
-      ? `<div style="margin-top:10px;color:#ff9800;font-weight:900;">🎬 Video in arrivo (senza link)</div>`
+      ? `<div class="diario-gallery" style="margin-top:10px;">
+           ${vtThumbPlanned(`apriEditIntervento(${e.id})`)}
+         </div>`
       : '')
 }
 
