@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -1127,23 +1128,24 @@ color:#fff;
   gap:8px;
   margin-top:10px;
 }
+.tag-grid{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:6px;
+}
 .tag-chip{
-  padding:8px 10px;
-  border-radius:999px;
-  border:1px solid #555;
-  background:#222;
+  padding:0;
+  border:none;
+  background:transparent;
   color:#bbb;
-  font-size:13px;
-  font-weight:700;
+  font-size:12px;
+  font-weight:900;
   cursor:pointer;
-  user-select:none;
 }
 .tag-chip.active{
-  background:var(--giallo);
-  border-color:var(--giallo);
-  color:#000;
+  color:var(--giallo);
 }
-
 /* ===== MARKER FOTO (mappa) ===== */
 .photo-marker {
   background: rgba(255,152,0,0.95);
@@ -1361,72 +1363,71 @@ color:#fff;
 
   <!-- BOTTONI VIAGGIO -->
   <div class="dash-card">
-    <button class="btn-azione" style="background:#4caf50; color:#000;"
-        onclick="syncDriveGithubOneClick()">
-  🚀 1-2-3 Sync iPhone → Drive → GitHub
-</button>
-    <button class="btn-azione btn-yellow" onclick="apriModal('modalTappe')">🗺️ Apri Diario Tappe</button>
-    <button class="btn-azione btn-yellow" onclick="apriModalPaesi()">🌎 Statistiche per Paese</button>
-    <button class="btn-azione btn-yellow" onclick="apriModal('modalStats'); aggiornaUI();">📊 Statistiche</button>
-    <button class="btn-azione btn-yellow" onclick="apriModal('modalLogCarburanti')">⛽ Log Rifornimenti</button>
-    <button class="btn-azione btn-yellow" onclick="apriModal('modalRegistro')">🔧 Log Manutenzioni</button>
-  </div>
 
-  <!-- DIARIO -->
-  <div class="dash-card" style="margin-top:15px;">
-    <h3 style="margin-top:0; color:#e91e63;">📖 Diario di Viaggio</h3>
+  <!-- spazio “crea post” (diario unico) -->
+  <h3 style="margin-top:0; color:#e91e63;">✍️ Nuovo Post (Diario di viaggio)</h3>
 
-    <!-- 1) APRI DIARIO -->
-    <button class="btn-azione btn-yellow" onclick="apriModal('modalDiario'); renderDiarioFull();">
-      📖 Apri Diario (tutti i post)
-    </button>
+  <textarea id="diario-testo"
+            placeholder="Scrivi... (puoi usare #hashtag nel testo)"
+            rows="4"
+            style="margin-top:10px; text-align:left;"></textarea>
 
+  <!-- hashtag button piccolo sotto -->
+  <button class="btn-secondary" style="margin-top:8px; padding:10px 12px; font-size:12px;"
+          onclick="apriModal('modalTagPicker'); renderTagPicker();">
+    # Hashtag
+  </button>
 
+  <!-- hashtag selezionati (solo testo, piccoli) -->
+  <div id="diario-tags-selected-inline" style="margin-top:6px;"></div>
 
-    <!-- input file nascosto -->
-    <input type="file" id="foto-input" accept="image/*" style="display:none;"
-       onchange="anteprima('foto-input','anteprima-foto')">
+  <!-- FOTO multiple -->
+  <input type="file" id="foto-input" accept="image/*" multiple style="display:none;"
+         onchange="anteprimaMulti('foto-input','anteprima-foto')">
 
-    <!-- 3) FOTO -->
-    <button class="btn-azione btn-yellow" onclick="document.getElementById('foto-input').click()">
-      📷 Aggiungi Foto
-    </button>
-    <div id="anteprima-foto" style="margin-top:10px; display:none;"></div>
+  <button class="btn-secondary" style="margin-top:8px; padding:10px 12px; font-size:12px;"
+          onclick="document.getElementById('foto-input').click()">
+    📷 Aggiungi foto
+  </button>
+  <div id="anteprima-foto" style="margin-top:10px; display:none;"></div>
 
-    <!-- 4) TAG -->
-    <button class="btn-azione btn-yellow" onclick="apriModal('modalTagPicker'); renderTagPicker();">
-      🏷️ Seleziona hashtag (multi)
-    </button>
-    <div id="diario-tags-selected-inline" class="tag-grid" style="margin-top:8px;"></div>
+  <!-- VIDEO -->
+  <input type="text" id="diario-video"
+         placeholder="🎬 Link YouTube (opzionale)"
+         style="margin-top:8px; background:#222; border-color:#444; color:white;">
 
-    <!-- 5) YOUTUBE -->
-    <input type="text" id="diario-video"
-           placeholder="📺 Link YouTube (opzionale)"
-           style="margin-top:8px; background:#222; border-color:#444; color:white;">
+  <label class="checklist-item tagpick planned-video" style="margin-top:8px;">
+    <input type="checkbox" id="diario-video-planned">
+    <span class="checklist-text">🎬 Video in arrivo (link non ancora)</span>
+  </label>
 
-<label class="checklist-item tagpick planned-video" style="margin-top:8px;">
-  <input type="checkbox" id="diario-video-planned">
-  <span class="checklist-text">🎬 Video da aggiungere dopo (link non ancora disponibile)</span>
-</label>
+  <!-- PUBBLICO / PRIVATO -->
+  <label class="checklist-item tagpick planned-video" style="margin-top:8px;">
+    <input type="checkbox" id="diario-is-public">
+    <span class="checklist-text">🔓 Questo post è PUBBLICO (ok per GitHub)</span>
+  </label>
 
+  <button id="btn-salva-diario" class="btn-azione btn-yellow" onclick="salvaDiario()"
+          style="margin-top:10px;">
+    💾 Salva nel Diario
+  </button>
 
-    
-    <!-- 6) TESTO (alla fine) -->
-    <textarea id="diario-testo"
-              placeholder="Scrivi un pensiero, un incontro, un'esperienza..."
-              rows="4"
-              style="margin-top:10px;"></textarea>
-  </div>
+  <!-- bottoni accesso -->
+  <button class="btn-azione btn-yellow" onclick="apriModal('modalStats'); aggiornaUI();">
+    📊 Statistiche
+  </button>
 
-      <!-- 2) SALVA -->
-    <button id="btn-salva-diario" class="btn-azione btn-yellow" onclick="salvaDiario()">
-      💾 Salva nel Diario
-    </button>
+  <button class="btn-azione btn-yellow" onclick="apriModal('modalDiario'); renderDiarioFull();">
+    📖 Diario di viaggio (timeline unica)
+  </button>
 
+  <!-- sync alla fine -->
+  <button class="btn-azione" style="background:#4caf50; color:#000; margin-top:10px;"
+          onclick="syncDriveGithubOneClick()">
+    🚀 1-2-3 Sync iPhone → Drive → GitHub
+  </button>
 </div>
-
-
-
+</div>
 
   
   <!-- ==================== PAGINA 3: BENZINA ==================== -->
@@ -2253,6 +2254,18 @@ color:#fff;
     <div id="lightbox-caption"></div>
   </div>
 </div>
+
+<div id="videoLightbox" class="modal-overlay fullscreen">
+  <div class="modal-content" style="padding:0;border:0;background:#000;">
+    <button class="close-modal" onclick="chiudiModal('videoLightbox')" style="position:fixed;top:12px;right:12px;z-index:99999;">×</button>
+    <iframe id="videoLightboxFrame" class="yt-embed"
+            style="width:100%;height:100vh;border:0;border-radius:0;"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen></iframe>
+  </div>
+</div>
+
+    
   <!-- TAG PICKER (modal) -->
 <div id="modalTagPicker" class="modal-overlay">
   <div class="modal-content" style="border-color:#ff9800; max-width:560px;">
@@ -2662,6 +2675,8 @@ color:#fff;
     </div>
   </div>
 </div>
+</div>
+
  
   <!-- ==================== NAV ==================== -->
   <div class="nav">
@@ -3271,6 +3286,36 @@ initDB('vt_inventario', JSON.stringify([
 
   coordinateTracciato = caricaJSON('vt_coordinateTracciato', []);
   lastCountry = carica('vt_paeseAttuale', 'Colombia');
+
+
+function migraPublicFlagsV1(){
+  if (carica('vt_mig_public_flags_v1','') === '1') return;
+
+  function patchList(key){
+    const arr = caricaJSON(key, []);
+    if (!Array.isArray(arr)) return;
+    let changed = false;
+    for (const e of arr) {
+      if (!e || typeof e !== 'object') continue;
+      if (e.ts == null) { e.ts = e.id || Date.now(); changed = true; }
+      if (e.isPublic == null) { e.isPublic = false; changed = true; }
+      if (e.ghSynced == null) { e.ghSynced = false; changed = true; }
+      if (e.ghSyncedAt == null) { e.ghSyncedAt = null; changed = true; }
+    }
+    if (changed) salva(key, arr);
+  }
+
+  patchList('vt_diario');
+  patchList('vt_logbook');
+  patchList('vt_logCarburanti');
+  patchList('vt_carburazione');
+  patchList('vt_tappe');
+  patchList('vt_turismo');
+
+  salva('vt_mig_public_flags_v1','1');
+}
+migraPublicFlagsV1();
+  
 }
 
   /* ============================================================
@@ -4269,6 +4314,20 @@ function driveToDirectImageUrl(url){
   return `https://www.youtube-nocookie.com/embed/${id}`;
 }
 
+
+function openVideoLightbox(videoUrl){
+  const emb = youtubeEmbedUrl(videoUrl);
+  if (!emb) { showToast('⚠️ Video non valido'); return; }
+  const fr = document.getElementById('videoLightboxFrame');
+  if (fr) fr.src = emb;
+  apriModal('videoLightbox');
+}
+function closeVideoLightbox(){
+  const fr = document.getElementById('videoLightboxFrame');
+  if (fr) fr.src = '';
+  chiudiModal('videoLightbox');
+}
+  
 // ===== LIGHTBOX (pinch + swipe) =====
 const lightboxAlbums = {}; // albumId -> { list:[srcRaw], captions:[html] }
 let lbAlbumId = '__single';
@@ -4564,12 +4623,12 @@ function renderMapFullPhotoMarkersForContext(ctx) {
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowfullscreen></iframe>` : ''}
 
-          <div style="margin-top:8px;">
-            <a href="${e.videoUrl}" target="_blank" rel="noopener"
-               style="display:block;width:100%;text-align:center;padding:10px 12px;border-radius:12px;background:#2196F3;color:#000;text-decoration:none;font-weight:900;">
-              ▶ Apri su YouTube
-            </a>
-          </div>
+        //  <div style="margin-top:8px;">
+         //   <a href="${e.videoUrl}" target="_blank" rel="noopener"
+         //      style="display:block;width:100%;text-align:center;padding:10px 12px;border-radius:12px;background:#2196F3;color:#000;text-decoration:none;font-weight:900;">
+        //      ▶ Apri su YouTube
+        //    </a>
+         // </div>
         </div>
       `;
     } else if (hasPlanned) {
@@ -5476,6 +5535,7 @@ salva('vt_scortaLitri', nuovaScorta);
     const logCarb = caricaJSON('vt_logCarburanti', []);
     logCarb.unshift({
       id: Date.now(),
+      ts: Date.now(),
       geo: geoFuel,
       data: now.toLocaleDateString('it-IT'),
       ora: now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }),
@@ -5603,6 +5663,7 @@ salva('vt_datiPaesi', datiPaesi);
   const logCarb = caricaJSON('vt_logCarburanti', []);
   logCarb.unshift({
     id: Date.now(),
+    ts: Date.now(),
     data: now.toLocaleDateString('it-IT'),
     ora: now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
     paese,
@@ -6394,11 +6455,12 @@ function renderSelectedTagsInline() {
     return;
   }
 
-  box.innerHTML = tags.map(t => `
-    <div class="tag-chip active" onclick="toggleDiarioTag('${escSQ(t)}'); renderSelectedTagsInline();">
-      ${t}
-    </div>
-  `).join('');
+box.innerHTML = tags.map(t => `
+  <span class="tag-chip active"
+        onclick="toggleDiarioTag('${escSQ(t)}'); renderSelectedTagsInline();">
+    #${t}
+  </span>
+`).join(' ');
 }
 
 function renderTagPicker() {
@@ -6476,8 +6538,12 @@ function salvaDiario() {
     const testo = testoEl ? testoEl.value.trim() : '';
     if (!testo) { showToast('⚠️ Scrivi qualcosa prima di salvare'); return; }
 
-    const anteprimaDiv = document.getElementById('anteprima-foto');
-    const fotoSrc = (anteprimaDiv && anteprimaDiv.dataset) ? (anteprimaDiv.dataset.src || null) : null;
+  const anteprimaDiv = document.getElementById('anteprima-foto');
+
+// da anteprimaMulti: dataset.list = JSON array di foto base64
+let fotoList = [];
+try { fotoList = JSON.parse(anteprimaDiv?.dataset?.list || '[]'); } catch { fotoList = []; }
+if (!Array.isArray(fotoList)) fotoList = [];
 
     const paese = carica('vt_paeseAttuale','Colombia');
     const now = new Date();
@@ -6501,10 +6567,15 @@ const videoPlanned = plannedEl ? plannedEl.checked : false;
       }
     } catch {}
 
+const pubEl = document.getElementById('diario-is-public');
+const isPublic = pubEl ? !!pubEl.checked : false;
+    
+const groupId = 'g_' + Date.now();
 
- const entry = {
+const base = {
   id: Date.now(),
   ts: Date.now(),
+  groupId,
 
   data: now.toLocaleDateString('it-IT'),
   ora: now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }),
@@ -6513,31 +6584,50 @@ const videoPlanned = plannedEl ? plannedEl.checked : false;
   km: (parseFloat(carica('vt_kmTotali','0')) || 0).toFixed(1),
 
   testo,
-
-  // ✅ usa i tag finali (selezionati + hashtag trovati nel testo)
   tags: tagsFinal,
+  geo,
 
-  // ✅ geo una sola volta
-  geo: geo,
+  videoUrl: videoUrl || null,
+  videoPlanned: !!videoPlanned,
 
-  foto: fotoSrc,      // base64 locale (se c’è)
-  fotoUrl: null,      // verrà riempito dalla sync Drive
-  videoUrl: videoUrl,           // link YouTube (può essere null)
-videoPlanned: !!videoPlanned  // ✅ true = "in arrivo"
+  // ✅ flag pubblicazione
+  isPublic: isPublic,
+  ghSynced: false,
+  ghSyncedAt: null
 };
 
-    // salva subito
-    const diario = caricaJSON('vt_diario', []);
-    diario.unshift(entry);
+const diario = caricaJSON('vt_diario', []);
+const list = Array.isArray(diario) ? diario : [];
+
+if (!fotoList.length) {
+  // solo testo/video
+  list.unshift({ ...base, foto:null, fotoUrl:null });
+} else {
+  // una entry per ogni foto (infinite foto per “lo stesso post”)
+  for (const src of fotoList) {
+    list.unshift({
+      ...base,
+      id: Date.now() + Math.floor(Math.random()*1000),
+      foto: src,
+      fotoUrl: null
+    });
+  }
+}
+
+salva('vt_diario', list);
+
+    
     salva('vt_diario', diario);
 
     // ✅ reset UI immediato (così non clicchi 10 volte)
     if (testoEl) testoEl.value = '';
+    if (pubEl) pubEl.checked = false;
     if (videoEl) videoEl.value = '';
     if (plannedEl) plannedEl.checked = false;
     if (anteprimaDiv) {
       anteprimaDiv.style.display = 'none';
       anteprimaDiv.dataset.src = '';
+      anteprimaDiv.dataset.list = '[]';
       anteprimaDiv.innerHTML = '';
     }
 
@@ -6629,12 +6719,12 @@ const videoHtml = e.videoUrl
          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
          allowfullscreen></iframe>` : ''}
 
-       <div style="margin-top:8px;">
-         <a href="${e.videoUrl}" target="_blank" rel="noopener"
-            style="display:inline-block;padding:8px 10px;border-radius:12px;background:#222;border:1px solid #444;color:#ff9800;text-decoration:none;font-weight:900;font-size:12px;">
-           ▶ Apri su YouTube
-         </a>
-       </div>
+     //  <div style="margin-top:8px;">
+    //     <a href="${e.videoUrl}" target="_blank" rel="noopener"
+    //        style="display:inline-block;padding:8px 10px;border-radius:12px;background:#222;border:1px solid #444;color:#ff9800;text-decoration:none;font-weight:900;font-size:12px;">
+    //       ▶ Apri su YouTube
+    //     </a>
+    //   </div>
      </div>`
   : (e.videoPlanned
       ? `<div style="margin-top:10px;color:#ff9800;font-weight:1000;">
@@ -6693,6 +6783,169 @@ const fotoHtml = fotoSrc
   container.innerHTML = html;
 }
 
+
+function renderTravelTimeline(containerId){
+  const box = document.getElementById(containerId);
+  if (!box) return;
+
+  const items = buildTravelTimelineItems();
+  if (!items.length) {
+    box.innerHTML = `<div style="color:#888;text-align:center;padding:20px;">Diario vuoto</div>`;
+    return;
+  }
+
+  box.innerHTML = items.map(it => {
+    if (it.kind === 'percorso') {
+      const p = it.data;
+      const tipo = (it.subkind === 'giro') ? 'GIRO' : 'TAPPA';
+      const col = (it.subkind === 'giro') ? '#2196F3' : '#9c27b0';
+
+      return `
+        <div class="diario-entry" style="border-left-color:${col};">
+          <div class="diario-header">
+            <span class="diario-data">🏁 ${p.data||''} ${p.ora||''} — ${p.paese||''}</span>
+            <span class="diario-paese" style="background:${col};color:#fff;">${tipo}</span>
+          </div>
+
+          <div style="color:#ddd;">📏 <b>${p.km||0} km</b></div>
+          ${p.titolo ? `<div style="margin-top:6px;font-weight:1000;">📍 ${escHtml(p.titolo)}</div>` : ''}
+          ${p.note ? `<div style="margin-top:6px;color:#bbb;">${escHtml(p.note)}</div>` : ''}
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
+            <button class="btn-secondary" onclick="apriTracciaPercorso(${p.id})">🗺️ Traccia</button>
+            <button class="btn-secondary" onclick="apriMediaPercorso(${p.id})">📸 Media</button>
+            <button class="btn-secondary" onclick="apriAddMediaToPercorso('${(String(p.tipo||'').toLowerCase()==='turismo') ? 'turismo' : 'tappa'}', ${p.id})">➕ Aggiungi media</button>
+          </div>
+        </div>
+        <div class="diario-divider"></div>
+      `;
+    }
+
+    if (it.kind === 'diario') {
+      // riusa il tuo render “diario list” ma senza duplicare tutto: renderizziamo solo il leader + thumbs
+      const arr = it.data || [];
+      const leader = arr[0] || {};
+      const photos = arr.filter(x => x && (x.fotoUrl || x.foto));
+
+      const albumId = 'tl_' + (it.groupId || leader.id);
+      registerLightboxAlbum(
+        albumId,
+        photos.map(x => (x.fotoUrl || x.foto)),
+        photos.map(x => `📍 ${(x.paese||'')} — ${(x.data||'')} ${(x.ora||'')}`)
+      );
+
+      const gh = leader.ghSynced ? '🐙' : '⏳';
+      const pub = leader.isPublic ? 'checked' : '';
+
+      const thumbs = photos.slice(0, 9).map((e, idx) => {
+        const raw = e.fotoUrl || e.foto;
+        const src = driveToDirectImageUrl(raw);
+        return `
+          <div class="diario-thumb" onclick="openPhotoLightboxAlbum('${albumId}', ${idx})">
+            <img src="${src}" loading="lazy">
+          </div>
+        `;
+      }).join('');
+
+      const vid = leader.videoUrl
+        ? `<button class="btn-secondary" style="margin-top:10px;width:100%;"
+                   onclick="openVideoLightbox(${JSON.stringify(leader.videoUrl)})">🎥 Apri video</button>`
+        : (leader.videoPlanned ? `<div style="margin-top:10px;color:#ff9800;font-weight:900;">🎬 Video in arrivo</div>` : '');
+
+      return `
+        <div class="diario-entry" style="border-left-color:#e91e63;">
+          <div class="diario-header">
+            <span class="diario-data">📝 ${leader.data||''} ${leader.ora||''} — ${leader.km||'--'} km</span>
+            <span class="diario-paese">${leader.paese||''}</span>
+          </div>
+
+          <div class="diario-testo">${escHtml(leader.testo||'')}</div>
+
+          <div style="display:flex;align-items:center;gap:12px;margin-top:10px;font-size:12px;color:#bbb;">
+            <label style="display:flex;align-items:center;gap:8px;">
+              <input type="checkbox" ${pub}
+                     onchange="setGroupPublicFlag(${JSON.stringify(it.groupId)}, this.checked)">
+              Pubblico
+            </label>
+            <span title="GitHub sync">${gh}</span>
+          </div>
+
+          ${vid}
+          ${thumbs ? `<div class="diario-gallery" style="margin-top:10px;">${thumbs}</div>` : ''}
+
+          <div style="display:flex; justify-content:space-between; gap:10px; margin-top:12px;">
+            <button onclick="apriModificaDiario(${leader.id})"
+              style="background:none;border:none;color:#ff9800;font-size:12px;cursor:pointer;">✏️ Modifica</button>
+
+            <button onclick="eliminaDiario(${leader.id})"
+              style="background:none;border:none;color:#666;font-size:12px;cursor:pointer;">🗑️ Elimina</button>
+          </div>
+        </div>
+        <div class="diario-divider"></div>
+      `;
+    }
+
+    if (it.kind === 'manutenzione') {
+      const e = it.data;
+      return `
+        <div class="diario-entry" style="border-left-color:#ff9800;">
+          <div class="diario-header">
+            <span class="diario-data">🔧 ${e.data||''} ${e.ora||''} — ${e.km||'--'} km</span>
+            <span class="diario-paese">${e.paese||''}</span>
+          </div>
+          <div style="font-weight:1000;">${escHtml(e.nome||'Intervento')}</div>
+          ${e.desc ? `<div style="margin-top:6px;color:#bbb;">${escHtml(e.desc)}</div>` : ''}
+          ${e.videoUrl ? `<button class="btn-secondary" style="margin-top:10px;width:100%;"
+                            onclick="openVideoLightbox(${JSON.stringify(e.videoUrl)})">🎥 Video</button>` : ''}
+        </div>
+        <div class="diario-divider"></div>
+      `;
+    }
+
+    if (it.kind === 'rifornimento') {
+      const e = it.data;
+      return `
+        <div class="diario-entry" style="border-left-color:#795548;">
+          <div class="diario-header">
+            <span class="diario-data">⛽ ${e.data||''} ${e.ora||''} — ${e.km||'--'} km</span>
+            <span class="diario-paese">${e.paese||''}</span>
+          </div>
+          <div>📦 ${e.qta||'--'} L → <b>${escHtml(e.dest||'')}</b></div>
+          <div style="color:#888;">${escHtml(e.luogo||'')}</div>
+        </div>
+        <div class="diario-divider"></div>
+      `;
+    }
+
+    if (it.kind === 'carburazione') {
+      const e = it.data;
+      return `
+        <div class="diario-entry" style="border-left-color:#00bcd4;">
+          <div class="diario-header">
+            <span class="diario-data">🌬️ ${e.data||''} ${e.ora||''}</span>
+            <span class="diario-paese">${e.paese||''}</span>
+          </div>
+          <div>Max <b>${e.chicMax||'--'}</b> — Min <b>${e.chicMin||'--'}</b></div>
+          <div style="color:#888;">Alt: ${e.alt||0} m</div>
+        </div>
+        <div class="diario-divider"></div>
+      `;
+    }
+
+    return '';
+  }).join('');
+}
+
+function setGroupPublicFlag(groupId, on){
+  const diario = caricaJSON('vt_diario', []);
+  if (!Array.isArray(diario)) return;
+  for (const e of diario) {
+    if (!e) continue;
+    if ((e.groupId || ('solo_'+e.id)) === groupId) e.isPublic = !!on;
+  }
+  salva('vt_diario', diario);
+}
+  
 function renderDiario() {
   // preview corta in pagina VIAGGIO
  // renderDiarioList('lista-diario-preview', 4);
@@ -6716,6 +6969,68 @@ function setDiarioView(mode) {
   renderDiarioFull();
 }
 
+
+  function buildTravelTimelineItems(){
+  const out = [];
+
+  const tappe = caricaJSON('vt_tappe', []);
+  const tur   = caricaJSON('vt_turismo', []);
+  const diario = caricaJSON('vt_diario', []);
+  const logbook = caricaJSON('vt_logbook', []);
+  const carb = caricaJSON('vt_carburazione', []);
+  const fuel = caricaJSON('vt_logCarburanti', []);
+
+  // tappe + giri
+  for (const p of ([]).concat(tappe||[], tur||[])) {
+    if (!p) continue;
+    out.push({
+      kind: 'percorso',
+      subkind: (String(p.tipo||'').toLowerCase()==='turismo') ? 'giro' : 'tappa',
+      ts: Number(p.startTs || p.id || 0),
+      data: p
+    });
+  }
+
+  // diario: raggruppa per groupId (un “post” può avere N foto)
+  const groups = new Map();
+  for (const e of (Array.isArray(diario) ? diario : [])) {
+    if (!e) continue;
+    const gid = e.groupId || ('solo_' + String(e.id));
+    if (!groups.has(gid)) groups.set(gid, []);
+    groups.get(gid).push(e);
+  }
+  for (const [gid, arr] of groups.entries()) {
+    arr.sort((a,b)=>Number(b.id||0)-Number(a.id||0));
+    const leader = arr[0];
+    out.push({
+      kind:'diario',
+      ts: Number(leader.ts || leader.id || 0),
+      groupId: gid,
+      data: arr
+    });
+  }
+
+  // manutenzioni
+  for (const e of (Array.isArray(logbook) ? logbook : [])) {
+    if (!e) continue;
+    out.push({ kind:'manutenzione', ts:Number(e.ts || e.id || 0), data:e });
+  }
+
+  // rifornimenti
+  for (const e of (Array.isArray(fuel) ? fuel : [])) {
+    if (!e) continue;
+    out.push({ kind:'rifornimento', ts:Number(e.ts || e.id || 0), data:e });
+  }
+
+  // carburazioni
+  for (const e of (Array.isArray(carb) ? carb : [])) {
+    if (!e) continue;
+    out.push({ kind:'carburazione', ts:Number(e.ts || e.id || 0), data:e });
+  }
+
+  out.sort((a,b)=>Number(b.ts||0)-Number(a.ts||0));
+  return out;
+}
 function getAllPercorsiSorted() {
   const tappe = caricaJSON('vt_tappe', []);
   const tur   = caricaJSON('vt_turismo', []);
@@ -6911,8 +7226,8 @@ function renderDiarioFull() {
   }
 
   // timeline
-  renderDiarioTopGallery();
-  renderDiarioList('lista-diario-modal', null);
+renderDiarioTopGallery();
+renderTravelTimeline('lista-diario-modal');
 }
 
 let pendingAddMediaCtx = null; // { id, tipoRef:'tappa'|'turismo', paese, data, ora, km, startTs, endTs, traccia }
@@ -9454,6 +9769,7 @@ const videoPlanned = !!document.getElementById('log-video-planned')?.checked;
 
   const entry = {
     id: Date.now(),
+    ts: Date.now(),
     geo: geoMaint,
     data: now.toLocaleDateString('it-IT'),
     ora: now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
@@ -10617,9 +10933,10 @@ async function esportaDatiPubblici(azione = 'download') {
     const filesMap = await costruisciArchivioPubblicoSpezzato();
 
     if (azione === 'github') {
-      await pubblicaArchivioSpezzatoSuGitHub(filesMap);
-      return;
-    }
+  await pubblicaArchivioSpezzatoSuGitHub(filesMap);
+  markGithubSyncedForPublic();
+  return;
+}
 
     // download locale: per semplicità scarico almeno l'index
     // e poi anche gli altri file uno per uno
@@ -10650,6 +10967,26 @@ async function esportaDatiPubblici(azione = 'download') {
   }
 }
 
+
+function markGithubSyncedForPublic(){
+  const now = Date.now();
+
+  // diario: solo public
+  const diario = caricaJSON('vt_diario', []);
+  if (Array.isArray(diario)) {
+    for (const e of diario) {
+      if (e && e.isPublic) {
+        e.ghSynced = true;
+        e.ghSyncedAt = now;
+      }
+    }
+    salva('vt_diario', diario);
+  }
+
+  // (se vuoi estendere anche a tappe/log/rifornimenti/carb: stesso schema)
+  showToast('🐙 Marcati come “pubblicati” i post pubblici');
+}
+  
 function slugPaese(nome) {
   return String(nome || 'sconosciuto')
     .toLowerCase()
