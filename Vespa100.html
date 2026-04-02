@@ -1252,7 +1252,10 @@ color:#fff;
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  bottom: 92px;
+  top: 70px;
+bottom: auto;
+max-height: 70vh;
+overflow: auto;
   width: min(92vw, 900px);
   background: #111;
   border: 2px solid var(--giallo);
@@ -2353,12 +2356,19 @@ color:#fff;
     <div id="diario-view-timeline" style="display:block;">
       <div class="diario-toolbar" style="margin-top:0;">
   <button class="seg-btn active" id="btn-tl-all" onclick="setTimelineFilter('all')" type="button">🧾 Tutto</button>
-  <button class="seg-btn" id="btn-tl-perc" onclick="setTimelineFilter('percorso')" type="button">🏁 Percorsi</button>
+
   <button class="seg-btn" id="btn-tl-post" onclick="setTimelineFilter('diario')" type="button">📝 Post</button>
   <button class="seg-btn" id="btn-tl-off" onclick="setTimelineFilter('manutenzione')" type="button">🔧 Officina</button>
   <button class="seg-btn" id="btn-tl-fuel" onclick="setTimelineFilter('rifornimento')" type="button">⛽ Benzina</button>
   <button class="seg-btn" id="btn-tl-carb" onclick="setTimelineFilter('carburazione')" type="button">🌬️ Carb</button>
 </div>
+
+<div style="position:sticky; top:10px; z-index:10020; background:#1e1e1e; padding-bottom:10px;">
+  <button class="btn-secondary" style="margin-top:0;" onclick="toggleTimelineFiltersUI()">
+    🔎 Filtri
+  </button>
+</div>
+      
       <div id="lista-diario-modal"></div>
     </div>
 
@@ -7099,16 +7109,6 @@ function renderTravelTimeline(containerId){
 
     
 
-      const emb = leader.videoUrl ? youtubeEmbedUrl(leader.videoUrl) : '';
-      const videoHtml = leader.videoUrl
-        ? `<div style="margin-top:10px;">
-             ${emb ? `<iframe class="yt-embed" src="${emb}"
-               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-               allowfullscreen></iframe>` : ''}
-           </div>`
-        : (leader.videoPlanned
-            ? `<div style="margin-top:10px;color:#ff9800;font-weight:1000;">🎬 Video in arrivo (aggiungerai il link dopo)</div>`
-            : '');
 
 const photos = arr.filter(x => x && (x.fotoUrl || x.foto));
 const albumId = 'diario_group_' + String(gid);
@@ -7148,7 +7148,7 @@ const galleryHtml = thumbs ? `<div class="diario-gallery" style="margin-top:12px
 
           ${testoShort ? `<div class="diario-testo">${escHtml(testoShort)}</div>` : ''}
 ${galleryHtml}
-          ${videoHtml}
+          
 
 
           <div style="display:flex; justify-content:space-between; gap:10px; margin-top:12px;">
@@ -7882,41 +7882,58 @@ if (!Array.isArray(fotos)) fotos = [];
 
 if (fotos.length) {
   const now = new Date();
-  const groupId = editDiarioGroupId || ('solo_' + String(editDiarioId));
+  // ✅ se il post era “singolo” (senza groupId), creo un groupId vero e lo assegno alla entry originale
+let groupId = editDiarioGroupId;
 
-  // prendo una entry "base" del gruppo per copiare paese/km/geo
-  const leader = diario.find(x => x && ((x.groupId||('solo_'+x.id)) === groupId)) || {};
+if (!groupId) {
+  groupId = 'g_' + Date.now();
 
-  for (const src of fotos) {
-    const entry = {
-      id: Date.now() + Math.floor(Math.random()*1000),
-      ts: Date.now(),
-      groupId: leader.groupId || null,
+  // assegna groupId alla entry che stai modificando (quella originale)
+  const orig = diario.find(x => x && String(x.id) === String(editDiarioId));
+  if (orig) orig.groupId = groupId;
 
-      data: now.toLocaleDateString('it-IT'),
-      ora: now.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' }),
+  editDiarioGroupId = groupId; // aggiorna stato edit
+}
 
-      paese: leader.paese || carica('vt_paeseAttuale','Colombia'),
-      km: leader.km || (parseFloat(carica('vt_kmTotali','0')) || 0).toFixed(1),
+// prendo una entry “leader” del gruppo (dopo la migrazione)
+const leader = diario.find(x => x && x.groupId === groupId) || {};
 
-      testo: leader.testo || testo,
-      tags: Array.isArray(leader.tags) ? leader.tags : [],
-      geo: leader.geo || null,
+// aggiungo le nuove foto nello STESSO post (stesso groupId)
+for (const src of fotos) {
+  const entry = {
+    id: Date.now() + Math.floor(Math.random()*1000),
+    ts: Date.now(),
+    groupId: groupId,   // ✅ IMPORTANTISSIMO: stesso gruppo
 
-      videoUrl: leader.videoUrl || null,
-      videoPlanned: !!leader.videoPlanned,
+    data: leader.data || new Date().toLocaleDateString('it-IT'),
+    ora:  leader.ora  || new Date().toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' }),
 
-      foto: src,
-      fotoUrl: null,
+    paese: leader.paese || carica('vt_paeseAttuale','Colombia'),
+    km: leader.km || (parseFloat(carica('vt_kmTotali','0')) || 0).toFixed(1),
 
-      isPublic: !!leader.isPublic,
-      ghSynced: false,
-      ghSyncedAt: null
-    };
+    testo: leader.testo || testo,
+    tags: Array.isArray(leader.tags) ? leader.tags : [],
+    geo: leader.geo || null,
 
-    diario.unshift(entry);
-    enqueueFoto?.('diario', entry.id);
-  }
+    // mantieni eventuale collegamento percorso se esiste
+    percorsoRefId: leader.percorsoRefId ?? null,
+    percorsoRefTipo: leader.percorsoRefTipo ?? null,
+
+    videoUrlList: Array.isArray(leader.videoUrlList) ? leader.videoUrlList : [],
+    videoUrl: leader.videoUrl || null,
+    videoPlanned: !!leader.videoPlanned,
+
+    foto: src,
+    fotoUrl: null,
+
+    isPublic: !!leader.isPublic,
+    ghSynced: false,
+    ghSyncedAt: null
+  };
+
+  diario.unshift(entry);
+  enqueueFoto?.('diario', entry.id);
+}
 }
 
   
