@@ -1366,6 +1366,7 @@ const I18N = {
     carbJetPilot: 'Getto minimo',
     carbScrewIdle: 'Vite minimo',
     carbScrewAir: 'Vite aria',
+        carbSparkPlug: 'Candela',
     turns: 'giri',
     altitude: 'Altitudine',
     filters: '🧭 Filtri',
@@ -1447,6 +1448,7 @@ const I18N = {
     carbJetPilot: 'Pilot jet',
     carbScrewIdle: 'Idle speed screw',
     carbScrewAir: 'Air/mixture screw',
+        carbSparkPlug: 'Spark plug',
     turns: 'turns',
     altitude: 'Altitude',
     filters: '🧭 Filters',
@@ -1528,6 +1530,7 @@ const I18N = {
     carbJetPilot: 'Chicler mínimo',
     carbScrewIdle: 'Tornillo de ralentí',
     carbScrewAir: 'Tornillo de aire',
+        carbSparkPlug: 'Bujía',
     turns: 'vueltas',
     altitude: 'Altitud',
     filters: '🧭 Filtros',
@@ -2056,8 +2059,13 @@ function pickFirst(obj, keys) {
 
 function fmtTurns(v) {
   if (v == null) return '';
-  // lascia stringhe tipo "1,5" o "1 3/4" così come sono
   const s = String(v).trim();
+  if (!s) return '';
+
+  // Se l'utente ha già scritto "giri/vueltas/turns", non aggiungere nulla
+  const low = s.toLowerCase();
+  if (low.includes('giri') || low.includes('vueltas') || low.includes('turns')) return s;
+
   return s;
 }
   
@@ -2071,6 +2079,8 @@ function buildCarbPopup(c) {
   // se nel JSON hai già “giri” separati
   const screwIdleTurns = pickFirst(c, ['viteMinimoGiri', 'giriViteMinimo', 'idleScrewTurns']);
   const screwAirTurns  = pickFirst(c, ['viteAriaGiri', 'giriViteAria', 'airScrewTurns']);
+
+    const plug = pickFirst(c, ['candela', 'sparkPlug', 'bujia']);
 
   const idleTxt = (screwIdleTurns != null)
     ? `${fmtTurns(screwIdleTurns)} ${T('turns')}`
@@ -2093,6 +2103,12 @@ function buildCarbPopup(c) {
         ${idleTxt ? `${T('carbScrewIdle')}: <b>${idleTxt}</b>` : ''}
         ${idleTxt && airTxt ? ' · ' : ''}
         ${airTxt ? `${T('carbScrewAir')}: <b>${airTxt}</b>` : ''}
+      </div>
+    ` : ''}
+
+        ${plug ? `
+      <div class="popup-meta" style="margin-top:8px;">
+        🔥 ${T('carbSparkPlug')}: <b>${plug}</b>
       </div>
     ` : ''}
 
@@ -3089,6 +3105,7 @@ $$
       badgeClass = 'badge-carb';
       badgeText = '🌬️ Carburazione';
       const c = it.raw || {};
+            const plug = pickFirst(c, ['candela', 'sparkPlug', 'bujia']);
             const jetMain  = pickFirst(c, ['gettoMax', 'gettoMassimo', 'chicMax', 'mainJet']);
       const jetPilot = pickFirst(c, ['gettoMin', 'gettoMinimo', 'chicMin', 'pilotJet', 'idleJet']);
 
@@ -3121,6 +3138,7 @@ $$
         ` : ''}
 
         <div class="diary-meta" style="margin-top:6px;">⛰️ ${T('altitude')}: <b>${escapeHtml(c.alt || 0)}</b> m</div>
+               ${plug ? `<div class="diary-meta" style="margin-top:8px;">🔥 ${T('carbSparkPlug')}: <b>${escapeHtml(plug)}</b></div>` : ''}
         ${c.nota ? `<div class="diary-meta" style="margin-top:8px;font-style:italic;">"${escapeHtml(c.nota)}"</div>` : ''}
       `;
     }
