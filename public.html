@@ -258,6 +258,21 @@
       pointer-events: auto;
     }
 
+.map-actions-bottom {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  z-index: 1100;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  pointer-events: none;
+}
+
+.map-actions-bottom > * {
+  pointer-events: auto;
+}
+    
     .floating-btn {
       display: inline-flex;
       align-items: center;
@@ -1006,6 +1021,17 @@
     @media (max-width: 520px) {
       .header-right {
         gap: 8px;
+
+          .map-actions-bottom {
+    bottom: 74px; /* più su, evita barra Safari */
+    left: 12px;
+    right: 12px;
+  }
+
+  .map-actions-bottom .floating-btn {
+    width: calc(50% - 4px);
+    justify-content: center;
+  }
       }
 
       .socials {
@@ -1063,9 +1089,9 @@
               </svg>
             </a>
           </div>
-<button id="btnDiaryOpen" class="btn btn-secondary" onclick="showDiaryOverlay()">📖 Apri il diario</button>
-          <button id="btnThanksOpen" class="btn btn-secondary" onclick="openThanksModal()">🙏 Ringraziamenti</button>
-          <button id="btnHost" class="btn btn-primary" onclick="openHostForm()">🤝 Supporta il viaggio</button>
+          <button id="btnDiaryOpen" class="btn btn-secondary" onclick="showDiaryOverlay()">📖 Apri il diario</button>
+          <button id="btnStats" class="btn btn-secondary" onclick="apriStats()">📊 Statistiche</button>
+        
         </div>
       </div>
 
@@ -1084,9 +1110,12 @@
     <div id="mapWrap">
       <div class="map-actions">
         <button id="btnOpenFilters" class="floating-btn" onclick="openFiltersDrawer()">🧭 <strong>Filtri</strong></button>
-        <button id="btnStats" class="floating-btn" onclick="apriStats()">📊 <strong>Statistiche</strong></button>
+     
       </div>
-
+<div class="map-actions-bottom">
+  <button id="btnThanksOpen" class="floating-btn" onclick="openThanksModal()">🙏 <strong>Ringraziamenti</strong></button>
+  <button id="btnHost" class="floating-btn" onclick="openHostForm()">🤝 <strong>Supporta il viaggio</strong></button>
+</div>
       <div id="mapPub"></div>
     </div>
   </div>
@@ -1589,7 +1618,7 @@ function applyLang() {
   document.getElementById('appSubtitle').innerText = T('subtitle');
 
   document.getElementById('btnOpenFilters').innerHTML = `🧭 <strong>${T('filters').replace('🧭 ', '')}</strong>`;
-  document.getElementById('btnStats').innerHTML = `📊 <strong>${T('statsBtn').replace('📊 ', '')}</strong>`;
+  document.getElementById('btnStats').innerText = T('statsBtn');
 
     const diaryBtn = document.getElementById('btnDiaryOpen');
   if (diaryBtn) diaryBtn.innerText = T('diaryBtn');
@@ -1603,8 +1632,11 @@ function applyLang() {
   const back = document.getElementById('btnDiaryBackToMap');
   if (back) back.innerText = T('backToMap');
 
-  document.getElementById('btnHost').innerText = T('hostBtn');
-  document.getElementById('btnThanksOpen').innerText = T('thanksBtn');
+document.getElementById('btnHost').innerHTML =
+  `🤝 <strong>${T('hostBtn').replace('🤝 ', '')}</strong>`;
+
+document.getElementById('btnThanksOpen').innerHTML =
+  `🙏 <strong>${T('thanksBtn').replace('🙏 ', '')}</strong>`;
 
   document.getElementById('pillKmLabel').innerText = T('totalLbl');
   document.getElementById('pillFuelLabel').innerText = T('fuelLbl');
