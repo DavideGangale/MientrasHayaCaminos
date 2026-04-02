@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-04-01T18:45:02.616Z",
+  "exportedAt": "2026-04-02T00:45:57.317Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -252,6 +252,25 @@
         "lon": -74.36063569216664
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1DDfLpI_kvTHhpU0sJrPYCwA_T2V1aDMF"
+    },
+    {
+      "ts": 1775090747107,
+      "id": 1775090747107,
+      "paese": "",
+      "km": "",
+      "testo": "Esos Club Bogotá",
+      "tags": [
+        "Vespa",
+        "Piaggio",
+        "dicarbonegastrobar"
+      ],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 4.806004247196552,
+        "lon": -74.36063734065583
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1YecOhEezNdkRutVpe7YwkoBnTqm2V3n0"
     }
   ]
 }
