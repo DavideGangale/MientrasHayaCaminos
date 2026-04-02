@@ -602,9 +602,27 @@ color:#fff;
   left: auto;
   z-index: 10050;
 }
-/* evita che la X copra il contenuto */
+
+/* ✅ Diario: X sempre in alto a destra (sticky/fixed) */
+#modalDiario .close-modal{
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  right: 12px;
+  left: auto;
+  z-index: 100200;
+}
+
+/* ✅ Diario: bottone Filtri sempre attaccato in alto a sinistra */
+#modalDiario .diario-filters-btn-wrap{
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  left: 12px;
+  z-index: 100200;
+}
+    
+/* evita che la X copra il contenuto + spazio per bottoni fixed */
 #modalDiario .modal-content{
-  padding-top: 60px;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 64px);
 }
 /* HUD velocità sopra la mappa */
 #mapFullHud{
@@ -1277,7 +1295,7 @@ color:#fff;
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  top: 70px;
+  top: calc(env(safe-area-inset-top, 0px) + 64px);
 bottom: auto;
 max-height: 70vh;
 overflow: auto;
@@ -2373,8 +2391,8 @@ overflow: auto;
     <!-- VISTA 1: CRONOLOGICO -->
     <div id="diario-view-timeline" style="display:block;">
    
-<div style="position:sticky; top:10px; z-index:10020; background:#1e1e1e; padding-bottom:10px;">
-  <button class="btn-secondary" style="margin-top:0;" onclick="toggleTimelineFiltersUI()">
+<div class="diario-filters-btn-wrap">
+  <button class="btn-secondary" style="margin:0;" onclick="toggleTimelineFiltersUI()">
     🔎 Filtri
   </button>
 </div>
@@ -6570,17 +6588,52 @@ async function anteprimaMulti(inputId, containerID) {
   div.innerHTML = `
     <div style="color:#bbb;font-size:12px;margin-bottom:8px;">✅ Foto pronte: ${out.length}</div>
     <div class="diario-gallery">
-      ${out.map(src => `
-        <div class="diario-thumb" onclick="openPhotoLightbox(${JSON.stringify(src)}, '')">
-          <img src="${src}" loading="lazy">
-        </div>
-      `).join('')}
+     ${out.map((src, i) => `
+  <div class="diario-thumb" onclick="openPhotoLightbox(${JSON.stringify(src)}, '')">
+    <button class="thumb-del"
+            onclick="event.stopPropagation(); removePreviewPhoto('${containerID}', ${i})">×</button>
+    <img src="${src}" loading="lazy">
+  </div>
+`).join('')}
     </div>
   `;
 
   showToast(`📷 ${out.length} foto pronte`);
 }
-    
+
+function removePreviewPhoto(containerID, idx){
+  const div = document.getElementById(containerID);
+  if (!div) return;
+
+  let arr = [];
+  try { arr = JSON.parse(div.dataset.list || '[]'); } catch { arr = []; }
+  if (!Array.isArray(arr)) arr = [];
+
+  arr.splice(idx, 1);
+  div.dataset.list = JSON.stringify(arr);
+
+  if (!arr.length){
+    div.style.display = 'none';
+    div.innerHTML = '';
+    return;
+  }
+
+  div.style.display = 'block';
+  div.innerHTML = `
+    <div style="color:#bbb;font-size:12px;margin-bottom:8px;">✅ Foto pronte: ${arr.length}</div>
+    <div class="diario-gallery">
+      ${arr.map((src, i) => `
+        <div class="diario-thumb" onclick="openPhotoLightbox(${JSON.stringify(src)}, '')">
+          <button class="thumb-del"
+                  onclick="event.stopPropagation(); removePreviewPhoto('${containerID}', ${i})">×</button>
+          <img src="${src}" loading="lazy">
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+  
 function escSQ(s){ return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
 
 function escHtml(s){
