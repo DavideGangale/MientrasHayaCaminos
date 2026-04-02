@@ -6844,7 +6844,7 @@ function renderTravelTimeline(containerId){
   const tipo = isGiro ? 'TURISMO' : 'TAPPA';
   const col = isGiro ? '#2196F3' : '#9c27b0';
 
-  const gh = e.ghSynced ? '' : '⏳';
+  const gh = p.ghSynced ? '🐙' : '⏳';
   const pub = p.isPublic ? 'checked' : '';
 
   // helper già presenti nel tuo codice (usati in renderTappe)
@@ -6948,7 +6948,99 @@ function renderTravelTimeline(containerId){
     <div class="diario-divider"></div>
   `;
 }
+    if (it.kind === 'diario') {
+      const arr = Array.isArray(it.data) ? it.data : [];
+      if (!arr.length) return '';
 
+      // leader = la entry più recente del gruppo
+      const leader = arr[0];
+
+      const gid = it.groupId || (leader.groupId || ('solo_' + leader.id));
+
+      const isPublic = !!leader.isPublic;
+      const pub = isPublic ? 'checked' : '';
+
+      // se è pubblico ma almeno uno non è stato sincronizzato => ⏳
+      const anyNotSynced = arr.some(x => x && x.isPublic && !x.ghSynced);
+      const gh = isPublic ? (anyNotSynced ? '⏳' : '🐙') : '';
+
+      const testo = (leader.testo || '').trim();
+      const testoShort = (testo.length > 240) ? (testo.slice(0, 240) + '…') : testo;
+
+      const photos = arr.filter(x => x && (x.fotoUrl || x.foto));
+      const albumId = 'diario_group_' + String(gid);
+
+      // album lightbox per swipe
+      registerLightboxAlbum(
+        albumId,
+        photos.map(x => (x.fotoUrl || x.foto)),
+        photos.map(x => `
+          <div style="font-weight:900;color:#ff9800;">📍 ${x.paese || ''}</div>
+          <div style="color:#bbb;">${x.data || ''} ${x.ora || ''} — km ${x.km || '--'}</div>
+          ${x.testo ? `<div style="margin-top:6px;color:#ddd;line-height:1.35;">${escHtml((x.testo || '').slice(0, 220))}${(x.testo || '').length > 220 ? '…' : ''}</div>` : ''}
+        `)
+      );
+
+      const heroRaw = photos[0] ? (photos[0].fotoUrl || photos[0].foto) : null;
+      const heroSrc = heroRaw ? driveToDirectImageUrl(heroRaw) : null;
+
+      const emb = leader.videoUrl ? youtubeEmbedUrl(leader.videoUrl) : '';
+      const videoHtml = leader.videoUrl
+        ? `<div style="margin-top:10px;">
+             ${emb ? `<iframe class="yt-embed" src="${emb}"
+               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+               allowfullscreen></iframe>` : ''}
+           </div>`
+        : (leader.videoPlanned
+            ? `<div style="margin-top:10px;color:#ff9800;font-weight:1000;">🎬 Video in arrivo (aggiungerai il link dopo)</div>`
+            : '');
+
+      return `
+        <div class="diario-entry" style="border-left-color:#e91e63;">
+          <div class="diario-header">
+            <span class="diario-data">📝 ${leader.data || ''} ${leader.ora || ''} — ${leader.km || '--'} km</span>
+            <span class="diario-paese">${leader.paese || ''}</span>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:12px;margin-top:10px;font-size:12px;color:#bbb;">
+            <label style="display:flex;align-items:center;gap:8px;">
+              <input type="checkbox" ${pub}
+                     onchange="setGroupPublicFlag('${escSQ(gid)}', this.checked); renderDiarioFull?.();">
+              Pubblico
+            </label>
+            ${gh ? `<span title="GitHub sync">${gh}</span>` : ''}
+            ${photos.length ? `<span style="color:#777;">📷 ${photos.length}</span>` : ''}
+          </div>
+
+          ${testoShort ? `<div class="diario-testo">${escHtml(testoShort)}</div>` : ''}
+
+          ${videoHtml}
+
+          ${heroSrc ? `
+            <img src="${heroSrc}" class="diario-foto" loading="lazy"
+                 onclick="openPhotoLightboxAlbum('${albumId}', 0)">
+            <button class="btn-secondary" style="margin-top:10px;"
+                    onclick="openPhotoLightboxAlbum('${albumId}', 0)">
+              📷 Apri foto
+            </button>
+          ` : ''}
+
+          <div style="display:flex; justify-content:space-between; gap:10px; margin-top:12px;">
+            <button onclick="apriModificaDiario(${leader.id})"
+              style="background:none; border:none; color:#ff9800; font-size:12px; cursor:pointer;">
+              ✏️ Modifica
+            </button>
+
+            <button onclick="eliminaDiario(${leader.id})"
+              style="background:none; border:none; color:#666; font-size:12px; cursor:pointer;">
+              🗑️ Elimina
+            </button>
+          </div>
+        </div>
+
+        <div class="diario-divider"></div>
+      `;
+    }
     if (it.kind === 'manutenzione') {
       const e = it.data;
 
@@ -7007,9 +7099,9 @@ const pub = e.isPublic ? 'checked' : '';
 
 <div style="display:flex;align-items:center;gap:12px;margin-top:10px;font-size:12px;color:#bbb;">
   <label style="display:flex;align-items:center;gap:8px;">
-    <input type="checkbox" ${pub}
-           onchange="setItemPublicFlag('rifornimento', ${e.id}, this.checked)"
-    Pubblico
+   <input type="checkbox" ${pub}
+       onchange="setItemPublicFlag('rifornimento', ${e.id}, this.checked)">
+Pubblico
   </label>
   <span title="GitHub sync">${gh}</span>
 </div>
@@ -7048,7 +7140,7 @@ const pub = e.isPublic ? 'checked' : '';
 <div style="display:flex;align-items:center;gap:12px;margin-top:10px;font-size:12px;color:#bbb;">
   <label style="display:flex;align-items:center;gap:8px;">
     <input type="checkbox" ${pub}
-          onchange="setItemPublicFlag('carburazione', ${e.id}, this.checked)"
+          onchange="setItemPublicFlag('carburazione', ${e.id}, this.checked)">
     Pubblico
   </label>
   <span title="GitHub sync">${gh}</span>
@@ -7081,7 +7173,11 @@ function setGroupPublicFlag(groupId, on){
   if (!Array.isArray(diario)) return;
   for (const e of diario) {
     if (!e) continue;
-    if ((e.groupId || ('solo_'+e.id)) === groupId) e.isPublic = !!on;
+    if ((e.groupId || ('solo_'+e.id)) === groupId) {
+  e.isPublic = !!on;
+  e.ghSynced = false;
+  e.ghSyncedAt = null;
+}
   }
   salva('vt_diario', diario);
 }
@@ -8170,10 +8266,14 @@ return {
 
   fotoUrl: e.fotoUrl || null,
   foto: e.foto || null,
-
+isPublic: false,
+ghSynced: false,
+ghSyncedAt: null,
   // ✅ VIDEO
   videoUrl: url || null,
   videoPlanned: (!!plannedBool && !url) // se c’è url, planned diventa false
+
+  
 };
 }
 
