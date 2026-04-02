@@ -2734,12 +2734,23 @@ function closeVideoModal() {
   if (modal) modal.classList.remove('open');
 }
 
-function focusOnMap(lat, lon, zoom = 13) {
+function focusOnMap(lat, lon) {
   if (!isFinite(lat) || !isFinite(lon)) return;
+
   hideDiaryOverlay();
+
   setTimeout(() => {
-    if (map) map.setView([lat, lon], zoom, { animate: true });
-  }, 160);
+    if (!map) return;
+
+    // zoom massimo consentito dalla mappa (fallback 19)
+    const maxZ = (typeof map.getMaxZoom === 'function' && isFinite(map.getMaxZoom()))
+      ? map.getMaxZoom()
+      : 19;
+
+    // Vai sul punto con zoom massimo
+    map.setView([lat, lon], maxZ, { animate: true });
+
+  }, 200);
 }
 
 function escapeHtml(s) {
