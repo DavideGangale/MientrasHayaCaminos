@@ -1401,6 +1401,12 @@ const I18N = {
     statsOilCost: 'SPESA OLIO 2T',
     statsAvgConsumption: 'CONSUMO MEDIO',
     videoComing: '🎬 Video in arrivo',
+    departure: 'Partenza',
+    arrival: 'Arrivo',
+    altStartEnd: 'Altitudine',
+    refuelsInTrack: 'Rifornimenti nella tappa',
+    oilUsed: 'Olio 2T usato',
+    oilCost: 'Costo olio 2T',
     diaryBtn: '📖 Apri il diario',
     diaryTitle: '📖 Diario di viaggio',
     diarySubtitle: 'Tutti i post in ordine cronologico',
@@ -1483,6 +1489,12 @@ const I18N = {
     statsOilCost: '2T OIL COST',
     statsAvgConsumption: 'AVERAGE CONSUMPTION',
     videoComing: '🎬 Video coming soon',
+    departure: 'Departure',
+    arrival: 'Arrival',
+    altStartEnd: 'Altitude',
+    refuelsInTrack: 'Refuels in this track',
+    oilUsed: '2T oil used',
+    oilCost: '2T oil cost',
     diaryBtn: '📖 Open diary',
     diaryTitle: '📖 Travel diary',
     diarySubtitle: 'All posts in chronological order',
@@ -1565,6 +1577,12 @@ const I18N = {
     statsOilCost: 'GASTO DE ACEITE 2T',
     statsAvgConsumption: 'CONSUMO MEDIO',
     videoComing: '🎬 Video próximamente',
+    departure: 'Salida',
+    arrival: 'Llegada',
+    altStartEnd: 'Altitud',
+    refuelsInTrack: 'Repostajes en la etapa',
+    oilUsed: 'Aceite 2T usado',
+    oilCost: 'Costo aceite 2T',
     diaryBtn: '📖 Abrir diario',
     diaryTitle: '📖 Diario de viaje',
     diarySubtitle: 'Todas las entradas en orden cronológico',
@@ -1912,6 +1930,96 @@ function getYouTubeId(url) {
   }
 }
 
+function getStartTs(obj) {
+  const ts = Number(obj?.ts);
+  if (isFinite(ts) && ts > 0) return ts;
+
+  // usa la funzione già presente nel diario (se c'è)
+  if (typeof parseDateTimeTs === 'function') {
+    const by = parseDateTimeTs(obj?.data, obj?.ora);
+    if (by) return by;
+  }
+
+  const id = Number(obj?.id);
+  if (isFinite(id) && id > 0) return id;
+
+  return null;
+}
+
+function fmtHHMM(ts) {
+  if (!isFinite(ts)) return '';
+  const d = new Date(Number(ts));
+  if (isNaN(d.getTime())) return '';
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  return `${hh}:${mm}`;
+}
+
+function getAltStartEndFromTelemetry(t) {
+  const telem = Array.isArray(t?.telemetry) ? t.telemetry : [];
+  if (telem.length < 2) return { a0: null, a1: null };
+  const a0 = Number(telem[0]?.alt);
+  const a1 = Number(telem[telem.length - 1]?.alt);
+  return {
+    a0: isFinite(a0) ? Math.round(a0) : null,
+    a1: isFinite(a1) ? Math.round(a1) : null
+  };
+}
+
+function countRefuelsForTrack(t) {
+  if (!DATA) return null;
+  const rif = Array.isArray(DATA.rifornimenti) ? DATA.rifornimenti : [];
+
+  const start = getStartTs(t);
+  const durSec = Number(t?.durata || 0);
+  if (!isFinite(start) || !isFinite(durSec) || durSec <= 0) return null;
+
+  const end = start + durSec * 1000;
+
+  let n = 0;
+  for (const r of rif) {
+    const ts = getStartTs(r);
+    if (!isFinite(ts)) continue;
+    if (ts >= start && ts <= end) n++;
+  }
+  return n;
+}
+
+function getTrackStartEndTimeStrings(t) {
+  const start = getStartTs(t);
+  const durSec = Number(t?.durata || 0);
+  if (!isFinite(start) || !isFinite(durSec) || durSec <= 0) return { startTxt: '', endTxt: '' };
+  const end = start + durSec * 1000;
+  return { startTxt: fmtHHMM(start), endTxt: fmtHHMM(end) };
+}
+
+function getOilInfoFromRefuel(r) {
+  // quantità olio
+  let oilL = null;
+
+  const ml = Number(r?.olioMl ?? r?.oilMl ?? null);
+  if (isFinite(ml) && ml > 0) oilL = ml / 1000;
+
+  const l = Number(r?.olioLitri ?? r?.olioL ?? r?.oilLiters ?? r?.oilL ?? r?.olio ?? null);
+  if (oilL == null && isFinite(l) && l > 0) oilL = l;
+
+  // costo olio
+  const oilCost = Number(
+    r?.costoOlioUsd ??
+    r?.spesaOlioUsd ??
+    r?.costoOlio ??
+    r?.oilCostUsd ??
+    r?.oilCost ??
+    0
+  );
+
+  return {
+    oilL: (oilL != null && isFinite(oilL) && oilL > 0) ? oilL : null,
+    oilCost: (isFinite(oilCost) && oilCost > 0) ? oilCost : null
+  };
+}
+
+  
 function resetMarkerOffsetCache() {
   MARKER_POSITION_COUNT = {};
 }
@@ -1975,7 +2083,7 @@ const iconFuel = L.divIcon({ className: 'custom-marker marker-fuel', html: '⛽'
 const iconCarb = L.divIcon({ className: 'custom-marker marker-carb', html: '🌬️' });
 const iconNote = L.divIcon({ className: 'custom-marker marker-note', html: '📝' });
 
-function buildTrackPopup(t) {
+function buildTrackPopup(t) {function buildTrackPopup(t) {
   const h = Math.floor((t.durata || 0) / 3600);
   const m = Math.floor(((t.durata || 0) % 3600) / 60);
   const tipo = t.tipo || 'Tappa';
@@ -1991,12 +2099,34 @@ function buildTrackPopup(t) {
     ? `📍 ${t.titolo}`
     : `${isGiro ? '🛵 ' + T('giri') : '🏁 ' + T('tappa')}`;
 
+  const { a0, a1 } = getAltStartEndFromTelemetry(t);
+  const tt = getTrackStartEndTimeStrings(t);
+  const refuelsCount = countRefuelsForTrack(t);
+
   return `
     <div class="popup-title">${titoloTop}</div>
     <div class="popup-meta">
       🌎 <b>${t.paese || ''}</b> · 📅 ${t.data || ''} ${t.ora || ''}<br>
       📏 <b>${Number(t.km || 0).toFixed(1)} km</b> · ${T('time')}: ${h}h ${m}m
     </div>
+
+    ${(tt.startTxt || tt.endTxt) ? `
+      <div class="popup-meta" style="margin-top:8px;">
+        🕘 ${T('departure')}: <b>${tt.startTxt || '--'}</b> · ${T('arrival')}: <b>${tt.endTxt || '--'}</b>
+      </div>
+    ` : ''}
+
+    ${(a0 != null || a1 != null) ? `
+      <div class="popup-meta" style="margin-top:6px;">
+        ⛰️ ${T('altStartEnd')}: <b>${a0 != null ? a0 : '--'}</b>m → <b>${a1 != null ? a1 : '--'}</b>m
+      </div>
+    ` : ''}
+
+    ${(refuelsCount != null && !isGiro) ? `
+      <div class="popup-meta" style="margin-top:6px;">
+        ⛽ ${T('refuelsInTrack')}: <b>${refuelsCount}</b>
+      </div>
+    ` : ''}
 
     ${t.note ? `<div class="popup-text">${t.note}</div>` : ''}
 
@@ -2041,13 +2171,22 @@ function buildFuelPopup(r) {
   const costoRif = Number(r?.costoBenzUsd || r?.costo || 0);
   const qta = Number(r?.qta || r?.litri || 0);
 
+  const oil = getOilInfoFromRefuel(r);
+
   return `
     <div class="popup-title" style="color:var(--fuel)">${T('refuel')}</div>
     <div class="popup-meta">📅 ${r?.data || ''} | 📏 km ${r?.km || ''}</div>
-    <div>📦 <b>${qta.toFixed(2)} L</b> (${T('destination')}: ${r?.dest || r?.note || ''})</div>
-    ${costoRif > 0 ? `<div style="margin-top:5px; color:#4caf50;">💰 ${T('paid')}: $ <b>${costoRif.toFixed(2)}</b></div>` : ''}  `;
-}
 
+    <div>📦 <b>${qta.toFixed(2)} L</b> (${T('destination')}: ${r?.dest || r?.note || ''})</div>
+
+    ${costoRif > 0 ? `<div style="margin-top:5px; color:#4caf50;">💰 ${T('paid')}: $ <b>${costoRif.toFixed(2)}</b></div>` : ''}
+
+    ${oil.oilL != null ? `<div class="popup-meta" style="margin-top:6px;">🛢️ ${T('oilUsed')}: <b>${oil.oilL.toFixed(2)} L</b></div>` : ''}
+    ${oil.oilCost != null ? `<div class="popup-meta" style="margin-top:4px;color:#9be28d;">💰 ${T('oilCost')}: <b>
+$$
+{oil.oilCost.toFixed(2)}</b></div>` : ''}
+  `;
+}
 function pickFirst(obj, keys) {
   for (const k of keys) {
     const v = obj?.[k];
@@ -3087,7 +3226,7 @@ $$
       badgeClass = 'badge-fuel';
       badgeText = '⛽ Rifornimento';
       const r = it.raw || {};
-
+      const oil = getOilInfoFromRefuel(r);
       const costo = Number(r?.costoBenzUsd ?? r?.costo ?? 0);
       const qta = Number(r?.qta ?? r?.litri ?? 0);
       const dest = r?.dest ?? r?.note ?? '';
@@ -3096,6 +3235,10 @@ $$
         <div class="diary-text">📦 <b>${qta.toFixed(2)} L</b> (${escapeHtml(dest)})</div>
         ${r?.km != null ? `<div class="diary-meta" style="margin-top:6px;">📏 km ${escapeHtml(r.km)}</div>` : ''}
         ${costo > 0 ? `<div class="diary-meta" style="margin-top:8px;color:#9be28d;">💰 ${T('paid')}: <b>$${costo.toFixed(2)}</b></div>` : ''}
+                ${oil.oilL != null ? `<div class="diary-meta" style="margin-top:6px;">🛢️ ${T('oilUsed')}: <b>${oil.oilL.toFixed(2)} L</b></div>` : ''}
+        ${oil.oilCost != null ? `<div class="diary-meta" style="margin-top:4px;color:#9be28d;">💰 ${T('oilCost')}: <b>
+$$
+{oil.oilCost.toFixed(2)}</b></div>` : ''}
       `;
 
       mediaHtml = buildMediaBlockFromAny(r);
@@ -3147,7 +3290,9 @@ $$
       badgeClass = (it.kind === 'GIRO') ? 'badge-giro' : 'badge-tappa';
       badgeText = (it.kind === 'GIRO') ? '🛵 Giro' : '🏁 Tappa';
       const t = it.raw || {};
-
+      const { a0, a1 } = getAltStartEndFromTelemetry(t);
+      const tt = getTrackStartEndTimeStrings(t);
+      const refuelsCount = countRefuelsForTrack(t);
       const h = Math.floor((t.durata || 0) / 3600);
       const mm = Math.floor(((t.durata || 0) % 3600) / 60);
 
@@ -3167,6 +3312,27 @@ $$
           ${t.velMax != null ? ` · 🏎️ max <b>${escapeHtml(t.velMax)}</b> km/h` : ''}
           ${t.velMedia != null ? ` · 📌 media <b>${escapeHtml(t.velMedia)}</b> km/h` : ''}
         </div>
+
+
+        ${(tt.startTxt || tt.endTxt) ? `
+          <div class="diary-meta" style="margin-top:8px;">
+            🕘 ${T('departure')}: <b>${escapeHtml(tt.startTxt || '--')}</b> · ${T('arrival')}: <b>${escapeHtml(tt.endTxt || '--')}</b>
+          </div>
+        ` : ''}
+
+        ${(a0 != null || a1 != null) ? `
+          <div class="diary-meta" style="margin-top:6px;">
+            ⛰️ ${T('altStartEnd')}: <b>${escapeHtml(a0 != null ? a0 : '--')}</b>m → <b>${escapeHtml(a1 != null ? a1 : '--')}</b>m
+          </div>
+        ` : ''}
+
+        ${(refuelsCount != null && it.kind === 'TAPPA') ? `
+          <div class="diary-meta" style="margin-top:6px;">
+            ⛽ ${T('refuelsInTrack')}: <b>${escapeHtml(refuelsCount)}</b>
+          </div>
+        ` : ''}
+
+
 
         <div class="diary-meta" style="margin-top:8px;">
           ⛽ stimata: <b>${benzStim.toFixed(2)} L</b> (${consStim} km/L)
