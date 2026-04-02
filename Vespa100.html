@@ -7144,7 +7144,7 @@ function renderTravelTimeline(containerId){
       return vtThumbPhoto(raw, albumId, idxPhoto, badge, `deleteDiarioPhotoEntry(${Number(e.id)})`);
     }
 
-    if (hasVideo) return vtThumbVideo(e.videoUrl);
+    if (hasVideo) return vtThumbVideo(e.videoUrl, `deleteLogbookVideo(${e.id}, ${JSON.stringify(e.videoUrl)})`);
     if (planned)  return vtThumbPlanned(`apriModificaDiario(${Number(e.id)})`);
     return '';
   }).join('');
@@ -7358,8 +7358,8 @@ const thumbs = []
   .concat(refs.map((r, albIdx) =>
     vtThumbPhoto(r.raw, albumId, albIdx, '', `deleteLogbookPhoto(${e.id}, ${r.idx})`)
   ))
-  .concat(e.videoUrl ? [vtThumbVideo(e.videoUrl)] : [])
-  .concat((e.videoPlanned && !e.videoUrl) ? [vtThumbPlanned(`apriEditIntervento(${e.id})`)] : [])
+  .concat(e.videoUrl ? [vtThumbVideo(e.videoUrl, `deleteLogbookVideo(${e.id}, ${JSON.stringify(e.videoUrl)})`)] : [])
+  .concat((e.videoPlanned && !e.videoUrl) ? [vtThumbPlanned(`apriEditIntervento(${e.id})`, `deleteLogbookVideo(${e.id}, '')`)] : [])
   .slice(0, 9)
   .join('');
          
@@ -8259,6 +8259,54 @@ function deleteLogbookPhoto(logId, photoIndex){
   } catch {}
 
   showToast('🗑️ Foto eliminata');
+}
+
+function deleteLogbookVideo(logId, videoUrl){
+  if (!confirm('Eliminare questo video dall’intervento?')) return;
+
+  const log = caricaJSON('vt_logbook', []);
+  if (!Array.isArray(log)) return;
+
+  const i = log.findIndex(x => String(x?.id) === String(logId));
+  if (i === -1) { showToast('⚠️ Intervento non trovato'); return; }
+
+  const e = log[i];
+
+  // lista video (nuovo campo) + fallback vecchio
+  let list = Array.isArray(e.videoUrlList) ? e.videoUrlList.slice() : [];
+  if (!list.length && e.videoUrl) list = [String(e.videoUrl).trim()];
+
+  const v = String(videoUrl || '').trim();
+
+  // se mi passi un URL specifico, tolgo quello; se stringa vuota => cancella tutto
+  if (v) list = list.filter(x => String(x || '').trim() !== v);
+  else list = [];
+
+  e.videoUrlList = list;
+  e.videoUrl = list[0] || null;
+
+  // se lo cancelli, non è più "planned"
+  e.videoPlanned = false;
+
+  // dopo modifica: va ripubblicato se era pubblico
+  e.ghSynced = false;
+  e.ghSyncedAt = null;
+
+  log[i] = e;
+  salva('vt_logbook', log);
+
+  try { renderDiarioFull?.(); } catch {}
+  try { renderLogManutenzione?.(); } catch {}
+
+  // refresh markers su MapFull se aperta
+  try {
+    const isOpen = document.getElementById('modalMapFull')?.classList.contains('open');
+    if (isOpen && typeof renderMapFullPhotoMarkersForContext === 'function') {
+      renderMapFullPhotoMarkersForContext(mapFullCtx);
+    }
+  } catch {}
+
+  showToast('🗑️ Video eliminato');
 }
   
 function eliminaDiario(id) {
@@ -10822,7 +10870,7 @@ function renderLogManutenzione() {
 
 ${(e.videoUrl)
   ? `<div class="diario-gallery" style="margin-top:10px;">
-       ${vtThumbVideo(e.videoUrl)}
+       ${vtThumbVideo(e.videoUrl, `deleteLogbookVideo(${e.id}, ${JSON.stringify(e.videoUrl)})`)}
      </div>`
   : (e.videoPlanned
       ? `<div class="diario-gallery" style="margin-top:10px;">
