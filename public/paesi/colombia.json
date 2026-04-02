@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-04-02T22:41:24.509Z",
+  "_exportDate": "2026-04-02T23:51:22.511Z",
   "tipo": "paese",
   "paese": "Colombia",
   "slug": "colombia",
@@ -3419,14 +3419,32 @@
   ],
   "carburazioni": [
     {
+      "id": 1775168581654,
+      "data": "02/04/2026",
+      "ora": "17:23",
+      "alt": 2674,
+      "chicMax": 31,
+      "chicMin": 31,
+      "viteAria": "2",
+      "viteMinimo": "2",
+      "candela": "caca",
+      "nota": "probando",
+      "geo": {
+        "lat": 4.8059709,
+        "lon": -74.3606698
+      },
+      "fotoCandela": null,
+      "paese": "Colombia"
+    },
+    {
       "id": 1774910721890,
       "data": "30/03/2026",
       "ora": "17:45",
       "alt": 2674,
-      "chicMax": 105,
-      "chicMin": 75,
-      "viteAria": "1.75",
-      "viteMinimo": "2.25",
+      "chicMax": 666,
+      "chicMin": 111,
+      "viteAria": "6",
+      "viteMinimo": "12",
       "candela": "de merda",
       "nota": "na merda",
       "geo": {
@@ -3442,7 +3460,7 @@
       "ora": "10:32",
       "alt": 2674,
       "chicMax": 110,
-      "chicMin": 55,
+      "chicMin": 75,
       "viteAria": "1.25",
       "viteMinimo": "1.75",
       "candela": "",
