@@ -752,7 +752,7 @@ color:#fff;
     #modalAddRicambio { z-index: 6700; }
     #modalCarbSetup { z-index: 6750; }
     #modalCarb      { z-index: 6900; }
-    #modalGrafico  { z-index: 6800; }
+   #modalGrafico  { z-index: 9900; }
 
     
     /* DIARIO */
@@ -2336,7 +2336,7 @@ color:#fff;
 
     <!-- VISTA 1: CRONOLOGICO -->
     <div id="diario-view-timeline" style="display:block;">
-      <div id="diario-top-gallery"></div>
+      
       <div id="lista-diario-modal"></div>
     </div>
 
@@ -4340,6 +4340,28 @@ function driveToDirectImageUrl(url){
 }
 
 
+function youtubeIdFromUrl(url){
+  const u = String(url || '').trim();
+  if (!u) return '';
+  try {
+    const obj = new URL(u);
+    if (obj.hostname.includes('youtu.be')) return obj.pathname.replace('/','').trim();
+    if (obj.searchParams.get('v')) return obj.searchParams.get('v').trim();
+    const m = obj.pathname.match(/\/shorts\/([a-zA-Z0-9_-]+)/);
+    return m ? m[1] : '';
+  } catch {
+    const m = u.match(/(?:v=|youtu\.be\/|\/shorts\/)([a-zA-Z0-9_-]{6,})/);
+    return m ? m[1] : '';
+  }
+}
+
+function youtubeThumbUrl(url){
+  const id = youtubeIdFromUrl(url);
+  if (!id) return '';
+  return `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+}
+
+  
 function openVideoLightbox(videoUrl){
   const emb = youtubeEmbedUrl(videoUrl);
   if (!emb) { showToast('⚠️ Video non valido'); return; }
@@ -6822,7 +6844,7 @@ function renderTravelTimeline(containerId){
   const tipo = isGiro ? 'TURISMO' : 'TAPPA';
   const col = isGiro ? '#2196F3' : '#9c27b0';
 
-  const gh = p.ghSynced ? '🐙' : '⏳';
+  const gh = e.ghSynced ? '' : '⏳';
   const pub = p.isPublic ? 'checked' : '';
 
   // helper già presenti nel tuo codice (usati in renderTappe)
@@ -6880,7 +6902,8 @@ function renderTravelTimeline(containerId){
                  onchange="setItemPublicFlag('percorso', ${p.id}, this.checked)">
           Pubblico
         </label>
-        <span title="GitHub sync">${gh}</span>
+        ${gh ? `<span title="GitHub sync">${gh}</span>` : ''}
+       
       </div>
 
       <div style="margin-top:10px; color:#ddd; line-height:1.6;">
@@ -6929,7 +6952,7 @@ function renderTravelTimeline(containerId){
     if (it.kind === 'manutenzione') {
       const e = it.data;
 
- const gh = e.ghSynced ? '🐙' : '⏳';
+ const gh = e.ghSynced ? '' : '⏳';
 const pub = e.isPublic ? 'checked' : '';
       
       return `
@@ -6939,13 +6962,14 @@ const pub = e.isPublic ? 'checked' : '';
             <span class="diario-paese">${e.paese||''}</span>
           </div>
 
+
 <div style="display:flex;align-items:center;gap:12px;margin-top:10px;font-size:12px;color:#bbb;">
   <label style="display:flex;align-items:center;gap:8px;">
     <input type="checkbox" ${pub}
            onchange="setItemPublicFlag('manutenzione', ${e.id}, this.checked)">
     Pubblico
   </label>
-  <span title="GitHub sync">${gh}</span>
+  ${gh ? `<span title="GitHub sync">${gh}</span>` : ''}
 </div>
 
           
@@ -6954,6 +6978,16 @@ const pub = e.isPublic ? 'checked' : '';
           ${e.videoUrl ? `<button class="btn-secondary" style="margin-top:10px;width:100%;"
                             onclick="openVideoLightbox(${JSON.stringify(e.videoUrl)})">🎥 Video</button>` : ''}
         </div>
+
+
+
+  <div style="display:flex; justify-content:space-between; gap:10px; margin-top:12px;">
+  <button onclick="apriEditIntervento(${e.id})"
+    style="background:none;border:none;color:#ff9800;font-size:12px;cursor:pointer;">✏️ Edit</button>
+
+  <button onclick="eliminaIntervento(${e.id})"
+    style="background:none;border:none;color:#666;font-size:12px;cursor:pointer;">🗑️ Elimina</button>
+</div>
         <div class="diario-divider"></div>
       `;
     }
@@ -6983,6 +7017,18 @@ const pub = e.isPublic ? 'checked' : '';
           <div>📦 ${e.qta||'--'} L → <b>${escHtml(e.dest||'')}</b></div>
           <div style="color:#888;">${escHtml(e.luogo||'')}</div>
         </div>
+
+
+        <div style="display:flex; justify-content:space-between; gap:10px; margin-top:12px;">
+  <button onclick="editRifornimento(${e.id})"
+    style="background:none;border:none;color:#ff9800;font-size:12px;cursor:pointer;">✏️ Edit</button>
+
+  <button onclick="eliminaRifornimento(${e.id})"
+    style="background:none;border:none;color:#666;font-size:12px;cursor:pointer;">🗑️ Elimina</button>
+</div>
+
+
+
         <div class="diario-divider"></div>
       `;
     }
@@ -7011,6 +7057,17 @@ const pub = e.isPublic ? 'checked' : '';
           <div>Max <b>${e.chicMax||'--'}</b> — Min <b>${e.chicMin||'--'}</b></div>
           <div style="color:#888;">Alt: ${e.alt||0} m</div>
         </div>
+
+
+        <div style="display:flex; justify-content:space-between; gap:10px; margin-top:12px;">
+  <button onclick="editCarburazione(${e.id})"
+    style="background:none;border:none;color:#ff9800;font-size:12px;cursor:pointer;">✏️ Edit</button>
+
+  <button onclick="eliminaCarburazione(${e.id})"
+    style="background:none;border:none;color:#666;font-size:12px;cursor:pointer;">🗑️ Elimina</button>
+</div>
+
+
         <div class="diario-divider"></div>
       `;
     }
@@ -7377,7 +7434,7 @@ function renderDiarioFull() {
   }
 
   // timeline
-renderDiarioTopGallery();
+
 renderTravelTimeline('lista-diario-modal');
 }
 
@@ -8780,7 +8837,36 @@ function eliminaRifornimento(id) {
   renderLogCarburanti();
   showToast('🗑️ Rifornimento eliminato');
 }
-  
+
+function editRifornimento(id){
+  const arr = caricaJSON('vt_logCarburanti', []);
+  if (!Array.isArray(arr)) return;
+  const idx = arr.findIndex(x => String(x.id) === String(id));
+  if (idx === -1) return;
+
+  const e = arr[idx];
+
+  const luogo = prompt('Luogo (opzionale):', e.luogo || '');
+  if (luogo === null) return;
+
+  const note = prompt('Nota (opzionale):', e.note || '');
+  if (note === null) return;
+
+  e.luogo = luogo.trim();
+  e.note = note.trim();
+
+  // quando editi, forzo “non synced” (così la clessidra torna)
+  e.ghSynced = false;
+  e.ghSyncedAt = null;
+
+  arr[idx] = e;
+  salva('vt_logCarburanti', arr);
+
+  renderDiarioFull?.();
+  showToast('✅ Rifornimento aggiornato');
+}
+
+                                               
 /* ============================================================
    STATS PER PAESE — RENDER MODAL
 ============================================================ */
@@ -9864,6 +9950,30 @@ function renderStoricoCarbur() {
   salva('vt_carburazione', storico);
   renderStoricoCarbur();
   showToast('🗑️ Setup eliminato');
+}
+
+
+function editCarburazione(id){
+  const arr = caricaJSON('vt_carburazione', []);
+  if (!Array.isArray(arr)) return;
+  const idx = arr.findIndex(x => String(x.id) === String(id));
+  if (idx === -1) return;
+
+  const e = arr[idx];
+
+  const nota = prompt('Nota carburazione:', e.nota || e.note || '');
+  if (nota === null) return;
+
+  e.nota = nota.trim();
+
+  e.ghSynced = false;
+  e.ghSyncedAt = null;
+
+  arr[idx] = e;
+  salva('vt_carburazione', arr);
+
+  renderDiarioFull?.();
+  showToast('✅ Carburazione aggiornata');
 }
   
 /* ============================================================
