@@ -7083,7 +7083,7 @@ function renderTravelTimeline(containerId){
       const raw = e.fotoUrl || e.foto;
       const idxPhoto = photoIndexById.get(String(e.id)) ?? 0;
       const badge = hasVideo ? `<span class="badge video">🎥</span>` : (planned ? `<span class="badge planned">🎬</span>` : '');
-      return vtThumbPhoto(raw, albumId, idxPhoto, badge);
+      return vtThumbPhoto(raw, albumId, idxPhoto, badge, `deleteDiarioPhotoEntry(${Number(e.id)})`);
     }
 
     if (hasVideo) return vtThumbVideo(e.videoUrl);
@@ -7285,19 +7285,26 @@ if (!photos.length) {
   if (e.fotoUrl2 || e.foto2) photos.push(e.fotoUrl2 || e.foto2);
 }
 
-      const albumId = 'logbook_tl_' + String(e.id);
-      registerLightboxAlbum(
-        albumId,
-        photos,
-        photos.map(() => `🔧 ${(e.nome || '')}`)
-      );
+ 
 
-      const thumbs = []
-        .concat(photos.map((raw, i) => vtThumbPhoto(raw, albumId, i)))
-        .concat(e.videoUrl ? [vtThumbVideo(e.videoUrl)] : [])
-        .concat((e.videoPlanned && !e.videoUrl) ? [vtThumbPlanned(`apriEditIntervento(${e.id})`)] : [])
-        .slice(0, 9)
-        .join('');
+  const refs = getLogbookPhotoRefs(e); // [{idx, raw}, ...]
+const albumId = 'logbook_tl_' + String(e.id);
+
+registerLightboxAlbum(
+  albumId,
+  refs.map(r => r.raw),
+  refs.map(() => `🔧 ${(e.nome || '')}`)
+);
+
+const thumbs = []
+  .concat(refs.map((r, albIdx) =>
+    vtThumbPhoto(r.raw, albumId, albIdx, '', `deleteLogbookPhoto(${e.id}, ${r.idx})`)
+  ))
+  .concat(e.videoUrl ? [vtThumbVideo(e.videoUrl)] : [])
+  .concat((e.videoPlanned && !e.videoUrl) ? [vtThumbPlanned(`apriEditIntervento(${e.id})`)] : [])
+  .slice(0, 9)
+  .join('');
+         
 
       const galleryHtml = thumbs
         ? `<div class="diario-gallery" style="margin-top:12px;">${thumbs}</div>`
@@ -8113,7 +8120,88 @@ function deleteDiarioVideoFromGroup(groupKey, videoUrl){
     showToast('🗑️ Video eliminato');
   }
 }
-  
+
+
+  function ensureLogbookPhotoArrays(e){
+  if (!e || typeof e !== 'object') return;
+
+  if (!Array.isArray(e.fotoList)) e.fotoList = [];
+  if (!Array.isArray(e.fotoUrlList)) e.fotoUrlList = [];
+
+  // allinea lunghezze
+  while (e.fotoUrlList.length < e.fotoList.length) e.fotoUrlList.push(null);
+  while (e.fotoList.length < e.fotoUrlList.length) e.fotoList.push(null);
+
+  // migra vecchi campi (prime 2)
+  if (e.foto && !e.fotoList[0] && !e.fotoUrlList[0]) e.fotoList[0] = e.foto;
+  if (e.foto2 && !e.fotoList[1] && !e.fotoUrlList[1]) e.fotoList[1] = e.foto2;
+
+  if (e.fotoUrl && !e.fotoUrlList[0] && !e.fotoList[0]) e.fotoUrlList[0] = e.fotoUrl;
+  if (e.fotoUrl2 && !e.fotoUrlList[1] && !e.fotoList[1]) e.fotoUrlList[1] = e.fotoUrl2;
+
+  // riallinea ancora dopo migrazione
+  while (e.fotoUrlList.length < e.fotoList.length) e.fotoUrlList.push(null);
+  while (e.fotoList.length < e.fotoUrlList.length) e.fotoList.push(null);
+}
+
+function getLogbookPhotoRefs(e){
+  ensureLogbookPhotoArrays(e);
+  const out = [];
+  const n = Math.max(e.fotoList.length, e.fotoUrlList.length);
+
+  for (let i = 0; i < n; i++){
+    const raw = e.fotoUrlList[i] || e.fotoList[i];
+    if (raw) out.push({ idx: i, raw });
+  }
+  return out;
+}
+
+function deleteLogbookPhoto(logId, photoIndex){
+  if (!confirm('Eliminare questa foto dall’intervento?')) return;
+
+  const log = caricaJSON('vt_logbook', []);
+  if (!Array.isArray(log)) return;
+
+  const i = log.findIndex(x => String(x?.id) === String(logId));
+  if (i === -1) { showToast('⚠️ Intervento non trovato'); return; }
+
+  const e = log[i];
+  ensureLogbookPhotoArrays(e);
+
+  const idx = Number(photoIndex);
+  if (!isFinite(idx) || idx < 0) return;
+
+  // rimuove la coppia (url+local) a quell’indice
+  if (idx < e.fotoList.length) e.fotoList.splice(idx, 1);
+  if (idx < e.fotoUrlList.length) e.fotoUrlList.splice(idx, 1);
+
+  // compatibilità: aggiorna i campi vecchi (prime 2)
+  e.foto     = e.fotoList[0] || null;
+  e.foto2    = e.fotoList[1] || null;
+  e.fotoUrl  = e.fotoUrlList[0] || null;
+  e.fotoUrl2 = e.fotoUrlList[1] || null;
+
+  // se pubblico, dopo modifica va rimesso “non syncato”
+  e.ghSynced = false;
+  e.ghSyncedAt = null;
+
+  log[i] = e;
+  salva('vt_logbook', log);
+
+  // refresh UI
+  try { renderDiarioFull?.(); } catch {}
+  try { renderLogManutenzione?.(); } catch {}
+
+  // refresh marker mappa full se aperta
+  try {
+    const isOpen = document.getElementById('modalMapFull')?.classList.contains('open');
+    if (isOpen && typeof renderMapFullPhotoMarkersForContext === 'function') {
+      renderMapFullPhotoMarkersForContext(mapFullCtx);
+    }
+  } catch {}
+
+  showToast('🗑️ Foto eliminata');
+}
   
 function eliminaDiario(id) {
   if (!confirm('Eliminare questa voce?')) return;
