@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-04-02T15:56:43.087Z",
+  "_exportDate": "2026-04-02T17:29:04.029Z",
   "tipo": "paese",
   "paese": "Colombia",
   "slug": "colombia",
@@ -1325,8 +1325,8 @@
       "benzinaRealeLitri": 4.732,
       "consumoStimatoKmL": 25,
       "consumoRealeKmL": 15.12,
-      "titolo": "",
-      "note": "",
+      "titolo": "Reunion Vespa Club Bogotá",
+      "note": "Almuerzo con los del Club de Bogotá",
       "telemetry": [
         {
           "km": 0.008197696204028987,
