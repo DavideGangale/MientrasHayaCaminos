@@ -6587,6 +6587,22 @@ function renderDiarioList(containerId, limit = null) {
 
   const arr = Array.isArray(diario) ? diario : [];
   const list = (limit != null) ? arr.slice(0, limit) : arr;
+  // Album swipe: tutte le foto presenti in QUESTA lista
+const photoEntries = list.filter(x => x && (x.fotoUrl || x.foto));
+const albumId = 'diario_' + containerId;
+
+registerLightboxAlbum(
+  albumId,
+  photoEntries.map(x => (x.fotoUrl || x.foto)),
+  photoEntries.map(x => `
+    <div style="font-weight:900;color:#ff9800;">📍 ${x.paese || ''}</div>
+    <div style="color:#bbb;">${x.data || ''} ${x.ora || ''} — km ${x.km || '--'}</div>
+    ${x.testo ? `<div style="margin-top:6px;color:#ddd;line-height:1.35;">${escHtml((x.testo || '').slice(0, 220))}${(x.testo || '').length > 220 ? '…' : ''}</div>` : ''}
+  `)
+);
+
+const photoIndexById = new Map();
+photoEntries.forEach((x, i) => photoIndexById.set(String(x.id), i));
 
   if (!list.length) {
     container.innerHTML = '<div style="color:#888; text-align:center; padding:20px;">Nessuna voce nel diario</div>';
@@ -6607,19 +6623,25 @@ function renderDiarioList(containerId, limit = null) {
     const fotoSrcRaw = (e.fotoUrl || e.foto) ? (e.fotoUrl || e.foto) : null;
     const fotoSrc = fotoSrcRaw ? driveToDirectImageUrl(fotoSrcRaw) : null;
 
-    const videoHtml = e.videoUrl
-      ? `<div style="margin-top:10px;">
-           <a href="${e.videoUrl}" target="_blank" rel="noopener"
-              style="display:inline-block;padding:10px 12px;border-radius:12px;
-                     background:#2196F3;color:#000;text-decoration:none;font-weight:1000;">
-             ▶ Guarda Video YouTube
-           </a>
+  const emb = e.videoUrl ? youtubeEmbedUrl(e.videoUrl) : '';
+const videoHtml = e.videoUrl
+  ? `<div style="margin-top:10px;">
+       ${emb ? `<iframe class="yt-embed" src="${emb}"
+         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+         allowfullscreen></iframe>` : ''}
+
+       <div style="margin-top:8px;">
+         <a href="${e.videoUrl}" target="_blank" rel="noopener"
+            style="display:inline-block;padding:8px 10px;border-radius:12px;background:#222;border:1px solid #444;color:#ff9800;text-decoration:none;font-weight:900;font-size:12px;">
+           ▶ Apri su YouTube
+         </a>
+       </div>
+     </div>`
+  : (e.videoPlanned
+      ? `<div style="margin-top:10px;color:#ff9800;font-weight:1000;">
+           🎬 Video in arrivo (aggiungerai il link dopo)
          </div>`
-      : (e.videoPlanned
-          ? `<div style="margin-top:10px;color:#ff9800;font-weight:1000;">
-               🎬 Video in arrivo (aggiungerai il link dopo)
-             </div>`
-          : '');
+      : '');
 
     const caption = `
       <div style="font-weight:900;color:#ff9800;">📍 ${e.paese || ''}</div>
@@ -6627,16 +6649,18 @@ function renderDiarioList(containerId, limit = null) {
       ${e.testo ? `<div style="margin-top:6px;color:#ddd;line-height:1.35;">${escHtml((e.testo || '').slice(0, 220))}${(e.testo || '').length > 220 ? '…' : ''}</div>` : ''}
     `;
 
-    const fotoHtml = fotoSrc
-      ? `
-        <img src="${fotoSrc}" class="diario-foto" loading="lazy"
-             onclick='openPhotoLightbox(${JSON.stringify(fotoSrcRaw)}, ${JSON.stringify(caption)})'>
-        <button class="btn-secondary" style="margin-top:10px;"
-                onclick='openPhotoLightbox(${JSON.stringify(fotoSrcRaw)}, ${JSON.stringify(caption)})'>
-          📷 Apri foto
-        </button>
-      `
-      : '';
+  const idxPhoto = photoIndexById.get(String(e.id)) ?? 0;
+
+const fotoHtml = fotoSrc
+  ? `
+    <img src="${fotoSrc}" class="diario-foto" loading="lazy"
+         onclick="openPhotoLightboxAlbum('${albumId}', ${idxPhoto})">
+    <button class="btn-secondary" style="margin-top:10px;"
+            onclick="openPhotoLightboxAlbum('${albumId}', ${idxPhoto})">
+      📷 Apri foto
+    </button>
+  `
+  : '';
 
     html += `
       <div class="diario-entry">
