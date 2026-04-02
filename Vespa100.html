@@ -1247,6 +1247,20 @@ color:#fff;
   overflow:auto;
 }
 
+    
+#timelineFiltersBox{
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 92px;
+  width: min(92vw, 900px);
+  background: #111;
+  border: 2px solid var(--giallo);
+  border-radius: 14px;
+  padding: 12px;
+  z-index: 99999;
+  box-shadow: 0 12px 30px rgba(0,0,0,.75);
+}
 
   </style>
 </head>
@@ -1402,9 +1416,10 @@ color:#fff;
   <div id="anteprima-foto" style="margin-top:10px; display:none;"></div>
 
   <!-- VIDEO -->
-  <input type="text" id="diario-video"
-         placeholder="🎬 Link YouTube (opzionale)"
-         style="margin-top:8px; background:#222; border-color:#444; color:white;">
+<textarea id="diario-video"
+          rows="2"
+          placeholder="🎬 Link YouTube (opzionale) — uno per riga"
+          style="margin-top:8px; background:#222; border:1px solid #444; color:white; border-radius:10px; padding:12px; width:100%;"></textarea>
 
   <label class="checklist-item tagpick planned-video" style="margin-top:8px;">
     <input type="checkbox" id="diario-video-planned">
@@ -2201,7 +2216,7 @@ color:#fff;
 
 
 <!-- VIDEO YOUTUBE (opzionale) -->
-<input type="text" id="log-video"
+<textarea id="log-video"
        placeholder="📺 Link YouTube (opzionale)"
        style="margin-top:10px; background:#222; border-color:#444; color:white;">
 
@@ -2331,10 +2346,7 @@ color:#fff;
               onclick="setDiarioView('timeline')"
               type="button">🕒 Cronologico</button>
 
-      <button id="btn-diario-view-tappe"
-              class="seg-btn"
-              onclick="setDiarioView('tappe')"
-              type="button">🏁 Per tappa</button>
+
     </div>
 
     <!-- VISTA 1: CRONOLOGICO -->
@@ -2365,7 +2377,17 @@ color:#fff;
 </button>
 <div id="timelineFiltersBox" style="display:none; margin-top:10px;">
   
+<div class="diario-toolbar" style="margin:0;">
+  <button class="seg-btn active" id="btn-tl-all" onclick="setTimelineFilter('all'); toggleTimelineFiltersUI();" type="button">🧾 Tutto</button>
 
+  <button class="seg-btn" id="btn-tl-tappe" onclick="setTimelineFilter('tappa'); toggleTimelineFiltersUI();" type="button">🏁 Tappe</button>
+  <button class="seg-btn" id="btn-tl-giri" onclick="setTimelineFilter('giro'); toggleTimelineFiltersUI();" type="button">🔁 Giri</button>
+
+  <button class="seg-btn" id="btn-tl-post" onclick="setTimelineFilter('diario'); toggleTimelineFiltersUI();" type="button">📝 Post</button>
+  <button class="seg-btn" id="btn-tl-off" onclick="setTimelineFilter('manutenzione'); toggleTimelineFiltersUI();" type="button">🔧 Officina</button>
+  <button class="seg-btn" id="btn-tl-fuel" onclick="setTimelineFilter('rifornimento'); toggleTimelineFiltersUI();" type="button">⛽ Benzina</button>
+  <button class="seg-btn" id="btn-tl-carb" onclick="setTimelineFilter('carburazione'); toggleTimelineFiltersUI();" type="button">🌬️ Carb</button>
+</div>
 
 </div>
     
@@ -2430,7 +2452,8 @@ color:#fff;
       <div id="tappa-media-preview" style="margin-top:10px; display:none;"></div>
 
       <!-- VIDEO -->
-      <input type="text" id="tappa-media-video"
+      <textarea type="text" id="tappa-media-video"
+        rows="2"
              placeholder="📺 Link YouTube (opzionale)"
              style="margin-top:10px; background:#222; border-color:#444; color:white;">
 
@@ -2460,7 +2483,7 @@ color:#fff;
 
     <textarea id="edit-diario-testo" rows="5" placeholder="Testo del post..."></textarea>
 
-    <input id="edit-diario-video" type="text" placeholder="📺 Link YouTube (opzionale)">
+    <textarea id="edit-diario-video" type="text" placeholder="📺 Link YouTube (opzionale)">
 
     <label class="checklist-item tagpick planned-video" style="margin-top:10px;">
       <input type="checkbox" id="edit-diario-video-planned">
@@ -4390,6 +4413,21 @@ function youtubeThumbUrl(url){
   return `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
 }
 
+      function parseVideoUrls(raw) {
+  const s = String(raw || '').trim();
+  if (!s) return [];
+  // separatori: newline, spazi, virgole, ;
+  const parts = s.split(/[\n\r\s,;]+/g).map(x => x.trim()).filter(Boolean);
+  // dedup
+  return Array.from(new Set(parts));
+}
+
+function getVideoUrlsFromAnyEntry(e) {
+  const out = [];
+  if (Array.isArray(e?.videoUrlList)) out.push(...e.videoUrlList.filter(Boolean));
+  if (e?.videoUrl) out.push(String(e.videoUrl).trim());
+  return Array.from(new Set(out.filter(Boolean)));
+}
   function vtThumbPhoto(srcRaw, albumId, idx, badgeHtml = '') {
   const src = driveToDirectImageUrl(srcRaw);
  return `
@@ -6657,11 +6695,11 @@ function salvaDiario() {
     const tagsFromText = extractHashtagsFromText(testo);
     const tagsFinal = Array.from(new Set([...(diarioTagsSelezionati || []), ...tagsFromText]));
 
-    const videoEl = document.getElementById('diario-video');
-    const videoUrl = videoEl ? videoEl.value.trim() : '';
+ const videoEl = document.getElementById('diario-video');
+const videoUrls = parseVideoUrls(videoEl ? videoEl.value : '');
 
-    const plannedEl = document.getElementById('diario-video-planned');
-    const videoPlanned = plannedEl ? plannedEl.checked : false;
+const plannedEl = document.getElementById('diario-video-planned');
+const videoPlanned = plannedEl ? plannedEl.checked : false;
 
     // geo: ultima posizione (se disponibile)
     let geo = null;
@@ -6690,8 +6728,9 @@ function salvaDiario() {
       tags: tagsFinal,
       geo,
 
-      videoUrl: videoUrl ? videoUrl : null,
-      videoPlanned: (!!videoPlanned && !videoUrl),
+    videoUrlList: videoUrls,
+videoUrl: videoUrls[0] || null,              // compatibilità
+videoPlanned: (!!videoPlanned && !videoUrls.length),
 
       // pubblicazione / sync
       isPublic: isPublic,
@@ -6810,19 +6849,20 @@ photoEntries.forEach((x, i) => photoIndexById.set(String(x.id), i));
     const fotoSrc = fotoSrcRaw ? driveToDirectImageUrl(fotoSrcRaw) : null;
 
   const emb = e.videoUrl ? youtubeEmbedUrl(e.videoUrl) : '';
-const videoHtml = e.videoUrl
-  ? `<div style="margin-top:10px;">
-       ${emb ? `<iframe class="yt-embed" src="${emb}"
-         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-         allowfullscreen></iframe>` : ''}
 
 
+
+      const vids = getVideoUrlsFromAnyEntry(e);
+
+const videoHtml = vids.length
+  ? `<div class="diario-gallery" style="margin-top:10px;">
+       ${vids.slice(0, 6).map(u => vtThumbVideo(u)).join('')}
      </div>`
   : (e.videoPlanned
-      ? `<div style="margin-top:10px;color:#ff9800;font-weight:1000;">
-           🎬 Video in arrivo (aggiungerai il link dopo)
-         </div>`
+      ? `<div class="diario-gallery" style="margin-top:10px;">${vtThumbPlanned(`apriModificaDiario(${e.id})`)}</div>`
       : '');
+
+      
 
     const caption = `
       <div style="font-weight:900;color:#ff9800;">📍 ${e.paese || ''}</div>
@@ -7383,23 +7423,9 @@ function renderDiario() {
  // renderDiarioList('lista-diario-preview', 4);
 }
 
-let diarioViewMode = 'timeline'; // 'timeline' | 'tappe'
 
-function setDiarioView(mode) {
-  diarioViewMode = mode;
 
-  // bottoni
-  document.getElementById('btn-diario-view-timeline')?.classList.toggle('active', mode === 'timeline');
-  document.getElementById('btn-diario-view-tappe')?.classList.toggle('active', mode === 'tappe');
 
-  // container
-  const a = document.getElementById('diario-view-timeline');
-  const b = document.getElementById('diario-view-tappe');
-  if (a) a.style.display = (mode === 'timeline') ? 'block' : 'none';
-  if (b) b.style.display = (mode === 'tappe') ? 'block' : 'none';
-
-  renderDiarioFull();
-}
 
 
   let timelineFilter = 'all'; // all | percorso | diario | manutenzione | rifornimento | carburazione
@@ -7407,12 +7433,13 @@ function setDiarioView(mode) {
 function setTimelineFilter(k) {
   timelineFilter = k || 'all';
 
-  document.getElementById('btn-tl-all')?.classList.toggle('active', timelineFilter === 'all');
-  document.getElementById('btn-tl-perc')?.classList.toggle('active', timelineFilter === 'percorso');
-  document.getElementById('btn-tl-post')?.classList.toggle('active', timelineFilter === 'diario');
-  document.getElementById('btn-tl-off')?.classList.toggle('active', timelineFilter === 'manutenzione');
-  document.getElementById('btn-tl-fuel')?.classList.toggle('active', timelineFilter === 'rifornimento');
-  document.getElementById('btn-tl-carb')?.classList.toggle('active', timelineFilter === 'carburazione');
+document.getElementById('btn-tl-all')?.classList.toggle('active', timelineFilter === 'all');
+document.getElementById('btn-tl-tappe')?.classList.toggle('active', timelineFilter === 'tappa');
+document.getElementById('btn-tl-giri')?.classList.toggle('active', timelineFilter === 'giro');
+document.getElementById('btn-tl-post')?.classList.toggle('active', timelineFilter === 'diario');
+document.getElementById('btn-tl-off')?.classList.toggle('active', timelineFilter === 'manutenzione');
+document.getElementById('btn-tl-fuel')?.classList.toggle('active', timelineFilter === 'rifornimento');
+document.getElementById('btn-tl-carb')?.classList.toggle('active', timelineFilter === 'carburazione');
 
   renderDiarioFull?.();
 }
@@ -7482,10 +7509,16 @@ function toggleTimelineFiltersUI(){
 
   out.sort((a,b)=>Number(b.ts||0)-Number(a.ts||0));
 
-    if (timelineFilter && timelineFilter !== 'all') {
-    return out.filter(x => x && x.kind === timelineFilter);
+if (timelineFilter && timelineFilter !== 'all') {
+  if (timelineFilter === 'tappa') {
+    return out.filter(x => x && x.kind === 'percorso' && x.subkind === 'tappa');
   }
-  return out;
+  if (timelineFilter === 'giro') {
+    return out.filter(x => x && x.kind === 'percorso' && x.subkind === 'giro');
+  }
+  return out.filter(x => x && x.kind === timelineFilter);
+}
+return out;
 }
 function getAllPercorsiSorted() {
   const tappe = caricaJSON('vt_tappe', []);
@@ -7569,139 +7602,9 @@ function renderDiarioTopGallery() {
   `;
 }
 
-let byTappaFilter = 'all'; // all | tappe | giri
-
-function setByTappaFilter(k){
-  byTappaFilter = k || 'all';
-  document.getElementById('btn-byt-all')?.classList.toggle('active', byTappaFilter==='all');
-  document.getElementById('btn-byt-tappe')?.classList.toggle('active', byTappaFilter==='tappe');
-  document.getElementById('btn-byt-giri')?.classList.toggle('active', byTappaFilter==='giri');
-  renderDiarioByTappa();
-}
-  
-function renderDiarioByTappa() {
-  const box = document.getElementById('diario-tappe-container');
-  if (!box) return;
-
-  const percorsi = getAllPercorsiSorted();
-
-
-  const percorsiFiltrati = percorsi.filter(p => {
-  const isGiro = String(p.tipo || '').toLowerCase() === 'turismo';
-  if (byTappaFilter === 'tappe') return !isGiro;
-  if (byTappaFilter === 'giri') return isGiro;
-  return true;
-});
-  if (!percorsi.length) {
-    box.innerHTML = `<div style="color:#888;text-align:center;padding:20px;">Nessuna tappa/giro salvato</div>`;
-    return;
-  }
-
-  box.innerHTML = percorsiFiltrati.map(p => {
-    const tipo = p.tipo || 'Tappa';
-    const badgeColor = (tipo === 'Turismo') ? '#2196F3' : '#9c27b0';
-
-    // se manca start/end => vecchio record
-    const hasRange = !!(p.startTs && p.endTs);
-    const ctx = { id: p.id, tipoRef: (String(p.tipo||'').toLowerCase()==='turismo' ? 'turismo' : 'tappa') };
-    const mediaEntries = getDiarioEntriesByRange(p.startTs, p.endTs, true, ctx);
-
-    // ===== album lightbox per questa tappa/giro (solo foto) =====
-    const photosOnly = mediaEntries.filter(x => !!(x && (x.fotoUrl || x.foto)));
-    const albumId = 'percorso_' + String(p.id);
-
-    const albumList = photosOnly.map(x => (x.fotoUrl || x.foto));
-    const albumCaps = photosOnly.map(x => `📍 ${(x.paese||'')} — ${(x.data||'')} ${(x.ora||'')}`);
-
-    registerLightboxAlbum(albumId, albumList, albumCaps);
-
-    const photoIndexById = new Map();
-    photosOnly.forEach((x, idx) => photoIndexById.set(String(x.id), idx));
-  
-    // thumbs: mostra prime 9 (foto o “tile video”)
-    const thumbs = mediaEntries.slice(0, 9).map(e => {
-      const hasPhoto = !!(e.fotoUrl || e.foto);
-      const hasVideo = !!e.videoUrl;
-      const planned  = !!(e.videoPlanned && !e.videoUrl);
-
-           if (hasPhoto) {
-        const raw = e.fotoUrl || e.foto;
-        const src = driveToDirectImageUrl(raw);
-        const badge = hasVideo
-          ? `<span class="badge video">🎥</span>`
-          : (planned ? `<span class="badge planned">🎬</span>` : '');
-
-        const idxPhoto = photoIndexById.get(String(e.id)) ?? 0;
-
-        return `
-          <div class="diario-thumb"
-               onclick="openPhotoLightboxAlbum('${albumId}', ${idxPhoto})">
-            ${badge}
-            <img src="${src}" loading="lazy">
-          </div>
-        `;
-      }
-
-      // no foto ma video / planned
-      const badge = hasVideo ? `<span class="badge video">🎥</span>` : `<span class="badge planned">🎬</span>`;
-      const click = hasVideo
-        ? `window.open(${JSON.stringify(e.videoUrl)}, '_blank')`
-        : `apriModificaDiario(${Number(e.id)})`;
-
-      return `
-        <div class="diario-thumb" style="display:flex;align-items:center;justify-content:center;color:#fff;"
-             onclick='${click}'>
-          ${badge}
-          <div style="font-size:26px;font-weight:1000;">${hasVideo ? '▶' : '🎬'}</div>
-        </div>
-      `;
-    }).join('');
-
-    const titolo = p.titolo ? `<div style="margin-top:6px;font-weight:1000;color:#fff;">📍 ${escHtml(p.titolo)}</div>` : '';
-    const note = p.note ? `<div style="margin-top:6px;color:#bbb;">${escHtml(p.note)}</div>` : '';
-
-    const h = Math.floor((p.durata || 0) / 3600);
-    const m = Math.floor(((p.durata || 0) % 3600) / 60);
-
-    return `
-      <div class="diario-entry" style="border-left-color:${badgeColor};">
-        <div class="diario-header">
-          <span class="diario-data">🏁 ${p.data || ''} ${p.ora || ''} — ${p.paese || ''}</span>
-          <span class="diario-paese" style="background:${badgeColor};color:#fff;">${String(tipo).toUpperCase()}</span>
-        </div>
-
-        <div style="color:#ddd;">📏 <b>${p.km || 0} km</b> &nbsp;|&nbsp; ⏱️ ${h}h ${m}m</div>
-        ${titolo}
-        ${note}
-
-        ${hasRange
-          ? (thumbs
-              ? `<div class="diario-gallery">${thumbs}</div>`
-              : `<div style="margin-top:10px;color:#777;">Nessuna foto/video trovata in questa tappa (nel range timestamp).</div>`)
-          : `<div style="margin-top:10px;color:#777;">Tappa vecchia: manca start/end timestamp → non posso associare automaticamente le foto.</div>`
-        }
-
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
-          <button class="btn-secondary" onclick="apriMediaPercorso(${p.id})">📸 Apri Foto/Video</button>
-          <button class="btn-secondary" onclick="apriTracciaPercorso(${p.id})">🗺️ Traccia</button>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
 
 function renderDiarioFull() {
-  // sincronizza UI in base alla vista
-  const mode = diarioViewMode || 'timeline';
-
-  if (mode === 'tappe') {
-    renderDiarioByTappa();
-    return;
-  }
-
-  // timeline
-
-renderTravelTimeline('lista-diario-modal');
+  renderTravelTimeline('lista-diario-modal');
 }
 
 let pendingAddMediaCtx = null; // { id, tipoRef:'tappa'|'turismo', paese, data, ora, km, startTs, endTs, traccia }
@@ -7836,8 +7739,8 @@ function salvaMediaSuPercorso() {
   }
 
   const txt = (document.getElementById('tappa-media-testo')?.value || '').trim();
-  const videoUrl = (document.getElementById('tappa-media-video')?.value || '').trim() || null;
-  const planned = !!document.getElementById('tappa-media-video-planned')?.checked;
+ const videoUrls = parseVideoUrls(document.getElementById('tappa-media-video')?.value || '');
+const planned = !!document.getElementById('tappa-media-video-planned')?.checked;
 
   const prev = document.getElementById('tappa-media-preview');
   let photos = [];
@@ -7874,8 +7777,9 @@ function salvaMediaSuPercorso() {
     percorsoRefTipo: pendingAddMediaCtx.tipoRef, // 'tappa' | 'turismo'
 
     fotoUrl: null,
-    videoUrl: videoUrl,
-    videoPlanned: (!!planned && !videoUrl)
+videoUrlList: videoUrls,
+videoUrl: videoUrls[0] || null,
+videoPlanned: (!!planned && !videoUrls.length)
   };
 
   const createdIds = [];
@@ -10376,8 +10280,7 @@ if (!Array.isArray(fotoList)) fotoList = [];
 
 
 
-const videoUrlRaw = (document.getElementById('log-video')?.value || '').trim();
-const videoUrl = videoUrlRaw || null;
+const videoUrls = parseVideoUrls(document.getElementById('log-video')?.value || '');
 const videoPlanned = !!document.getElementById('log-video-planned')?.checked;
 
   const now = new Date();
@@ -10409,7 +10312,11 @@ const videoPlanned = !!document.getElementById('log-video-planned')?.checked;
   isPublic: false,
   ghSynced: false,
   ghSyncedAt: null,
-
+      
+videoUrlList: videoUrls,
+videoUrl: videoUrls[0] || null,                       // compatibilità
+videoPlanned: (!!videoPlanned && !videoUrls.length),
+      
   valuta: cur,
   fxToUsd: getFxToUsd(cur),
 
@@ -10426,8 +10333,6 @@ const videoPlanned = !!document.getElementById('log-video-planned')?.checked;
   costoLocal: costoLocal,
   costoUsd: costoUsd,
 
-  videoUrl: videoUrl,
-  videoPlanned: (!!videoPlanned && !videoUrl)
 };
 
   const log = caricaJSON('vt_logbook', []);
@@ -10703,14 +10608,12 @@ try { newFotos = JSON.parse(prev?.dataset?.list || '[]'); } catch { newFotos = [
 if (!Array.isArray(newFotos)) newFotos = [];
 
 
+const videoUrls = parseVideoUrls(document.getElementById('edit-log-video')?.value || '');
+const planned = !!document.getElementById('edit-log-video-planned')?.checked;
 
-  const videoUrlRaw = (document.getElementById('edit-log-video')?.value || '').trim();
-  const videoUrl = videoUrlRaw || null;
-  const planned = !!document.getElementById('edit-log-video-planned')?.checked;
-
-  e.videoUrl = videoUrl;
-  e.videoPlanned = (!!planned && !videoUrl);
-  
+e.videoUrlList = videoUrls;
+e.videoUrl = videoUrls[0] || null;                 // compatibilità
+e.videoPlanned = (!!planned && !videoUrls.length);
 
   // aggiorna campi base
   e.nome = nome;
