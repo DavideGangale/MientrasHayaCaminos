@@ -7039,21 +7039,6 @@ function renderTravelTimeline(containerId){
       const testo = (leader.testo || '').trim();
       const testoShort = (testo.length > 240) ? (testo.slice(0, 240) + '…') : testo;
 
-     // const photos = arr.filter(x => x && (x.fotoUrl || x.foto));
-    //  const albumId = 'diario_group_' + String(gid);
-
-      // album lightbox per swipe
-    //  registerLightboxAlbum(
-     //  albumId,
-    //   photos.map(x => (x.fotoUrl || x.foto)),
-     //  photos.map(x => `
-      
-      //    <div style="font-weight:900;color:#ff9800;">📍 ${x.paese || ''}</div>
-     //     <div style="color:#bbb;">${x.data || ''} ${x.ora || ''} — km ${x.km || '--'}</div>
-     //     ${x.testo ? `<div style="margin-top:6px;color:#ddd;line-height:1.35;">${escHtml((x.testo || '').slice(0, 220))}${(x.testo || '').length > 220 ? '…' : ''}</div>` : ''}
-     //   `)
- //     );
-
       const heroRaw = photos[0] ? (photos[0].fotoUrl || photos[0].foto) : null;
       //const heroSrc = heroRaw ? driveToDirectImageUrl(heroRaw) : null;
 
@@ -7125,32 +7110,35 @@ ${galleryHtml}
         <div class="diario-divider"></div>
       `;
     }
-    if (it.kind === 'manutenzione') {
+       if (it.kind === 'manutenzione') {
       const e = it.data;
 
- const gh = e.ghSynced ? '' : '⏳';
-const pub = e.isPublic ? 'checked' : '';
+      const gh = e.ghSynced ? '🐙' : '⏳';
+      const pub = e.isPublic ? 'checked' : '';
 
-  const photos = [];
-  if (e.fotoUrl || e.foto) photos.push(e.fotoUrl || e.foto);
-  if (e.fotoUrl2 || e.foto2) photos.push(e.fotoUrl2 || e.foto2);
+      // gallery: foto 1, foto 2, video thumbnail
+      const photos = [];
+      if (e.fotoUrl || e.foto) photos.push(e.fotoUrl || e.foto);
+      if (e.fotoUrl2 || e.foto2) photos.push(e.fotoUrl2 || e.foto2);
 
-  const albumId = 'logbook_tl_' + String(e.id);
-  registerLightboxAlbum(
-    albumId,
-    photos,
-    photos.map(() => `🔧 ${(e.nome||'')}`)
-  );
+      const albumId = 'logbook_tl_' + String(e.id);
+      registerLightboxAlbum(
+        albumId,
+        photos,
+        photos.map(() => `🔧 ${(e.nome || '')}`)
+      );
 
-  const thumbs = []
-    .concat(photos.map((raw, i) => vtThumbPhoto(raw, albumId, i)))
-    .concat(e.videoUrl ? [vtThumbVideo(e.videoUrl)] : [])
-    .concat((e.videoPlanned && !e.videoUrl) ? [vtThumbPlanned(`apriEditIntervento(${e.id})`)] : [])
-    .slice(0, 9)
-    .join('');
+      const thumbs = []
+        .concat(photos.map((raw, i) => vtThumbPhoto(raw, albumId, i)))
+        .concat(e.videoUrl ? [vtThumbVideo(e.videoUrl)] : [])
+        .concat((e.videoPlanned && !e.videoUrl) ? [vtThumbPlanned(`apriEditIntervento(${e.id})`)] : [])
+        .slice(0, 9)
+        .join('');
 
-  const galleryHtml = thumbs ? `<div class="diario-gallery" style="margin-top:12px;">${thumbs}</div>` : '';
-  
+      const galleryHtml = thumbs
+        ? `<div class="diario-gallery" style="margin-top:12px;">${thumbs}</div>`
+        : '';
+
       return `
         <div class="diario-entry" style="border-left-color:#ff9800;">
           <div class="diario-header">
@@ -7158,36 +7146,32 @@ const pub = e.isPublic ? 'checked' : '';
             <span class="diario-paese">${e.paese||''}</span>
           </div>
 
+          <div style="display:flex;align-items:center;gap:12px;margin-top:10px;font-size:12px;color:#bbb;">
+            <label style="display:flex;align-items:center;gap:8px;">
+              <input type="checkbox" ${pub}
+                     onchange="setItemPublicFlag('manutenzione', ${e.id}, this.checked)">
+              Pubblico
+            </label>
+            <span title="GitHub sync">${gh}</span>
+          </div>
 
-<div style="display:flex;align-items:center;gap:12px;margin-top:10px;font-size:12px;color:#bbb;">
-  <label style="display:flex;align-items:center;gap:8px;">
-    <input type="checkbox" ${pub}
-           onchange="setItemPublicFlag('manutenzione', ${e.id}, this.checked)">
-    Pubblico
-  </label>
-  ${gh ? `<span title="GitHub sync">${gh}</span>` : ''}
-</div>
-
-          
-          <div style="font-weight:1000;">${escHtml(e.nome||'Intervento')}</div>
+          <div style="font-weight:1000;margin-top:10px;">${escHtml(e.nome||'Intervento')}</div>
           ${e.desc ? `<div style="margin-top:6px;color:#bbb;">${escHtml(e.desc)}</div>` : ''}
-          ${e.videoUrl ? `<button class="btn-secondary" style="margin-top:10px;width:100%;"
-                           
+
+          ${galleryHtml}
+
+          <div style="display:flex; justify-content:space-between; gap:10px; margin-top:12px;">
+            <button onclick="apriEditIntervento(${e.id})"
+              style="background:none;border:none;color:#ff9800;font-size:12px;cursor:pointer;">✏️ Modifica</button>
+
+            <button onclick="eliminaIntervento(${e.id})"
+              style="background:none;border:none;color:#666;font-size:12px;cursor:pointer;">🗑️ Elimina</button>
+          </div>
         </div>
 
-${galleryHtml}
-
-  <div style="display:flex; justify-content:space-between; gap:10px; margin-top:12px;">
-  <button onclick="apriEditIntervento(${e.id})"
-    style="background:none;border:none;color:#ff9800;font-size:12px;cursor:pointer;">✏️ Moldifica</button>
-
-  <button onclick="eliminaIntervento(${e.id})"
-    style="background:none;border:none;color:#666;font-size:12px;cursor:pointer;">🗑️ Elimina</button>
-</div>
         <div class="diario-divider"></div>
       `;
     }
-
        if (it.kind === 'rifornimento') {
       const e = it.data;
 
