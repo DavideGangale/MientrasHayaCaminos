@@ -602,7 +602,10 @@ color:#fff;
   left: auto;
   z-index: 10050;
 }
-
+/* evita che la X copra il contenuto */
+#modalDiario .modal-content{
+  padding-top: 60px;
+}
 /* HUD velocità sopra la mappa */
 #mapFullHud{
   position: fixed;
@@ -840,6 +843,28 @@ color:#fff;
   aspect-ratio:1/1;
   cursor:pointer;
 }
+
+/* ✅ pulsante elimina sulle miniature */
+.thumb-del{
+  position:absolute;
+  top:6px;
+  right:6px;
+  width:22px;
+  height:22px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,0.25);
+  background: rgba(0,0,0,0.65);
+  color:#fff;
+  font-weight:1000;
+  font-size:14px;
+  line-height:20px;
+  cursor:pointer;
+  z-index:5;
+}
+.thumb-del:active{ opacity:0.8; }
+
+
+    
 .diario-thumb img{
   width:100%;
   height:100%;
@@ -4422,32 +4447,49 @@ function getVideoUrlsFromAnyEntry(e) {
   if (e?.videoUrl) out.push(String(e.videoUrl).trim());
   return Array.from(new Set(out.filter(Boolean)));
 }
-  function vtThumbPhoto(srcRaw, albumId, idx, badgeHtml = '') {
+ function vtThumbPhoto(srcRaw, albumId, idx, badgeHtml = '', delOnclick = '') {
   const src = driveToDirectImageUrl(srcRaw);
- return `
-  <div class="diario-thumb is-photo" onclick="openPhotoLightboxAlbum('${albumId}', ${idx})">
-    <span class="badge tr">📷</span>
-    ${badgeHtml || ''}
-    <img src="${src}" loading="lazy">
-  </div>
-`;
+
+  const delBtn = delOnclick
+    ? `<button class="thumb-del" onclick="event.stopPropagation(); ${delOnclick}">×</button>`
+    : '';
+
+  return `
+    <div class="diario-thumb is-photo" onclick="openPhotoLightboxAlbum('${albumId}', ${idx})">
+      ${delBtn}
+      <span class="badge tr">📷</span>
+      ${badgeHtml || ''}
+      <img src="${src}" loading="lazy">
+    </div>
+  `;
 }
 
-function vtThumbVideo(videoUrl) {
+function vtThumbVideo(videoUrl, delOnclick = '') {
   const th = youtubeThumbUrl(videoUrl);
-   return `
-  <div class="diario-thumb is-video" onclick='openVideoLightbox(${JSON.stringify(videoUrl)})'>
-    <span class="badge video tr">🎥</span>
-    ${th ? `<img src="${th}" loading="lazy">`
-         : `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:26px;font-weight:1000;">▶</div>`}
-  </div>
-`;
+
+  const delBtn = delOnclick
+    ? `<button class="thumb-del" onclick="event.stopPropagation(); ${delOnclick}">×</button>`
+    : '';
+
+  return `
+    <div class="diario-thumb is-video" onclick='openVideoLightbox(${JSON.stringify(videoUrl)})'>
+      ${delBtn}
+      <span class="badge video tr">🎥</span>
+      ${th ? `<img src="${th}" loading="lazy">`
+           : `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:26px;font-weight:1000;">▶</div>`}
+    </div>
+  `;
 }
 
-function vtThumbPlanned(onclickJs) {
+function vtThumbPlanned(onclickJs, delOnclick = '') {
+  const delBtn = delOnclick
+    ? `<button class="thumb-del" onclick="event.stopPropagation(); ${delOnclick}">×</button>`
+    : '';
+
   return `
     <div class="diario-thumb" onclick="${onclickJs}"
-         style="display:flex;align-items:center;justify-content:center;color:#fff;">
+         style="display:flex;align-items:center;justify-content:center;color:#fff; position:relative;">
+      ${delBtn}
       <span class="badge planned">🎬</span>
       <div style="font-size:26px;font-weight:1000;">🎬</div>
     </div>
@@ -7104,9 +7146,27 @@ registerLightboxAlbum(
 );
 
 const thumbs = []
-  .concat(photos.slice(0, 9).map((x, i) => vtThumbPhoto((x.fotoUrl || x.foto), albumId, i)))
-  .concat(leader.videoUrl ? [vtThumbVideo(leader.videoUrl)] : [])
-  .concat((leader.videoPlanned && !leader.videoUrl) ? [vtThumbPlanned(`apriModificaDiario(${leader.id})`)] : [])
+  .concat(
+    photos.slice(0, 9).map((x, i) =>
+      vtThumbPhoto(
+        (x.fotoUrl || x.foto),
+        albumId,
+        i,
+        '',
+        `deleteDiarioPhotoEntry(${Number(x.id)})`
+      )
+    )
+  )
+  .concat(
+    leader.videoUrl
+      ? [vtThumbVideo(leader.videoUrl, `deleteDiarioVideoFromGroup('${escSQ(gid)}', ${JSON.stringify(leader.videoUrl)})`)]
+      : []
+  )
+  .concat(
+    (leader.videoPlanned && !leader.videoUrl)
+      ? [vtThumbPlanned(`apriModificaDiario(${leader.id})`, `deleteDiarioVideoFromGroup('${escSQ(gid)}', '')`)]
+      : []
+  )
   .slice(0, 9)
   .join('');
 
@@ -7940,6 +8000,67 @@ if (fi2) fi2.value = '';
     }
   } catch {}
 }
+
+function getDiarioGroupKey(e){
+  return (e && e.groupId) ? String(e.groupId) : ('solo_' + String(e?.id));
+}
+
+// ✅ elimina UNA FOTO (una entry) dal diario
+function deleteDiarioPhotoEntry(id){
+  if (!confirm('Eliminare questa foto dal post?')) return;
+
+  const diario = caricaJSON('vt_diario', []);
+  const out = (Array.isArray(diario) ? diario : []).filter(e => String(e?.id) !== String(id));
+
+  salva('vt_diario', out);
+  renderDiarioFull?.();
+  showToast('🗑️ Foto eliminata');
+
+  // refresh markers su MapFull se aperta
+  try {
+    const isOpen = document.getElementById('modalMapFull')?.classList.contains('open');
+    if (isOpen && typeof renderMapFullPhotoMarkersForContext === 'function') {
+      renderMapFullPhotoMarkersForContext(mapFullCtx);
+    }
+  } catch {}
+}
+
+// ✅ elimina UN VIDEO dal post (da tutto il gruppo)
+function deleteDiarioVideoFromGroup(groupKey, videoUrl){
+  if (!confirm('Eliminare questo video dal post?')) return;
+
+  const diario = caricaJSON('vt_diario', []);
+  if (!Array.isArray(diario)) return;
+
+  const v = String(videoUrl || '').trim();
+  let changed = false;
+
+  for (const e of diario) {
+    if (!e) continue;
+    if (getDiarioGroupKey(e) !== String(groupKey)) continue;
+
+    let list = Array.isArray(e.videoUrlList) ? e.videoUrlList.slice() : [];
+    if (!list.length && e.videoUrl) list = [String(e.videoUrl).trim()];
+
+    const list2 = list.filter(x => String(x || '').trim() && String(x).trim() !== v);
+
+    e.videoUrlList = list2;
+    e.videoUrl = list2[0] || null;
+    if (!list2.length) e.videoPlanned = false;
+
+    e.ghSynced = false;
+    e.ghSyncedAt = null;
+
+    changed = true;
+  }
+
+  if (changed) {
+    salva('vt_diario', diario);
+    renderDiarioFull?.();
+    showToast('🗑️ Video eliminato');
+  }
+}
+  
   
 function eliminaDiario(id) {
   if (!confirm('Eliminare questa voce?')) return;
