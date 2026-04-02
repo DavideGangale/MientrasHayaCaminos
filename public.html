@@ -3039,15 +3039,18 @@ $$
       badgeClass = 'badge-fuel';
       badgeText = '⛽ Rifornimento';
       const r = it.raw || {};
-      const costo = Number(r?.costoBenzUsd || r?.costo || 0);
-      const qta = Number(r?.qta || r?.litri || 0);
+
+      const costo = Number(r?.costoBenzUsd ?? r?.costo ?? 0);
+      const qta = Number(r?.qta ?? r?.litri ?? 0);
+      const dest = r?.dest ?? r?.note ?? '';
+
       bodyHtml = `
-        <div class="diary-text">📦 <b>${qta.toFixed(2)} L</b> (${escapeHtml(r?.dest || r?.note || '')})</div>
-        ${r?.km ? `<div class="diary-meta" style="margin-top:6px;">📏 km ${escapeHtml(r.km)}</div>` : ''}
-        ${costo > 0 ? `<div class="diary-meta" style="margin-top:8px;color:#9be28d;">💰 ${T('paid')}: <b>
-$$
-{costo.toFixed(2)}</b></div>` : ''}
+        <div class="diary-text">📦 <b>${qta.toFixed(2)} L</b> (${escapeHtml(dest)})</div>
+        ${r?.km != null ? `<div class="diary-meta" style="margin-top:6px;">📏 km ${escapeHtml(r.km)}</div>` : ''}
+        ${costo > 0 ? `<div class="diary-meta" style="margin-top:8px;color:#9be28d;">💰 ${T('paid')}: <b>$${costo.toFixed(2)}</b></div>` : ''}
       `;
+
+      mediaHtml = buildMediaBlockFromAny(r);
     }
 
     if (it.kind === 'CARB') {
@@ -3061,20 +3064,38 @@ $$
       `;
     }
 
-    if (it.kind === 'TAPPA' || it.kind === 'GIRO') {
+     if (it.kind === 'TAPPA' || it.kind === 'GIRO') {
       badgeClass = (it.kind === 'GIRO') ? 'badge-giro' : 'badge-tappa';
       badgeText = (it.kind === 'GIRO') ? '🛵 Giro' : '🏁 Tappa';
       const t = it.raw || {};
-            mediaHtml = buildMediaBlockFromAny(t);
+
       const h = Math.floor((t.durata || 0) / 3600);
       const mm = Math.floor(((t.durata || 0) % 3600) / 60);
+
+      const benzStim = Number(t.benzinaStimataLitri ?? t.benzina ?? 0);
+      const benzReal = Number(t.benzinaRealeLitri ?? 0);
+      const km = Number(t.km || 0);
+
+      const consStim = (benzStim > 0) ? (km / benzStim).toFixed(2) : '--';
+      const consReal = (benzReal > 0) ? (km / benzReal).toFixed(2) : '--';
+
       bodyHtml = `
         <div class="diary-text"><b>${escapeHtml(t.titolo || '')}</b></div>
         ${t.note ? `<div class="diary-text" style="margin-top:6px;">${escapeHtml(t.note)}</div>` : ''}
+
+        <div class="diary-meta" style="margin-top:10px;">
+          📏 <b>${km.toFixed(1)} km</b> · ⏱️ ${h}h ${mm}m
+          ${t.velMax != null ? ` · 🏎️ max <b>${escapeHtml(t.velMax)}</b> km/h` : ''}
+          ${t.velMedia != null ? ` · 📌 media <b>${escapeHtml(t.velMedia)}</b> km/h` : ''}
+        </div>
+
         <div class="diary-meta" style="margin-top:8px;">
-          📏 <b>${Number(t.km || 0).toFixed(1)} km</b> · ⏱️ ${h}h ${mm}m · 🏎️ max ${escapeHtml(t.velMax || 0)} km/h
+          ⛽ stimata: <b>${benzStim.toFixed(2)} L</b> (${consStim} km/L)
+          ${benzReal > 0 ? `<br>🔥 reale: <b>${benzReal.toFixed(2)} L</b> (${consReal} km/L)` : ''}
         </div>
       `;
+
+      mediaHtml = buildMediaBlockFromAny(t);
 
       const hasGraph = Array.isArray(t.telemetry) && t.telemetry.length >= 3;
       actions.push(`
