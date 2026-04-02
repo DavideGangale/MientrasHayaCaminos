@@ -1362,6 +1362,11 @@ const I18N = {
     workshop: '🔧 Officina',
     cost: 'Costo',
     carbSetup: '🌬️ Setup carburatore',
+        carbJetMain: 'Getto massimo',
+    carbJetPilot: 'Getto minimo',
+    carbScrewIdle: 'Vite minimo',
+    carbScrewAir: 'Vite aria',
+    turns: 'giri',
     altitude: 'Altitudine',
     filters: '🧭 Filtri',
     filtersTitle: 'Filtri mappa',
@@ -1438,6 +1443,11 @@ const I18N = {
     workshop: '🔧 Workshop',
     cost: 'Cost',
     carbSetup: '🌬️ Carb setup',
+        carbJetMain: 'Main jet',
+    carbJetPilot: 'Pilot jet',
+    carbScrewIdle: 'Idle speed screw',
+    carbScrewAir: 'Air/mixture screw',
+    turns: 'turns',
     altitude: 'Altitude',
     filters: '🧭 Filters',
     filtersTitle: 'Map filters',
@@ -1514,6 +1524,11 @@ const I18N = {
     workshop: '🔧 Taller',
     cost: 'Costo',
     carbSetup: '🌬️ Carburación',
+        carbJetMain: 'Chicler máximo',
+    carbJetPilot: 'Chicler mínimo',
+    carbScrewIdle: 'Tornillo de ralentí',
+    carbScrewAir: 'Tornillo de aire',
+    turns: 'vueltas',
     altitude: 'Altitud',
     filters: '🧭 Filtros',
     filtersTitle: 'Filtros del mapa',
@@ -2030,11 +2045,57 @@ function buildFuelPopup(r) {
     ${costoRif > 0 ? `<div style="margin-top:5px; color:#4caf50;">💰 ${T('paid')}: $ <b>${costoRif.toFixed(2)}</b></div>` : ''}  `;
 }
 
+function pickFirst(obj, keys) {
+  for (const k of keys) {
+    const v = obj?.[k];
+    if (v === 0) return v; // accetta 0
+    if (v != null && String(v).trim() !== '') return v;
+  }
+  return null;
+}
+
+function fmtTurns(v) {
+  if (v == null) return '';
+  // lascia stringhe tipo "1,5" o "1 3/4" così come sono
+  const s = String(v).trim();
+  return s;
+}
+  
 function buildCarbPopup(c) {
+  const jetMain  = pickFirst(c, ['gettoMax', 'gettoMassimo', 'chicMax', 'mainJet']);
+  const jetPilot = pickFirst(c, ['gettoMin', 'gettoMinimo', 'chicMin', 'pilotJet', 'idleJet']);
+
+  const screwIdle = pickFirst(c, ['viteMinimo', 'viteRallenti', 'idleScrew', 'idleSpeedScrew']);
+  const screwAir  = pickFirst(c, ['viteAria', 'viteMiscela', 'airScrew', 'mixtureScrew']);
+
+  // se nel JSON hai già “giri” separati
+  const screwIdleTurns = pickFirst(c, ['viteMinimoGiri', 'giriViteMinimo', 'idleScrewTurns']);
+  const screwAirTurns  = pickFirst(c, ['viteAriaGiri', 'giriViteAria', 'airScrewTurns']);
+
+  const idleTxt = (screwIdleTurns != null)
+    ? `${fmtTurns(screwIdleTurns)} ${T('turns')}`
+    : (screwIdle != null ? fmtTurns(screwIdle) : '');
+
+  const airTxt = (screwAirTurns != null)
+    ? `${fmtTurns(screwAirTurns)} ${T('turns')}`
+    : (screwAir != null ? fmtTurns(screwAir) : '');
+
   return `
     <div class="popup-title">${T('carbSetup')}</div>
     <div class="popup-meta">📅 ${c.data || ''} · ⛰️ ${T('altitude')}: ${c.alt || 0}m</div>
-    <div class="popup-text">Max: <b>${c.chicMax || ''}</b> · Min: <b>${c.chicMin || ''}</b></div>
+
+    <div class="popup-text">
+      ${T('carbJetMain')}: <b>${jetMain ?? ''}</b> · ${T('carbJetPilot')}: <b>${jetPilot ?? ''}</b>
+    </div>
+
+    ${(idleTxt || airTxt) ? `
+      <div class="popup-meta" style="margin-top:8px;">
+        ${idleTxt ? `${T('carbScrewIdle')}: <b>${idleTxt}</b>` : ''}
+        ${idleTxt && airTxt ? ' · ' : ''}
+        ${airTxt ? `${T('carbScrewAir')}: <b>${airTxt}</b>` : ''}
+      </div>
+    ` : ''}
+
     ${c.nota ? `<div class="popup-meta" style="margin-top:8px;font-style:italic;">"${c.nota}"</div>` : ''}
   `;
 }
@@ -3028,8 +3089,37 @@ $$
       badgeClass = 'badge-carb';
       badgeText = '🌬️ Carburazione';
       const c = it.raw || {};
+            const jetMain  = pickFirst(c, ['gettoMax', 'gettoMassimo', 'chicMax', 'mainJet']);
+      const jetPilot = pickFirst(c, ['gettoMin', 'gettoMinimo', 'chicMin', 'pilotJet', 'idleJet']);
+
+      const screwIdle = pickFirst(c, ['viteMinimo', 'viteRallenti', 'idleScrew', 'idleSpeedScrew']);
+      const screwAir  = pickFirst(c, ['viteAria', 'viteMiscela', 'airScrew', 'mixtureScrew']);
+
+      const screwIdleTurns = pickFirst(c, ['viteMinimoGiri', 'giriViteMinimo', 'idleScrewTurns']);
+      const screwAirTurns  = pickFirst(c, ['viteAriaGiri', 'giriViteAria', 'airScrewTurns']);
+
+      const idleTxt = (screwIdleTurns != null)
+        ? `${fmtTurns(screwIdleTurns)} ${T('turns')}`
+        : (screwIdle != null ? fmtTurns(screwIdle) : '');
+
+      const airTxt = (screwAirTurns != null)
+        ? `${fmtTurns(screwAirTurns)} ${T('turns')}`
+        : (screwAir != null ? fmtTurns(screwAir) : '');
+
       bodyHtml = `
-        <div class="diary-text">Max: <b>${escapeHtml(c.chicMax || '')}</b> · Min: <b>${escapeHtml(c.chicMin || '')}</b></div>
+        <div class="diary-text">
+          ${T('carbJetMain')}: <b>${escapeHtml(jetMain ?? '')}</b> ·
+          ${T('carbJetPilot')}: <b>${escapeHtml(jetPilot ?? '')}</b>
+        </div>
+
+        ${(idleTxt || airTxt) ? `
+          <div class="diary-meta" style="margin-top:8px;">
+            ${idleTxt ? `${T('carbScrewIdle')}: <b>${escapeHtml(idleTxt)}</b>` : ''}
+            ${idleTxt && airTxt ? ' · ' : ''}
+            ${airTxt ? `${T('carbScrewAir')}: <b>${escapeHtml(airTxt)}</b>` : ''}
+          </div>
+        ` : ''}
+
         <div class="diary-meta" style="margin-top:6px;">⛰️ ${T('altitude')}: <b>${escapeHtml(c.alt || 0)}</b> m</div>
         ${c.nota ? `<div class="diary-meta" style="margin-top:8px;font-style:italic;">"${escapeHtml(c.nota)}"</div>` : ''}
       `;
