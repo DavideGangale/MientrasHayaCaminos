@@ -2132,6 +2132,13 @@ color:#fff;
     <button class="btn-azione" style="background:#ff9800;color:black;" onclick="salvaDettagliPercorso()">
       💾 Salva dettagli
     </button>
+
+    <button class="btn-secondary"
+        onclick="chiudiModal('modalDettagli'); apriAddMediaToPercorso(detPercorsoTipoRef, detPercorsoId);">
+  ➕ Aggiungi media (foto/video)
+</button>
+
+    
   </div>
 </div>
 
@@ -2343,7 +2350,7 @@ color:#fff;
 
 
   <!-- MEDIA PERCORSO (modal) -->
-<div id="modalMediaPercorso" class="modal-overlay">
+<div id="modalMediaPercorso" class="modal-overlay fullscreen">
   <div class="modal-content" style="border-color:#ff9800; max-width:900px;">
     <button class="close-modal" onclick="chiudiModal('modalMediaPercorso')">×</button>
     <h2 id="mediaPercorsoTitolo" style="color:#ff9800; text-align:center; margin-top:0;">
@@ -7521,7 +7528,37 @@ function eliminaDiario(id) {
 /* ============================================================
    TAPPE — RENDER MODAL
 ============================================================ */
-function renderTappe() {
+
+
+  function fmtHHMM(ts){
+  if (!ts) return '--:--';
+  const d = new Date(Number(ts));
+  if (isNaN(d.getTime())) return '--:--';
+  return d.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' });
+}
+
+function fmtDurataHM(sec){
+  const s = Math.max(0, Number(sec || 0));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  return `${h}h ${m}m`;
+}
+
+// altitudine partenza/arrivo: da telemetry (se esiste)
+function getAltStartEndFromTelemetry(p){
+  const t = Array.isArray(p?.telemetry) ? p.telemetry : [];
+  if (t.length >= 2) {
+    const a0 = Number(t[0]?.alt);
+    const a1 = Number(t[t.length - 1]?.alt);
+    if (isFinite(a0) && isFinite(a1)) return { start: Math.round(a0), end: Math.round(a1) };
+  }
+  // fallback: se non c’è telemetry uso altMin/altMax (meno preciso)
+  const aMin = Number(p?.altMin);
+  const aMax = Number(p?.altMax);
+  if (isFinite(aMin) && isFinite(aMax)) return { start: Math.round(aMin), end: Math.round(aMax) };
+  return { start: 0, end: 0 };
+}
+function renderTappe() {function renderTappe() {
   const tappe = caricaJSON('vt_tappe', []);
   const turismo = caricaJSON('vt_turismo', []);
 
@@ -7531,103 +7568,109 @@ function renderTappe() {
   const lista = []
     .concat(Array.isArray(tappe) ? tappe : [])
     .concat(Array.isArray(turismo) ? turismo : [])
-    .sort((a, b) => (b.id || 0) - (a.id || 0));
+    .sort((a, b) => (Number(b.id || 0) - Number(a.id || 0)));
 
   if (!lista.length) {
-    container.innerHTML =
-      '<div style="color:#888; text-align:center; padding:30px;">Nessuna tappa registrata</div>';
+    container.innerHTML = '<div style="color:#888; text-align:center; padding:30px;">Nessuna tappa registrata</div>';
     return;
   }
 
-  container.innerHTML = lista.map(t => {
-    const h = Math.floor((t.durata || 0) / 3600);
-    const m = Math.floor(((t.durata || 0) % 3600) / 60);
+  container.innerHTML = lista.map(p => {
+    const tipo = p.tipo || 'Tappa';
+    const isGiro = (String(tipo).toLowerCase() === 'turismo');
+    const badgeColor = isGiro ? '#2196F3' : '#9c27b0';
 
-    const tipo = t.tipo || 'Tappa';
-    const badgeColor = (tipo === 'Turismo') ? '#2196F3' : '#9c27b0';
+    const oraInizio = fmtHHMM(p.startTs);
+    const oraFine   = fmtHHMM(p.endTs);
 
-    const velMediaTxt = (t.velMedia != null)
-      ? `🚀 Vel media: <b>${t.velMedia}</b> km/h<br>`
-      : '';
+    const altSE = getAltStartEndFromTelemetry(p); // ✅ partenza → arrivo
 
-    const benzStim = Number(t.benzinaStimataLitri ?? t.benzina ?? 0);
-    const benzStimTxt = isFinite(benzStim) ? benzStim.toFixed(2) : '0.00';
+    const benzStim = Number(p.benzinaStimataLitri ?? p.benzina ?? 0);
+    const stimTxt = (isFinite(benzStim) ? benzStim.toFixed(2) : '0.00');
 
     let benzRealeHtml = `<div style="color:#777;">🔥 Benzina reale: --</div>`;
-    if (t.benzinaRealeLitri != null && Number(t.benzinaRealeLitri) > 0) {
-      const real = Number(t.benzinaRealeLitri).toFixed(2);
-      const cons = t.consumoRealeKmL ? (t.consumoRealeKmL + ' km/L') : '--';
+    if (p.benzinaRealeLitri != null && Number(p.benzinaRealeLitri) > 0) {
+      const real = Number(p.benzinaRealeLitri).toFixed(2);
+      const cons = p.consumoRealeKmL ? (p.consumoRealeKmL + ' km/L') : '--';
       benzRealeHtml = `<div>🔥 Benzina reale: <b>${real} L</b> (${cons})</div>`;
     }
 
-    const fuelEndHtml = (t.fuelEndGal != null)
-      ? `<div>⛽ Serbatoio fine: <b>${t.fuelEndGal}</b> gal</div>`
+    const titoloHtml = p.titolo
+      ? `<div style="margin-top:10px; font-weight:1000; color:#fff;">📍 ${escHtml(p.titolo)}</div>`
       : '';
 
-    const titoloHtml = t.titolo
-      ? `<div style="margin-top:6px;"><b>📍 ${t.titolo}</b></div>`
+    const noteHtml = p.note
+      ? `<div style="margin-top:6px; color:#bbb; line-height:1.35;">${escHtml(p.note)}</div>`
       : '';
 
-    const noteHtml = t.note
-      ? `<div style="margin-top:6px;color:#bbb;">${t.note}</div>`
-      : '';
+    // pulsanti sobri (piccoli)
+    const btnSmall = (txt, onclick, bg, fg='#fff') => `
+      <button onclick="${onclick}"
+        style="flex:1; padding:10px 10px; border-radius:12px; border:1px solid #333;
+               background:${bg}; color:${fg}; font-weight:1000; font-size:12px; cursor:pointer;">
+        ${txt}
+      </button>
+    `;
 
     return `
-      <div class="log-entry-full">
+      <div class="log-entry-full" style="
+        border-left:4px solid ${badgeColor};
+        border-radius:14px;
+        background:#2a2a2a;
+      ">
+        <!-- header -->
         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
-          <div style="font-size:16px; font-weight:bold; color:var(--verde);">🏁 ${t.data} ${t.ora}</div>
-          <div style="background:${badgeColor};color:white;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:bold;">
-            ${String(tipo).toUpperCase()}
+          <div style="font-size:16px; font-weight:1000; color:${badgeColor};">
+            🏁 ${p.data || ''} ${p.ora || ''}
+          </div>
+          <div style="background:${badgeColor};color:#fff;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:1000;">
+            ${isGiro ? 'GIRO' : 'TAPPA'}
           </div>
         </div>
 
-        <div style="color:var(--giallo); margin:5px 0;">${t.paese}</div>
-        <div>📏 <b>${t.km} km</b> &nbsp;|&nbsp; ⏱️ ${h}h ${m}m</div>
-        <div>⛰️ Alt: ${t.altMin}m → ${t.altMax}m</div>
-        <div>⛽ Benzina stimata: ${benzStimTxt} L</div>
-        ${benzRealeHtml}
-        <div>🏎️ Vel max: <b>${t.velMax || 0}</b> km/h</div>
-        ${velMediaTxt}
-        ${fuelEndHtml}
+        <div style="color:var(--giallo); margin-top:6px; font-weight:900;">${p.paese || ''}</div>
 
-        <button onclick="apriTracciaPercorso(${t.id})"
-          style="background:#2196F3;border:none;color:white;padding:8px 10px;border-radius:8px;font-size:12px;cursor:pointer;margin-top:8px;">
-          🗺️ Vedi traccia
-        </button>
+        <!-- dati -->
+        <div style="margin-top:8px; color:#ddd; line-height:1.6;">
+          <div>📏 <b>${p.km || 0} km</b> &nbsp;|&nbsp; ⏱️ ${fmtDurataHM(p.durata || 0)}</div>
+          <div>🕒 <b>${oraInizio}</b> → <b>${oraFine}</b></div>
+          <div>⛰️ Alt: <b>${altSE.start}m</b> → <b>${altSE.end}m</b></div>
 
-  <button onclick="apriAddMediaToPercorso('${(String(t.tipo||'').toLowerCase()==='turismo') ? 'turismo' : 'tappa'}', ${t.id})"
-  style="background:#4caf50;border:none;color:#000;padding:8px 10px;border-radius:8px;font-size:12px;cursor:pointer;margin-top:8px;">
-  ➕ Aggiungi Media
-</button>
+          <div>⛽ Benzina stimata: <b>${stimTxt} L</b></div>
+          ${benzRealeHtml}
 
-<button onclick="apriMediaPercorso(${t.id})"
-  style="background:#ff9800;border:none;color:black;padding:8px 10px;border-radius:8px;font-size:12px;cursor:pointer;margin-top:8px;">
-  📸 Foto/Video
-</button>
-
-
-        <button onclick="scaricaKML(${t.id})"
-          style="background:#00bcd4;border:none;color:black;padding:8px 10px;border-radius:8px;font-size:12px;cursor:pointer;margin-top:8px;">
-          ⬇️ KML
-        </button>
-
-        <button onclick="apriGraficoPercorso(${t.id})"
-          style="background:#2196F3;border:none;color:white;padding:8px 10px;border-radius:8px;font-size:12px;cursor:pointer;margin-top:8px;">
-          📈 Grafico
-        </button>
+          <div>🏎️ Vel max: <b>${p.velMax || 0}</b> km/h</div>
+          ${p.velMedia != null ? `<div>🚀 Vel media: <b>${p.velMedia}</b> km/h</div>` : ''}
+        </div>
 
         ${titoloHtml}
         ${noteHtml}
 
-        <button onclick="apriDettagliPercorso(${t.id})"
-          style="background:#ff9800;border:none;color:black;padding:8px 10px;border-radius:8px;font-size:12px;cursor:pointer;margin-top:8px;">
-          ✏️ Dettagli
-        </button>
+        <!-- azioni principali -->
+        <div style="display:flex; gap:10px; margin-top:12px;">
+          ${btnSmall('📸 Foto/Video', `apriMediaPercorso(${p.id})`, '#ff9800', '#000')}
+          ${btnSmall('🗺️ Traccia', `apriTracciaPercorso(${p.id})`, '#222', '#bbb')}
+          ${btnSmall('📈 Grafico', `apriGraficoPercorso(${p.id})`, '#222', '#bbb')}
+        </div>
 
-        <button onclick="eliminaPercorso(${t.id})"
-          style="background:none; border:none; color:#666; font-size:12px; cursor:pointer; margin-top:5px;">
-          🗑️ Elimina
-        </button>
+        <!-- bottom bar: elimina | kml | edit -->
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-top:14px;">
+          <button onclick="eliminaPercorso(${p.id})"
+            style="background:none;border:none;color:#888;font-size:12px;font-weight:1000;cursor:pointer;">
+            🗑️ Elimina
+          </button>
+
+          <button onclick="scaricaKML(${p.id})"
+            style="background:#111;border:1px solid #333;color:#bbb;padding:6px 10px;border-radius:999px;
+                   font-size:11px;font-weight:1000;cursor:pointer;">
+            ⬇️ KML
+          </button>
+
+          <button onclick="apriDettagliPercorso(${p.id})"
+            style="background:none;border:none;color:#ff9800;font-size:12px;font-weight:1000;cursor:pointer;">
+            ✏️ Edit
+          </button>
+        </div>
       </div>
     `;
   }).join('');
@@ -7680,22 +7723,22 @@ const entries = getDiarioEntriesByRange(p.startTs, p.endTs, true, ctx);
            onclick="openPhotoLightbox('${String(photoSrc).replace(/'/g, "\\'")}', '${String(testoShort).replace(/'/g, "\\'")}')">
     ` : '';
 
-    const videoHtml = e.videoUrl ? `
-      <div style="margin-top:10px;">
-        <a href="${e.videoUrl}" target="_blank" rel="noopener"
-           style="display:inline-block;padding:10px 12px;border-radius:12px;background:#2196F3;color:#000;text-decoration:none;font-weight:900;">
-          ▶ Apri video YouTube
-        </a>
-      </div>
-    ` : (e.videoPlanned ? `
-      <div style="margin-top:10px;color:#ff9800;font-weight:900;">
-        🎬 Video in arrivo (senza link)
-      </div>
-      <button class="btn-secondary" style="margin-top:10px;"
-              onclick="apriModificaDiario(${e.id});">
-        🎬 Inserisci link video
-      </button>
-    ` : '');
+    const emb = e.videoUrl ? youtubeEmbedUrl(e.videoUrl) : '';
+const videoHtml = e.videoUrl ? `
+  <div style="margin-top:10px;">
+    ${emb ? `<iframe class="yt-embed" src="${emb}"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen></iframe>` : ''}
+  </div>
+` : (e.videoPlanned ? `
+  <div style="margin-top:10px;color:#ff9800;font-weight:900;">
+    🎬 Video in arrivo (senza link)
+  </div>
+  <button class="btn-secondary" style="margin-top:10px;width:100%;"
+          onclick="apriModificaDiario(${e.id});">
+    🎬 Inserisci link video
+  </button>
+` : '');
 
     return `
       <div class="diario-entry" style="border-left-color:#ff9800;">
@@ -8295,7 +8338,7 @@ function cambiaPaeseDaSettings() {
   showToast('🗺️ Paese: ' + p);
 }
 let detPercorsoId = null;
-
+let detPercorsoTipoRef = 'tappa'; // 'tappa' | 'turismo'
 window.trovaPercorsoById = function (id) {
   const tappe = caricaJSON('vt_tappe', []);
   const tur   = caricaJSON('vt_turismo', []);
@@ -8314,7 +8357,7 @@ window.apriDettagliPercorso = function (id) {
   if (!found) { showToast('⚠️ Elemento non trovato'); return; }
 
   detPercorsoId = id;
-
+detPercorsoTipoRef = (found.key === 'vt_turismo') ? 'turismo' : 'tappa';
   const titoloEl = document.getElementById('det-titolo');
   const noteEl   = document.getElementById('det-note');
   if (!titoloEl || !noteEl) {
