@@ -3334,6 +3334,7 @@ initDB('vt_inventario', JSON.stringify([
 
 function migraPublicFlagsV1(){
   if (carica('vt_mig_public_flags_v1','') === '1') return;
+  }
 
   function patchList(key){
     const arr = caricaJSON(key, []);
@@ -10394,7 +10395,7 @@ const videoPlanned = !!document.getElementById('log-video-planned')?.checked;
     }
   } catch(e) {}
 
-  const entry = {const entry = {
+  const entry = {
   id: Date.now(),
   ts: Date.now(),
   geo: geoMaint,
