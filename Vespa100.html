@@ -2392,7 +2392,31 @@ overflow: auto;
    
 
     <!-- VISTA 1: CRONOLOGICO -->
- <div id="lista-diario-modal"></div>
+ <!-- VISTA: CRONOLOGICO -->
+<div id="diario-view-timeline" style="display:block;">
+
+  <div class="diario-filters-btn-wrap">
+    <button class="btn-secondary" style="margin:0;" onclick="toggleTimelineFiltersUI()">
+      🔎 Filtri
+    </button>
+  </div>
+
+  <div id="timelineFiltersBox" style="display:none; margin-top:10px;">
+    <div class="diario-toolbar" style="margin:0;">
+      <button class="seg-btn active" id="btn-tl-all" onclick="setTimelineFilter('all'); toggleTimelineFiltersUI();" type="button">🧾 Tutto</button>
+
+      <button class="seg-btn" id="btn-tl-tappe" onclick="setTimelineFilter('tappa'); toggleTimelineFiltersUI();" type="button">🏁 Tappe</button>
+      <button class="seg-btn" id="btn-tl-giri" onclick="setTimelineFilter('giro'); toggleTimelineFiltersUI();" type="button">🔁 Giri</button>
+
+      <button class="seg-btn" id="btn-tl-post" onclick="setTimelineFilter('diario'); toggleTimelineFiltersUI();" type="button">📝 Post</button>
+      <button class="seg-btn" id="btn-tl-off" onclick="setTimelineFilter('manutenzione'); toggleTimelineFiltersUI();" type="button">🔧 Officina</button>
+      <button class="seg-btn" id="btn-tl-fuel" onclick="setTimelineFilter('rifornimento'); toggleTimelineFiltersUI();" type="button">⛽ Benzina</button>
+      <button class="seg-btn" id="btn-tl-carb" onclick="setTimelineFilter('carburazione'); toggleTimelineFiltersUI();" type="button">🌬️ Carb</button>
+    </div>
+  </div>
+
+  <div id="lista-diario-modal"></div>
+</div>
     
   </div>
 </div>
@@ -8180,13 +8204,29 @@ function deleteLogbookPhoto(logId, photoIndex){
 }
   
 function eliminaDiario(id) {
-  if (!confirm('Eliminare questa voce?')) return;
-  const diario = caricaJSON('vt_diario', []).filter(e => e.id !== id);
-  salva('vt_diario', diario);
-   renderDiario();
-  renderDiarioFull();
+  if (!confirm('Eliminare questo post?')) return;
 
+  const diario = caricaJSON('vt_diario', []);
+  if (!Array.isArray(diario)) return;
+
+  // trova entry cliccata
+  const entry = diario.find(e => String(e?.id) === String(id));
+  if (!entry) return;
+
+  // se ha groupId => elimina TUTTO il post (tutte le foto)
+  if (entry.groupId) {
+    const out = diario.filter(e => String(e?.groupId || '') !== String(entry.groupId));
+    salva('vt_diario', out);
+  } else {
+    // post singolo vecchio formato
+    const out = diario.filter(e => String(e?.id) !== String(id));
+    salva('vt_diario', out);
+  }
+
+  renderDiarioFull?.();
+  showToast('🗑️ Post eliminato');
 }
+  
 </script>
 <script>
 /* ============================================================
