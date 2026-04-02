@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-04-02T17:49:51.001Z",
+  "_exportDate": "2026-04-02T17:55:41.736Z",
   "tipo": "paese",
   "paese": "Colombia",
   "slug": "colombia",
@@ -3448,9 +3448,11 @@
       "costoLocal": 0,
       "valuta": "COP",
       "costoUsd": 0,
-      "fotoUrl": null,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1bmyPGsAGeDESVEvsvgHTwyAT6FHtlhIy",
       "fotoUrl2": null,
-      "fotoUrlList": [],
+      "fotoUrlList": [
+        "https://drive.google.com/uc?export=view&id=1bmyPGsAGeDESVEvsvgHTwyAT6FHtlhIy"
+      ],
       "videoUrl": "https://youtu.be/AbqCsDj8c3Q?si=gJWrPnE6aThp7xIV",
       "videoPlanned": false,
       "geo": {
