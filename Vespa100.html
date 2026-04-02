@@ -753,7 +753,8 @@ color:#fff;
     #modalCarbSetup { z-index: 6750; }
     #modalCarb      { z-index: 6900; }
    #modalGrafico  { z-index: 9900; }
-
+#modalEditIntervento { z-index: 9850; }
+#videoLightbox       { z-index: 9950; }
     
     /* DIARIO */
     .diario-entry{
@@ -2221,19 +2222,13 @@ color:#fff;
 
     <div id="edit-log-foto-attuale" style="margin-top:10px;"></div>
 
-    <input type="file" id="edit-log-foto-input" accept="image/*" style="width:100%; margin-top:10px;"
-           onchange="anteprima('edit-log-foto-input','anteprima-edit-log-foto')">
+   <input type="file" id="edit-log-foto-input" accept="image/*" multiple style="width:100%; margin-top:10px;"
+       onchange="anteprimaMulti('edit-log-foto-input','anteprima-edit-log-foto')">
 
     <div id="anteprima-edit-log-foto" style="margin-top:10px; display:none;"></div>
 
 
-    <!-- FOTO 2 (opzionale) -->
-<div id="edit-log-foto2-attuale" style="margin-top:10px;"></div>
 
-<input type="file" id="edit-log-foto2-input" accept="image/*" style="width:100%; margin-top:10px;"
-       onchange="anteprima('edit-log-foto2-input','anteprima-edit-log-foto2')">
-
-<div id="anteprima-edit-log-foto2" style="margin-top:10px; display:none;"></div>
 
 <!-- VIDEO YOUTUBE (opzionale) -->
 <input type="text" id="edit-log-video"
@@ -2264,7 +2259,8 @@ color:#fff;
 
 <div id="videoLightbox" class="modal-overlay fullscreen">
   <div class="modal-content" style="padding:0;border:0;background:#000;">
-    <button class="close-modal" onclick="chiudiModal('videoLightbox')" style="position:fixed;top:12px;right:12px;z-index:99999;">×</button>
+
+    <button class="close-modal" onclick="closeVideoLightbox('videoLightbox')" style="position:fixed;top:12px;right:12px;z-index:99999;">×</button>
     <iframe id="videoLightboxFrame" class="yt-embed"
             style="width:100%;height:100vh;border:0;border-radius:0;"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -2345,7 +2341,11 @@ color:#fff;
       <div id="diario-tappe-container"></div>
     </div>
 
-
+<button class="btn-secondary" style="margin-top:0;" onclick="toggleTimelineFiltersUI()">
+  🔎 Filtri
+</button>
+<div id="timelineFiltersBox" style="display:none; margin-top:10px;">
+  
 <div class="diario-toolbar" style="margin-top:0;">
   <button class="seg-btn active" id="btn-tl-all" onclick="setTimelineFilter('all')" type="button">🧾 Tutto</button>
   <button class="seg-btn" id="btn-tl-perc" onclick="setTimelineFilter('percorso')" type="button">🏁 Percorsi</button>
@@ -2355,7 +2355,7 @@ color:#fff;
   <button class="seg-btn" id="btn-tl-carb" onclick="setTimelineFilter('carburazione')" type="button">🌬️ Carb</button>
 </div>
 
-
+</div>
     
   </div>
 </div>
@@ -4249,6 +4249,10 @@ function apriModal(id) {
 function chiudiModal(id) {
   const m = document.getElementById(id);
   if (!m) return;
+  if (id === 'videoLightbox') {
+  const fr = document.getElementById('videoLightboxFrame');
+  if (fr) fr.src = '';
+}
   m.classList.remove('open');
     // ✅ quando chiudo la mappa full: se sto tracciando rimane acceso,
   // altrimenti può spegnersi
@@ -4701,13 +4705,6 @@ function renderMapFullPhotoMarkersForContext(ctx) {
           ${emb ? `<iframe class="yt-embed" src="${emb}"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowfullscreen></iframe>` : ''}
-
-        //  <div style="margin-top:8px;">
-         //   <a href="${e.videoUrl}" target="_blank" rel="noopener"
-         //      style="display:block;width:100%;text-align:center;padding:10px 12px;border-radius:12px;background:#2196F3;color:#000;text-decoration:none;font-weight:900;">
-        //      ▶ Apri su YouTube
-        //    </a>
-         // </div>
         </div>
       `;
     } else if (hasPlanned) {
@@ -6793,12 +6790,7 @@ const videoHtml = e.videoUrl
          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
          allowfullscreen></iframe>` : ''}
 
-     //  <div style="margin-top:8px;">
-    //     <a href="${e.videoUrl}" target="_blank" rel="noopener"
-    //        style="display:inline-block;padding:8px 10px;border-radius:12px;background:#222;border:1px solid #444;color:#ff9800;text-decoration:none;font-weight:900;font-size:12px;">
-    //       ▶ Apri su YouTube
-    //     </a>
-    //   </div>
+
      </div>`
   : (e.videoPlanned
       ? `<div style="margin-top:10px;color:#ff9800;font-weight:1000;">
@@ -6875,7 +6867,7 @@ function renderTravelTimeline(containerId){
   const tipo = isGiro ? 'TURISMO' : 'TAPPA';
   const col = isGiro ? '#2196F3' : '#9c27b0';
 
-  const gh = p.ghSynced ? '🐙' : '⏳';
+  const gh = p.isPublic ? (p.ghSynced ? '🐙' : '⏳') : '';
   const pub = p.isPublic ? 'checked' : '';
 
   // helper già presenti nel tuo codice (usati in renderTappe)
@@ -6995,7 +6987,7 @@ function renderTravelTimeline(containerId){
 
       <div style="display:flex; gap:10px; margin-top:12px;">
         ${btnSmall('🗺️ Vedi traccia', `apriTracciaPercorso(${p.id})`, '#222', '#bbb')}
-        ${btnSmall('➕ Aggiungi Media', `apriAddMediaToPercorso('${(String(p.tipo||'').toLowerCase()==='turismo') ? 'turismo' : 'tappa'}', ${p.id})`, '#4caf50', '#000')}
+       
       </div>
 
       <div style="display:flex; gap:10px; margin-top:10px;">
@@ -7039,8 +7031,7 @@ function renderTravelTimeline(containerId){
       const testo = (leader.testo || '').trim();
       const testoShort = (testo.length > 240) ? (testo.slice(0, 240) + '…') : testo;
 
-      const heroRaw = photos[0] ? (photos[0].fotoUrl || photos[0].foto) : null;
-      //const heroSrc = heroRaw ? driveToDirectImageUrl(heroRaw) : null;
+    
 
       const emb = leader.videoUrl ? youtubeEmbedUrl(leader.videoUrl) : '';
       const videoHtml = leader.videoUrl
@@ -7221,15 +7212,11 @@ ${galleryHtml}
               : ''}
 
             ${(costoUsd != null && costoUsd > 0)
-              ? `<div>💵 Totale benzina (USD): <b style="color:var(--giallo);">
-$$
-{costoUsd.toFixed(2)}</b></div>`
+              ? `<div>💵 Totale benzina (USD): <b style="color:var(--giallo);">$${costoUsd.toFixed(2)}</b></div>`
               : ''}
 
             ${(costoOlio != null && costoOlio > 0)
-              ? `<div>🧪 Olio 2T (da stock): <b style="color:#00bcd4;">
-$$
-{costoOlio.toFixed(2)}</b></div>`
+              ? `<div>🧪 Olio 2T (da stock): <b style="color:var(--giallo);">$${costoOlio.toFixed(2)}</b></div>`
               : ''}
 
             ${e.note ? `<div style="margin-top:8px;color:#aaa;">📝 ${escHtml(e.note)}</div>` : ''}
@@ -7271,6 +7258,7 @@ const pub = e.isPublic ? 'checked' : '';
           
           <div>Max <b>${e.chicMax||'--'}</b> — Min <b>${e.chicMin||'--'}</b></div>
           <div style="color:#888;">Alt: ${e.alt||0} m</div>
+          ${e.nota ? `<div class="log-note">📝 ${escHtml(e.nota)}</div>` : ''}
         </div>
 
 
@@ -7392,7 +7380,12 @@ function setTimelineFilter(k) {
 
   renderDiarioFull?.();
 }
-
+  
+function toggleTimelineFiltersUI(){
+  const b = document.getElementById('timelineFiltersBox');
+  if (!b) return;
+  b.style.display = (b.style.display === 'none' || !b.style.display) ? 'block' : 'none';
+}
   function buildTravelTimelineItems(){
   const out = [];
 
@@ -10551,32 +10544,17 @@ function apriEditIntervento(id) {
     }
   }
 
-  const box2 = document.getElementById('edit-log-foto2-attuale');
-  if (box2) {
-    const srcRaw2 = e.fotoUrl2 || e.foto2;
-    if (srcRaw2) {
-      const src2 = driveToDirectImageUrl(srcRaw2);
-      box2.innerHTML = `
-        <div style="color:#aaa;font-size:12px;margin-bottom:6px;">Foto 2 attuale:</div>
-        <img src="${src2}" style="width:100%;border-radius:12px;max-height:220px;object-fit:cover;">
-      `;
-    } else {
-      box2.innerHTML = `<div style="color:#777;font-size:12px;">Nessuna Foto 2.</div>`;
-    }
-  }
+
 
   document.getElementById('edit-log-video').value = e.videoUrl || '';
   document.getElementById('edit-log-video-planned').checked = !!e.videoPlanned;
 
-  const prev2 = document.getElementById('anteprima-edit-log-foto2');
-  if (prev2) { prev2.style.display = 'none'; prev2.innerHTML = ''; prev2.dataset.src = ''; }
-  const fi2 = document.getElementById('edit-log-foto2-input');
-  if (fi2) fi2.value = '';
+  
 
   
   // reset input nuova foto
-  const prev = document.getElementById('anteprima-edit-log-foto');
-  if (prev) { prev.style.display = 'none'; prev.innerHTML = ''; prev.dataset.src = ''; }
+ //const prev = document.getElementById('anteprima-edit-log-foto');
+if (prev) { prev.style.display = 'none'; prev.innerHTML = ''; prev.dataset.list = '[]'; }
   const fi = document.getElementById('edit-log-foto-input');
   if (fi) fi.value = '';
 
@@ -10600,11 +10578,11 @@ function salvaModificaIntervento() {
 
   // foto nuova (se scelta)
   const prev = document.getElementById('anteprima-edit-log-foto');
-  const newFoto = (prev?.dataset?.src || '').trim();
+let newFotos = [];
+try { newFotos = JSON.parse(prev?.dataset?.list || '[]'); } catch { newFotos = []; }
+if (!Array.isArray(newFotos)) newFotos = [];
 
 
-  const prev2 = document.getElementById('anteprima-edit-log-foto2');
-  const newFoto2 = (prev2?.dataset?.src || '').trim();
 
   const videoUrlRaw = (document.getElementById('edit-log-video')?.value || '').trim();
   const videoUrl = videoUrlRaw || null;
@@ -10639,19 +10617,19 @@ function salvaModificaIntervento() {
   e.valuta = cur;
 
   // se c’è una nuova foto: sostituisci (e rimetti in coda per Drive)
-  if (newFoto) {
-    e.foto = newFoto;
-    e.fotoUrl = null;
-    enqueueFoto?.('logbook', e.id);
-    updateDriveSyncInfo?.();
-  }
+ if (newFotos.length >= 1 && newFotos[0]) {
+  e.foto = newFotos[0];
+  e.fotoUrl = null;
+  enqueueFoto?.('logbook', e.id);
+  updateDriveSyncInfo?.();
+}
 
-  if (newFoto2) {
-    e.foto2 = newFoto2;
-    e.fotoUrl2 = null;
-    enqueueFoto?.('logbook', e.id);
-    updateDriveSyncInfo?.();
-  }
+if (newFotos.length >= 2 && newFotos[1]) {
+  e.foto2 = newFotos[1];
+  e.fotoUrl2 = null;
+  enqueueFoto?.('logbook', e.id);
+  updateDriveSyncInfo?.();
+}
 
   
   log[idx] = e;
