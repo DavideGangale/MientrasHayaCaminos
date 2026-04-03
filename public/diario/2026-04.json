@@ -1,10 +1,316 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-04-03T18:13:34.574Z",
+  "_exportDate": "2026-04-03T22:58:23.479Z",
   "tipo": "diario_mese",
   "mese": "2026-04",
-  "count": 14,
+  "count": 30,
   "entries": [
+    {
+      "id": 1775256646896,
+      "ts": 1775256646073,
+      "data": "03/04/2026",
+      "ora": "17:50",
+      "paese": "Colombia",
+      "km": "184.4",
+      "testo": "Sasaima",
+      "tags": [],
+      "geo": {
+        "lat": 4.96384229089202,
+        "lon": -74.43429647595374
+      },
+      "videoUrl": "https://youtube.com/shorts/5Cd-93HXbFY?si=teCtkyhyOLU3r43O",
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=15nLSi2WHNbdPHI3dpXZfz70RWpB7nGXz",
+      "foto": null
+    },
+    {
+      "id": 1775256393093,
+      "ts": 1775256393093,
+      "data": "03/04/2026",
+      "ora": "17:46",
+      "paese": "Colombia",
+      "km": "67.13",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 4.949335,
+        "lon": -74.2987333
+      },
+      "videoUrl": "https://youtube.com/shorts/qe3qEHRA3OM?si=CISZUAFIMN53ZKeL",
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1775256345933,
+      "ts": 1775256345932,
+      "data": "03/04/2026",
+      "ora": "17:45",
+      "paese": "Colombia",
+      "km": "67.13",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 4.949335,
+        "lon": -74.2987333
+      },
+      "videoUrl": "https://youtube.com/shorts/pwPC8NKsBjA?si=MgEuv5Cmeq4U86Yl",
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1775256211401,
+      "ts": 1775256211119,
+      "data": "03/04/2026",
+      "ora": "17:43",
+      "paese": "Colombia",
+      "km": "67.13",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 4.949335,
+        "lon": -74.2987333
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1S-t86x1qOTfeCwuy7-mmu4ySfTSAfWJE",
+      "foto": null
+    },
+    {
+      "id": 1775256211192,
+      "ts": 1775256211119,
+      "data": "03/04/2026",
+      "ora": "17:43",
+      "paese": "Colombia",
+      "km": "67.13",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 4.949335,
+        "lon": -74.2987333
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1kvvcLg4p0vFI-qU8CYYzbeOBzDmkBAsk",
+      "foto": null
+    },
+    {
+      "id": 1775256211769,
+      "ts": 1775256211119,
+      "data": "03/04/2026",
+      "ora": "17:43",
+      "paese": "Colombia",
+      "km": "67.13",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 4.949335,
+        "lon": -74.2987333
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1TCEYgacdIlaypEeDQ6Emz-_yN2OPMP-V",
+      "foto": null
+    },
+    {
+      "id": 1775256212000,
+      "ts": 1775256211119,
+      "data": "03/04/2026",
+      "ora": "17:43",
+      "paese": "Colombia",
+      "km": "67.13",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 4.949335,
+        "lon": -74.2987333
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=17q05XiRLV_trDwt03MnKQxZsVLtGh6Cp",
+      "foto": null
+    },
+    {
+      "id": 1775256211600,
+      "ts": 1775256211119,
+      "data": "03/04/2026",
+      "ora": "17:43",
+      "paese": "Colombia",
+      "km": "67.13",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 4.949335,
+        "lon": -74.2987333
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1aCT4TJzhFtoSCJBXGeXEpuA8Jzpzy509",
+      "foto": null
+    },
+    {
+      "id": 1775256211461,
+      "ts": 1775256211119,
+      "data": "03/04/2026",
+      "ora": "17:43",
+      "paese": "Colombia",
+      "km": "67.13",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 4.949335,
+        "lon": -74.2987333
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1k6GhDt9a4Z4DqU6GBaXA_7mSRVlj79PE",
+      "foto": null
+    },
+    {
+      "id": 1775256211414,
+      "ts": 1775256211119,
+      "data": "03/04/2026",
+      "ora": "17:43",
+      "paese": "Colombia",
+      "km": "67.13",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 4.949335,
+        "lon": -74.2987333
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=15nLSi2WHNbdPHI3dpXZfz70RWpB7nGXz",
+      "foto": null
+    },
+    {
+      "id": 1775256211396,
+      "ts": 1775256211119,
+      "data": "03/04/2026",
+      "ora": "17:43",
+      "paese": "Colombia",
+      "km": "67.13",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 4.949335,
+        "lon": -74.2987333
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1g3bkPBHzHKB98-i80MrqgCGQOyBs-Wmv",
+      "foto": null
+    },
+    {
+      "id": 1775255964561,
+      "ts": 1775255963692,
+      "data": "03/04/2026",
+      "ora": "17:39",
+      "paese": "Colombia",
+      "km": "29.87",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 4.8198867,
+        "lon": -74.35554
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1HDR3Vhq1R-7dh8Xqxd2dLQYfLkOhCBt2",
+      "foto": null
+    },
+    {
+      "id": 1775255964216,
+      "ts": 1775255963692,
+      "data": "03/04/2026",
+      "ora": "17:39",
+      "paese": "Colombia",
+      "km": "29.87",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 4.8198867,
+        "lon": -74.35554
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1uD2m2UOa0ZRQrkouUhHXgURX4DNsa8Yz",
+      "foto": null
+    },
+    {
+      "id": 1775255964064,
+      "ts": 1775255963692,
+      "data": "03/04/2026",
+      "ora": "17:39",
+      "paese": "Colombia",
+      "km": "29.87",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 4.8198867,
+        "lon": -74.35554
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1qvRxEiJTk5_U6kWP_cwQ5xQNK3WJIB4t",
+      "foto": null
+    },
+    {
+      "id": 1775255964583,
+      "ts": 1775255963692,
+      "data": "03/04/2026",
+      "ora": "17:39",
+      "paese": "Colombia",
+      "km": "29.87",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 4.8198867,
+        "lon": -74.35554
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1bIK1UoSRR6gOBoZWqKIIetplYTn4uIR_",
+      "foto": null
+    },
+    {
+      "id": 1775255963746,
+      "ts": 1775255963692,
+      "data": "03/04/2026",
+      "ora": "17:39",
+      "paese": "Colombia",
+      "km": "29.87",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 4.8198867,
+        "lon": -74.35554
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1LVcjwAGmeKM3kGN-bCBsZdGgfSW7OM16",
+      "foto": null
+    },
+    {
+      "id": 1775255871823,
+      "ts": 1775255871822,
+      "data": "03/04/2026",
+      "ora": "17:37",
+      "paese": "Colombia",
+      "km": "1.65",
+      "testo": "Una vistia dende el parche vespista de Faca",
+      "tags": [],
+      "geo": {
+        "lat": 4.8198867,
+        "lon": -74.35554
+      },
+      "videoUrl": "https://youtube.com/shorts/isbmpvCMcEc?si=rELaalfHjENXHTx2",
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
     {
       "id": 1775239921225,
       "ts": 1775239921225,
@@ -20,27 +326,9 @@
         "lat": 4.949295658831372,
         "lon": -74.29857688539241
       },
-      "videoUrl": null,
-      "videoPlanned": true,
-      "fotoUrl": null,
-      "foto": null
-    },
-    {
-      "id": 1775239111266,
-      "ts": 1775239110496,
-      "data": "03/04/2026",
-      "ora": "12:58",
-      "paese": "Colombia",
-      "km": "152.8",
-      "testo": "almuerzo Frances",
-      "tags": [],
-      "geo": {
-        "lat": 4.949335,
-        "lon": -74.2987333
-      },
-      "videoUrl": null,
+      "videoUrl": "https://youtube.com/shorts/1H51W-1tOHA?si=z9LNvQUpMEMU1207",
       "videoPlanned": false,
-      "fotoUrl": "https://drive.google.com/uc?export=view&id=1A-7RggwC653_r1QpsTKrzvoBGQ-iuS9z",
+      "fotoUrl": null,
       "foto": null
     },
     {
@@ -112,7 +400,7 @@
         "lat": 4.9964883,
         "lon": -74.341185
       },
-      "videoUrl": null,
+      "videoUrl": "https://youtube.com/shorts/pSizYwjLoew?si=ZjqaMQBa9VpYMriE",
       "videoPlanned": false,
       "fotoUrl": null,
       "foto": null
@@ -124,7 +412,7 @@
       "ora": "12:10",
       "paese": "Colombia",
       "km": "135.6",
-      "testo": "carretera casi se va",
+      "testo": "Y la carretera casi se va",
       "tags": [
         "Sterrato"
       ],
@@ -150,7 +438,7 @@
         "lat": 4.96384229089202,
         "lon": -74.43429647595374
       },
-      "videoUrl": null,
+      "videoUrl": "https://youtube.com/shorts/5Cd-93HXbFY?si=teCtkyhyOLU3r43O",
       "videoPlanned": false,
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1DLiNUJOye7Et_0LU0t9D3iWe4SUBKO87",
       "foto": null
@@ -182,7 +470,7 @@
       "ora": "10:47",
       "paese": "Colombia",
       "km": "102.6",
-      "testo": "otra pricesion",
+      "testo": "Otra procesion en la ruta",
       "tags": [
         "SemanaSanta"
       ],
@@ -190,8 +478,8 @@
         "lat": 4.8780033,
         "lon": -74.4362067
       },
-      "videoUrl": null,
-      "videoPlanned": true,
+      "videoUrl": "https://youtube.com/shorts/20FFjk11vD8?si=F4YZ5aYy04_Uqavo",
+      "videoPlanned": false,
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1jguuseAeiZQbYbc_vcIB9Zh7VzYNhVBG",
       "foto": null
     },
@@ -202,7 +490,7 @@
       "ora": "",
       "paese": "Colombia",
       "km": "",
-      "testo": "",
+      "testo": "en el medio de la procesion",
       "tags": [
         "Procesión",
         "SemanaSanta"
@@ -211,8 +499,8 @@
         "lat": 4.807359459152309,
         "lon": -74.35879961651979
       },
-      "videoUrl": null,
-      "videoPlanned": true,
+      "videoUrl": "https://youtube.com/shorts/xCr3GBpqygs?si=D_3ohf28elkgXGJZ",
+      "videoPlanned": false,
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1OJ743UgrNfVPHBn0Q72UqoNYm3pCOL9h",
       "foto": null
     },
