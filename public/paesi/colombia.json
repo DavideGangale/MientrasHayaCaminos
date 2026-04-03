@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-04-03T12:22:25.338Z",
+  "_exportDate": "2026-04-03T13:20:23.458Z",
   "tipo": "paese",
   "paese": "Colombia",
   "slug": "colombia",
@@ -3474,6 +3474,7 @@
       ],
       "videoUrl": "https://youtu.be/AbqCsDj8c3Q?si=gJWrPnE6aThp7xIV",
       "videoPlanned": false,
+      "ricambiUsati": [],
       "geo": {
         "lat": 4.8197633,
         "lon": -74.35554
