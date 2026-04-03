@@ -1438,7 +1438,9 @@ const I18N = {
     diary: 'Diario',
     partsUsed: 'Ricambi usati',
 
+
     statsHoursOnRoad: '⏱️ Ore su Strada',
+    total: 'Totale',
 statsAltitudeRange: '⛰️ Rango Altezza',
 statsRefuelsCount: '⛽ Numero Rifornimenti',
 statsMaintCount: '🔧 Numero Interventi',
@@ -1537,6 +1539,7 @@ statsOil: '⛽ Statistiche Olio 2T',
     diary: 'Diary',
     partsUsed: "Parts used",
        statsHoursOnRoad: '⏱️ Hours on the Road',
+    total: 'Total',
 statsAltitudeRange: '⛰️ Altitude Range',
 statsRefuelsCount: '⛽ Number of Fuel Stops',
 statsMaintCount: '🔧 Number of Repairs',
@@ -1635,12 +1638,14 @@ statsOil: '⛽ Oil Stats',
     partsUsed: "Repuestos usados",
 
        statsHoursOnRoad: '⏱️ Horas de Carretera',
+    total: 'Total',
 statsAltitudeRange: '⛰️ Rangos de Altura',
 statsRefuelsCount: '⛽ Numero de Repostajes',
 statsMaintCount: '🔧 Numero de Manutenciones',
 statsCarbCount: '🌬️ Numero Carburaciones',
 statsFuel: '⛽ Estadísticas de Repostajes',
 statsOil: '⛽ Estadísticas de Aceite',
+    
     
     diary: 'Diario'
   }
@@ -2790,7 +2795,6 @@ function buildUsedPartsStatsHtmlPublic(country = null) {
 
   if (!arr.length) return '';
 
-  // titolo traducibile (se non hai la key partsUsed, mostra IT)
   let title = 'Ricambi usati';
   try {
     const t = (typeof T === 'function') ? T('partsUsed') : '';
@@ -2805,8 +2809,10 @@ function buildUsedPartsStatsHtmlPublic(country = null) {
       </div>
     </div>
   `;
+}
 
   
+function renderStatsDati() {
   if (!INDEX_DATA) return;
 
   const mode = document.getElementById('statsCountryFilter').value;
@@ -2827,13 +2833,9 @@ function buildUsedPartsStatsHtmlPublic(country = null) {
     km = Number(st.km || 0);
     benz = Number(st.benzina || 0);
 
-    if (st.olioTotaleLitri != null) {
-      olio = Number(st.olioTotaleLitri || 0);
-    } else if (st.olioMl != null) {
-      olio = Number(st.olioMl || 0) / 1000;
-    } else {
-      olio = 0;
-    }
+    if (st.olioTotaleLitri != null) olio = Number(st.olioTotaleLitri || 0);
+    else if (st.olioMl != null) olio = Number(st.olioMl || 0) / 1000;
+    else olio = 0;
 
     spesaBenz = Number(st.spesaBenzinaUsd || 0);
     spesaMaint = Number(st.spesaRicambiUsd || 0) + Number(st.spesaManodoperaUsd || 0);
@@ -2850,82 +2852,97 @@ function buildUsedPartsStatsHtmlPublic(country = null) {
   const olioBoxValue = (country === null)
     ? `${Number(olio || 0).toFixed(2)} L`
     : (olio > 0 ? `${Number(olio || 0).toFixed(2)} L` : '--');
+
+  const extra = computeExtraPublicStats(country);
   const usedPartsHtml = buildUsedPartsStatsHtmlPublic(country);
-     const extra = computeExtraPublicStats(country);
-  const usedPartsHtml = buildUsedPartsStatsHtmlPublic(country);
+
   document.getElementById('statsModalContent').innerHTML = `
-  <div class="stats-card">
-    <div class="stats-k">${T('statsKmTotal')}</div>
-    <div class="stats-v">${Number(km || 0).toFixed(1)}</div>
-  </div>
+    <div class="stats-card">
+      <div class="stats-k">${T('statsKmTotal')}</div>
+      <div class="stats-v">${Number(km || 0).toFixed(1)}</div>
+    </div>
 
-  <div class="stats-card">
-    <div class="stats-k">${T('statsAvgConsumption')}</div>
-    <div class="stats-v">${cons} km/L</div>
-  </div>
+    <div class="stats-card">
+      <div class="stats-k">${T('statsAvgConsumption')}</div>
+      <div class="stats-v">${cons} km/L</div>
+    </div>
 
-  <div class="stats-card">
-    <div class="stats-k">${T('statsHoursOnRoad') ?? 'Ore su strada'}</div>
-    <div class="stats-v">${fmtHhMmFromSeconds(extra.durataTotSec)}</div>
-  </div>
-
-  <div class="stats-card wide accent-fuel">
-    <div class="stats-k">⛽ ${T('statsFuel')}</div>
-    <div class="stats-pair">
-      <div class="col">
-        <div class="k">${T('statsFuelUsed')}</div>
-        <div class="v">${Number(benz || 0).toFixed(1)} L</div>
-      </div>
-      <div class="col">
-        <div class="k">${T('statsFuelCost')}</div>
-        <div class="v">${fmtUsd(spesaBenz)}</div>
+    <!-- Ore su strada: tappe + giri + totale -->
+    <div class="stats-card wide">
+      <div class="stats-k">${T('statsHoursOnRoad') ?? 'Ore su strada'}</div>
+      <div class="stats-pair" style="margin-top:10px;">
+        <div class="col">
+          <div class="k">${T('tappa') ?? 'Tappe'}</div>
+          <div class="v">${fmtHhMmFromSeconds(extra.durataTappeSec)}</div>
+        </div>
+        <div class="col">
+          <div class="k">${T('giri') ?? 'Giri'}</div>
+          <div class="v">${fmtHhMmFromSeconds(extra.durataGiriSec)}</div>
+        </div>
+        <div class="col">
+          <div class="k">${T('total') ?? 'Totale'}</div>
+          <div class="v">${fmtHhMmFromSeconds(extra.durataTotSec)}</div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="stats-card wide accent-oil">
-    <div class="stats-k">🛢️ ${T('statsOil')}</div>
-    <div class="stats-pair">
-      <div class="col">
-        <div class="k">${T('statsOilUsed')}</div>
-        <div class="v">${olioBoxValue}</div>
-      </div>
-      <div class="col">
-        <div class="k">${T('statsOilCost')}</div>
-        <div class="v">${fmtUsd(spesaOlio)}</div>
+    <div class="stats-card wide accent-fuel">
+      <div class="stats-k">⛽ ${T('statsFuel') ?? 'Benzina'}</div>
+      <div class="stats-pair">
+        <div class="col">
+          <div class="k">${T('statsFuelUsed')}</div>
+          <div class="v">${Number(benz || 0).toFixed(1)} L</div>
+        </div>
+        <div class="col">
+          <div class="k">${T('statsFuelCost')}</div>
+          <div class="v">${fmtUsd(spesaBenz)}</div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="stats-card wide accent-alt">
-    <div class="stats-k">⛰️ ${T('statsAltitudeRange') ?? 'Altitudine (min → max)'}</div>
-    <div class="stats-v">
-      ${extra.altMin == null ? '--' : `${Math.round(extra.altMin)} m`} → ${extra.altMax == null ? '--' : `${Math.round(extra.altMax)} m`}
+    <div class="stats-card wide accent-oil">
+      <div class="stats-k">🛢️ ${T('statsOil') ?? 'Olio 2T'}</div>
+      <div class="stats-pair">
+        <div class="col">
+          <div class="k">${T('statsOilUsed') ?? 'Olio usato'}</div>
+          <div class="v">${olioBoxValue}</div>
+        </div>
+        <div class="col">
+          <div class="k">${T('statsOilCost')}</div>
+          <div class="v">${fmtUsd(spesaOlio)}</div>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <div class="stats-card accent-fuel">
-    <div class="stats-k">${T('statsRefuelsCount') ?? 'Rifornimenti'}</div>
-    <div class="stats-v">${extra.refuelsCount}</div>
-  </div>
+    <div class="stats-card wide accent-alt">
+      <div class="stats-k">⛰️ ${T('statsAltitudeRange') ?? 'Altitudine (min → max)'}</div>
+      <div class="stats-v">
+        ${extra.altMin == null ? '--' : `${Math.round(extra.altMin)} m`} → ${extra.altMax == null ? '--' : `${Math.round(extra.altMax)} m`}
+      </div>
+    </div>
 
-  <div class="stats-card accent-maint">
-    <div class="stats-k">${T('statsMaintCount') ?? 'Interventi'}</div>
-    <div class="stats-v">${extra.maintCount}</div>
-  </div>
+    <div class="stats-card accent-fuel">
+      <div class="stats-k">${T('statsRefuelsCount') ?? 'Rifornimenti'}</div>
+      <div class="stats-v">${extra.refuelsCount}</div>
+    </div>
 
-  <div class="stats-card">
-    <div class="stats-k">${T('statsCarbCount') ?? 'Carburazioni'}</div>
-    <div class="stats-v">${extra.carbCount}</div>
-  </div>
+    <div class="stats-card accent-maint">
+      <div class="stats-k">${T('statsMaintCount') ?? 'Interventi'}</div>
+      <div class="stats-v">${extra.maintCount}</div>
+    </div>
 
-  <div class="stats-card wide accent-maint">
-    <div class="stats-k">${T('statsWorkshopCost')}</div>
-    <div class="stats-v">${fmtUsd(spesaMaint)}</div>
-  </div>
+    <div class="stats-card">
+      <div class="stats-k">${T('statsCarbCount') ?? 'Carburazioni'}</div>
+      <div class="stats-v">${extra.carbCount}</div>
+    </div>
 
-  ${usedPartsHtml}
-`;
+    <div class="stats-card wide accent-maint">
+      <div class="stats-k">${T('statsWorkshopCost')}</div>
+      <div class="stats-v">${fmtUsd(spesaMaint)}</div>
+    </div>
+
+    ${usedPartsHtml}
+  `;
 }
 
 function updateHostModalTexts() {
@@ -3717,6 +3734,41 @@ function computeExtraPublicStats(country = null) {
     if (!country) return true;
     return String(x?.paese || '').trim() === String(country).trim();
   };
+
+  const tappe = (Array.isArray(DATA?.tappe) ? DATA.tappe : []).filter(isSameCountry);
+  const giri  = (Array.isArray(DATA?.turismo) ? DATA.turismo : []).filter(isSameCountry);
+
+  const rifornimenti = (Array.isArray(DATA?.rifornimenti) ? DATA.rifornimenti : []).filter(isSameCountry);
+  const manutenzioni = (Array.isArray(DATA?.manutenzioni) ? DATA.manutenzioni : []).filter(isSameCountry);
+  const carburazioni = (Array.isArray(DATA?.carburazioni) ? DATA.carburazioni : []).filter(isSameCountry);
+
+  // ore su strada separate
+  const durataTappeSec = tappe.reduce((sum, t) => sum + Number(t?.durata || 0), 0);
+  const durataGiriSec  = giri.reduce((sum, t) => sum + Number(t?.durata || 0), 0);
+  const durataTotSec   = durataTappeSec + durataGiriSec;
+
+  // altitudine min/max globale (tappe + giri)
+  let altMin = null, altMax = null;
+  for (const t of [...tappe, ...giri]) {
+    const mm = getAltMinMaxFromTrackPublic(t);
+    if (mm.min == null || mm.max == null) continue;
+    altMin = (altMin == null) ? mm.min : Math.min(altMin, mm.min);
+    altMax = (altMax == null) ? mm.max : Math.max(altMax, mm.max);
+  }
+
+  return {
+    refuelsCount: rifornimenti.length,
+    maintCount: manutenzioni.length,
+    carbCount: carburazioni.length,
+
+    durataTappeSec,
+    durataGiriSec,
+    durataTotSec,
+
+    altMin,
+    altMax
+  };
+}
 
   const tappe = (Array.isArray(DATA?.tappe) ? DATA.tappe : []).filter(isSameCountry);
   const giri  = (Array.isArray(DATA?.turismo) ? DATA.turismo : []).filter(isSameCountry);
