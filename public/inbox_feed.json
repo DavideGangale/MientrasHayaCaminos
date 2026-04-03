@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-04-03T16:15:58.909Z",
+  "exportedAt": "2026-04-03T18:12:04.327Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -321,6 +321,23 @@
         "lon": -74.43429647595374
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1DLiNUJOye7Et_0LU0t9D3iWe4SUBKO87"
+    },
+    {
+      "ts": 1775239921225,
+      "id": 1775239921225,
+      "paese": "",
+      "km": "",
+      "testo": "Almuerzo en Petit Jardin",
+      "tags": [
+        "ComidaFrancesa"
+      ],
+      "videoUrl": null,
+      "videoPlanned": true,
+      "geo": {
+        "lat": 4.949295658831372,
+        "lon": -74.29857688539241
+      },
+      "fotoUrl": null
     }
   ]
 }
