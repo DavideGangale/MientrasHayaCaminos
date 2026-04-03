@@ -1412,7 +1412,8 @@ const I18N = {
     diarySubtitle: 'Tutti i post in ordine cronologico',
     backToMap: '← Mappa',
     viewOnMap: '📍 Vedi sulla mappa',
-     openGraph: '📈 Grafico'
+    diary: 'Diario',
+    openGraph: '📈 Grafico'
   },
   en: {
     live: 'VespaTrek PX150',
@@ -1500,6 +1501,7 @@ const I18N = {
     diarySubtitle: 'All posts in chronological order',
     backToMap: '← Map',
     viewOnMap: '📍 View on map',
+    diary: 'Diary',
     openGraph: '📈 Chart'
   },
   es: {
@@ -1588,7 +1590,8 @@ const I18N = {
     diarySubtitle: 'Todas las entradas en orden cronológico',
     backToMap: '← Mapa',
     viewOnMap: '📍 Ver en el mapa',
-    openGraph: '📈 Gráfico'
+    openGraph: '📈 Gráfico',
+    diary: 'Diario'
   }
 };
 
@@ -1714,6 +1717,11 @@ document.getElementById('btnThanksOpen').innerHTML =
   renderThanksModalList();
   updateLangButtons();
   syncFilterButtonsUI();
+
+    // se il diario è aperto, ritraduco il contenuto
+  const page = document.getElementById('diaryPage');
+  if (page && page.classList.contains('open')) {
+    renderDiaryList();
 }
 
 async function loadHostConfig() {
@@ -3199,7 +3207,7 @@ function renderDiaryList() {
 
     if (it.kind === 'DIARIO') {
       badgeClass = 'badge-diario';
-      badgeText = '📝 Diario';
+      badgeText = `📝 ${T('diary')}`;   // <-- invece di "📝 Diario"
       const d = it.raw || {};
       bodyHtml = `<div class="diary-text">${escapeHtml(d.testo || '')}</div>`;
       mediaHtml = buildMediaBlockFromAny(d);
@@ -3207,7 +3215,7 @@ function renderDiaryList() {
 
     if (it.kind === 'MAINT') {
       badgeClass = 'badge-maint';
-      badgeText = '🔧 Officina';
+      badgeText = `🔧 ${T('workshop')}`;  // <-- invece di "🔧 Officina"
       const m = it.raw || {};
             mediaHtml = buildMediaBlockFromAny(m);
       const costo = Number(m?.costoUsd || 0);
@@ -3222,7 +3230,7 @@ $$
 
     if (it.kind === 'FUEL') {
       badgeClass = 'badge-fuel';
-      badgeText = '⛽ Rifornimento';
+      badgeText = `⛽ ${T('refuel')}`;   // <-- invece di "⛽ Rifornimento"
       const r = it.raw || {};
       const oil = getOilInfoFromRefuel(r);
       const costo = Number(r?.costoBenzUsd ?? r?.costo ?? 0);
@@ -3242,7 +3250,7 @@ $$
 
     if (it.kind === 'CARB') {
       badgeClass = 'badge-carb';
-      badgeText = '🌬️ Carburazione';
+      badgeText = `🌬️ ${T('carbSetup')}`;  // <-- invece di "🌬️ Carburazione"
       const c = it.raw || {};
             const plug = pickFirst(c, ['candela', 'sparkPlug', 'bujia']);
             const jetMain  = pickFirst(c, ['gettoMax', 'gettoMassimo', 'chicMax', 'mainJet']);
@@ -3284,7 +3292,8 @@ $$
 
      if (it.kind === 'TAPPA' || it.kind === 'GIRO') {
       badgeClass = (it.kind === 'GIRO') ? 'badge-giro' : 'badge-tappa';
-      badgeText = (it.kind === 'GIRO') ? '🛵 Giro' : '🏁 Tappa';
+       badgeText  = (it.kind === 'GIRO') ? `🛵 ${T('giri')}`     // oppure crea una key tipo T('ride') se preferisci
+    : `🏁 ${T('tappa')}`;
       const t = it.raw || {};
       const { a0, a1 } = getAltStartEndFromTelemetry(t);
       const tt = getTrackStartEndTimeStrings(t);
