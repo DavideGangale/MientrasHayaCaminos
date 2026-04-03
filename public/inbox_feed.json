@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-04-02T00:45:57.317Z",
+  "exportedAt": "2026-04-03T15:09:41.529Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -271,6 +271,24 @@
         "lon": -74.36063734065583
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1YecOhEezNdkRutVpe7YwkoBnTqm2V3n0"
+    },
+    {
+      "ts": 1775228967634,
+      "id": 1775228967634,
+      "paese": "",
+      "km": "",
+      "testo": "",
+      "tags": [
+        "Procesión",
+        "SemanaSanta"
+      ],
+      "videoUrl": null,
+      "videoPlanned": true,
+      "geo": {
+        "lat": 4.807359459152309,
+        "lon": -74.35879961651979
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1OJ743UgrNfVPHBn0Q72UqoNYm3pCOL9h"
     }
   ]
 }
