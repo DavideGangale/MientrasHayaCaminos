@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-04-03T18:01:26.122Z",
+  "_exportDate": "2026-04-03T18:03:23.122Z",
   "titolo": "VespaTrek PX150",
   "paeseAttuale": "Colombia",
   "diarioTagsPreset": [
@@ -27,7 +27,7 @@
   ],
   "stats": {
     "kmTotali": 152.8482,
-    "benzinaUsataLitri": 7.812728,
+    "benzinaUsataLitri": 7.019527999999999,
     "benzinaFuoriTappaLitri": 1.893,
     "olioTotaleLitri": 0.853,
     "spesaBenzinaUsd": 48.331376375217154,
