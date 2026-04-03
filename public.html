@@ -3768,38 +3768,7 @@ function computeExtraPublicStats(country = null) {
     altMin,
     altMax
   };
-
-
-  const tappe = (Array.isArray(DATA?.tappe) ? DATA.tappe : []).filter(isSameCountry);
-  const giri  = (Array.isArray(DATA?.turismo) ? DATA.turismo : []).filter(isSameCountry);
-
-  const rifornimenti = (Array.isArray(DATA?.rifornimenti) ? DATA.rifornimenti : []).filter(isSameCountry);
-  const manutenzioni = (Array.isArray(DATA?.manutenzioni) ? DATA.manutenzioni : []).filter(isSameCountry);
-  const carburazioni = (Array.isArray(DATA?.carburazioni) ? DATA.carburazioni : []).filter(isSameCountry);
-
-  // ore totali su strada: tappe + giri
-  const durataTotSec =
-    [...tappe, ...giri].reduce((sum, t) => sum + Number(t?.durata || 0), 0);
-
-  // altitudine min/max globale (tappe + giri)
-  let altMin = null, altMax = null;
-  for (const t of [...tappe, ...giri]) {
-    const mm = getAltMinMaxFromTrackPublic(t);
-    if (mm.min == null || mm.max == null) continue;
-    altMin = (altMin == null) ? mm.min : Math.min(altMin, mm.min);
-    altMax = (altMax == null) ? mm.max : Math.max(altMax, mm.max);
-  }
-
-  return {
-    refuelsCount: rifornimenti.length,
-    maintCount: manutenzioni.length,
-    carbCount: carburazioni.length,
-    durataTotSec: durataTotSec,
-    altMin: altMin,
-    altMax: altMax
-  };
 }
-  
 window.onload = loadData;
   
 </script>
