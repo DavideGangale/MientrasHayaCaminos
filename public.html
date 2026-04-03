@@ -3216,7 +3216,7 @@ function renderDiaryList() {
 
     if (it.kind === 'MAINT') {
       badgeClass = 'badge-maint';
-      badgeText = `🔧 ${T('workshop')}`;  // <-- invece di "🔧 Officina"
+      badgeText = `${T('workshop')}`;  // <-- invece di "🔧 Officina"
       const m = it.raw || {};
             mediaHtml = buildMediaBlockFromAny(m);
       const costo = Number(m?.costoUsd || 0);
@@ -3231,7 +3231,7 @@ $$
 
     if (it.kind === 'FUEL') {
       badgeClass = 'badge-fuel';
-      badgeText = `⛽ ${T('refuel')}`;   // <-- invece di "⛽ Rifornimento"
+      badgeText = `${T('refuel')}`;   // <-- invece di "⛽ Rifornimento"
       const r = it.raw || {};
       const oil = getOilInfoFromRefuel(r);
       const costo = Number(r?.costoBenzUsd ?? r?.costo ?? 0);
@@ -3251,7 +3251,7 @@ $$
 
     if (it.kind === 'CARB') {
       badgeClass = 'badge-carb';
-      badgeText = `🌬️ ${T('carbSetup')}`;  // <-- invece di "🌬️ Carburazione"
+      badgeText = `${T('carbSetup')}`;  // <-- invece di "🌬️ Carburazione"
       const c = it.raw || {};
             const plug = pickFirst(c, ['candela', 'sparkPlug', 'bujia']);
             const jetMain  = pickFirst(c, ['gettoMax', 'gettoMassimo', 'chicMax', 'mainJet']);
