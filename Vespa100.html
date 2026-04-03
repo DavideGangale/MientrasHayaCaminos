@@ -11592,23 +11592,35 @@ const turismoPub = turismoPublicSrc.map(t => ({
   }));
 
  const logbookPub = logbookPublicSrc.map(e => ({
-    id: e.id,
-    data: e.data,
-    ora: e.ora,
-    paese: e.paese,
-    km: e.km,
-    nome: e.nome,
-    desc: e.desc,
-    costoLocal: e.costoLocal ?? e.costo ?? 0,
-    valuta: e.valuta ?? carica('vt_valuta','USD'),
-    costoUsd: e.costoUsd ?? 0,
-    fotoUrl: e.fotoUrl || null,
-    fotoUrl2: e.fotoUrl2 || null,
-   fotoUrlList: Array.isArray(e.fotoUrlList) ? e.fotoUrlList.filter(Boolean) : [],
-    videoUrl: e.videoUrl || null,
-    videoPlanned: !!e.videoPlanned,
-    geo: e.geo || null
-  }));
+  id: e.id,
+  data: e.data,
+  ora: e.ora,
+  paese: e.paese,
+  km: e.km,
+  nome: e.nome,
+  desc: e.desc,
+  costoLocal: e.costoLocal ?? e.costo ?? 0,
+  valuta: e.valuta ?? carica('vt_valuta','USD'),
+  costoUsd: e.costoUsd ?? 0,
+  fotoUrl: e.fotoUrl || null,
+  fotoUrl2: e.fotoUrl2 || null,
+  fotoUrlList: Array.isArray(e.fotoUrlList) ? e.fotoUrlList.filter(Boolean) : [],
+  videoUrl: e.videoUrl || null,
+  videoPlanned: !!e.videoPlanned,
+
+  // ✅ QUI: esporta i ricambi usati
+  ricambiUsati: Array.isArray(e.ricambiUsati)
+    ? e.ricambiUsati
+        .map(r => ({
+          invId: String(r?.invId || '').trim(),
+          qta: Number(r?.qta || 1) || 1,
+          nome: r?.nome || ''
+        }))
+        .filter(r => r.invId && r.qta > 0)
+    : [],
+
+  geo: e.geo || null
+}));
 
   const carburazionePub = carburazionePublicSrc.map(e => ({
   id: e.id,
