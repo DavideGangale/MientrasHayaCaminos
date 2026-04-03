@@ -1,16 +1,16 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-04-03T13:21:42.882Z",
+  "_exportDate": "2026-04-03T18:01:26.121Z",
   "tipo": "paese",
   "paese": "Colombia",
   "slug": "colombia",
   "stats": {
     "km": 77.73,
-    "benzina": 4.808,
-    "benzinaFuori": 0,
-    "olioMl": 777,
-    "spesaBenzinaUsd": 44.03437908604507,
-    "spesaOlioUsd": 12.154909280565587,
+    "benzina": 8.51741,
+    "benzinaFuori": 1.892642082,
+    "olioMl": 853,
+    "spesaBenzinaUsd": 48.331376375217154,
+    "spesaOlioUsd": 13.343985513749443,
     "spesaRicambiUsd": 0,
     "spesaManodoperaUsd": 0
   },
@@ -3242,6 +3242,26 @@
     }
   ],
   "diario": [
+    {
+      "id": 1775231268103,
+      "ts": 1775231267564,
+      "data": "03/04/2026",
+      "ora": "10:47",
+      "paese": "Colombia",
+      "km": "102.6",
+      "testo": "otra pricesion",
+      "tags": [
+        "SemanaSanta"
+      ],
+      "geo": {
+        "lat": 4.8780033,
+        "lon": -74.4362067
+      },
+      "videoUrl": null,
+      "videoPlanned": true,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1jguuseAeiZQbYbc_vcIB9Zh7VzYNhVBG",
+      "foto": null
+    },
     {
       "id": 1775065192751,
       "ts": 1775065192109,
