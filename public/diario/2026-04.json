@@ -1,10 +1,180 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-04-03T18:12:27.259Z",
+  "_exportDate": "2026-04-03T18:13:34.574Z",
   "tipo": "diario_mese",
   "mese": "2026-04",
-  "count": 4,
+  "count": 14,
   "entries": [
+    {
+      "id": 1775239921225,
+      "ts": 1775239921225,
+      "data": "",
+      "ora": "",
+      "paese": "Colombia",
+      "km": "",
+      "testo": "Almuerzo en Petit Jardin",
+      "tags": [
+        "ComidaFrancesa"
+      ],
+      "geo": {
+        "lat": 4.949295658831372,
+        "lon": -74.29857688539241
+      },
+      "videoUrl": null,
+      "videoPlanned": true,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1775239111266,
+      "ts": 1775239110496,
+      "data": "03/04/2026",
+      "ora": "12:58",
+      "paese": "Colombia",
+      "km": "152.8",
+      "testo": "almuerzo Frances",
+      "tags": [],
+      "geo": {
+        "lat": 4.949335,
+        "lon": -74.2987333
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1A-7RggwC653_r1QpsTKrzvoBGQ-iuS9z",
+      "foto": null
+    },
+    {
+      "id": 1775238935854,
+      "ts": 1775238935852,
+      "data": "03/04/2026",
+      "ora": "12:55",
+      "paese": "Colombia",
+      "km": "152.5",
+      "testo": "vista",
+      "tags": [],
+      "geo": {
+        "lat": 4.9479933,
+        "lon": -74.2955467
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1775238196225,
+      "ts": 1775238196224,
+      "data": "03/04/2026",
+      "ora": "12:43",
+      "paese": "Colombia",
+      "km": "144.8",
+      "testo": "vista de la Vega",
+      "tags": [],
+      "geo": {
+        "lat": 4.9897217,
+        "lon": -74.3237883
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1775237330362,
+      "ts": 1775237330362,
+      "data": "03/04/2026",
+      "ora": "12:28",
+      "paese": "Colombia",
+      "km": "140.8",
+      "testo": "la vegas",
+      "tags": [],
+      "geo": {
+        "lat": 4.999545,
+        "lon": -74.3390967
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1775237096255,
+      "ts": 1775237096252,
+      "data": "03/04/2026",
+      "ora": "12:24",
+      "paese": "Colombia",
+      "km": "140.5",
+      "testo": "cascada en la via",
+      "tags": [
+        "Strade"
+      ],
+      "geo": {
+        "lat": 4.9964883,
+        "lon": -74.341185
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1775236247531,
+      "ts": 1775236246976,
+      "data": "03/04/2026",
+      "ora": "12:10",
+      "paese": "Colombia",
+      "km": "135.6",
+      "testo": "carretera casi se va",
+      "tags": [
+        "Sterrato"
+      ],
+      "geo": {
+        "lat": 4.9658233,
+        "lon": -74.3538017
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=17ICQ2oLvWnEzJp9xGMsdaGuJ_WJGKLNm",
+      "foto": null
+    },
+    {
+      "id": 1775232948980,
+      "ts": 1775232948980,
+      "data": "",
+      "ora": "",
+      "paese": "Colombia",
+      "km": "",
+      "testo": "Sasaima",
+      "tags": [],
+      "geo": {
+        "lat": 4.96384229089202,
+        "lon": -74.43429647595374
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1DLiNUJOye7Et_0LU0t9D3iWe4SUBKO87",
+      "foto": null
+    },
+    {
+      "id": 1775232867490,
+      "ts": 1775232867490,
+      "data": "",
+      "ora": "",
+      "paese": "Colombia",
+      "km": "",
+      "testo": "En la ruta de hoy",
+      "tags": [
+        "Paisaje"
+      ],
+      "geo": {
+        "lat": 4.959956358110127,
+        "lon": -74.43296630428685
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1WntOtvkYPDLTPfCnkeUGBaa4H98C9eYj",
+      "foto": null
+    },
     {
       "id": 1775231268103,
       "ts": 1775231267564,
@@ -23,6 +193,27 @@
       "videoUrl": null,
       "videoPlanned": true,
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1jguuseAeiZQbYbc_vcIB9Zh7VzYNhVBG",
+      "foto": null
+    },
+    {
+      "id": 1775228967634,
+      "ts": 1775228967634,
+      "data": "",
+      "ora": "",
+      "paese": "Colombia",
+      "km": "",
+      "testo": "",
+      "tags": [
+        "Procesión",
+        "SemanaSanta"
+      ],
+      "geo": {
+        "lat": 4.807359459152309,
+        "lon": -74.35879961651979
+      },
+      "videoUrl": null,
+      "videoPlanned": true,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1OJ743UgrNfVPHBn0Q72UqoNYm3pCOL9h",
       "foto": null
     },
     {
