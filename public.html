@@ -1413,6 +1413,7 @@ const I18N = {
     backToMap: '← Mappa',
     viewOnMap: '📍 Vedi sulla mappa',
     diary: 'Diario',
+    partsUsed: "Ricambi usati"
     openGraph: '📈 Grafico'
   },
   en: {
@@ -1502,6 +1503,7 @@ const I18N = {
     backToMap: '← Map',
     viewOnMap: '📍 View on map',
     diary: 'Diary',
+    partsUsed: "Parts used"
     openGraph: '📈 Chart'
   },
   es: {
@@ -1591,6 +1593,7 @@ const I18N = {
     backToMap: '← Mapa',
     viewOnMap: '📍 Ver en el mapa',
     openGraph: '📈 Gráfico',
+    partsUsed: "Repuestos usados"
     diary: 'Diario'
   }
 };
@@ -2697,7 +2700,65 @@ function apriStats() {
 function closeStatsModal() {
   document.getElementById('statsModal').classList.remove('open');
 }
+function sumUsedPartsCountsPublic(country = null) {
+  const out = {}; // invId -> { id, name, qta }
 
+  const manut = Array.isArray(OFFICINA_DATA?.manutenzioni) ? OFFICINA_DATA.manutenzioni : [];
+  const inv = Array.isArray(OFFICINA_DATA?.inventario) ? OFFICINA_DATA.inventario : [];
+
+  // mappa id -> nome (se manca il nome nel ricambiUsati)
+  const invNameById = {};
+  inv.forEach(it => {
+    const id = String(it?.id || '').trim();
+    if (!id) return;
+    invNameById[id] = it?.nome || id;
+  });
+
+  for (const m of manut) {
+    if (country && String(m?.paese || '').trim() !== String(country).trim()) continue;
+
+    const used = Array.isArray(m?.ricambiUsati) ? m.ricambiUsati : [];
+    for (const u of used) {
+      const id = String(u?.invId || '').trim();
+      const qta = Number(u?.qta || 0);
+
+      if (!id || !isFinite(qta) || qta <= 0) continue;
+
+      const name = String(u?.nome || invNameById[id] || id);
+
+      if (!out[id]) out[id] = { id, name, qta: 0 };
+      out[id].qta += qta;
+    }
+  }
+
+  return out;
+}
+
+function buildUsedPartsStatsHtmlPublic(country = null) {
+  const map = sumUsedPartsCountsPublic(country);
+  const arr = Object.values(map)
+    .filter(x => x && x.qta > 0)
+    .sort((a, b) => (b.qta || 0) - (a.qta || 0));
+
+  if (!arr.length) return '';
+
+  // titolo traducibile (se non hai la key partsUsed, mostra IT)
+  let title = 'Ricambi usati';
+  try {
+    const t = (typeof T === 'function') ? T('partsUsed') : '';
+    if (t && t !== 'partsUsed') title = t;
+  } catch {}
+
+  return `
+    <div class="stats-card wide">
+      <div class="stats-k">${title}</div>
+      <div class="stats-v" style="font-size:14px; line-height:1.6; text-align:left;">
+        ${arr.map(x => `<div>• ${escapeHtml(x.name)}: <b>${x.qta}</b></div>`).join('')}
+      </div>
+    </div>
+  `;
+}
+  
 function renderStatsDati() {
   if (!INDEX_DATA) return;
 
@@ -2742,7 +2803,7 @@ function renderStatsDati() {
   const olioBoxValue = (country === null)
     ? `${Number(olio || 0).toFixed(2)} L`
     : (olio > 0 ? `${Number(olio || 0).toFixed(2)} L` : '--');
-
+  const usedPartsHtml = buildUsedPartsStatsHtmlPublic(country);
   document.getElementById('statsModalContent').innerHTML = `
     <div class="stats-card">
       <div class="stats-k">${T('statsKmTotal')}</div>
@@ -2778,6 +2839,8 @@ function renderStatsDati() {
       <div class="stats-k">${T('statsOilUsed')}</div>
       <div class="stats-v">${olioBoxValue}</div>
     </div>
+
+        ${usedPartsHtml}
   `;
 }
 
