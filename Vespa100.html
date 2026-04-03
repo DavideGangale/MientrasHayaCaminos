@@ -10643,9 +10643,6 @@ const invItemUsed = Array.isArray(invAllForUsed)
   ? invAllForUsed.find(x => String(x?.id || '') === ricambioIdSelezionato)
   : null;
 
-const ricambiUsati = ricambioIdSelezionato
-  ? [{ invId: ricambioIdSelezionato, qta: 1, nome: invItemUsed?.nome || '' }]
-  : [];
 
   const entry = {
   id: Date.now(),
