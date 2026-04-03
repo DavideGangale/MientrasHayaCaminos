@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-04-03T12:22:25.337Z",
+  "_exportDate": "2026-04-03T13:20:23.452Z",
   "tipo": "officina",
   "stats": {
     "spesaRicambiUsd": 0,
@@ -25,6 +25,7 @@
       ],
       "videoUrl": "https://youtu.be/AbqCsDj8c3Q?si=gJWrPnE6aThp7xIV",
       "videoPlanned": false,
+      "ricambiUsati": [],
       "geo": {
         "lat": 4.8197633,
         "lon": -74.35554
@@ -136,11 +137,11 @@
     {
       "id": "inv8",
       "nome": "Pneumatico",
-      "qta": 2,
+      "qta": 1,
       "wear": "interval",
       "intervalKm": 10000,
-      "usedKm": 6200,
-      "lastKm": 2862.1000000000004
+      "usedKm": 0,
+      "lastKm": 77.7238
     },
     {
       "id": "inv9",
