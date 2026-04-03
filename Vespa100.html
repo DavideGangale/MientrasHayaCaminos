@@ -7326,7 +7326,7 @@ const thumbs = []
             <span title="GitHub sync">${gh}</span>
           </div>
 
-          <div style="font-weight:1000;margin-top:10px;">${escHtml(e.nome||'Intervento')}</div>
+          <div style="font-weight:1000;margin-top:10px;">${escHtml(e.nome||'')}</div>
           ${e.desc ? `<div style="margin-top:6px;color:#bbb;">${escHtml(e.desc)}</div>` : ''}
 
           ${galleryHtml}
@@ -10614,6 +10614,8 @@ const videoPlanned = !!document.getElementById('log-video-planned')?.checked;
   
   const ricambioSel = document.getElementById('log-ricambio-select');
   const ricambioIdSelezionato = ricambioSel ? String(ricambioSel.value || '').trim() : '';
+
+
   
   let geoMaint = null;
   try {
@@ -10623,6 +10625,27 @@ const videoPlanned = !!document.getElementById('log-video-planned')?.checked;
       if (ll && isFinite(ll.lat)) geoMaint = { lat: ll.lat, lon: ll.lng };
     }
   } catch(e) {}
+
+
+
+  const invAll = caricaJSON('vt_inventario', []);
+const invItemSel = Array.isArray(invAll)
+  ? invAll.find(x => String(x?.id || '') === ricambioIdSelezionato)
+  : null;
+
+const ricambiUsati = ricambioIdSelezionato
+  ? [{ invId: ricambioIdSelezionato, qta: 1, nome: invItemSel?.nome || '' }]
+  : [];
+
+  // ✅ Ricambi usati (serve per export pubblico e statistiche)
+const invAllForUsed = caricaJSON('vt_inventario', []);
+const invItemUsed = Array.isArray(invAllForUsed)
+  ? invAllForUsed.find(x => String(x?.id || '') === ricambioIdSelezionato)
+  : null;
+
+const ricambiUsati = ricambioIdSelezionato
+  ? [{ invId: ricambioIdSelezionato, qta: 1, nome: invItemUsed?.nome || '' }]
+  : [];
 
   const entry = {
   id: Date.now(),
@@ -10635,7 +10658,7 @@ const videoPlanned = !!document.getElementById('log-video-planned')?.checked;
 
   nome,
   desc,
-
+  ricambiUsati: ricambiUsati,
   isPublic: false,
   ghSynced: false,
   ghSyncedAt: null,
