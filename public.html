@@ -617,6 +617,29 @@
       grid-column: 1 / -1;
     }
 
+/* === Stats: cards più “tematiche” === */
+.stats-card.accent-fuel { border: 1px solid rgba(76, 175, 80, .25); box-shadow: 0 0 0 1px rgba(76, 175, 80, .08) inset; }
+.stats-card.accent-oil  { border: 1px solid rgba(255, 193, 7, .25); box-shadow: 0 0 0 1px rgba(255, 193, 7, .08) inset; }
+.stats-card.accent-alt  { border: 1px solid rgba(33, 150, 243, .25); box-shadow: 0 0 0 1px rgba(33, 150, 243, .08) inset; }
+.stats-card.accent-maint{ border: 1px solid rgba(255, 152, 0, .25); box-shadow: 0 0 0 1px rgba(255, 152, 0, .08) inset; }
+
+.stats-pair {
+  display: flex;
+  gap: 14px;
+  margin-top: 6px;
+}
+
+.stats-pair .col {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.06);
+}
+
+.stats-pair .k { color:#9aa0a6; font-size:12px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; }
+.stats-pair .v { color:#fff; font-size:22px; font-weight:900; margin-top:4px; }
+    
     .stats-k {
       font-size: 11px;
       color: var(--text-soft);
@@ -1413,7 +1436,16 @@ const I18N = {
     backToMap: '← Mappa',
     viewOnMap: '📍 Vedi sulla mappa',
     diary: 'Diario',
-    partsUsed: "Ricambi usati",
+    partsUsed: 'Ricambi usati',
+
+    statsHoursOnRoad: '⏱️ Ore su Strada',
+statsAltitudeRange: '⛰️ Rango d'Altezza',
+statsRefuelsCount: '⛽ Numero Rifornimenti',
+statsMaintCount: '🔧 Numero Interventi',
+statsCarbCount: '🌬️ Numero Carburazioni',
+statsFuel: '⛽ Statistiche Rifornimenti',
+statsOil: '⛽ Statistiche Olio 2T',
+    
     openGraph: '📈 Grafico'
   },
   en: {
@@ -1504,6 +1536,13 @@ const I18N = {
     viewOnMap: '📍 View on map',
     diary: 'Diary',
     partsUsed: "Parts used",
+       statsHoursOnRoad: '⏱️ Hours on the Road',
+statsAltitudeRange: '⛰️ Altitude Range',
+statsRefuelsCount: '⛽ Number of Fuel Stops',
+statsMaintCount: '🔧 Number of Repairs',
+statsCarbCount: '🌬️ Numero Carduration',
+statsFuel: '⛽ Fuel Stats',
+statsOil: '⛽ Oil Stats',
     openGraph: '📈 Chart'
   },
   es: {
@@ -1594,6 +1633,15 @@ const I18N = {
     viewOnMap: '📍 Ver en el mapa',
     openGraph: '📈 Gráfico',
     partsUsed: "Repuestos usados",
+
+       statsHoursOnRoad: '⏱️ Horas de Carretera',
+statsAltitudeRange: '⛰️ Rangos de Altura',
+statsRefuelsCount: '⛽ Numero de Repostajes',
+statsMaintCount: '🔧 Numero de Manutenciones',
+statsCarbCount: '🌬️ Numero Carburaciones',
+statsFuel: '⛽ Estadísticas de Repostajes',
+statsOil: '⛽ Estadísticas de Aceite',
+    
     diary: 'Diario'
   }
 };
@@ -2759,7 +2807,7 @@ function buildUsedPartsStatsHtmlPublic(country = null) {
   `;
 }
   
-function renderStatsDati() {
+ {
   if (!INDEX_DATA) return;
 
   const mode = document.getElementById('statsCountryFilter').value;
@@ -2804,44 +2852,81 @@ function renderStatsDati() {
     ? `${Number(olio || 0).toFixed(2)} L`
     : (olio > 0 ? `${Number(olio || 0).toFixed(2)} L` : '--');
   const usedPartsHtml = buildUsedPartsStatsHtmlPublic(country);
+     const extra = computeExtraPublicStats(country);
+  const usedPartsHtml = buildUsedPartsStatsHtmlPublic(country);
   document.getElementById('statsModalContent').innerHTML = `
-    <div class="stats-card">
-      <div class="stats-k">${T('statsKmTotal')}</div>
-      <div class="stats-v">${Number(km || 0).toFixed(1)}</div>
-    </div>
+  <div class="stats-card">
+    <div class="stats-k">${T('statsKmTotal')}</div>
+    <div class="stats-v">${Number(km || 0).toFixed(1)}</div>
+  </div>
 
-    <div class="stats-card">
-      <div class="stats-k">${T('statsFuelUsed')}</div>
-      <div class="stats-v">${Number(benz || 0).toFixed(1)} L</div>
-    </div>
+  <div class="stats-card">
+    <div class="stats-k">${T('statsAvgConsumption')}</div>
+    <div class="stats-v">${cons} km/L</div>
+  </div>
 
-    <div class="stats-card">
-      <div class="stats-k">${T('statsAvgConsumption')}</div>
-      <div class="stats-v">${cons} km/L</div>
-    </div>
+  <div class="stats-card">
+    <div class="stats-k">${T('statsHoursOnRoad') ?? 'Ore su strada'}</div>
+    <div class="stats-v">${fmtHhMmFromSeconds(extra.durataTotSec)}</div>
+  </div>
 
-    <div class="stats-card">
-      <div class="stats-k">${T('statsFuelCost')}</div>
-      <div class="stats-v">${fmtUsd(spesaBenz)}</div>
+  <div class="stats-card wide accent-fuel">
+    <div class="stats-k">⛽ ${T('statsFuel')}</div>
+    <div class="stats-pair">
+      <div class="col">
+        <div class="k">${T('statsFuelUsed')}</div>
+        <div class="v">${Number(benz || 0).toFixed(1)} L</div>
+      </div>
+      <div class="col">
+        <div class="k">${T('statsFuelCost')}</div>
+        <div class="v">${fmtUsd(spesaBenz)}</div>
+      </div>
     </div>
+  </div>
 
-    <div class="stats-card">
-      <div class="stats-k">${T('statsOilCost')}</div>
-      <div class="stats-v">${fmtUsd(spesaOlio)}</div>
+  <div class="stats-card wide accent-oil">
+    <div class="stats-k">🛢️ ${T('statsOil')}</div>
+    <div class="stats-pair">
+      <div class="col">
+        <div class="k">${T('statsOilUsed')}</div>
+        <div class="v">${olioBoxValue}</div>
+      </div>
+      <div class="col">
+        <div class="k">${T('statsOilCost')}</div>
+        <div class="v">${fmtUsd(spesaOlio)}</div>
+      </div>
     </div>
+  </div>
 
-    <div class="stats-card">
-      <div class="stats-k">${T('statsWorkshopCost')}</div>
-      <div class="stats-v">${fmtUsd(spesaMaint)}</div>
+  <div class="stats-card wide accent-alt">
+    <div class="stats-k">⛰️ ${T('statsAltitudeRange') ?? 'Altitudine (min → max)'}</div>
+    <div class="stats-v">
+      ${extra.altMin == null ? '--' : `${Math.round(extra.altMin)} m`} → ${extra.altMax == null ? '--' : `${Math.round(extra.altMax)} m`}
     </div>
+  </div>
 
-    <div class="stats-card wide">
-      <div class="stats-k">${T('statsOilUsed')}</div>
-      <div class="stats-v">${olioBoxValue}</div>
-    </div>
+  <div class="stats-card accent-fuel">
+    <div class="stats-k">${T('statsRefuelsCount') ?? 'Rifornimenti'}</div>
+    <div class="stats-v">${extra.refuelsCount}</div>
+  </div>
 
-        ${usedPartsHtml}
-  `;
+  <div class="stats-card accent-maint">
+    <div class="stats-k">${T('statsMaintCount') ?? 'Interventi'}</div>
+    <div class="stats-v">${extra.maintCount}</div>
+  </div>
+
+  <div class="stats-card">
+    <div class="stats-k">${T('statsCarbCount') ?? 'Carburazioni'}</div>
+    <div class="stats-v">${extra.carbCount}</div>
+  </div>
+
+  <div class="stats-card wide accent-maint">
+    <div class="stats-k">${T('statsWorkshopCost')}</div>
+    <div class="stats-v">${fmtUsd(spesaMaint)}</div>
+  </div>
+
+  ${usedPartsHtml}
+`;
 }
 
 function updateHostModalTexts() {
@@ -3605,8 +3690,67 @@ async function loadData() {
     document.getElementById('pillFuelValue').innerText = 'Errore';
   }
 }
+  
+function fmtHhMmFromSeconds(sec) {
+  const s = Number(sec || 0);
+  if (!isFinite(s) || s <= 0) return '--';
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  return `${h}h ${String(m).padStart(2, '0')}m`;
+}
 
+function getAltMinMaxFromTrackPublic(t) {
+  // preferisci altMin/altMax se presenti
+  const aMin = Number(t?.altMin);
+  const aMax = Number(t?.altMax);
+  if (isFinite(aMin) && isFinite(aMax)) return { min: aMin, max: aMax };
+
+  // fallback: calcola da telemetry
+  const telem = Array.isArray(t?.telemetry) ? t.telemetry : [];
+  const alts = telem.map(p => Number(p?.alt)).filter(x => isFinite(x));
+  if (alts.length >= 2) return { min: Math.min(...alts), max: Math.max(...alts) };
+
+  return { min: null, max: null };
+}
+
+function computeExtraPublicStats(country = null) {
+  const isSameCountry = (x) => {
+    if (!country) return true;
+    return String(x?.paese || '').trim() === String(country).trim();
+  };
+
+  const tappe = (Array.isArray(DATA?.tappe) ? DATA.tappe : []).filter(isSameCountry);
+  const giri  = (Array.isArray(DATA?.turismo) ? DATA.turismo : []).filter(isSameCountry);
+
+  const rifornimenti = (Array.isArray(DATA?.rifornimenti) ? DATA.rifornimenti : []).filter(isSameCountry);
+  const manutenzioni = (Array.isArray(DATA?.manutenzioni) ? DATA.manutenzioni : []).filter(isSameCountry);
+  const carburazioni = (Array.isArray(DATA?.carburazioni) ? DATA.carburazioni : []).filter(isSameCountry);
+
+  // ore totali su strada: tappe + giri
+  const durataTotSec =
+    [...tappe, ...giri].reduce((sum, t) => sum + Number(t?.durata || 0), 0);
+
+  // altitudine min/max globale (tappe + giri)
+  let altMin = null, altMax = null;
+  for (const t of [...tappe, ...giri]) {
+    const mm = getAltMinMaxFromTrackPublic(t);
+    if (mm.min == null || mm.max == null) continue;
+    altMin = (altMin == null) ? mm.min : Math.min(altMin, mm.min);
+    altMax = (altMax == null) ? mm.max : Math.max(altMax, mm.max);
+  }
+
+  return {
+    refuelsCount: rifornimenti.length,
+    maintCount: manutenzioni.length,
+    carbCount: carburazioni.length,
+    durataTotSec: durataTotSec,
+    altMin: altMin,
+    altMax: altMax
+  };
+}
+  
 window.onload = loadData;
+  
 </script>
 </body>
 </html>
