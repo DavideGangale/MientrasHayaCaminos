@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-04-03T15:09:41.529Z",
+  "exportedAt": "2026-04-03T16:14:38.132Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -289,6 +289,23 @@
         "lon": -74.35879961651979
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1OJ743UgrNfVPHBn0Q72UqoNYm3pCOL9h"
+    },
+    {
+      "ts": 1775232867490,
+      "id": 1775232867490,
+      "paese": "",
+      "km": "",
+      "testo": "En la ruta de hoy",
+      "tags": [
+        "Paisaje"
+      ],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 4.959956358110127,
+        "lon": -74.43296630428685
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1WntOtvkYPDLTPfCnkeUGBaa4H98C9eYj"
     }
   ]
 }
