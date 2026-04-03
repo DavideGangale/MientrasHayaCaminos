@@ -1,10 +1,30 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-04-03T13:21:42.882Z",
+  "_exportDate": "2026-04-03T18:01:26.121Z",
   "tipo": "diario_mese",
   "mese": "2026-04",
-  "count": 3,
+  "count": 4,
   "entries": [
+    {
+      "id": 1775231268103,
+      "ts": 1775231267564,
+      "data": "03/04/2026",
+      "ora": "10:47",
+      "paese": "Colombia",
+      "km": "102.6",
+      "testo": "otra pricesion",
+      "tags": [
+        "SemanaSanta"
+      ],
+      "geo": {
+        "lat": 4.8780033,
+        "lon": -74.4362067
+      },
+      "videoUrl": null,
+      "videoPlanned": true,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1jguuseAeiZQbYbc_vcIB9Zh7VzYNhVBG",
+      "foto": null
+    },
     {
       "id": 1775065192751,
       "ts": 1775065192109,
