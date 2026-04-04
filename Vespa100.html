@@ -11472,8 +11472,11 @@ async function sanitizeImageDataUrl(dataUrl, maxW = 900, quality = 0.60) {
   });
 }
 
-function simplifyTrace(trace, minDistM = 15, maxPts = 25000) {
+function simplifyTrace(trace, minDistM = 10, maxPts = 25000, noSimplifyUnder = 5000) {
   if (!Array.isArray(trace) || trace.length === 0) return [];
+
+  // ✅ non semplificare tappe piccole/medie (come la tua da 872 punti)
+  if (trace.length <= noSimplifyUnder) return trace;
 
   const getLL = (p) => Array.isArray(p)
     ? { lat: Number(p[0]), lon: Number(p[1]) }
@@ -11575,7 +11578,7 @@ const tappePub = tappePublicSrc.map(t => ({
     titolo: t.titolo || '',
     note: t.note || '',
     telemetry: simplifyTelemetry(t.telemetry, 2, 260),
-    traccia: simplifyTrace(t.traccia, 15, 25000)
+    traccia: simplifyTrace(t.traccia, 10, 25000, 5000)
   }));
 
 const turismoPub = turismoPublicSrc.map(t => ({
@@ -11597,7 +11600,7 @@ const turismoPub = turismoPublicSrc.map(t => ({
     titolo: t.titolo || '',
     note: t.note || '',
     telemetry: simplifyTelemetry(t.telemetry, 2, 260),
-    traccia: simplifyTrace(t.traccia, 15, 25000)
+    traccia: simplifyTrace(t.traccia, 10, 25000, 5000)
   }));
 
   const diarioSorted = [...diarioPublicSrc].sort((a,b) =>
