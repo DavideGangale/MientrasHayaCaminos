@@ -3355,7 +3355,8 @@ function renderDiaryList() {
   }
 
   // Ordine cronologico: dal più vecchio al più nuovo
-  items.sort((a, b) => Number(a.ts) - Number(b.ts));
+ // Ultimi post prima
+items.sort((a, b) => Number(b.ts) - Number(a.ts));
 
   // Render HTML
   list.innerHTML = items.map(it => {
