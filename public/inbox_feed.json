@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-04-03T18:12:04.327Z",
+  "exportedAt": "2026-04-04T18:10:26.691Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -338,6 +338,23 @@
         "lon": -74.29857688539241
       },
       "fotoUrl": null
+    },
+    {
+      "ts": 1775326220197,
+      "id": 1775326220197,
+      "paese": "",
+      "km": "",
+      "testo": "Priva iphone",
+      "tags": [
+        "Probó la"
+      ],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 4.806171381544611,
+        "lon": -74.36040790134565
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1RjWbfHMKW5F6jI-A3gvuC_lB3rYNdKpi"
     }
   ]
 }
