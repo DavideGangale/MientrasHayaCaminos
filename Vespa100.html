@@ -11536,7 +11536,7 @@ const tappePub = tappePublicSrc.map(t => ({
     titolo: t.titolo || '',
     note: t.note || '',
     telemetry: simplifyTelemetry(t.telemetry, 2, 260),
-    traccia: simplifyTrace(t.traccia, 3)
+    traccia: simplifyTrace(t.traccia, 1)
   }));
 
 const turismoPub = turismoPublicSrc.map(t => ({
@@ -11558,7 +11558,7 @@ const turismoPub = turismoPublicSrc.map(t => ({
     titolo: t.titolo || '',
     note: t.note || '',
     telemetry: simplifyTelemetry(t.telemetry, 2, 260),
-    traccia: simplifyTrace(t.traccia, 3)
+    traccia: simplifyTrace(t.traccia, 1)
   }));
 
   const diarioSorted = [...diarioPublicSrc].sort((a,b) =>
