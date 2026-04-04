@@ -3510,6 +3510,11 @@ function aggiornaGpsBadge(stato, acc) {
 }
 
 function startGPS() {
+    // evita doppi watch attivi
+  if (watchId != null) {
+    try { navigator.geolocation.clearWatch(watchId); } catch(e) {}
+    watchId = null;
+  }
   if (!navigator.geolocation) {
     gpsDisponibile = false;
     ultimoErroreGps = 'Geolocalizzazione non supportata';
@@ -3537,10 +3542,18 @@ function startGPS() {
       console.warn('GPS err:', err && err.code);
       aggiornaGpsBadge('off');
     },
-    { enableHighAccuracy:true, timeout:15000, maximumAge:0 }
+    { enableHighAccuracy:true, timeout:15000, maximumAge:2000 }
   );
 }
-
+  
+function stopGPS() {
+  if (!navigator.geolocation) return;
+  if (watchId != null) {
+    try { navigator.geolocation.clearWatch(watchId); } catch(e) {}
+    watchId = null;
+  }
+}
+  
 function bearingDeg(lat1, lon1, lat2, lon2) {
   const toRad = (d) => d * Math.PI / 180;
   const toDeg = (r) => r * 180 / Math.PI;
@@ -3685,7 +3698,18 @@ if (dist < 0.008) { // 8 metri
 }
      
       // filtro “salti” GPS
-      if (dist < 0.5 && dist > 0) {
+      const dtSec = Math.max(1, (pos.timestamp - lastTimestamp) / 1000);
+const impliedKmh = dist / (dtSec / 3600);
+
+// accetta distanze più grandi se la velocità è realistica
+// (così non “salta” quando gli update arrivano radi per colpa di Maps)
+const acc = (pos.coords.accuracy || 999);
+const ok = (dist > 0) && (dist < 3.0) && (impliedKmh < 140);
+
+// se accuratezza pessima, sii più severo
+const ok2 = acc <= 120 ? ok : (ok && impliedKmh < 80);
+
+if (ok2) {
         // ✅ aggiungi punto alla traccia SOLO se non è un salto GPS
 coordinateTracciato.push([lat, lon]);
 
