@@ -3667,20 +3667,13 @@ if (hd != null) setMapFullHeading(hd);
     if (altitudineAttuale < tappaAttuale.altMin) tappaAttuale.altMin = altitudineAttuale;
     if (altitudineAttuale > tappaAttuale.altMax) tappaAttuale.altMax = altitudineAttuale;
 
-    // Aggiungi coordinata con decimazione
-    coordinateTracciato.push([lat, lon]);
-    if (coordinateTracciato.length > MAX_PUNTI_MAPPA) {
-      coordinateTracciato = coordinateTracciato.filter((_, i) => i % 2 === 0);
-    }
-    polyline.setLatLngs(coordinateTracciato);
 
-    // Salva coordinate ogni 10 punti
-    puntiDaSalvare++;
-    if (puntiDaSalvare >= 10) {
-      salva('vt_coordinateTracciato', coordinateTracciato);
-      puntiDaSalvare = 0;
-    }
-
+// ✅ primo punto traccia (inizio tappa)
+if (lastLat === null) {
+  coordinateTracciato.push([lat, lon]);
+  polyline.setLatLngs(coordinateTracciato);
+  salva('vt_coordinateTracciato', coordinateTracciato);
+}
     // Calcola distanza
     if (lastLat !== null) {
       const dist = calcolaDistanza(lastLat, lastLon, lat, lon);
@@ -3693,6 +3686,21 @@ if (dist < 0.008) { // 8 metri
      
       // filtro “salti” GPS
       if (dist < 0.5 && dist > 0) {
+        // ✅ aggiungi punto alla traccia SOLO se non è un salto GPS
+coordinateTracciato.push([lat, lon]);
+
+if (coordinateTracciato.length > MAX_PUNTI_MAPPA) {
+  coordinateTracciato = coordinateTracciato.filter((_, i) => i % 2 === 0);
+}
+
+polyline.setLatLngs(coordinateTracciato);
+
+// salva su storage ogni 10 punti
+puntiDaSalvare++;
+if (puntiDaSalvare >= 10) {
+  salva('vt_coordinateTracciato', coordinateTracciato);
+  puntiDaSalvare = 0;
+}
         const kmTot = (parseFloat(carica('vt_kmTotali','0')) || 0) + dist;
         salva('vt_kmTotali', kmTot.toFixed(4));
 
