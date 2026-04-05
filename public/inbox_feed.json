@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-04-05T16:22:49.505Z",
+  "exportedAt": "2026-04-05T17:01:24.963Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -387,6 +387,23 @@
         "lon": -74.38015404164267
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1wEsgDrGh_bCDdhbG-UTTgMXDjN6lSE7t"
+    },
+    {
+      "ts": 1775408476805,
+      "id": 1775408476805,
+      "paese": "",
+      "km": "",
+      "testo": "Chachipay",
+      "tags": [
+        "Puebliando"
+      ],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 4.731049585564796,
+        "lon": -74.43704905951984
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1JCww8lltYHN5IK11JvLLz0yN2T-TVUco"
     }
   ]
 }
