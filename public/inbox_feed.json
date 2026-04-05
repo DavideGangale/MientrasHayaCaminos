@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-04-04T18:10:26.691Z",
+  "exportedAt": "2026-04-05T00:14:00.201Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -355,6 +355,21 @@
         "lon": -74.36040790134565
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1RjWbfHMKW5F6jI-A3gvuC_lB3rYNdKpi"
+    },
+    {
+      "ts": 1775348032678,
+      "id": 1775348032678,
+      "paese": "",
+      "km": "",
+      "testo": "Bojaca",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 4.732060230103979,
+        "lon": -74.34159446375746
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1Jh_stx4c62ckHVWZR6h73rUUWCxv9JG8"
     }
   ]
 }
