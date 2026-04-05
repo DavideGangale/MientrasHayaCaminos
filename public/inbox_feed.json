@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-04-05T17:23:58.713Z",
+  "exportedAt": "2026-04-05T18:41:33.250Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -421,6 +421,21 @@
         "lon": -74.43745463614725
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=116BRKLzXZFJbLKYiFQ8vUryop0g2ao3u"
+    },
+    {
+      "ts": 1775414466359,
+      "id": 1775414466359,
+      "paese": "",
+      "km": "",
+      "testo": "Cascadas de las monjas",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 4.698183839213749,
+        "lon": -74.43322749815363
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1PHqeVOmWoiu3BqCPlSv0NhFkdTQQDKT4"
     }
   ]
 }
