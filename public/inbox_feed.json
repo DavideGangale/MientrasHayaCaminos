@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-04-05T22:03:35.230Z",
+  "exportedAt": "2026-04-05T22:39:45.057Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -453,6 +453,23 @@
         "lon": -74.40103992124712
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1iR29T3I9TE2UvdKrY5GvLzGDBsh3CDwh"
+    },
+    {
+      "ts": 1775428776941,
+      "id": 1775428776941,
+      "paese": "",
+      "km": "",
+      "testo": "Zipacon",
+      "tags": [
+        "Flora café"
+      ],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 4.76089946758312,
+        "lon": -74.37993773836381
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1II7TEZ5Z0188iLpy3RMuPWostFjA4O9Z"
     }
   ]
 }
