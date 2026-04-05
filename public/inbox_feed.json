@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-04-05T18:41:33.250Z",
+  "exportedAt": "2026-04-05T22:03:35.230Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -436,6 +436,23 @@
         "lon": -74.43322749815363
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1PHqeVOmWoiu3BqCPlSv0NhFkdTQQDKT4"
+    },
+    {
+      "ts": 1775426605846,
+      "id": 1775426605846,
+      "paese": "",
+      "km": "",
+      "testo": "Se varo Oscar…. Rodamiento de la canastilla se reventó… vamos a llegar a faca despacito después de retirar las piezas",
+      "tags": [
+        "Varada"
+      ],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 4.743752068299917,
+        "lon": -74.40103992124712
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1iR29T3I9TE2UvdKrY5GvLzGDBsh3CDwh"
     }
   ]
 }
