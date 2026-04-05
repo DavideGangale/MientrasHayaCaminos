@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-04-05T00:14:00.201Z",
+  "exportedAt": "2026-04-05T16:22:49.505Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -370,6 +370,23 @@
         "lon": -74.34159446375746
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1Jh_stx4c62ckHVWZR6h73rUUWCxv9JG8"
+    },
+    {
+      "ts": 1775406161686,
+      "id": 1775406161686,
+      "paese": "",
+      "km": "",
+      "testo": "Zipacon",
+      "tags": [
+        "Puebliando"
+      ],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 4.759937468920607,
+        "lon": -74.38015404164267
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1wEsgDrGh_bCDdhbG-UTTgMXDjN6lSE7t"
     }
   ]
 }
