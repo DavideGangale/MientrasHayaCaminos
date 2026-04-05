@@ -1,10 +1,48 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-04-05T02:44:55.029Z",
+  "_exportDate": "2026-04-05T02:46:04.293Z",
   "tipo": "diario_mese",
   "mese": "2026-04",
-  "count": 30,
+  "count": 32,
   "entries": [
+    {
+      "id": 1775348032678,
+      "ts": 1775348032678,
+      "data": "",
+      "ora": "",
+      "paese": "Colombia",
+      "km": "",
+      "testo": "Bojaca",
+      "tags": [],
+      "geo": {
+        "lat": 4.732060230103979,
+        "lon": -74.34159446375746
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1Jh_stx4c62ckHVWZR6h73rUUWCxv9JG8",
+      "foto": null
+    },
+    {
+      "id": 1775326220197,
+      "ts": 1775326220197,
+      "data": "",
+      "ora": "",
+      "paese": "Colombia",
+      "km": "",
+      "testo": "Priva iphone",
+      "tags": [
+        "Probó la"
+      ],
+      "geo": {
+        "lat": 4.806171381544611,
+        "lon": -74.36040790134565
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1RjWbfHMKW5F6jI-A3gvuC_lB3rYNdKpi",
+      "foto": null
+    },
     {
       "id": 1775256646896,
       "ts": 1775256646073,
