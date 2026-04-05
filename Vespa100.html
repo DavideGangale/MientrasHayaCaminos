@@ -2812,7 +2812,7 @@ const SERBATOIO_GAL = 2.0;
 const SERBATOIO_LITRI = SERBATOIO_GAL * FAT_GAL; // ~7.57 L
 
 const CONSUMO_MEDIO = 28;      // km/L stimato PX150
-const MAX_PUNTI_MAPPA = 20000; // prima era 1500: troppo basso => decimazioni aggressive e rette
+const MAX_PUNTI_MAPPA = 1500;
 
 function compressTrace(points, maxPts = 1200) {
   const arr = Array.isArray(points) ? points : [];
@@ -3618,59 +3618,6 @@ function pushTelemetryPoint(pos, speedKmh) {
   }
 }
 
-
-// ===== TRACE RECORDING (anti-retta + campionamento) =====
-let lastTraceLat = null;
-let lastTraceLon = null;
-let lastTraceTs  = null;
-
-// registra un punto al massimo ogni X ms o ogni Y metri
-const TRACE_MIN_TIME_MS = 1500;   // 1.5s
-const TRACE_MIN_DIST_KM = 0.015;  // 15 metri
-
-// se un punto è troppo lontano dal precedente, NON disegnare la retta
-const TRACE_MAX_JUMP_KM = 0.60;   // 600m (se arriva un update molto distante, meglio evitare la retta)
-
-function shouldAppendTracePoint(lat, lon, ts) {
-  if (lastTraceLat == null || lastTraceLon == null || lastTraceTs == null) return true;
-
-  const dt = Math.max(0, Number(ts) - Number(lastTraceTs)); // ms
-  const distKm = calcolaDistanza(lastTraceLat, lastTraceLon, lat, lon);
-
-  // se salto enorme, non lo metto in traccia (evita rette assurde)
-  if (distKm >= TRACE_MAX_JUMP_KM) return false;
-
-  // campionamento: aggiungo solo se è passato tempo o se mi sono mosso abbastanza
-  const okTime = dt >= TRACE_MIN_TIME_MS;
-  const okDist = distKm >= TRACE_MIN_DIST_KM;
-
-  return okTime || okDist;
-}
-
-function appendTracePoint(lat, lon, ts) {
-  // inizializza traccia con primo punto se vuota
-  if (!Array.isArray(coordinateTracciato)) coordinateTracciato = [];
-  if (coordinateTracciato.length === 0) {
-    coordinateTracciato.push([lat, lon]);
-    lastTraceLat = lat; lastTraceLon = lon; lastTraceTs = ts;
-    return true;
-  }
-
-  // evita crescita infinita: se diventa enorme, non “taglio a metà”
-  // ma faccio una decimazione leggera SOLO della parte in memoria (mantiene forma molto meglio).
-  // (semplice: se superi MAX_PUNTI_MAPPA, tieni 1 punto ogni 2 MA SOLO una volta ogni tanto)
-  if (coordinateTracciato.length > MAX_PUNTI_MAPPA) {
-    // decimazione soft: NON ripetuta troppo spesso (la rifaccio solo se supero molto)
-    coordinateTracciato = coordinateTracciato.filter((_, i) => i % 2 === 0);
-  }
-
-  if (!shouldAppendTracePoint(lat, lon, ts)) return false;
-
-  coordinateTracciato.push([lat, lon]);
-  lastTraceLat = lat; lastTraceLon = lon; lastTraceTs = ts;
-  return true;
-}
-  
 function updatePosition(pos) {
   const lat = pos.coords.latitude;
   const lon = pos.coords.longitude;
@@ -3720,19 +3667,18 @@ if (hd != null) setMapFullHeading(hd);
     if (altitudineAttuale < tappaAttuale.altMin) tappaAttuale.altMin = altitudineAttuale;
     if (altitudineAttuale > tappaAttuale.altMax) tappaAttuale.altMax = altitudineAttuale;
 
-    // ✅ Aggiungi punto traccia in modo "pulito" (anti-retta + campionamento)
-    const tsNow = Number(pos.timestamp || Date.now());
-    const added = appendTracePoint(lat, lon, tsNow);
+    // Aggiungi coordinata con decimazione
+    coordinateTracciato.push([lat, lon]);
+    if (coordinateTracciato.length > MAX_PUNTI_MAPPA) {
+      coordinateTracciato = coordinateTracciato.filter((_, i) => i % 2 === 0);
+    }
+    polyline.setLatLngs(coordinateTracciato);
 
-    if (added) {
-      polyline.setLatLngs(coordinateTracciato);
-
-      // Salva coordinate ogni 10 punti REALI aggiunti
-      puntiDaSalvare++;
-      if (puntiDaSalvare >= 10) {
-        salva('vt_coordinateTracciato', coordinateTracciato);
-        puntiDaSalvare = 0;
-      }
+    // Salva coordinate ogni 10 punti
+    puntiDaSalvare++;
+    if (puntiDaSalvare >= 10) {
+      salva('vt_coordinateTracciato', coordinateTracciato);
+      puntiDaSalvare = 0;
     }
 
     // Calcola distanza
