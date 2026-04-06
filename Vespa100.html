@@ -3468,7 +3468,65 @@ function aggiungiPaeseManuale() {
 
   showToast('🌍 Paese aggiunto: ' + paese);
 }
- 
+
+
+function riparaKmPaesiDaPercorsi() {
+  // 1) carico datiPaesi e li normalizzo (per unire "Colombia" e "Colombia ")
+  const datiOld = caricaJSON('vt_datiPaesi', {}) || {};
+  const dati = {};
+
+  for (const [k, v] of Object.entries(datiOld)) {
+    const nk = normalizePaeseNome(k);
+    if (!nk) continue;
+
+    if (!dati[nk]) dati[nk] = { ...(v || {}) };
+    else {
+      // merge minimo (qui ci interessa soprattutto km)
+      dati[nk].km = Number(dati[nk].km || 0) + Number(v?.km || 0);
+      dati[nk].benzina = Number(dati[nk].benzina || 0) + Number(v?.benzina || 0);
+      dati[nk].benzinaFuori = Number(dati[nk].benzinaFuori || 0) + Number(v?.benzinaFuori || 0);
+      dati[nk].olioMl = Number(dati[nk].olioMl || 0) + Number(v?.olioMl || 0);
+
+      dati[nk].spesaBenzinaUsd = Number(dati[nk].spesaBenzinaUsd || 0) + Number(v?.spesaBenzinaUsd || 0);
+      dati[nk].spesaOlioUsd = Number(dati[nk].spesaOlioUsd || 0) + Number(v?.spesaOlioUsd || 0);
+      dati[nk].spesaRicambiUsd = Number(dati[nk].spesaRicambiUsd || 0) + Number(v?.spesaRicambiUsd || 0);
+      dati[nk].spesaManodoperaUsd = Number(dati[nk].spesaManodoperaUsd || 0) + Number(v?.spesaManodoperaUsd || 0);
+    }
+  }
+
+  // 2) ricalcolo i KM per paese dai percorsi salvati (tappe + turismo)
+  const tappe = caricaJSON('vt_tappe', []) || [];
+  const tur   = caricaJSON('vt_turismo', []) || [];
+  const all = [].concat(tappe, tur);
+
+  const kmByPaese = {};
+  for (const p of all) {
+    if (!p) continue;
+    const paese = normalizePaeseNome(p.paese);
+    const km = Number(p.km || 0);
+    if (!paese || !isFinite(km) || km <= 0) continue;
+    kmByPaese[paese] = (kmByPaese[paese] || 0) + km;
+  }
+
+  // 3) scrivo dentro vt_datiPaesi.km il valore “vero”
+  for (const [paese, kmSum] of Object.entries(kmByPaese)) {
+    ensurePaeseExists(paese);
+    if (!dati[paese]) dati[paese] = {};
+    dati[paese].km = Number(kmSum.toFixed(3));
+  }
+
+  // 4) caso semplice: se hai SOLO 1 paese, aggiungo anche i km fuori tappa (globali)
+  const keys = Object.keys(dati);
+  if (keys.length === 1) {
+    const only = keys[0];
+    const kmFuori = Number(carica('vt_kmFuoriTappa', '0')) || 0;
+    if (kmFuori > 0) dati[only].km = Number((Number(dati[only].km || 0) + kmFuori).toFixed(3));
+  }
+
+  salva('vt_datiPaesi', dati);
+}
+
+  
 /* ============================================================
    MAPPA LEAFLET
 ============================================================ */
@@ -12400,7 +12458,7 @@ if (modalitaGuida === 'TURISMO') modalitaGuida = 'GIRI';
 
 const paese = normalizePaeseNome(carica('vt_paeseAttuale','Colombia'));
 ensurePaeseExists(paese);
-
+riparaKmPaesiDaPercorsi();   // ✅ ripara mismatch Globali vs Paese
 
   // aggiorna select paese se esistono (guida/settings)
   const selGuida = document.getElementById('selectPaese');
