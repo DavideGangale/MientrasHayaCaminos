@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-04-06T00:02:25.814Z",
+  "_exportDate": "2026-04-06T11:55:26.126Z",
   "tipo": "paese",
   "paese": "Colombia",
   "slug": "colombia",
@@ -21532,13 +21532,53 @@
   ],
   "diario": [
     {
+      "id": 1775428776941,
+      "ts": 1775428776941,
+      "data": "",
+      "ora": "",
+      "paese": "Colombia",
+      "km": "",
+      "testo": "Zipacon",
+      "tags": [
+        "Flora café"
+      ],
+      "geo": {
+        "lat": 4.76089946758312,
+        "lon": -74.37993773836381
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1II7TEZ5Z0188iLpy3RMuPWostFjA4O9Z",
+      "foto": null
+    },
+    {
+      "id": 1775426605846,
+      "ts": 1775426605846,
+      "data": "",
+      "ora": "",
+      "paese": "Colombia",
+      "km": "",
+      "testo": "Se varo Oscar…. Rodamiento de la canastilla se reventó… vamos a llegar a faca despacito después de retirar las piezas",
+      "tags": [
+        "Varada"
+      ],
+      "geo": {
+        "lat": 4.743752068299917,
+        "lon": -74.40103992124712
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1iR29T3I9TE2UvdKrY5GvLzGDBsh3CDwh",
+      "foto": null
+    },
+    {
       "id": 1775421662405,
       "ts": 1775421661640,
       "data": "05/04/2026",
       "ora": "15:41",
       "paese": "Colombia",
       "km": "246.5",
-      "testo": "hoyeeee",
+      "testo": "Hotel Paraiso Terrenal",
       "tags": [],
       "geo": {
         "lat": 4.6980767,
@@ -21547,6 +21587,24 @@
       "videoUrl": null,
       "videoPlanned": false,
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1NOUQscTBvONySYsxMgc2wEIUFaaWubKW",
+      "foto": null
+    },
+    {
+      "id": 1775414466359,
+      "ts": 1775414466359,
+      "data": "",
+      "ora": "",
+      "paese": "Colombia",
+      "km": "",
+      "testo": "Cascadas de las monjas",
+      "tags": [],
+      "geo": {
+        "lat": 4.698183839213749,
+        "lon": -74.43322749815363
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1PHqeVOmWoiu3BqCPlSv0NhFkdTQQDKT4",
       "foto": null
     },
     {
