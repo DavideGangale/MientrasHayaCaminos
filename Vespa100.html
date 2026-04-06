@@ -106,6 +106,14 @@ html, body{
   text-align:right;
 }
 
+.ui-clock{
+  font-size: 22px;
+  font-weight: 1000;
+  color: #fff;
+  letter-spacing: 1px;
+  text-shadow: 0 0 12px rgba(0,0,0,0.45);
+}
+    
 .speed-unit{
   font-size:18px;          /* ✅ più grande (da 14 a 18) */
   font-weight:1000;
@@ -1421,10 +1429,11 @@ overflow: auto;
     <div class="speed-wrap">
   <div class="speed" id="speedometer">0</div>
 
-  <div class="speed-corner">
-    <span id="gps-badge" class="gps-badge gps-off">GPS OFF</span>
-    <div class="speed-unit">km/h</div>
-  </div>
+<div class="speed-corner">
+  <div id="ui-clock" class="ui-clock">--:--</div>
+  <span id="gps-badge" class="gps-badge gps-off">GPS OFF</span>
+  <div class="speed-unit">km/h</div>
+</div>
 </div>
 
     <!-- mini: ALT / AUT / TRIP -->
@@ -2512,7 +2521,7 @@ overflow: auto;
     </label>
 
     <label class="checklist-item tagpick planned-video" style="margin-top:8px;">
-      <input type="checkbox" id="diario-is-public">
+      <input type="checkbox" id="diario-is-public" checked>
       <span class="checklist-text">🔓 Questo post è PUBBLICO (ok per GitHub)</span>
     </label>
 
@@ -2959,6 +2968,23 @@ function salvaDatiPaesiThrottled(datiPaesi, minMs = 15000) { // 15s
 /* ============================================================
    TOAST
 ============================================================ */
+
+let clockTimer = null;
+
+function updateClockUI(){
+  const el = document.getElementById('ui-clock');
+  if (!el) return;
+  const d = new Date();
+  el.innerText = d.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' });
+}
+
+function startClock(){
+  if (clockTimer) return;
+  updateClockUI();
+  clockTimer = setInterval(updateClockUI, 1000);
+}
+
+  
 let toastTimer = null;
 function showToast(msg, durata = 2500) {
   const t = document.getElementById('toast');
@@ -4125,7 +4151,7 @@ function concludiTappa() {
     traccia: compressTrace(traceRaw, 4000),
     telemetry: Array.isArray(tappaAttuale.telemetry) ? tappaAttuale.telemetry : [],
     tipo: 'Tappa',
-    isPublic: false,
+    isPublic: DEFAULT_PUBLIC,
     ghSynced: false,
     ghSyncedAt: null,
     startTs: tappaAttuale.startTs || null,
@@ -4292,7 +4318,7 @@ function concludiTurismo() {
 startTs: tappaAttuale.startTs || null,
 endTs: Date.now(),
 
-      isPublic: false,
+    isPublic: DEFAULT_PUBLIC,
     ghSynced: false,
     ghSyncedAt: null,
     
@@ -5825,7 +5851,7 @@ salva('vt_scortaLitri', nuovaScorta);
       dest: (dest === 'V') ? 'Vespa' : 'Tanica',
       mix: (dest === 'V') ? (mixC + '%') : '--',
 
-          isPublic: false,
+      isPublic: DEFAULT_PUBLIC,
       ghSynced: false,
       ghSyncedAt: null,
 
@@ -6184,7 +6210,7 @@ if (fuelMini) {
    CONDIVISIONE (FUNZIONE UNICA, FIX)
 ============================================================ */
 const PUBLIC_BLOG_URL = 'https://davidegangale.github.io/MientrasHayaCaminos/public.html';
-  
+  const DEFAULT_PUBLIC = true;   // ✅ tutto pubblico di default
 function dataURLToFile(dataUrl, filename = 'foto.jpg') {
   const arr = dataUrl.split(',');
   const mimeMatch = arr[0].match(/:(.*?);/);
@@ -7976,7 +8002,9 @@ const planned = !!document.getElementById('tappa-media-video-planned')?.checked;
     // ✅ COLLEGAMENTO ESPLICITO AL PERCORSO
     percorsoRefId: pendingAddMediaCtx.id,
     percorsoRefTipo: pendingAddMediaCtx.tipoRef, // 'tappa' | 'turismo'
-
+    isPublic: DEFAULT_PUBLIC,
+    ghSynced: false,
+    ghSyncedAt: null,
     fotoUrl: null,
 videoUrlList: videoUrls,
 videoUrl: videoUrls[0] || null,
@@ -8792,44 +8820,58 @@ function caricaInboxFeedSettingsUI(){
 }
 
 function normalizeInboxDiarioEntry(e) {
-  const id = Number(e.id || e.ts || Date.now());
+  // ts: usa ts, oppure id se sembra un timestamp, altrimenti adesso
+  const tsVal = Number(e?.ts || e?.id || Date.now());
+  const d = new Date(isFinite(tsVal) ? tsVal : Date.now());
+
+  const id = isFinite(tsVal) ? tsVal : Date.now();
+
   const rawPlanned = (e && e.videoPlanned != null) ? e.videoPlanned : false;
 
-// accetta true/false, "true"/"false", "1"/"0"
-const plannedBool =
-  (rawPlanned === true) ||
-  (String(rawPlanned).toLowerCase() === 'true') ||
-  (String(rawPlanned) === '1');
+  // accetta true/false, "true"/"false", "1"/"0"
+  const plannedBool =
+    (rawPlanned === true) ||
+    (String(rawPlanned).toLowerCase() === 'true') ||
+    (String(rawPlanned) === '1');
 
-const url = e.videoUrl ? String(e.videoUrl).trim() : '';
+  const url = e?.videoUrl ? String(e.videoUrl).trim() : '';
 
-return {
-  id,
-  ts: Number(e.ts || id),
+  // ✅ data/ora fallback da ts
+  const dataIt = (e?.data && String(e.data).trim()) ? e.data : d.toLocaleDateString('it-IT');
+  const oraIt  = (e?.ora  && String(e.ora).trim())  ? e.ora  : d.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' });
 
-  data: e.data || '',
-  ora: e.ora || '',
+  // ✅ km fallback: usa quello attuale dell’app (meglio di vuoto)
+  const kmIt = (e?.km != null && String(e.km).trim() !== '')
+    ? String(e.km)
+    : (parseFloat(carica('vt_kmTotali','0')) || 0).toFixed(1);
 
-  paese: e.paese || carica('vt_paeseAttuale','Colombia'),
-  km: (e.km != null) ? String(e.km) : (parseFloat(carica('vt_kmTotali','0')) || 0).toFixed(1),
+  return {
+    id,
+    ts: Number(tsVal || id),
 
-  testo: String(e.testo || '').trim(),
-  tags: Array.isArray(e.tags) ? e.tags : [],
-  geo: (e.geo && isFinite(e.geo.lat) && isFinite(e.geo.lon)) ? e.geo : null,
+    data: dataIt,
+    ora: oraIt,
 
-  fotoUrl: e.fotoUrl || null,
-  foto: e.foto || null,
-isPublic: false,
-ghSynced: false,
-ghSyncedAt: null,
-  // ✅ VIDEO
-  videoUrl: url || null,
-  videoPlanned: (!!plannedBool && !url) // se c’è url, planned diventa false
+    paese: e?.paese || carica('vt_paeseAttuale','Colombia'),
+    km: kmIt,
 
-  
-};
+    testo: String(e?.testo || '').trim(),
+    tags: Array.isArray(e?.tags) ? e.tags : [],
+    geo: (e?.geo && isFinite(e.geo.lat) && isFinite(e.geo.lon)) ? e.geo : null,
+
+    fotoUrl: e?.fotoUrl || null,
+    foto: e?.foto || null,
+
+    // ✅ default pubblico
+    isPublic: DEFAULT_PUBLIC,
+    ghSynced: false,
+    ghSyncedAt: null,
+
+    // VIDEO
+    videoUrl: url || null,
+    videoPlanned: (!!plannedBool && !url)
+  };
 }
-
 
 async function syncInboxNowJSONP() {
   const feedUrl = (carica('vt_inboxFeedUrl','') || '').trim();
@@ -8861,7 +8903,7 @@ async function syncInboxNowJSONP() {
 
     for (const raw of entries) {
       // filtra solo nuovi (ts > since)
-      const ts = Number(raw?.ts || 0);
+      const ts = Number(raw?.ts || raw?.id || 0);
       if (!ts || ts <= since) continue;
 
       const e = normalizeInboxDiarioEntry(raw);
@@ -10533,7 +10575,7 @@ const entry = {
   ora: now.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' }),
   alt: altitudineAttuale,
 
-    isPublic: false,
+  isPublic: DEFAULT_PUBLIC,
   ghSynced: false,
   ghSyncedAt: null,
 
@@ -10753,7 +10795,7 @@ const invItemUsed = Array.isArray(invAllForUsed)
   nome,
   desc,
   ricambiUsati: ricambiUsati,
-  isPublic: false,
+  isPublic: DEFAULT_PUBLIC,
   ghSynced: false,
   ghSyncedAt: null,
       
@@ -12480,6 +12522,7 @@ if (typeof aggiornaGuidaButtonsUI === 'function') aggiornaGuidaButtonsUI();
 setStatsMode(visualizzazioneStats || 'Globali');
 refreshStatsPaeseDropdown();
 aggiornaUI();
+  startClock();
 aggiornaUIOlioStock();
 aggiornaTempoGuidaUI();
 renderDiario();
