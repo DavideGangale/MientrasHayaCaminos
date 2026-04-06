@@ -1,10 +1,88 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-04-05T14:58:38.604Z",
+  "_exportDate": "2026-04-06T00:01:28.446Z",
   "tipo": "diario_mese",
   "mese": "2026-04",
-  "count": 32,
+  "count": 36,
   "entries": [
+    {
+      "id": 1775421662405,
+      "ts": 1775421661640,
+      "data": "05/04/2026",
+      "ora": "15:41",
+      "paese": "Colombia",
+      "km": "246.5",
+      "testo": "hoyeeee",
+      "tags": [],
+      "geo": {
+        "lat": 4.6980767,
+        "lon": -74.433095
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1NOUQscTBvONySYsxMgc2wEIUFaaWubKW",
+      "foto": null
+    },
+    {
+      "id": 1775409829195,
+      "ts": 1775409829195,
+      "data": "",
+      "ora": "",
+      "paese": "Colombia",
+      "km": "",
+      "testo": "Cachipay",
+      "tags": [
+        "Puebliando"
+      ],
+      "geo": {
+        "lat": 4.730460763888238,
+        "lon": -74.43745463614725
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=116BRKLzXZFJbLKYiFQ8vUryop0g2ao3u",
+      "foto": null
+    },
+    {
+      "id": 1775408476805,
+      "ts": 1775408476805,
+      "data": "",
+      "ora": "",
+      "paese": "Colombia",
+      "km": "",
+      "testo": "Chachipay",
+      "tags": [
+        "Puebliando"
+      ],
+      "geo": {
+        "lat": 4.731049585564796,
+        "lon": -74.43704905951984
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1JCww8lltYHN5IK11JvLLz0yN2T-TVUco",
+      "foto": null
+    },
+    {
+      "id": 1775406161686,
+      "ts": 1775406161686,
+      "data": "",
+      "ora": "",
+      "paese": "Colombia",
+      "km": "",
+      "testo": "Zipacon",
+      "tags": [
+        "Puebliando"
+      ],
+      "geo": {
+        "lat": 4.759937468920607,
+        "lon": -74.38015404164267
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1wEsgDrGh_bCDdhbG-UTTgMXDjN6lSE7t",
+      "foto": null
+    },
     {
       "id": 1775348032678,
       "ts": 1775348032678,
