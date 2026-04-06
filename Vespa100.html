@@ -3925,25 +3925,31 @@ function salvaFuelInizioTappa() {
       // anche per paese (opzionale)
       const paese = carica('vt_paeseAttuale','Colombia');
       const datiPaesi = caricaJSON('vt_datiPaesi', {});
-      if (!datiPaesi[paese]) datiPaesi[paese] = { km:0, benzina:0, spesaBenzina:0, spesaOlio:0, benzinaFuori:0 };
+      if (!datiPaesi[paese]) datiPaesi[paese] = { km:0, benzina:0, spesaBenzina:0, spesaOlio:0, benzinaFuori:0, kmFuori:0 };
       datiPaesi[paese].benzinaFuori = (datiPaesi[paese].benzinaFuori || 0) + diff;
       salva('vt_datiPaesi', datiPaesi);
 
-      // km fuori tappa (opzionale)
-      const kmStr = prompt('Quanti km hai fatto FUORI TAPPA? (opzionale)', '');
-      const km = kmStr ? parseFloat(kmStr) : 0;
+     // km fuori tappa (automatico) -> km = litriDiff * consumoMedio (km/L)
+const CONSUMO_MEDIO_KM_L = 25; // <-- se vuoi renderlo variabile, dimmelo e lo leghiamo a un setting salvato
+const km = diff * CONSUMO_MEDIO_KM_L;
 
-      if (!isNaN(km) && km > 0) {
-        const oldKmFuori = parseFloat(carica('vt_kmFuoriTappa','0')) || 0;
-        salva('vt_kmFuoriTappa', (oldKmFuori + km).toFixed(3));
+if (km > 0) {
+  // globale: km fuori tappa
+  const oldKmFuori = parseFloat(carica('vt_kmFuoriTappa','0')) || 0;
+  salva('vt_kmFuoriTappa', (oldKmFuori + km).toFixed(3));
 
-        const kmTot = parseFloat(carica('vt_kmTotali','0')) || 0;
-        salva('vt_kmTotali', (kmTot + km).toFixed(4));
+  // globale: km totali
+  const kmTot = parseFloat(carica('vt_kmTotali','0')) || 0;
+  salva('vt_kmTotali', (kmTot + km).toFixed(4));
 
-        // km per paese
-        datiPaesi[paese].km = (datiPaesi[paese].km || 0) + km;
-        salva('vt_datiPaesi', datiPaesi);
-      }
+  // per paese: aggiungili SEMPRE al paese attuale
+  datiPaesi[paese].km = (datiPaesi[paese].km || 0) + km;
+
+  // (opzionale ma utile) tieni anche un contatore separato "kmFuori" per capire le differenze
+  datiPaesi[paese].kmFuori = (datiPaesi[paese].kmFuori || 0) + km;
+
+  salva('vt_datiPaesi', datiPaesi);
+}
 
       showToast(`📝 Fuori tappa: +${diff.toFixed(2)} L`);
     }
