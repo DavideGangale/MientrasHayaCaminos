@@ -3760,40 +3760,45 @@ function computeExtraPublicStats(country = null) {
 }
 
 function computeMainPublicStats(country = null) {
-  const isSameCountry = (x) => {
-    if (!country) return true;
-    return String(x?.paese || '').trim() === String(country).trim();
-  };
-
-  const tappe = (Array.isArray(DATA?.tappe) ? DATA.tappe : []).filter(isSameCountry);
-  const giri  = (Array.isArray(DATA?.turismo) ? DATA.turismo : []).filter(isSameCountry);
-  const rifornimenti = (Array.isArray(DATA?.rifornimenti) ? DATA.rifornimenti : []).filter(isSameCountry);
-  const manutenzioni = (Array.isArray(DATA?.manutenzioni) ? DATA.manutenzioni : []).filter(isSameCountry);
-
-  const percorsi = [...tappe, ...giri];
-
-  const km = percorsi.reduce((sum, t) => sum + Number(t?.km || 0), 0);
-
-  let benz = 0;
-  for (const r of rifornimenti) {
-    benz += Number(r?.qta ?? r?.litri ?? 0);
+  function readOilLiters(st) {
+    if (!st) return 0;
+    if (st.olioTotaleLitri != null) return Number(st.olioTotaleLitri || 0);
+    if (st.olioMl != null) return Number(st.olioMl || 0) / 1000;
+    return 0;
   }
 
+  if (country) {
+    const meta = getIndexPaesiList().find(x => String(x.paese).trim() === String(country).trim());
+    const st = meta?.stats || {};
+
+    return {
+      km: Number(st.km || 0),
+      benz: Number(st.benzina || 0),
+      spesaBenz: Number(st.spesaBenzinaUsd || 0),
+      olio: readOilLiters(st),
+      spesaOlio: Number(st.spesaOlioUsd || 0),
+      spesaMaint: Number(st.spesaRicambiUsd || 0) + Number(st.spesaManodoperaUsd || 0)
+    };
+  }
+
+  // GLOBALE = somma delle stats dei paesi
+  const paesi = getIndexPaesiList();
+
+  let km = 0;
+  let benz = 0;
   let spesaBenz = 0;
   let olio = 0;
   let spesaOlio = 0;
-
-  for (const r of rifornimenti) {
-    spesaBenz += Number(r?.costoBenzUsd ?? r?.costo ?? 0);
-
-    const oil = getOilInfoFromRefuel(r);
-    if (oil.oilL != null) olio += Number(oil.oilL || 0);
-    if (oil.oilCost != null) spesaOlio += Number(oil.oilCost || 0);
-  }
-
   let spesaMaint = 0;
-  for (const m of manutenzioni) {
-    spesaMaint += Number(m?.costoUsd || 0);
+
+  for (const p of paesi) {
+    const st = p?.stats || {};
+    km += Number(st.km || 0);
+    benz += Number(st.benzina || 0);
+    spesaBenz += Number(st.spesaBenzinaUsd || 0);
+    olio += readOilLiters(st);
+    spesaOlio += Number(st.spesaOlioUsd || 0);
+    spesaMaint += Number(st.spesaRicambiUsd || 0) + Number(st.spesaManodoperaUsd || 0);
   }
 
   return {
