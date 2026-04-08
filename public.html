@@ -2821,37 +2821,19 @@ function buildUsedPartsStatsHtmlPublic(country = null) {
 function renderStatsDati() {
   if (!INDEX_DATA) return;
 
-  const mode = document.getElementById('statsCountryFilter').value;
-  let km = 0, benz = 0, spesaBenz = 0, spesaMaint = 0, olio = 0;
+    const mode = document.getElementById('statsCountryFilter').value;
   const country = (mode === 'GLOBAL') ? null : mode;
 
-  if (country === null) {
-    const s = INDEX_DATA.stats || {};
-    km = Number(s.kmTotali || 0);
-    benz = Number(s.benzinaUsataLitri || 0);
-    olio = Number(s.olioTotaleLitri || 0);
-    spesaBenz = Number(s.spesaBenzinaUsd || 0);
-    spesaMaint = Number(s.spesaRicambiUsd || 0) + Number(s.spesaManodoperaUsd || 0);
-  } else {
-    const meta = getIndexPaesiList().find(x => x.paese === country);
-    const st = meta?.stats || {};
+  const main = computeMainPublicStats(country);
 
-    km = Number(st.km || 0);
-    benz = Number(st.benzina || 0);
-
-    if (st.olioTotaleLitri != null) olio = Number(st.olioTotaleLitri || 0);
-    else if (st.olioMl != null) olio = Number(st.olioMl || 0) / 1000;
-    else olio = 0;
-
-    spesaBenz = Number(st.spesaBenzinaUsd || 0);
-    spesaMaint = Number(st.spesaRicambiUsd || 0) + Number(st.spesaManodoperaUsd || 0);
-  }
+  const km = Number(main.km || 0);
+  const benz = Number(main.benz || 0);
+  const spesaBenz = Number(main.spesaBenz || 0);
+  const spesaMaint = Number(main.spesaMaint || 0);
+  const olio = Number(main.olio || 0);
+  const spesaOlio = Number(main.spesaOlio || 0);
 
   const cons = benz > 0 ? (km / benz).toFixed(1) : '--';
-
-  const spesaOlio = (country === null)
-    ? Number((INDEX_DATA.stats || {}).spesaOlioUsd || 0)
-    : Number((getIndexPaesiList().find(x => x.paese === country)?.stats?.spesaOlioUsd || 0));
 
   const fmtUsd = (x) => '$' + Number(x || 0).toFixed(2);
 
@@ -3776,6 +3758,54 @@ function computeExtraPublicStats(country = null) {
     altMax
   };
 }
+
+function computeMainPublicStats(country = null) {
+  const isSameCountry = (x) => {
+    if (!country) return true;
+    return String(x?.paese || '').trim() === String(country).trim();
+  };
+
+  const tappe = (Array.isArray(DATA?.tappe) ? DATA.tappe : []).filter(isSameCountry);
+  const giri  = (Array.isArray(DATA?.turismo) ? DATA.turismo : []).filter(isSameCountry);
+  const rifornimenti = (Array.isArray(DATA?.rifornimenti) ? DATA.rifornimenti : []).filter(isSameCountry);
+  const manutenzioni = (Array.isArray(DATA?.manutenzioni) ? DATA.manutenzioni : []).filter(isSameCountry);
+
+  const percorsi = [...tappe, ...giri];
+
+  const km = percorsi.reduce((sum, t) => sum + Number(t?.km || 0), 0);
+
+  let benz = 0;
+  for (const r of rifornimenti) {
+    benz += Number(r?.qta ?? r?.litri ?? 0);
+  }
+
+  let spesaBenz = 0;
+  let olio = 0;
+  let spesaOlio = 0;
+
+  for (const r of rifornimenti) {
+    spesaBenz += Number(r?.costoBenzUsd ?? r?.costo ?? 0);
+
+    const oil = getOilInfoFromRefuel(r);
+    if (oil.oilL != null) olio += Number(oil.oilL || 0);
+    if (oil.oilCost != null) spesaOlio += Number(oil.oilCost || 0);
+  }
+
+  let spesaMaint = 0;
+  for (const m of manutenzioni) {
+    spesaMaint += Number(m?.costoUsd || 0);
+  }
+
+  return {
+    km,
+    benz,
+    spesaBenz,
+    olio,
+    spesaOlio,
+    spesaMaint
+  };
+}
+  
 window.onload = loadData;
   
 </script>
