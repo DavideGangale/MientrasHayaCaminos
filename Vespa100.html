@@ -3542,12 +3542,14 @@ function riparaKmPaesiDaPercorsi() {
   }
 
   // 4) caso semplice: se hai SOLO 1 paese, aggiungo anche i km fuori tappa (globali)
-  const keys = Object.keys(dati);
-  if (keys.length === 1) {
-    const only = keys[0];
-    const kmFuori = Number(carica('vt_kmFuoriTappa', '0')) || 0;
-    if (kmFuori > 0) dati[only].km = Number((Number(dati[only].km || 0) + kmFuori).toFixed(3));
-  }
+  // 4) NON aggiungere i km fuori tappa ai km del paese:
+  // le stats paese devono riflettere solo la somma dei percorsi del paese.
+ // const keys = Object.keys(dati);
+ // if (keys.length === 1) {
+ //   const only = keys[0];
+ //   const kmFuori = Number(carica('vt_kmFuoriTappa', '0')) || 0;
+ //   if (kmFuori > 0) dati[only].km = Number((Number(dati[only].km || 0) + kmFuori).toFixed(3));
+//  }
 
   salva('vt_datiPaesi', dati);
 }
