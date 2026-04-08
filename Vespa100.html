@@ -9583,8 +9583,9 @@ function renderStatsPaesi() {
   }
 
   container.innerHTML = paesi.map(([nome, d]) => {
-    const litriBruciati = calcBenzinaBruciataLitri(nome, Number(d.km || 0));
-const consumo = litriBruciati > 0 ? ((Number(d.km || 0)) / litriBruciati).toFixed(1) : '--';
+    const km = Number(d.km || 0);
+    const litriBruciati = Number(d.benzina || 0);
+    const consumo = litriBruciati > 0 ? (km / litriBruciati).toFixed(1) : '--';
     return `
       <div class="paese-stat">
         <div class="paese-name">${nome}</div>
@@ -11910,7 +11911,7 @@ const spesaBenzinaPaeseCalcolata =
       slug: slug,
       stats: {
        km: Number(kmPaeseCalcolati || 0),
-        benzina: Number(dp.benzina || 0),
+        benzina: Number(benzinaPaeseCalcolata || 0),
         benzinaFuori: Number(dp.benzinaFuori || 0),
         olioMl: Number(dp.olioMl || 0),
         spesaBenzinaUsd: Number(dp.spesaBenzinaUsd || 0),
@@ -11932,7 +11933,7 @@ const spesaBenzinaPaeseCalcolata =
       path: path,
       stats: {
         km: Number(kmPaeseCalcolati || 0),
-        benzina: Number(dp.benzina || 0),
+        benzina: Number(benzinaPaeseCalcolata || 0),
         spesaBenzinaUsd: Number(dp.spesaBenzinaUsd || 0),
         olioMl: Number(dp.olioMl || 0),
         spesaOlioUsd: Number(dp.spesaOlioUsd || 0),
