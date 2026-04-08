@@ -9577,6 +9577,7 @@ function renderStatsPaesi() {
   if (!container) return;
 
   const paesi = Object.entries(datiPaesi);
+  console.log('DEBUG vt_datiPaesi:', datiPaesi);
   if (!paesi.length) {
     container.innerHTML = '<div style="color:#888; text-align:center; padding:30px;">Nessun dato per paese</div>';
     return;
