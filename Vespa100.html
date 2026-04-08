@@ -9573,25 +9573,43 @@ function editRifornimento(id){
 ============================================================ */
 function renderStatsPaesi() {
   const datiPaesi = caricaJSON('vt_datiPaesi', {});
+  const tappe = caricaJSON('vt_tappe', []);
+  const turismo = caricaJSON('vt_turismo', []);
   const container = document.getElementById('contenutoPaesi');
   if (!container) return;
 
   const paesi = Object.entries(datiPaesi);
+  console.log('DEBUG vt_datiPaesi:', datiPaesi);
+
   if (!paesi.length) {
     container.innerHTML = '<div style="color:#888; text-align:center; padding:30px;">Nessun dato per paese</div>';
     return;
   }
 
   container.innerHTML = paesi.map(([nome, d]) => {
-    const km = Number(d.km || 0);
+    const paeseNorm = String(nome || '').trim().toLowerCase();
+
+    const tappePaese = (Array.isArray(tappe) ? tappe : []).filter(x =>
+      String(x?.paese || '').trim().toLowerCase() === paeseNorm
+    );
+
+    const turismoPaese = (Array.isArray(turismo) ? turismo : []).filter(x =>
+      String(x?.paese || '').trim().toLowerCase() === paeseNorm
+    );
+
+    const percorsiPaese = [...tappePaese, ...turismoPaese];
+
+    const km = percorsiPaese.reduce((sum, x) => sum + Number(x?.km || 0), 0);
+
     const litriBruciati = Number(d.benzina || 0);
     const consumo = litriBruciati > 0 ? (km / litriBruciati).toFixed(1) : '--';
+
     return `
       <div class="paese-stat">
         <div class="paese-name">${nome}</div>
         <div class="paese-numbers">
-          <div style="font-size:13px; color:#aaa;">KM: <b style="color:white;">${(d.km||0).toFixed(1)}</b></div>
-          <div style="font-size:13px; color:#aaa;">Benzina: <b style="color:white;">${(d.benzina||0).toFixed(1)} L</b></div>
+          <div style="font-size:13px; color:#aaa;">KM: <b style="color:white;">${km.toFixed(1)}</b></div>
+          <div style="font-size:13px; color:#aaa;">Benzina: <b style="color:white;">${litriBruciati.toFixed(1)} L</b></div>
           <div style="font-size:13px; color:#aaa; grid-column:span 2;">
             Consumo: <b style="color:var(--verde);">${consumo} km/L</b>
           </div>
@@ -9600,7 +9618,6 @@ function renderStatsPaesi() {
     `;
   }).join('');
 }
-
 /* ============================================================
    INVENTARIO RICAMBI
 ============================================================ */
