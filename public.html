@@ -2524,6 +2524,12 @@ if (!skipAutoFit && (drawnLines > 0 || layerMarkers.getLayers().length > 0) && b
 }
 
 function syncFilterButtonsUI() {
+  // --- GESTIONE BOTTONI MODALITÀ (TUTTO/TAPPE/GIRI) ---
+  document.getElementById('modeBtnAll').classList.toggle('active', currentMode === 'TUTTO');
+  document.getElementById('modeBtnTappe').classList.toggle('active', currentMode === 'TAPPE');
+  document.getElementById('modeBtnGiri').classList.toggle('active', currentMode === 'GIRI');
+
+  // --- GESTIONE BOTTONI MARKER ---
   const map = {
     FOTO: 'markerBtnFoto',
     VIDEO: 'markerBtnVideo',
@@ -2535,7 +2541,6 @@ function syncFilterButtonsUI() {
   Object.entries(map).forEach(([type, id]) => {
     const btn = document.getElementById(id);
     if (!btn) return;
-
     btn.classList.toggle('active', !!currentMarkerFilters[type]);
   });
 
