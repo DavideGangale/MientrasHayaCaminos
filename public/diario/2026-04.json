@@ -1,10 +1,28 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-04-06T22:40:11.953Z",
+  "_exportDate": "2026-04-08T18:14:36.886Z",
   "tipo": "diario_mese",
   "mese": "2026-04",
-  "count": 40,
+  "count": 41,
   "entries": [
+    {
+      "id": 1775671889488,
+      "ts": 1775671889488,
+      "data": "08/04/2026",
+      "ora": "13:11",
+      "paese": "Colombia",
+      "km": "62.07",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 4.805935,
+        "lon": -74.3607533
+      },
+      "videoUrl": "https://youtu.be/_OOzEbXJ2m8?si=mUHn_Nptg81fcCwv",
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
     {
       "id": 1775486380438,
       "ts": 1775486379473,
@@ -126,7 +144,7 @@
       "ora": "",
       "paese": "Colombia",
       "km": "",
-      "testo": "Chachipay",
+      "testo": "Cachipay",
       "tags": [
         "Puebliando"
       ],
