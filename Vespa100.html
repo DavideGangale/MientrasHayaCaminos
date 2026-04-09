@@ -3267,11 +3267,7 @@ if (oldTan != null && localStorage.getItem('vt_tanica1CapLitri') == null) {
 
 initDB('vt_turismo', JSON.stringify([]));
 initDB('vt_modalitaGuida', 'TAPPA');
-
-  
-initDB('vt_benzinaFuoriTappaLitri', '0.0');
-initDB('vt_kmFuoriTappa', '0.0');
-  
+ 
   initDB('vt_tappe', JSON.stringify([]));
   initDB('vt_logbook', JSON.stringify([]));
   initDB('vt_diario', JSON.stringify([]));
@@ -3432,7 +3428,6 @@ function ensurePaeseExists(paese) {
     datiPaesi[p] = {
       km: 0,
       benzina: 0,
-      benzinaFuori: 0,
       olioMl: 0,
       spesaBenzinaUsd: 0,
       spesaOlioUsd: 0,
@@ -3510,7 +3505,7 @@ function riparaKmPaesiDaPercorsi() {
       // merge minimo (qui ci interessa soprattutto km)
       dati[nk].km = Number(dati[nk].km || 0) + Number(v?.km || 0);
       dati[nk].benzina = Number(dati[nk].benzina || 0) + Number(v?.benzina || 0);
-      dati[nk].benzinaFuori = Number(dati[nk].benzinaFuori || 0) + Number(v?.benzinaFuori || 0);
+      
       dati[nk].olioMl = Number(dati[nk].olioMl || 0) + Number(v?.olioMl || 0);
 
       dati[nk].spesaBenzinaUsd = Number(dati[nk].spesaBenzinaUsd || 0) + Number(v?.spesaBenzinaUsd || 0);
@@ -3904,60 +3899,7 @@ function salvaFuelInizioTappa() {
   const gal = sel ? parseFloat(sel.value) : 0;
   const litri = gal * FAT_GAL;
 
-  // livello precedente (tipicamente salvato a fine tappa)
-  const prevLitri = parseFloat(carica('vt_serbatoioLitri','0')) || 0;
-  const soglia = 0.05; // 50 ml
-
-  // Se il livello è sceso, chiedi se registrare "fuori tappa"
-  if (prevLitri > 0 && (prevLitri - litri) > soglia) {
-    const diff = prevLitri - litri;
-
-    const ok = confirm(
-      `Serbatoio più basso rispetto all'ultima volta.\n` +
-      `Prima: ${prevLitri.toFixed(2)} L\n` +
-      `Ora:   ${litri.toFixed(2)} L\n\n` +
-      `Vuoi registrare ${diff.toFixed(2)} L come benzina "FUORI TAPPA"?`
-    );
-
-    if (ok) {
-      // benzina fuori tappa (globale)
-      const oldB = parseFloat(carica('vt_benzinaFuoriTappaLitri','0')) || 0;
-      salva('vt_benzinaFuoriTappaLitri', (oldB + diff).toFixed(3));
-
-      // anche per paese (opzionale)
-      const paese = carica('vt_paeseAttuale','Colombia');
-      const datiPaesi = caricaJSON('vt_datiPaesi', {});
-      if (!datiPaesi[paese]) datiPaesi[paese] = { km:0, benzina:0, spesaBenzina:0, spesaOlio:0, benzinaFuori:0, kmFuori:0 };
-      datiPaesi[paese].benzinaFuori = (datiPaesi[paese].benzinaFuori || 0) + diff;
-      salva('vt_datiPaesi', datiPaesi);
-
-     // km fuori tappa (automatico) -> km = litriDiff * consumoMedio (km/L)
-const CONSUMO_MEDIO_KM_L = 25; // <-- se vuoi renderlo variabile, dimmelo e lo leghiamo a un setting salvato
-const km = diff * CONSUMO_MEDIO_KM_L;
-
-if (km > 0) {
-  // globale: km fuori tappa
-  const oldKmFuori = parseFloat(carica('vt_kmFuoriTappa','0')) || 0;
-  salva('vt_kmFuoriTappa', (oldKmFuori + km).toFixed(3));
-
-  // globale: km totali
-  const kmTot = parseFloat(carica('vt_kmTotali','0')) || 0;
-  salva('vt_kmTotali', (kmTot + km).toFixed(4));
-
-  // per paese: aggiungili SEMPRE al paese attuale
-  datiPaesi[paese].km = (datiPaesi[paese].km || 0) + km;
-
-  // (opzionale ma utile) tieni anche un contatore separato "kmFuori" per capire le differenze
-  datiPaesi[paese].kmFuori = (datiPaesi[paese].kmFuori || 0) + km;
-
-  salva('vt_datiPaesi', datiPaesi);
-}
-
-      showToast(`📝 Fuori tappa: +${diff.toFixed(2)} L`);
-    }
-  }
-
-  // Imposta serbatoio “corrente”
+  // Imposta serbatoio “corrente” senza confronti / senza fuori tappa
   salva('vt_serbatoioLitri', litri.toFixed(3));
 
   // Salva anche dentro la tappa (per calcolo consumo reale)
@@ -3971,7 +3913,7 @@ if (km > 0) {
   chiudiModal('modalFuelStart');
   aggiornaUI();
 
-  // ✅ parte sempre dopo conferma
+  // parte sempre dopo conferma
   startTrackingNow();
 }
 
@@ -5962,7 +5904,7 @@ function registraTravaso() {
 
 const paese = carica('vt_paeseAttuale','Colombia');
 const datiPaesi = caricaJSON('vt_datiPaesi', {});
-if (!datiPaesi[paese]) datiPaesi[paese] = { km:0, benzina:0, benzinaFuori:0, spesaBenzinaUsd:0, spesaOlioUsd:0, spesaRicambiUsd:0, spesaManodoperaUsd:0 };
+if (!datiPaesi[paese]) datiPaesi[paese] = { km:0, benzina:0, spesaBenzinaUsd:0, spesaOlioUsd:0, spesaRicambiUsd:0, spesaManodoperaUsd:0 };
 
 // spesa olio (USD): qui il costo lo hai in "costoOlioUsato"
 salva('vt_spesaOlioUsd', (parseFloat(carica('vt_spesaOlioUsd', '0')) || 0) + costoOlioUsato);
@@ -11914,7 +11856,6 @@ const spesaBenzinaPaeseCalcolata =
   const dp = datiPaesi[paese] || {
   km: 0,
   benzina: 0,
-  benzinaFuori: 0,
   olioMl: 0,
   spesaBenzinaUsd: 0,
   spesaOlioUsd: 0,
@@ -11931,7 +11872,7 @@ const spesaBenzinaPaeseCalcolata =
       stats: {
        km: Number(kmPaeseCalcolati || 0),
         benzina: Number(benzinaPaeseCalcolata || 0),
-        benzinaFuori: Number(dp.benzinaFuori || 0),
+        
         olioMl: Number(dp.olioMl || 0),
         spesaBenzinaUsd: Number(dp.spesaBenzinaUsd || 0),
         spesaOlioUsd: Number(dp.spesaOlioUsd || 0),
@@ -11975,7 +11916,6 @@ const spesaBenzinaPaeseCalcolata =
     stats: {
       kmTotali: parseFloat(carica('vt_kmTotali','0')) || 0,
       benzinaUsataLitri: calcBenzinaBruciataLitri(null, parseFloat(carica('vt_kmTotali','0')) || 0),
-      benzinaFuoriTappaLitri: parseFloat(carica('vt_benzinaFuoriTappaLitri','0')) || 0,
       olioTotaleLitri: (parseFloat(carica('vt_olioTotaleMl','0')) || 0) / 1000,
       spesaBenzinaUsd: parseFloat(carica('vt_spesaBenzinaUsd','0')) || 0,
       spesaOlioUsd: parseFloat(carica('vt_spesaOlioUsd','0')) || 0,
@@ -12256,7 +12196,7 @@ function esportaDati() {
     'vt_spesaBenzina','vt_spesaOlio','vt_spesaBenzinaUsd','vt_spesaOlioUsd','vt_spesaRicambiUsd','vt_spesaManodoperaUsd',
 
 'vt_turismo',
-'vt_benzinaFuoriTappaLitri','vt_kmFuoriTappa',
+
 
 'vt_unita','vt_dist','vt_valuta',
 'vt_fxRates',
@@ -12497,6 +12437,13 @@ async function setLoadingProgress(pct, label) {
 async function inizializzaApp() {
   await setLoadingProgress(10, '🗄️ Database...');
   initAllData();
+
+// ✅ Pulizia vecchie chiavi "fuori tappa"
+try {
+  localStorage.removeItem('vt_benzinaFuoriTappaLitri');
+  localStorage.removeItem('vt_kmFuoriTappa');
+} catch {}
+  
   migraPublicFlagsV1();
   migraLogbookMultiFotoV1();
   migrateCarburazionePaeseFromPercorsi();
