@@ -3549,7 +3549,25 @@ function riparaKmPaesiDaPercorsi() {
   salva('vt_datiPaesi', dati);
 }
 
-  
+  function riparaKmTotaliDaPercorsi(includiTappaAttuale = true) {
+  const tappe = caricaJSON('vt_tappe', []) || [];
+  const tur   = caricaJSON('vt_turismo', []) || [];
+
+  const all = [].concat(tappe, tur);
+
+  let km = 0;
+  for (const p of all) {
+    const v = Number(p?.km || 0);
+    if (isFinite(v) && v > 0) km += v;
+  }
+
+  if (includiTappaAttuale) {
+    const cur = Number(tappaAttuale?.kmPercorsi || 0);
+    if (isFinite(cur) && cur > 0) km += cur;
+  }
+
+  salva('vt_kmTotali', km.toFixed(4));
+}
 /* ============================================================
    MAPPA LEAFLET
 ============================================================ */
@@ -5453,6 +5471,29 @@ setOlioStock(st.ml + ml, st.usd + usd);
 
   return litriDaPercorsiSalvati + litriMancanti;
 }
+
+
+function calcKmDaPercorsiSalvati(paeseScope = null) {
+  const tappe = caricaJSON('vt_tappe', []);
+  const tur   = caricaJSON('vt_turismo', []);
+
+  const all = []
+    .concat(Array.isArray(tappe) ? tappe : [])
+    .concat(Array.isArray(tur) ? tur : []);
+
+  let km = 0;
+
+  for (const p of all) {
+    if (!p) continue;
+    if (paeseScope && String(p.paese) !== String(paeseScope)) continue;
+
+    const v = Number(p.km || 0);
+    if (isFinite(v) && v > 0) km += v;
+  }
+
+  return km;
+}
+
   
   function aggiornaUI() {
   const kmTot   = parseFloat(carica('vt_kmTotali','0')) || 0;
@@ -5489,16 +5530,18 @@ setOlioStock(st.ml + ml, st.usd + usd);
   // =========================
   // STATS (Globali / Paese)
   // =========================
-  let kmVisKM = kmTot; // sempre km internamente
+ let kmVisKM = 0; // sempre km internamente
 
-  if (paeseScope) {
-    const datiPaesi = caricaJSON('vt_datiPaesi', {});
-    const dp = datiPaesi[paeseScope] || { km: 0 };
-    kmVisKM = Number(dp.km || 0);
-    setText('titolo-stat-paese', paeseScope);
-  } else {
-    setText('titolo-stat-paese', 'Globali');
-  }
+if (paeseScope) {
+  const datiPaesi = caricaJSON('vt_datiPaesi', {});
+  const dp = datiPaesi[paeseScope] || { km: 0 };
+  kmVisKM = Number(dp.km || 0);
+  setText('titolo-stat-paese', paeseScope);
+} else {
+  // ✅ GLOBALI = somma percorsi salvati (tappe + turismo)
+  kmVisKM = calcKmDaPercorsiSalvati(null);
+  setText('titolo-stat-paese', 'Globali');
+}
 
   // ✅ benzina BRUCIATA (reale/stimata), SEMPRE in litri
   const benzBruciataL = calcBenzinaBruciataLitri(paeseScope, kmVisKM);
@@ -12474,7 +12517,7 @@ if (modalitaGuida === 'TURISMO') modalitaGuida = 'GIRI';
 const paese = normalizePaeseNome(carica('vt_paeseAttuale','Colombia'));
 ensurePaeseExists(paese);
 riparaKmPaesiDaPercorsi();   // ✅ ripara mismatch Globali vs Paese
-
+riparaKmTotaliDaPercorsi(true); // true = include eventuale tappa attuale non conclusa
   // aggiorna select paese se esistono (guida/settings)
   const selGuida = document.getElementById('selectPaese');
   if (selGuida) selGuida.value = paese;
