@@ -1,9 +1,9 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-04-09T00:55:14.791Z",
+  "_exportDate": "2026-04-12T22:10:27.408Z",
   "tipo": "officina",
   "stats": {
-    "spesaRicambiUsd": 0,
+    "spesaRicambiUsd": 0.010517314815972843,
     "spesaManodoperaUsd": 0
   },
   "manutenzioni": [
@@ -194,11 +194,15 @@
     {
       "id": "inv11",
       "nome": "Cambio Olio 300ml",
-      "qta": 0,
+      "qta": 3,
       "wear": "interval",
       "intervalKm": 2000,
       "usedKm": 1200,
-      "lastKm": 7862.1
+      "lastKm": 7862.1,
+      "costoLocal": 39,
+      "costoUsd": 0.010517314815972843,
+      "valuta": "COP",
+      "fxToUsd": 0.00026967473887109855
     },
     {
       "id": "inv12",
