@@ -1,10 +1,28 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-04-09T00:55:14.791Z",
+  "_exportDate": "2026-04-12T22:10:27.409Z",
   "tipo": "diario_mese",
   "mese": "2026-04",
-  "count": 41,
+  "count": 42,
   "entries": [
+    {
+      "id": 1776013982663,
+      "ts": 1776013982663,
+      "data": "12/04/2026",
+      "ora": "12:13",
+      "paese": "Colombia",
+      "km": "424.3",
+      "testo": "San Francisco",
+      "tags": [],
+      "geo": {
+        "lat": 4.974766267524343,
+        "lon": -74.28914249497939
+      },
+      "videoUrl": null,
+      "videoPlanned": true,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1qrnunILhiDfNzBsWUAibsStR_f1xm3c1",
+      "foto": null
+    },
     {
       "id": 1775671889488,
       "ts": 1775671889488,
