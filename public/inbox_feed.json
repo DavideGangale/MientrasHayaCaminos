@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-04-05T22:39:45.057Z",
+  "exportedAt": "2026-04-12T17:13:13.091Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -470,6 +470,21 @@
         "lon": -74.37993773836381
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1II7TEZ5Z0188iLpy3RMuPWostFjA4O9Z"
+    },
+    {
+      "ts": 1776013982663,
+      "id": 1776013982663,
+      "paese": "",
+      "km": "",
+      "testo": "San Francisco",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": true,
+      "geo": {
+        "lat": 4.974766267524343,
+        "lon": -74.28914249497939
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1qrnunILhiDfNzBsWUAibsStR_f1xm3c1"
     }
   ]
 }
