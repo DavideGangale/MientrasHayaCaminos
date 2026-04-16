@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-04-12T17:13:13.091Z",
+  "exportedAt": "2026-04-16T16:41:32.302Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -485,6 +485,21 @@
         "lon": -74.28914249497939
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1qrnunILhiDfNzBsWUAibsStR_f1xm3c1"
+    },
+    {
+      "ts": 1776357680017,
+      "id": 1776357680017,
+      "paese": "",
+      "km": "",
+      "testo": "Chapinero",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 4.6498325581467155,
+        "lon": -74.06336257709526
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1Fj0rQXtMvJBKevEXb3fmuHmPPmZasufJ"
     }
   ]
 }
