@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-04-16T16:41:57.221Z",
+  "exportedAt": "2026-04-18T10:37:01.523Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -515,6 +515,23 @@
         "lon": -74.0634337010316
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1IbejMURhOctjvcZslZ6OkF4eHuo3d4-p"
+    },
+    {
+      "ts": 1776508613087,
+      "id": 1776508613087,
+      "paese": "",
+      "km": "",
+      "testo": "Bogotown",
+      "tags": [
+        "Capital"
+      ],
+      "videoUrl": null,
+      "videoPlanned": true,
+      "geo": {
+        "lat": 4.648226902916259,
+        "lon": -74.06084741499521
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1qgGoPCIlssp-x20BUECXDWvJdPBwCuSm"
     }
   ]
 }
