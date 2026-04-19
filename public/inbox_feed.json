@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-04-19T16:14:40.710Z",
+  "exportedAt": "2026-04-19T20:03:01.836Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -607,6 +607,21 @@
         "lon": -74.62978009464085
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=14wwdzRyY0ZSbB0uRXab78l0OwQUklsB4"
+    },
+    {
+      "ts": 1776628973983,
+      "id": 1776628973983,
+      "paese": "",
+      "km": "",
+      "testo": "Almuerzo",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 7.121410710251053,
+        "lon": -73.59558378509888
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1nVcRayyX8Kpjnwym06ZAZRDQocxlFyg6"
     }
   ]
 }
