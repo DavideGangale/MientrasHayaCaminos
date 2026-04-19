@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-04-19T20:19:35.283Z",
+  "exportedAt": "2026-04-19T21:03:15.207Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -637,6 +637,21 @@
         "lon": -73.59555430591413
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1es6eZGH-6SGSzCiTuxbEWsySI5t759E6"
+    },
+    {
+      "ts": 1776632587462,
+      "id": 1776632587462,
+      "paese": "",
+      "km": "",
+      "testo": "Represa de sogamoso",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 7.105288384114439,
+        "lon": -73.41617647782923
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1RmpiMKp-aYBHRhO3wd1zb_PuST79yYiZ"
     }
   ]
 }
