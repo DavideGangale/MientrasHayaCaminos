@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-04-19T14:33:06.059Z",
+  "exportedAt": "2026-04-19T16:14:40.710Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -592,6 +592,21 @@
         "lon": -74.59489580250772
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1nfNR_HaOxLf5pcRpcdMji8J_AucIULeN"
+    },
+    {
+      "ts": 1776615270146,
+      "id": 1776615270146,
+      "paese": "",
+      "km": "",
+      "testo": "En la vía",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 5.754780176399699,
+        "lon": -74.62978009464085
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=14wwdzRyY0ZSbB0uRXab78l0OwQUklsB4"
     }
   ]
 }
