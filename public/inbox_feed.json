@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-04-19T21:03:15.207Z",
+  "exportedAt": "2026-04-19T22:08:15.759Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -652,6 +652,21 @@
         "lon": -73.41617647782923
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1RmpiMKp-aYBHRhO3wd1zb_PuST79yYiZ"
+    },
+    {
+      "ts": 1776636487877,
+      "id": 1776636487877,
+      "paese": "",
+      "km": "",
+      "testo": "Girón Parque principal",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 7.067309408455218,
+        "lon": -73.16978727474172
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1e8ON-rqRxe_fo_DfpER55iPGsxvoDLnr"
     }
   ]
 }
