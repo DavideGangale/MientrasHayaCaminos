@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-04-19T13:38:22.789Z",
+  "exportedAt": "2026-04-19T14:33:06.059Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -577,6 +577,21 @@
         "lon": -74.47731764994047
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1WM4Ira9corA-d0Ze3mG7R9DSoPUROpdE"
+    },
+    {
+      "ts": 1776609179395,
+      "id": 1776609179395,
+      "paese": "",
+      "km": "",
+      "testo": "Guadua",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": true,
+      "geo": {
+        "lat": 5.067838635300349,
+        "lon": -74.59489580250772
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1nfNR_HaOxLf5pcRpcdMji8J_AucIULeN"
     }
   ]
 }
