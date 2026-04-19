@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-04-19T20:03:01.836Z",
+  "exportedAt": "2026-04-19T20:19:35.283Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -622,6 +622,21 @@
         "lon": -73.59558378509888
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1nVcRayyX8Kpjnwym06ZAZRDQocxlFyg6"
+    },
+    {
+      "ts": 1776629968309,
+      "id": 1776629968309,
+      "paese": "",
+      "km": "",
+      "testo": "Hamburguesa de búfalo",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 7.121476313657855,
+        "lon": -73.59555430591413
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1es6eZGH-6SGSzCiTuxbEWsySI5t759E6"
     }
   ]
 }
