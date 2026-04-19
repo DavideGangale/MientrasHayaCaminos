@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-04-18T10:37:01.523Z",
+  "exportedAt": "2026-04-19T12:45:20.280Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -532,6 +532,21 @@
         "lon": -74.06084741499521
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1qgGoPCIlssp-x20BUECXDWvJdPBwCuSm"
+    },
+    {
+      "ts": 1776602691993,
+      "id": 1776602691993,
+      "paese": "",
+      "km": "",
+      "testo": "La cuchilla",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 4.863363574263512,
+        "lon": -74.42783500074822
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1nCb_SRg1S-h2NcUuHbiWbOOEhIDqWDHr"
     }
   ]
 }
