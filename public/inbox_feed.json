@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-04-19T13:18:57.384Z",
+  "exportedAt": "2026-04-19T13:38:22.789Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -562,6 +562,21 @@
         "lon": -74.44085989154357
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1O5QBD7YXcS3Vb9kcS_EqI4mThQwh1ixU"
+    },
+    {
+      "ts": 1776605892347,
+      "id": 1776605892347,
+      "paese": "",
+      "km": "",
+      "testo": "Coffe",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 5.008375654001723,
+        "lon": -74.47731764994047
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1WM4Ira9corA-d0Ze3mG7R9DSoPUROpdE"
     }
   ]
 }
