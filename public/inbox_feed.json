@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-04-19T12:45:20.280Z",
+  "exportedAt": "2026-04-19T13:18:57.384Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -547,6 +547,21 @@
         "lon": -74.42783500074822
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1nCb_SRg1S-h2NcUuHbiWbOOEhIDqWDHr"
+    },
+    {
+      "ts": 1776604720836,
+      "id": 1776604720836,
+      "paese": "",
+      "km": "",
+      "testo": "Camino",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 4.977026120764182,
+        "lon": -74.44085989154357
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1O5QBD7YXcS3Vb9kcS_EqI4mThQwh1ixU"
     }
   ]
 }
