@@ -1,10 +1,246 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-04-12T22:15:48.056Z",
+  "_exportDate": "2026-04-19T22:23:18.337Z",
   "tipo": "diario_mese",
   "mese": "2026-04",
-  "count": 43,
+  "count": 56,
   "entries": [
+    {
+      "id": 1776636771082,
+      "ts": 1776636771082,
+      "data": "19/04/2026",
+      "ora": "17:12",
+      "paese": "Colombia",
+      "km": "1004.0",
+      "testo": "Girón parque las nieves",
+      "tags": [],
+      "geo": {
+        "lat": 7.06623774022522,
+        "lon": -73.17118856131394
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1itINhWV75W2i63oPmLKTmU0Yh5EMRdVW",
+      "foto": null
+    },
+    {
+      "id": 1776636487877,
+      "ts": 1776636487877,
+      "data": "19/04/2026",
+      "ora": "17:08",
+      "paese": "Colombia",
+      "km": "1004.0",
+      "testo": "Girón Parque principal",
+      "tags": [],
+      "geo": {
+        "lat": 7.067309408455218,
+        "lon": -73.16978727474172
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1e8ON-rqRxe_fo_DfpER55iPGsxvoDLnr",
+      "foto": null
+    },
+    {
+      "id": 1776632587462,
+      "ts": 1776632587462,
+      "data": "19/04/2026",
+      "ora": "16:03",
+      "paese": "Colombia",
+      "km": "1004.0",
+      "testo": "Represa de sogamoso",
+      "tags": [],
+      "geo": {
+        "lat": 7.105288384114439,
+        "lon": -73.41617647782923
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1RmpiMKp-aYBHRhO3wd1zb_PuST79yYiZ",
+      "foto": null
+    },
+    {
+      "id": 1776629968309,
+      "ts": 1776629968309,
+      "data": "19/04/2026",
+      "ora": "15:19",
+      "paese": "Colombia",
+      "km": "1004.0",
+      "testo": "Hamburguesa de búfalo",
+      "tags": [],
+      "geo": {
+        "lat": 7.121476313657855,
+        "lon": -73.59555430591413
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1es6eZGH-6SGSzCiTuxbEWsySI5t759E6",
+      "foto": null
+    },
+    {
+      "id": 1776628973983,
+      "ts": 1776628973983,
+      "data": "19/04/2026",
+      "ora": "15:02",
+      "paese": "Colombia",
+      "km": "1004.0",
+      "testo": "Almuerzo",
+      "tags": [],
+      "geo": {
+        "lat": 7.121410710251053,
+        "lon": -73.59558378509888
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1nVcRayyX8Kpjnwym06ZAZRDQocxlFyg6",
+      "foto": null
+    },
+    {
+      "id": 1776615270146,
+      "ts": 1776615270146,
+      "data": "19/04/2026",
+      "ora": "11:14",
+      "paese": "Colombia",
+      "km": "1004.0",
+      "testo": "En la vía",
+      "tags": [],
+      "geo": {
+        "lat": 5.754780176399699,
+        "lon": -74.62978009464085
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=14wwdzRyY0ZSbB0uRXab78l0OwQUklsB4",
+      "foto": null
+    },
+    {
+      "id": 1776609179395,
+      "ts": 1776609179395,
+      "data": "19/04/2026",
+      "ora": "09:32",
+      "paese": "Colombia",
+      "km": "708.5",
+      "testo": "Guadua",
+      "tags": [],
+      "geo": {
+        "lat": 5.067838635300349,
+        "lon": -74.59489580250772
+      },
+      "videoUrl": null,
+      "videoPlanned": true,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1nfNR_HaOxLf5pcRpcdMji8J_AucIULeN",
+      "foto": null
+    },
+    {
+      "id": 1776605892347,
+      "ts": 1776605892347,
+      "data": "19/04/2026",
+      "ora": "08:38",
+      "paese": "Colombia",
+      "km": "612.8",
+      "testo": "Coffe",
+      "tags": [],
+      "geo": {
+        "lat": 5.008375654001723,
+        "lon": -74.47731764994047
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1WM4Ira9corA-d0Ze3mG7R9DSoPUROpdE",
+      "foto": null
+    },
+    {
+      "id": 1776604720836,
+      "ts": 1776604720836,
+      "data": "19/04/2026",
+      "ora": "08:18",
+      "paese": "Colombia",
+      "km": "612.8",
+      "testo": "Camino",
+      "tags": [],
+      "geo": {
+        "lat": 4.977026120764182,
+        "lon": -74.44085989154357
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1O5QBD7YXcS3Vb9kcS_EqI4mThQwh1ixU",
+      "foto": null
+    },
+    {
+      "id": 1776602691993,
+      "ts": 1776602691993,
+      "data": "19/04/2026",
+      "ora": "07:44",
+      "paese": "Colombia",
+      "km": "612.8",
+      "testo": "La cuchilla",
+      "tags": [],
+      "geo": {
+        "lat": 4.863363574263512,
+        "lon": -74.42783500074822
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1nCb_SRg1S-h2NcUuHbiWbOOEhIDqWDHr",
+      "foto": null
+    },
+    {
+      "id": 1776508613087,
+      "ts": 1776508613087,
+      "data": "18/04/2026",
+      "ora": "05:36",
+      "paese": "Colombia",
+      "km": "551.0",
+      "testo": "Bogotown",
+      "tags": [
+        "Capital"
+      ],
+      "geo": {
+        "lat": 4.648226902916259,
+        "lon": -74.06084741499521
+      },
+      "videoUrl": null,
+      "videoPlanned": true,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1qgGoPCIlssp-x20BUECXDWvJdPBwCuSm",
+      "foto": null
+    },
+    {
+      "id": 1776357705732,
+      "ts": 1776357705732,
+      "data": "16/04/2026",
+      "ora": "11:41",
+      "paese": "Colombia",
+      "km": "551.0",
+      "testo": "Chapinero",
+      "tags": [],
+      "geo": {
+        "lat": 4.649863565183618,
+        "lon": -74.0634337010316
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1IbejMURhOctjvcZslZ6OkF4eHuo3d4-p",
+      "foto": null
+    },
+    {
+      "id": 1776357680017,
+      "ts": 1776357680017,
+      "data": "16/04/2026",
+      "ora": "11:41",
+      "paese": "Colombia",
+      "km": "551.0",
+      "testo": "Chapinero",
+      "tags": [],
+      "geo": {
+        "lat": 4.6498325581467155,
+        "lon": -74.06336257709526
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1Fj0rQXtMvJBKevEXb3fmuHmPPmZasufJ",
+      "foto": null
+    },
     {
       "id": 1776032056231,
       "ts": 1776032055891,
