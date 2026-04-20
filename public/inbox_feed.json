@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-04-20T23:01:05.755Z",
+  "exportedAt": "2026-04-20T23:13:23.536Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -697,6 +697,21 @@
         "lon": -73.04042841240496
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1WqD2eyr-vzpAhsIvNC-zlwGPe_jXXuEj"
+    },
+    {
+      "ts": 1776726794922,
+      "id": 1776726794922,
+      "paese": "",
+      "km": "",
+      "testo": "Mesa de los santos",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 6.906760745811104,
+        "lon": -73.03271730562038
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=10512gcIFVAf7anhkyqSRDpf1dCIkntLn"
     }
   ]
 }
