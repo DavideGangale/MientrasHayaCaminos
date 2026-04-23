@@ -2821,9 +2821,9 @@ const SERBATOIO_GAL = 2.0;
 const SERBATOIO_LITRI = SERBATOIO_GAL * FAT_GAL; // ~7.57 L
 
 const CONSUMO_MEDIO = 28;      // km/L stimato PX150
-const MAX_PUNTI_MAPPA = 6000;
+const MAX_PUNTI_MAPPA = 50000;
 
-function resampleTraceUniform(points, maxPts = 1200) {
+function resampleTraceUniform(points, maxPts = 50000) {
   const arr = Array.isArray(points) ? points : [];
   if (arr.length <= maxPts) return arr;
   if (maxPts < 2) return [arr[arr.length - 1]];
@@ -2842,8 +2842,72 @@ function resampleTraceUniform(points, maxPts = 1200) {
   return out;
 }
 
-function compressTrace(points, maxPts = 1200) {
-  return resampleTraceUniform(points, maxPts);
+function getPerpendicularDistance(point, lineStart, lineEnd) {
+  const x = point[1], y = point[0];
+  const x1 = lineStart[1], y1 = lineStart[0];
+  const x2 = lineEnd[1], y2 = lineEnd[0];
+
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+
+  if (dx === 0 && dy === 0) {
+    const dxp = x - x1;
+    const dyp = y - y1;
+    return Math.sqrt(dxp * dxp + dyp * dyp);
+  }
+
+  const t = ((x - x1) * dx + (y - y1) * dy) / (dx * dx + dy * dy);
+  const projX = x1 + t * dx;
+  const projY = y1 + t * dy;
+
+  const distX = x - projX;
+  const distY = y - projY;
+
+  return Math.sqrt(distX * distX + distY * distY);
+}
+
+function douglasPeucker(points, epsilon) {
+  if (!Array.isArray(points) || points.length < 3) return points;
+
+  let dmax = 0;
+  let index = 0;
+  const end = points.length - 1;
+
+  for (let i = 1; i < end; i++) {
+    const d = getPerpendicularDistance(points[i], points[0], points[end]);
+    if (d > dmax) {
+      index = i;
+      dmax = d;
+    }
+  }
+
+  if (dmax > epsilon) {
+    const recResults1 = douglasPeucker(points.slice(0, index + 1), epsilon);
+    const recResults2 = douglasPeucker(points.slice(index, end + 1), epsilon);
+
+    return recResults1.slice(0, -1).concat(recResults2);
+  } else {
+    return [points[0], points[end]];
+  }
+}
+
+function compressTrace(points, maxPts = 50000) {
+  const arr = Array.isArray(points) ? points : [];
+  if (arr.length <= maxPts) return arr;
+
+  let epsilon = 0.00005;
+  let simplified = arr;
+
+  while (simplified.length > maxPts && epsilon < 1) {
+    simplified = douglasPeucker(arr, epsilon);
+    epsilon *= 1.5;
+  }
+
+  if (simplified.length > maxPts) {
+    simplified = resampleTraceUniform(simplified, maxPts);
+  }
+
+  return simplified;
 }
  
 function nuovaTappa(kmInizio) {
@@ -3773,9 +3837,9 @@ if (lastLat === null || lastLon === null) {
   coordinateTracciato.push([lat, lon]);
 
   // se supera limite, ricampiona UNIFORME (non dimezzare)
-  if (coordinateTracciato.length > MAX_PUNTI_MAPPA) {
-    coordinateTracciato = resampleTraceUniform(coordinateTracciato, MAX_PUNTI_MAPPA);
-  }
+if (coordinateTracciato.length > MAX_PUNTI_MAPPA) {
+  console.warn('Traccia oltre limite MAX_PUNTI_MAPPA:', coordinateTracciato.length);
+}
 
   polyline.setLatLngs(coordinateTracciato);
 
@@ -3819,7 +3883,7 @@ if (dist < 0.008) { // 8 metri
 coordinateTracciato.push([lat, lon]);
 
 if (coordinateTracciato.length > MAX_PUNTI_MAPPA) {
-  coordinateTracciato = resampleTraceUniform(coordinateTracciato, MAX_PUNTI_MAPPA);
+  console.warn('Traccia oltre limite MAX_PUNTI_MAPPA:', coordinateTracciato.length);
 }
 
 polyline.setLatLngs(coordinateTracciato);
@@ -4116,7 +4180,7 @@ function concludiTappa() {
     velMax: tappaAttuale.velMax || 0,
 
     // ✅ qui usiamo traceRaw (anche se 1 solo punto)
-    traccia: compressTrace(traceRaw, 4000),
+    traccia: compressTrace(traceRaw, 30000),
     telemetry: Array.isArray(tappaAttuale.telemetry) ? tappaAttuale.telemetry : [],
     tipo: 'Tappa',
     isPublic: DEFAULT_PUBLIC,
