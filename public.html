@@ -1770,7 +1770,7 @@ function updateLangButtons() {
   });
 }
 
-function applyLang() {function applyLang() {
+function applyLang() {
   const title = (DATA && DATA.titolo) ? DATA.titolo : T('live');
 
   const appTitleEl = document.getElementById('appTitle');
@@ -2855,8 +2855,11 @@ function resetFilters() {
     FUEL: false,
     CARB: false
   };
-    currentMonthFilter = '';
+   currentMonthFilter = '';
   selectedTrackId = null;
+  selectedTrackBounds = null;
+  selectedTrackGeoBounds = null;
+  selectedTrackMarkerIds = null;
 
   DATA = unisciDatasetGlobale();
   popolaMesi();
