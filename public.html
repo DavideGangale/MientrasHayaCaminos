@@ -2271,14 +2271,14 @@ function isItemInsideSelectedTrack(item) {
   const lon = Number(item?.geo?.lon ?? item?.geo?.lng ?? item?.lon ?? item?.lng ?? item?.longitude);
 
   const hasGeo = isFinite(lat) && isFinite(lon);
-  const byGeo = hasGeo ? isPointNearSelectedTrack(lat, lon, 10) : false;
+  const byGeo = hasGeo ? isPointNearSelectedTrack(lat, lon, 6) : false;
 
   const ts = getStartTs(item);
   let byTime = false;
 
   if (selectedTrackBounds && isFinite(ts)) {
     // margine di 3 ore prima/dopo
-    const marginMs = 3 * 60 * 60 * 1000;
+    const marginMs = 1 * 60 * 60 * 1000;
     byTime =
       ts >= (selectedTrackBounds.start - marginMs) &&
       ts <= (selectedTrackBounds.end + marginMs);
