@@ -1335,17 +1335,17 @@ let THANKS_DATA = [];
   return String(url) + sep + 'v=' + Date.now();
 }
 
-let currentMode = 'TUTTO';
+let currentMode = 'TAPPE';
 let currentCountry = '';
 let currentMarkerFilters = {
   FOTO: true,
-  VIDEO: true,
-  MAINT: true,
-  FUEL: true,
-  CARB: true
+  VIDEO: false,
+  MAINT: false,
+  FUEL: false,
+  CARB: false
 };
 let currentMonthFilter = '';
-
+let selectedTrackId = null;
 let LANG = localStorage.getItem('vt_pub_lang') || 'it';
 
 const I18N = {
@@ -1430,7 +1430,7 @@ const I18N = {
     refuelsInTrack: 'Rifornimenti nella tappa',
     oilUsed: 'Olio 2T usato',
     oilCost: 'Costo olio 2T',
-    diaryBtn: '📖 Apri il diario',
+    diaryBtn: '📖 Diario',
     diaryTitle: '📖 Diario di viaggio',
     diarySubtitle: 'Tutti i post in ordine cronologico',
     backToMap: '← Mappa',
@@ -1531,7 +1531,7 @@ statsOil: 'Statistiche Olio 2T',
     refuelsInTrack: 'Refuels in this track',
     oilUsed: '2T oil used',
     oilCost: '2T oil cost',
-    diaryBtn: '📖 Open diary',
+    diaryBtn: '📖 Diary',
     diaryTitle: '📖 Travel diary',
     diarySubtitle: 'All posts in chronological order',
     backToMap: '← Map',
@@ -1629,7 +1629,7 @@ statsOil: 'Oil Stats',
     refuelsInTrack: 'Repostajes en la etapa',
     oilUsed: 'Aceite 2T usado',
     oilCost: 'Costo aceite 2T',
-    diaryBtn: '📖 Abrir diario',
+    diaryBtn: '📖 Diario',
     diaryTitle: '📖 Diario de viaje',
     diarySubtitle: 'Todas las entradas en orden cronológico',
     backToMap: '← Mapa',
@@ -2337,6 +2337,10 @@ function renderMap(skipAutoFit = false) {
   if (currentMode === 'TUTTO' || currentMode === 'TAPPE') tracceDaMostrare.push(...tappe);
   if (currentMode === 'TUTTO' || currentMode === 'GIRI') tracceDaMostrare.push(...turismo);
 
+  if (selectedTrackId != null) {
+    tracceDaMostrare = tracceDaMostrare.filter(t => String(t.id) === String(selectedTrackId));
+  }
+
   tracceDaMostrare.forEach(t => {
     if (currentCountry && t.paese !== currentCountry) return;
     if (currentMonthFilter && getYearMonthFromPercorso(t) !== currentMonthFilter) return;
@@ -2557,13 +2561,14 @@ function syncFilterButtonsUI() {
 
 function setMode(mode, onlyUI = false) {
   currentMode = mode;
+  selectedTrackId = null;
   syncFilterButtonsUI();
   if (!onlyUI) renderMap();
 }
 
 async function setCountry(country, onlyUI = false) {
   currentCountry = country;
-
+  selectedTrackId = null;
   try {
     await caricaPaeseSeServe(currentCountry);
     popolaMesi();
@@ -2577,6 +2582,7 @@ async function setCountry(country, onlyUI = false) {
 
 function setMonthFilter(month, onlyUI = false) {
   currentMonthFilter = month || '';
+  selectedTrackId = null;
   syncFilterButtonsUI();
   if (!onlyUI) renderMap();
 }
@@ -2619,16 +2625,17 @@ function applyFiltersAndClose() {
 }
 
 function resetFilters() {
-  currentMode = 'TUTTO';
+  currentMode = 'TAPPE';
   currentCountry = '';
   currentMarkerFilters = {
-  FOTO: true,
-  VIDEO: true,
-  MAINT: true,
-  FUEL: true,
-  CARB: true
-};
-  currentMonthFilter = '';
+    FOTO: true,
+    VIDEO: false,
+    MAINT: false,
+    FUEL: false,
+    CARB: false
+  };
+    currentMonthFilter = '';
+  selectedTrackId = null;
 
   DATA = unisciDatasetGlobale();
   popolaMesi();
@@ -3159,7 +3166,28 @@ function focusOnMap(lat, lon) {
 
   }, 200);
 }
+function focusOnTrack(trackId, mode) {
+  selectedTrackId = trackId;
 
+  if (mode === 'GIRO') currentMode = 'GIRI';
+  else currentMode = 'TAPPE';
+
+  // quando apro una singola tappa, nascondo i marker per pulizia
+  currentMarkerFilters = {
+    FOTO: false,
+    VIDEO: false,
+    MAINT: false,
+    FUEL: false,
+    CARB: false
+  };
+
+  syncFilterButtonsUI();
+  hideDiaryOverlay();
+
+  setTimeout(() => {
+    renderMap(false);
+  }, 200);
+}
 function escapeHtml(s) {
   return String(s ?? '')
     .replaceAll('&', '&amp;')
@@ -3508,6 +3536,15 @@ $$
           ${hasGraph ? '' : 'disabled'}
         >${T('openGraph')}</button>
       `);
+
+
+             actions.push(`
+        <button class="diary-action-btn"
+          onclick="focusOnTrack(${t.id}, '${it.kind}')"
+        >🗺️ Vedi percorso</button>
+      `);
+
+       
     }
 
     // Azione "vedi su mappa" se abbiamo coordinate
@@ -3683,10 +3720,12 @@ async function loadData() {
     applyLang();
     updateStatsMini();
     syncFilterButtonsUI();
-    renderMap();
-    // Se URL contiene ?view=diary, apri direttamente il diario
-    const view = new URLSearchParams(window.location.search).get('view');
-    if (view === 'diary' && typeof showDiaryOverlay === 'function') showDiaryOverlay(true);
+       renderMap();
+
+    // Apri il diario di default all'avvio
+    if (typeof showDiaryOverlay === 'function') {
+      showDiaryOverlay(true);
+    }
       
 
   } catch (e) {
