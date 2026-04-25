@@ -2226,32 +2226,61 @@ function getTrackGeoBounds(t) {
   };
 }
   
+function isPointNearSelectedTrack(lat, lon, maxKm = 8) {
+  if (!selectedTrackId || !DATA) return false;
+
+  const tappe = Array.isArray(DATA?.tappe) ? DATA.tappe : [];
+  const giri = Array.isArray(DATA?.turismo) ? DATA.turismo : [];
+  const all = tappe.concat(giri);
+
+  const t = all.find(x => String(x.id) === String(selectedTrackId));
+  if (!t || !Array.isArray(t.traccia) || t.traccia.length < 2) return false;
+
+  function distKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const toRad = deg => deg * Math.PI / 180;
+
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  for (const p of t.traccia) {
+    const pLat = Number(Array.isArray(p) ? p[0] : p?.lat);
+    const pLon = Number(Array.isArray(p) ? p[1] : (p?.lon ?? p?.lng));
+    if (!isFinite(pLat) || !isFinite(pLon)) continue;
+
+    if (distKm(lat, lon, pLat, pLon) <= maxKm) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 function isItemInsideSelectedTrack(item) {
   if (!selectedTrackId) return true;
 
   const ts = getStartTs(item);
 
-  // controllo temporale
   let byTime = false;
   if (selectedTrackBounds && isFinite(ts)) {
     byTime = ts >= selectedTrackBounds.start && ts <= selectedTrackBounds.end;
   }
 
-  // controllo geografico
-  let byGeo = false;
   const lat = Number(item?.geo?.lat ?? item?.lat ?? item?.latitude);
   const lon = Number(item?.geo?.lon ?? item?.geo?.lng ?? item?.lon ?? item?.lng ?? item?.longitude);
 
-  if (
-    selectedTrackGeoBounds &&
-    isFinite(lat) &&
-    isFinite(lon)
-  ) {
-    byGeo =
-      lat >= selectedTrackGeoBounds.minLat &&
-      lat <= selectedTrackGeoBounds.maxLat &&
-      lon >= selectedTrackGeoBounds.minLon &&
-      lon <= selectedTrackGeoBounds.maxLon;
+  let byGeo = false;
+  if (isFinite(lat) && isFinite(lon)) {
+    byGeo = isPointNearSelectedTrack(lat, lon, 5);
   }
 
   return byTime || byGeo;
