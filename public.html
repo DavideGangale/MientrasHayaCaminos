@@ -1144,17 +1144,59 @@
   </div>
 <!-- ===== DIARY PAGE (overlay) ===== -->
 <div id="diaryPage" aria-hidden="true">
-  <div id="diaryTopBar">
-    <div class="left">
-      <div id="diaryTitle">📖 Diario</div>
-      <div id="diarySubtitle">Tutti i post in ordine cronologico</div>
+<div id="diaryTopBar">
+  <div class="topbar-main">
+    <div class="brand-block">
+      <div class="brand-copy">
+        <div id="diaryTitle" class="brand-title">📖 Diario</div>
+        <div id="diarySubtitle" class="brand-subtitle">Tutti i post in ordine cronologico</div>
+      </div>
     </div>
-    <div class="right" style="display:flex; gap:8px; align-items:center;">
-      <button id="btnDiaryBackToMap" class="btn btn-secondary" onclick="hideDiaryOverlay()">← Mappa</button>
+
+    <div class="header-right">
+      <div class="lang-switch" aria-label="Language switch">
+        <button class="lang-btn" id="langBtnItDiary" onclick="setLang('it')">IT</button>
+        <button class="lang-btn" id="langBtnEsDiary" onclick="setLang('es')">ES</button>
+        <button class="lang-btn" id="langBtnEnDiary" onclick="setLang('en')">EN</button>
+      </div>
+
+      <div class="socials">
+        <a class="social-link ig" href="https://www.instagram.com/lapizzadidavide?utm_source=qr&igsh=cDU0ZXBhYTNpb3dr" target="_blank" rel="noopener" aria-label="Instagram">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="currentColor" d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm10 2H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3Zm-5 4.2A3.8 3.8 0 1 1 8.2 12 3.8 3.8 0 0 1 12 8.2Zm0 2A1.8 1.8 0 1 0 13.8 12 1.8 1.8 0 0 0 12 10.2ZM17.6 6.7a.9.9 0 1 1-.9.9.9.9 0 0 1 .9-.9Z"/>
+          </svg>
+        </a>
+
+        <a class="social-link yt" href="https://youtube.com/@davidegangale?si=L5182Vj_sBj9rTxY" target="_blank" rel="noopener" aria-label="YouTube">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="currentColor" d="M21.6 7.2a3 3 0 0 0-2.1-2.1C17.7 4.6 12 4.6 12 4.6s-5.7 0-7.5.5A3 3 0 0 0 2.4 7.2 31.6 31.6 0 0 0 2 12a31.6 31.6 0 0 0 .4 4.8 3 3 0 0 0 2.1 2.1c1.8.5 7.5.5 7.5.5s5.7 0 7.5-.5a3 3 0 0 0 2.1-2.1A31.6 31.6 0 0 0 22 12a31.6 31.6 0 0 0-.4-4.8ZM10 15.5v-7l6 3.5-6 3.5Z"/>
+          </svg>
+        </a>
+      </div>
+
+      <button id="btnDiaryStats" class="btn btn-secondary" onclick="apriStats()">📊 Statistiche</button>
+      <button id="btnDiaryBackToMap" class="btn btn-secondary" onclick="showFullMapFromDiary()">🗺️ Vedi mappa completa</button>
     </div>
   </div>
 
-  <div id="diaryList"></div>
+  <div class="stats-pills">
+    <div class="stat-pill">
+      <span class="label" id="pillKmLabelDiary">Totale</span>
+      <span class="value" id="pillKmValueDiary">...</span>
+    </div>
+    <div class="stat-pill">
+      <span class="label" id="pillFuelLabelDiary">Benzina</span>
+      <span class="value" id="pillFuelValueDiary">...</span>
+    </div>
+  </div>
+
+  <div class="map-actions-bottom" style="position:static; margin-top:10px;">
+    <button id="btnThanksOpenDiary" class="floating-btn" onclick="openThanksModal()">🙏 <strong>Ringraziamenti</strong></button>
+    <button id="btnHostDiary" class="floating-btn" onclick="openHostForm()">🤝 <strong>Supporta il viaggio</strong></button>
+  </div>
+</div>
+
+<div id="diaryList"></div>
 </div>
 
 <!-- Video modal (apertura video dal diario) -->
@@ -1346,6 +1388,8 @@ let currentMarkerFilters = {
 };
 let currentMonthFilter = '';
 let selectedTrackId = null;
+  let selectedTrackBounds = null;
+let selectedTrackMarkerIds = null;
 let LANG = localStorage.getItem('vt_pub_lang') || 'it';
 
 const I18N = {
@@ -1434,6 +1478,7 @@ const I18N = {
     diaryTitle: '📖 Diario di viaggio',
     diarySubtitle: 'Tutti i post in ordine cronologico',
     backToMap: '← Mappa',
+fullMapBtn: '🗺️ Vedi mappa completa',
     viewOnMap: '📍 Vedi sulla mappa',
     diary: 'Diario',
     partsUsed: 'Ricambi usati',
@@ -1535,6 +1580,7 @@ statsOil: 'Statistiche Olio 2T',
     diaryTitle: '📖 Travel diary',
     diarySubtitle: 'All posts in chronological order',
     backToMap: '← Map',
+fullMapBtn: '🗺️ View full map',
     viewOnMap: '📍 View on map',
     diary: 'Diary',
     partsUsed: "Parts used",
@@ -1633,6 +1679,7 @@ statsOil: 'Oil Stats',
     diaryTitle: '📖 Diario de viaje',
     diarySubtitle: 'Todas las entradas en orden cronológico',
     backToMap: '← Mapa',
+fullMapBtn: '🗺️ Ver mapa completo',
     viewOnMap: '📍 Ver en el mapa',
     openGraph: '📈 Gráfico',
     partsUsed: "Repuestos usados",
@@ -1702,9 +1749,19 @@ function setLang(l) {
 }
 
 function updateLangButtons() {
-  document.getElementById('langBtnIt').classList.toggle('active', LANG === 'it');
-  document.getElementById('langBtnEs').classList.toggle('active', LANG === 'es');
-  document.getElementById('langBtnEn').classList.toggle('active', LANG === 'en');
+  const ids = [
+    ['langBtnIt', 'it'],
+    ['langBtnEs', 'es'],
+    ['langBtnEn', 'en'],
+    ['langBtnItDiary', 'it'],
+    ['langBtnEsDiary', 'es'],
+    ['langBtnEnDiary', 'en']
+  ];
+
+  ids.forEach(([id, lang]) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('active', LANG === lang);
+  });
 }
 
 function applyLang() {
@@ -1714,7 +1771,27 @@ function applyLang() {
 
   document.getElementById('btnOpenFilters').innerHTML = `🧭 <strong>${T('filters').replace('🧭 ', '')}</strong>`;
   document.getElementById('btnStats').innerText = T('statsBtn');
+  const btnDiaryStats = document.getElementById('btnDiaryStats');
+  if (btnDiaryStats) btnDiaryStats.innerText = T('statsBtn');
 
+  const btnDiaryMap = document.getElementById('btnDiaryBackToMap');
+  if (btnDiaryMap) btnDiaryMap.innerText = T('fullMapBtn');
+
+  const pillKmLabelDiary = document.getElementById('pillKmLabelDiary');
+  if (pillKmLabelDiary) pillKmLabelDiary.innerText = T('totalLbl');
+
+  const pillFuelLabelDiary = document.getElementById('pillFuelLabelDiary');
+  if (pillFuelLabelDiary) pillFuelLabelDiary.innerText = T('fuelLbl');
+
+  const btnHostDiary = document.getElementById('btnHostDiary');
+  if (btnHostDiary) {
+    btnHostDiary.innerHTML = `🤝 <strong>${T('hostBtn').replace('🤝 ', '')}</strong>`;
+  }
+
+  const btnThanksOpenDiary = document.getElementById('btnThanksOpenDiary');
+  if (btnThanksOpenDiary) {
+    btnThanksOpenDiary.innerHTML = `🙏 <strong>${T('thanksBtn').replace('🙏 ', '')}</strong>`;
+  }
     const diaryBtn = document.getElementById('btnDiaryOpen');
   if (diaryBtn) diaryBtn.innerText = T('diaryBtn');
 
@@ -1933,8 +2010,16 @@ function updateStatsMini() {
   const s = getIndexStats();
   const km = Number(s.kmTotali || 0).toFixed(1);
   const l  = Number(s.benzinaUsataLitri || 0).toFixed(1);
-  document.getElementById('pillKmValue').innerText = `${km} km`;
-  document.getElementById('pillFuelValue').innerText = `${l} L`;
+
+  const a = document.getElementById('pillKmValue');
+  const b = document.getElementById('pillFuelValue');
+  const c = document.getElementById('pillKmValueDiary');
+  const d = document.getElementById('pillFuelValueDiary');
+
+  if (a) a.innerText = `${km} km`;
+  if (b) b.innerText = `${l} L`;
+  if (c) c.innerText = `${km} km`;
+  if (d) d.innerText = `${l} L`;
 }
 
 function initMap() {
@@ -2049,7 +2134,27 @@ function countRefuelsForTrack(t) {
   }
   return n;
 }
+function getTrackTimeRange(t) {
+  const start = getStartTs(t);
+  const durSec = Number(t?.durata || 0);
 
+  if (!isFinite(start) || !isFinite(durSec) || durSec <= 0) return null;
+
+  return {
+    start,
+    end: start + durSec * 1000
+  };
+}
+
+function isItemInsideSelectedTrack(item) {
+  if (!selectedTrackId) return true;
+  if (!selectedTrackBounds) return false;
+
+  const ts = getStartTs(item);
+  if (!isFinite(ts)) return false;
+
+  return ts >= selectedTrackBounds.start && ts <= selectedTrackBounds.end;
+}
 function getTrackStartEndTimeStrings(t) {
   const start = getStartTs(t);
   const durSec = Number(t?.durata || 0);
@@ -2407,6 +2512,7 @@ const diario = Array.isArray(DATA.diario) ? DATA.diario : [];
 function drawDiaryMarker(d, onlyVideos = false) {
   if (currentCountry && d.paese !== currentCountry) return;
   if (currentMonthFilter && getYearMonthFromPublicEntry(d) !== currentMonthFilter) return;
+  if (selectedTrackId && !isItemInsideSelectedTrack(d)) return;
   if (!d.geo) return;
 
   const lat = Number(d.geo.lat);
@@ -2473,6 +2579,7 @@ diario.forEach(d => drawDiaryMarker(d, true));
   manutenzioni.forEach(m => {
     if (currentCountry && m.paese !== currentCountry) return;
     if (currentMonthFilter && getYearMonthFromPublicEntry(m) !== currentMonthFilter) return;
+    if (selectedTrackId && !isItemInsideSelectedTrack(m)) return;
     if (!m.geo) return;
     if (!isMarkerTypeVisible('MAINT')) return;
 
@@ -2487,6 +2594,7 @@ diario.forEach(d => drawDiaryMarker(d, true));
   rifornimenti.forEach(r => {
     if (currentCountry && r.paese !== currentCountry) return;
     if (currentMonthFilter && getYearMonthFromPublicEntry(r) !== currentMonthFilter) return;
+    if (selectedTrackId && !isItemInsideSelectedTrack(r)) return;
     if (!isMarkerTypeVisible('FUEL')) return;
 
     const lat = Number(
@@ -2510,8 +2618,9 @@ diario.forEach(d => drawDiaryMarker(d, true));
 
   const carburazioni = Array.isArray(DATA.carburazioni) ? DATA.carburazioni : [];
   carburazioni.forEach(c => {
-    if (currentCountry && c.paese !== currentCountry) return;
+       if (currentCountry && c.paese !== currentCountry) return;
     if (currentMonthFilter && getYearMonthFromPublicEntry(c) !== currentMonthFilter) return;
+    if (selectedTrackId && !isItemInsideSelectedTrack(c)) return;
     if (!c.geo) return;
     if (!isMarkerTypeVisible('CARB')) return;
 
@@ -2562,6 +2671,8 @@ function syncFilterButtonsUI() {
 function setMode(mode, onlyUI = false) {
   currentMode = mode;
   selectedTrackId = null;
+  selectedTrackBounds = null;
+  selectedTrackMarkerIds = null;
   syncFilterButtonsUI();
   if (!onlyUI) renderMap();
 }
@@ -2569,6 +2680,9 @@ function setMode(mode, onlyUI = false) {
 async function setCountry(country, onlyUI = false) {
   currentCountry = country;
   selectedTrackId = null;
+  selectedTrackBounds = null;
+  selectedTrackMarkerIds = null;
+  
   try {
     await caricaPaeseSeServe(currentCountry);
     popolaMesi();
@@ -2583,6 +2697,8 @@ async function setCountry(country, onlyUI = false) {
 function setMonthFilter(month, onlyUI = false) {
   currentMonthFilter = month || '';
   selectedTrackId = null;
+  selectedTrackBounds = null;
+  selectedTrackMarkerIds = null;
   syncFilterButtonsUI();
   if (!onlyUI) renderMap();
 }
@@ -3122,7 +3238,18 @@ function hideDiaryOverlay(skipUrlUpdate = false) {
     if (map) map.invalidateSize();
   }, 120);
 }
+function showFullMapFromDiary() {
+  selectedTrackId = null;
+  selectedTrackBounds = null;
+  selectedTrackMarkerIds = null;
 
+  hideDiaryOverlay();
+
+  setTimeout(() => {
+    if (!map) return;
+    renderMap(false);
+  }, 200);
+}
 function openVideoModal(ytId) {
   const modal = document.getElementById('videoModal');
   const body = document.getElementById('videoModalBody');
@@ -3167,18 +3294,27 @@ function focusOnMap(lat, lon) {
   }, 200);
 }
 function focusOnTrack(trackId, mode) {
+  const tappe = Array.isArray(DATA?.tappe) ? DATA.tappe : [];
+  const giri = Array.isArray(DATA?.turismo) ? DATA.turismo : [];
+  const all = tappe.concat(giri);
+
+  const t = all.find(x => String(x.id) === String(trackId));
+  if (!t) return;
+
   selectedTrackId = trackId;
+  selectedTrackBounds = getTrackTimeRange(t);
+  selectedTrackMarkerIds = null;
 
   if (mode === 'GIRO') currentMode = 'GIRI';
   else currentMode = 'TAPPE';
 
-  // quando apro una singola tappa, nascondo i marker per pulizia
+  // Quando apro una singola tappa, attivo tutti i marker
   currentMarkerFilters = {
-    FOTO: false,
-    VIDEO: false,
-    MAINT: false,
-    FUEL: false,
-    CARB: false
+    FOTO: true,
+    VIDEO: true,
+    MAINT: true,
+    FUEL: true,
+    CARB: true
   };
 
   syncFilterButtonsUI();
@@ -3541,7 +3677,7 @@ $$
              actions.push(`
         <button class="diary-action-btn"
           onclick="focusOnTrack(${t.id}, '${it.kind}')"
-        >🗺️ Vedi percorso</button>
+       >🗺️ Vedi tappa sulla mappa</button>
       `);
 
        
