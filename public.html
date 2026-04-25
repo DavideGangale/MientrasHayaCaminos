@@ -790,7 +790,7 @@
 #diaryPage {
   position: fixed;
   inset: 0;
-  z-index: 1700;
+  z-index: 5000;
   display: none;
   flex-direction: column;
   background: var(--bg);
@@ -1188,7 +1188,9 @@
   </div>
 </div>
 
-<div id="diaryList"></div>
+<div id="diaryList">
+  <div style="padding:20px;color:white;">DEBUG DIARY CARICATO</div>
+</div>
 
 <div id="diaryBottomActions" class="map-actions-bottom">
   <button id="btnThanksOpenDiary" class="floating-btn" onclick="openThanksModal()">🙏 <strong>Ringraziamenti</strong></button>
@@ -3280,9 +3282,12 @@ function showDiaryOverlay(skipUrlUpdate = false) {
   const page = document.getElementById('diaryPage');
   if (!page) return;
 
-  page.classList.add('open');
   page.style.display = 'flex';
+  page.classList.add('open');
   page.setAttribute('aria-hidden', 'false');
+
+  // forza il diary sopra la mappa
+  page.style.zIndex = '5000';
 
   renderDiaryList();
 }
@@ -3926,7 +3931,7 @@ async function loadData() {
     applyLang();
     updateStatsMini();
     syncFilterButtonsUI();
-          renderMap(false);
+              renderMap(false);
 
     // Forza il corretto layout Leaflet dopo il primo render
     setTimeout(() => {
@@ -3936,12 +3941,15 @@ async function loadData() {
       }
     }, 120);
 
-    // Apri sempre il diario all'avvio, dopo che il layout si è stabilizzato
-    setTimeout(() => {
-      if (typeof showDiaryOverlay === 'function') {
-        showDiaryOverlay(true);
-      }
-    }, 180);
+    // Se l'URL chiede il diario, aprilo dopo il caricamento
+    const view = new URLSearchParams(window.location.search).get('view');
+    if (view === 'diary') {
+      setTimeout(() => {
+        if (typeof showDiaryOverlay === 'function') {
+          showDiaryOverlay(true);
+        }
+      }, 220);
+    }
       
 
 } catch (e) {
@@ -4068,7 +4076,24 @@ function computeMainPublicStats(country = null) {
   };
 }
   
-window.onload = loadData;
+window.onload = function() {
+  // forza la vista diario nell'URL al primo avvio
+  const url = new URL(window.location.href);
+  if (!url.searchParams.get('view')) {
+    url.searchParams.set('view', 'diary');
+    history.replaceState({}, '', url);
+  }
+
+  loadData();
+
+  // fallback extra: riapri il diario poco dopo il load
+  setTimeout(() => {
+    const page = document.getElementById('diaryPage');
+    if (page && typeof showDiaryOverlay === 'function') {
+      showDiaryOverlay(true);
+    }
+  }, 300);
+};
   
 </script>
 </body>
