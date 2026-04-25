@@ -4118,9 +4118,9 @@ function computeMainPublicStats(country = null) {
   };
 }
   
-window.onload = function() {
-  // forza la vista diario nell'URL al primo avvio
+window.onload = function () {
   const url = new URL(window.location.href);
+
   if (!url.searchParams.get('view')) {
     url.searchParams.set('view', 'diary');
     history.replaceState({}, '', url);
@@ -4128,10 +4128,8 @@ window.onload = function() {
 
   loadData();
 
-  // fallback extra: riapri il diario poco dopo il load
   setTimeout(() => {
-    const page = document.getElementById('diaryPage');
-    if (page && typeof showDiaryOverlay === 'function') {
+    if (typeof showDiaryOverlay === 'function') {
       showDiaryOverlay(true);
     }
   }, 300);
