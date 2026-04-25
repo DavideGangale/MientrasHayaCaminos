@@ -98,15 +98,15 @@
       text-overflow: ellipsis;
     }
 
-    .brand-subtitle {
-      margin-top: 3px;
-      font-size: 12px;
-      color: var(--text-soft);
-      font-weight: 500;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+   .brand-subtitle {
+  margin-top: 3px;
+  font-size: 22px;
+  color: var(--text-soft);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
     .header-right {
       display: flex;
@@ -989,7 +989,7 @@
       }
 
       .brand-title {
-        font-size: 20px;
+        font-size: 18px;
       }
 
       .stats-pills {
@@ -3925,10 +3925,12 @@ async function loadData() {
     }
       
 
-  } catch (e) {
+} catch (e) {
     console.error(e);
-    document.getElementById('pillKmValue').innerText = 'Errore';
-    document.getElementById('pillFuelValue').innerText = 'Errore';
+    const kmErr = document.getElementById('pillKmValue');
+    const fuelErr = document.getElementById('pillFuelValue');
+    if (kmErr) kmErr.innerText = 'Errore';
+    if (fuelErr) fuelErr.innerText = 'Errore';
   }
 }
   
