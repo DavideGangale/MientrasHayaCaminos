@@ -794,6 +794,9 @@
   display: none;
   flex-direction: column;
   background: var(--bg);
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
 }
 
 #diaryPage.open { display: flex; }
@@ -834,7 +837,7 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-    padding: 14px 14px 100px;
+  padding: 14px 14px 100px;
   display: grid;
   gap: 12px;
 }
@@ -3278,6 +3281,7 @@ function showDiaryOverlay(skipUrlUpdate = false) {
   if (!page) return;
 
   page.classList.add('open');
+  page.style.display = 'flex';
   page.setAttribute('aria-hidden', 'false');
 
   renderDiaryList();
@@ -3290,13 +3294,18 @@ function hideDiaryOverlay(skipUrlUpdate = false) {
   if (!page) return;
 
   page.classList.remove('open');
+  page.style.display = 'none';
   page.setAttribute('aria-hidden', 'true');
 
-  // quando torni alla mappa, Leaflet a volte ha bisogno di un refresh size
   setTimeout(() => {
-    if (map) map.invalidateSize();
-  }, 120);
+    if (map) {
+      map.invalidateSize();
+      renderMap(false);
+    }
+  }, 180);
 }
+
+  
 function showFullMapFromDiary() {
   selectedTrackId = null;
   selectedTrackBounds = null;
@@ -3917,12 +3926,22 @@ async function loadData() {
     applyLang();
     updateStatsMini();
     syncFilterButtonsUI();
-       renderMap();
+          renderMap(false);
 
-    // Apri il diario di default all'avvio
-    if (typeof showDiaryOverlay === 'function') {
-      showDiaryOverlay(true);
-    }
+    // Forza il corretto layout Leaflet dopo il primo render
+    setTimeout(() => {
+      if (map) {
+        map.invalidateSize();
+        renderMap(false);
+      }
+    }, 120);
+
+    // Apri sempre il diario all'avvio, dopo che il layout si è stabilizzato
+    setTimeout(() => {
+      if (typeof showDiaryOverlay === 'function') {
+        showDiaryOverlay(true);
+      }
+    }, 180);
       
 
 } catch (e) {
