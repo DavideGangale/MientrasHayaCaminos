@@ -1770,7 +1770,7 @@ function updateLangButtons() {
   });
 }
 
-function applyLang() {
+function applyLang() {function applyLang() {
   const title = (DATA && DATA.titolo) ? DATA.titolo : T('live');
 
   const appTitleEl = document.getElementById('appTitle');
@@ -1779,19 +1779,36 @@ function applyLang() {
   const appSubtitleEl = document.getElementById('appSubtitle');
   if (appSubtitleEl) appSubtitleEl.innerText = T('subtitle');
 
-  document.getElementById('btnOpenFilters').innerHTML = `🧭 <strong>${T('filters').replace('🧭 ', '')}</strong>`;
-  document.getElementById('btnStats').innerText = T('statsBtn');
+  const btnOpenFilters = document.getElementById('btnOpenFilters');
+  if (btnOpenFilters) btnOpenFilters.innerHTML = `🧭 <strong>${T('filters').replace('🧭 ', '')}</strong>`;
+
+  const btnStats = document.getElementById('btnStats');
+  if (btnStats) btnStats.innerText = T('statsBtn');
+
   const btnDiaryStats = document.getElementById('btnDiaryStats');
   if (btnDiaryStats) btnDiaryStats.innerText = T('statsBtn');
 
-  const btnDiaryMap = document.getElementById('btnDiaryBackToMap');
-  if (btnDiaryMap) btnDiaryMap.innerText = T('fullMapBtn');
+  const diaryBtn = document.getElementById('btnDiaryOpen');
+  if (diaryBtn) diaryBtn.innerText = T('diaryBtn');
 
-  const pillKmLabelDiary = document.getElementById('pillKmLabelDiary');
-  if (pillKmLabelDiary) pillKmLabelDiary.innerText = T('totalLbl');
+  const dt = document.getElementById('diaryTitle');
+  if (dt) dt.innerText = T('diaryTitle');
 
-  const pillFuelLabelDiary = document.getElementById('pillFuelLabelDiary');
-  if (pillFuelLabelDiary) pillFuelLabelDiary.innerText = T('fuelLbl');
+  const ds = document.getElementById('diarySubtitle');
+  if (ds) ds.innerText = T('diarySubtitle');
+
+  const back = document.getElementById('btnDiaryBackToMap');
+  if (back) back.innerText = T('fullMapBtn') || T('backToMap');
+
+  const btnHost = document.getElementById('btnHost');
+  if (btnHost) {
+    btnHost.innerHTML = `🤝 <strong>${T('hostBtn').replace('🤝 ', '')}</strong>`;
+  }
+
+  const btnThanksOpen = document.getElementById('btnThanksOpen');
+  if (btnThanksOpen) {
+    btnThanksOpen.innerHTML = `🙏 <strong>${T('thanksBtn').replace('🙏 ', '')}</strong>`;
+  }
 
   const btnHostDiary = document.getElementById('btnHostDiary');
   if (btnHostDiary) {
@@ -1802,50 +1819,75 @@ function applyLang() {
   if (btnThanksOpenDiary) {
     btnThanksOpenDiary.innerHTML = `🙏 <strong>${T('thanksBtn').replace('🙏 ', '')}</strong>`;
   }
-    const diaryBtn = document.getElementById('btnDiaryOpen');
-  if (diaryBtn) diaryBtn.innerText = T('diaryBtn');
 
-  const dt = document.getElementById('diaryTitle');
-  if (dt) dt.innerText = T('diaryTitle');
+  const pillKmLabel = document.getElementById('pillKmLabel');
+  if (pillKmLabel) pillKmLabel.innerText = T('totalLbl');
 
-  const ds = document.getElementById('diarySubtitle');
-  if (ds) ds.innerText = T('diarySubtitle');
+  const pillFuelLabel = document.getElementById('pillFuelLabel');
+  if (pillFuelLabel) pillFuelLabel.innerText = T('fuelLbl');
 
-  const back = document.getElementById('btnDiaryBackToMap');
-  if (back) back.innerText = T('backToMap');
+  const pillKmLabelDiary = document.getElementById('pillKmLabelDiary');
+  if (pillKmLabelDiary) pillKmLabelDiary.innerText = T('totalLbl');
 
-document.getElementById('btnHost').innerHTML =
-  `🤝 <strong>${T('hostBtn').replace('🤝 ', '')}</strong>`;
+  const pillFuelLabelDiary = document.getElementById('pillFuelLabelDiary');
+  if (pillFuelLabelDiary) pillFuelLabelDiary.innerText = T('fuelLbl');
 
-document.getElementById('btnThanksOpen').innerHTML =
-  `🙏 <strong>${T('thanksBtn').replace('🙏 ', '')}</strong>`;
+  const filtersTitle = document.getElementById('filtersTitle');
+  if (filtersTitle) filtersTitle.innerText = T('filtersTitle');
 
-  document.getElementById('pillKmLabel').innerText = T('totalLbl');
-  document.getElementById('pillFuelLabel').innerText = T('fuelLbl');
+  const filterModeLabel = document.getElementById('filterModeLabel');
+  if (filterModeLabel) filterModeLabel.innerText = T('filterMode');
 
-  document.getElementById('filtersTitle').innerText = T('filtersTitle');
-  document.getElementById('filterModeLabel').innerText = T('filterMode');
-  document.getElementById('filterMonthLabel').innerText = T('filterMonth');
-  document.getElementById('filterCountryLabel').innerText = T('filterCountry');
-  document.getElementById('filterMarkerLabel').innerText = T('filterMarker');
+  const filterMonthLabel = document.getElementById('filterMonthLabel');
+  if (filterMonthLabel) filterMonthLabel.innerText = T('filterMonth');
 
-  document.getElementById('btnResetFilters').innerText = T('resetFilters');
-  document.getElementById('btnApplyFilters').innerText = T('applyFilters');
+  const filterCountryLabel = document.getElementById('filterCountryLabel');
+  if (filterCountryLabel) filterCountryLabel.innerText = T('filterCountry');
 
-  document.getElementById('modeBtnAll').innerText = T('allTracks');
-  document.getElementById('modeBtnTappe').innerText = T('onlyTappe');
-  document.getElementById('modeBtnGiri').innerText = T('onlyGiri');
+  const filterMarkerLabel = document.getElementById('filterMarkerLabel');
+  if (filterMarkerLabel) filterMarkerLabel.innerText = T('filterMarker');
 
-  document.getElementById('markerBtnAll').innerText = T('allMarkers');
-  document.getElementById('markerBtnNone').innerText = T('noMarkers');
-  document.getElementById('markerBtnFoto').innerText = T('foto');
-  document.getElementById('markerBtnVideo').innerText = T('video');
-  document.getElementById('markerBtnMaint').innerText = T('maint');
-  document.getElementById('markerBtnFuel').innerText = T('fuel');
-  document.getElementById('markerBtnCarb').innerText = T('carb');
+  const btnResetFilters = document.getElementById('btnResetFilters');
+  if (btnResetFilters) btnResetFilters.innerText = T('resetFilters');
 
-  document.getElementById('statsModalTitle').innerText = T('statsTitle');
-  document.getElementById('statsModalIntro').innerText = T('statsIntro');
+  const btnApplyFilters = document.getElementById('btnApplyFilters');
+  if (btnApplyFilters) btnApplyFilters.innerText = T('applyFilters');
+
+  const modeBtnAll = document.getElementById('modeBtnAll');
+  if (modeBtnAll) modeBtnAll.innerText = T('allTracks');
+
+  const modeBtnTappe = document.getElementById('modeBtnTappe');
+  if (modeBtnTappe) modeBtnTappe.innerText = T('onlyTappe');
+
+  const modeBtnGiri = document.getElementById('modeBtnGiri');
+  if (modeBtnGiri) modeBtnGiri.innerText = T('onlyGiri');
+
+  const markerBtnAll = document.getElementById('markerBtnAll');
+  if (markerBtnAll) markerBtnAll.innerText = T('allMarkers');
+
+  const markerBtnNone = document.getElementById('markerBtnNone');
+  if (markerBtnNone) markerBtnNone.innerText = T('noMarkers');
+
+  const markerBtnFoto = document.getElementById('markerBtnFoto');
+  if (markerBtnFoto) markerBtnFoto.innerText = T('foto');
+
+  const markerBtnVideo = document.getElementById('markerBtnVideo');
+  if (markerBtnVideo) markerBtnVideo.innerText = T('video');
+
+  const markerBtnMaint = document.getElementById('markerBtnMaint');
+  if (markerBtnMaint) markerBtnMaint.innerText = T('maint');
+
+  const markerBtnFuel = document.getElementById('markerBtnFuel');
+  if (markerBtnFuel) markerBtnFuel.innerText = T('fuel');
+
+  const markerBtnCarb = document.getElementById('markerBtnCarb');
+  if (markerBtnCarb) markerBtnCarb.innerText = T('carb');
+
+  const statsModalTitle = document.getElementById('statsModalTitle');
+  if (statsModalTitle) statsModalTitle.innerText = T('statsTitle');
+
+  const statsModalIntro = document.getElementById('statsModalIntro');
+  if (statsModalIntro) statsModalIntro.innerText = T('statsIntro');
 
   const firstStatsOpt = document.querySelector('#statsCountryFilter option[value="GLOBAL"]');
   if (firstStatsOpt) firstStatsOpt.innerText = T('global');
@@ -1861,11 +1903,10 @@ document.getElementById('btnThanksOpen').innerHTML =
   updateLangButtons();
   syncFilterButtonsUI();
 
-    // se il diario è aperto, ritraduco il contenuto
   const page = document.getElementById('diaryPage');
   if (page && page.classList.contains('open')) {
     renderDiaryList();
-}
+  }
 }
 
 async function loadHostConfig() {
