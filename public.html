@@ -2225,8 +2225,7 @@ function getTrackGeoBounds(t) {
     maxLon: maxLon + 0.05
   };
 }
-  
-function isPointNearSelectedTrack(lat, lon, maxKm = 8) {
+function isPointNearSelectedTrack(lat, lon, maxKm = 5) {
   if (!selectedTrackId || !DATA) return false;
 
   const tappe = Array.isArray(DATA?.tappe) ? DATA.tappe : [];
@@ -2268,22 +2267,21 @@ function isPointNearSelectedTrack(lat, lon, maxKm = 8) {
 function isItemInsideSelectedTrack(item) {
   if (!selectedTrackId) return true;
 
+  // 1) criterio principale: timestamp dentro la tappa
   const ts = getStartTs(item);
-
-  let byTime = false;
   if (selectedTrackBounds && isFinite(ts)) {
-    byTime = ts >= selectedTrackBounds.start && ts <= selectedTrackBounds.end;
+    return ts >= selectedTrackBounds.start && ts <= selectedTrackBounds.end;
   }
 
+  // 2) fallback solo se il marker NON ha timestamp valido
   const lat = Number(item?.geo?.lat ?? item?.lat ?? item?.latitude);
   const lon = Number(item?.geo?.lon ?? item?.geo?.lng ?? item?.lon ?? item?.lng ?? item?.longitude);
 
-  let byGeo = false;
   if (isFinite(lat) && isFinite(lon)) {
-    byGeo = isPointNearSelectedTrack(lat, lon, 5);
+    return isPointNearSelectedTrack(lat, lon, 5);
   }
 
-  return byTime || byGeo;
+  return false;
 }
   
 function getTrackStartEndTimeStrings(t) {
