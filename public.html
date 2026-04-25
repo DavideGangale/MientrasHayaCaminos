@@ -834,11 +834,27 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  padding: 14px;
+    padding: 14px 14px 100px;
   display: grid;
   gap: 12px;
 }
 
+#diaryBottomActions {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, rgba(20,20,20,0.98), rgba(20,20,20,0.88));
+  backdrop-filter: blur(14px);
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+#diaryBottomActions .floating-btn {
+  flex: 1 1 0;
+  justify-content: center;
+}
+
+    
 .diary-card {
   background: var(--panel);
   border: 1px solid var(--border);
@@ -1086,10 +1102,9 @@
     <div id="topBar">
       <div class="topbar-main">
         <div class="brand-block">
-          <div class="brand-copy">
-            <div id="appTitle" class="brand-title">VespaTrek PX150</div>
-            <div id="appSubtitle" class="brand-subtitle">Mappa live del viaggio in Sud America</div>
-          </div>
+         <div class="brand-copy">
+  <div id="appSubtitle" class="brand-subtitle">Mientras Haya Caminos...</div>
+</div>
         </div>
 
         <div class="header-right">
@@ -1118,16 +1133,7 @@
         </div>
       </div>
 
-      <div class="stats-pills">
-        <div class="stat-pill">
-          <span class="label" id="pillKmLabel">Totale</span>
-          <span class="value" id="pillKmValue">...</span>
-        </div>
-        <div class="stat-pill">
-          <span class="label" id="pillFuelLabel">Benzina</span>
-          <span class="value" id="pillFuelValue">...</span>
-        </div>
-      </div>
+      
     </div>
 
     <div id="mapWrap">
@@ -1148,7 +1154,6 @@
   <div class="topbar-main">
     <div class="brand-block">
       <div class="brand-copy">
-        <div id="diaryTitle" class="brand-title">📖 Diario</div>
         <div id="diarySubtitle" class="brand-subtitle">Tutti i post in ordine cronologico</div>
       </div>
     </div>
@@ -1178,25 +1183,16 @@
       <button id="btnDiaryBackToMap" class="btn btn-secondary" onclick="showFullMapFromDiary()">🗺️ Vedi mappa completa</button>
     </div>
   </div>
-
-  <div class="stats-pills">
-    <div class="stat-pill">
-      <span class="label" id="pillKmLabelDiary">Totale</span>
-      <span class="value" id="pillKmValueDiary">...</span>
-    </div>
-    <div class="stat-pill">
-      <span class="label" id="pillFuelLabelDiary">Benzina</span>
-      <span class="value" id="pillFuelValueDiary">...</span>
-    </div>
-  </div>
-
-  <div class="map-actions-bottom" style="position:static; margin-top:10px;">
-    <button id="btnThanksOpenDiary" class="floating-btn" onclick="openThanksModal()">🙏 <strong>Ringraziamenti</strong></button>
-    <button id="btnHostDiary" class="floating-btn" onclick="openHostForm()">🤝 <strong>Supporta il viaggio</strong></button>
-  </div>
 </div>
 
 <div id="diaryList"></div>
+
+<div id="diaryBottomActions" class="map-actions-bottom">
+  <button id="btnThanksOpenDiary" class="floating-btn" onclick="openThanksModal()">🙏 <strong>Ringraziamenti</strong></button>
+  <button id="btnHostDiary" class="floating-btn" onclick="openHostForm()">🤝 <strong>Supporta il viaggio</strong></button>
+</div>
+
+  
 </div>
 
 <!-- Video modal (apertura video dal diario) -->
@@ -1387,15 +1383,17 @@ let currentMarkerFilters = {
   CARB: false
 };
 let currentMonthFilter = '';
-let selectedTrackId = null;
-  let selectedTrackBounds = null;
+let selectedTrackId = null; 
+let selectedTrackBounds = null;
+  
+let selectedTrackGeoBounds = null; 
 let selectedTrackMarkerIds = null;
 let LANG = localStorage.getItem('vt_pub_lang') || 'it';
 
 const I18N = {
   it: {
     live: 'VespaTrek PX150',
-    subtitle: 'Mappa live del viaggio in Sud America',
+    subtitle: 'Finché c'è strade...',
     allTracks: '🛣️ Tutto',
     onlyTappe: '🏁 Tappe',
     onlyGiri: '🛵 Giri',
@@ -1480,6 +1478,7 @@ const I18N = {
     backToMap: '← Mappa',
 fullMapBtn: '🗺️ Vedi mappa completa',
     viewOnMap: '📍 Vedi sulla mappa',
+viewTrackOnMap: '🗺️ Vedi tappa sulla mappa',
     diary: 'Diario',
     partsUsed: 'Ricambi usati',
 
@@ -1497,7 +1496,7 @@ statsOil: 'Statistiche Olio 2T',
   },
   en: {
     live: 'VespaTrek PX150',
-    subtitle: 'Live map of the South America journey',
+    subtitle: 'Until roads are available...',
     allTracks: '🛣️ All',
     onlyTappe: '🏁 Trips',
     onlyGiri: '🛵 Rides',
@@ -1582,6 +1581,7 @@ statsOil: 'Statistiche Olio 2T',
     backToMap: '← Map',
 fullMapBtn: '🗺️ View full map',
     viewOnMap: '📍 View on map',
+viewTrackOnMap: '🗺️ View stage on map',
     diary: 'Diary',
     partsUsed: "Parts used",
        statsHoursOnRoad: '⏱️ Hours on the Road',
@@ -1681,6 +1681,7 @@ statsOil: 'Oil Stats',
     backToMap: '← Mapa',
 fullMapBtn: '🗺️ Ver mapa completo',
     viewOnMap: '📍 Ver en el mapa',
+viewTrackOnMap: '🗺️ Ver etapa en el mapa',
     openGraph: '📈 Gráfico',
     partsUsed: "Repuestos usados",
 
@@ -1766,8 +1767,12 @@ function updateLangButtons() {
 
 function applyLang() {
   const title = (DATA && DATA.titolo) ? DATA.titolo : T('live');
-  document.getElementById('appTitle').innerText = title;
-  document.getElementById('appSubtitle').innerText = T('subtitle');
+
+  const appTitleEl = document.getElementById('appTitle');
+  if (appTitleEl) appTitleEl.innerText = title;
+
+  const appSubtitleEl = document.getElementById('appSubtitle');
+  if (appSubtitleEl) appSubtitleEl.innerText = T('subtitle');
 
   document.getElementById('btnOpenFilters').innerHTML = `🧭 <strong>${T('filters').replace('🧭 ', '')}</strong>`;
   document.getElementById('btnStats').innerText = T('statsBtn');
@@ -2146,15 +2151,66 @@ function getTrackTimeRange(t) {
   };
 }
 
+function getTrackGeoBounds(t) {
+  const pts = Array.isArray(t?.traccia) ? t.traccia : [];
+  if (!pts.length) return null;
+
+  let minLat = Infinity, maxLat = -Infinity, minLon = Infinity, maxLon = -Infinity;
+
+  for (const p of pts) {
+    const lat = Number(Array.isArray(p) ? p[0] : p?.lat);
+    const lon = Number(Array.isArray(p) ? p[1] : (p?.lon ?? p?.lng));
+
+    if (!isFinite(lat) || !isFinite(lon)) continue;
+
+    if (lat < minLat) minLat = lat;
+    if (lat > maxLat) maxLat = lat;
+    if (lon < minLon) minLon = lon;
+    if (lon > maxLon) maxLon = lon;
+  }
+
+  if (![minLat, maxLat, minLon, maxLon].every(isFinite)) return null;
+
+  // piccolo margine
+  return {
+    minLat: minLat - 0.05,
+    maxLat: maxLat + 0.05,
+    minLon: minLon - 0.05,
+    maxLon: maxLon + 0.05
+  };
+}
+  
 function isItemInsideSelectedTrack(item) {
   if (!selectedTrackId) return true;
-  if (!selectedTrackBounds) return false;
 
   const ts = getStartTs(item);
-  if (!isFinite(ts)) return false;
 
-  return ts >= selectedTrackBounds.start && ts <= selectedTrackBounds.end;
+  // controllo temporale
+  let byTime = false;
+  if (selectedTrackBounds && isFinite(ts)) {
+    byTime = ts >= selectedTrackBounds.start && ts <= selectedTrackBounds.end;
+  }
+
+  // controllo geografico
+  let byGeo = false;
+  const lat = Number(item?.geo?.lat ?? item?.lat ?? item?.latitude);
+  const lon = Number(item?.geo?.lon ?? item?.geo?.lng ?? item?.lon ?? item?.lng ?? item?.longitude);
+
+  if (
+    selectedTrackGeoBounds &&
+    isFinite(lat) &&
+    isFinite(lon)
+  ) {
+    byGeo =
+      lat >= selectedTrackGeoBounds.minLat &&
+      lat <= selectedTrackGeoBounds.maxLat &&
+      lon >= selectedTrackGeoBounds.minLon &&
+      lon <= selectedTrackGeoBounds.maxLon;
+  }
+
+  return byTime || byGeo;
 }
+  
 function getTrackStartEndTimeStrings(t) {
   const start = getStartTs(t);
   const durSec = Number(t?.durata || 0);
@@ -2672,6 +2728,7 @@ function setMode(mode, onlyUI = false) {
   currentMode = mode;
   selectedTrackId = null;
   selectedTrackBounds = null;
+  selectedTrackGeoBounds = null;
   selectedTrackMarkerIds = null;
   syncFilterButtonsUI();
   if (!onlyUI) renderMap();
@@ -2681,6 +2738,7 @@ async function setCountry(country, onlyUI = false) {
   currentCountry = country;
   selectedTrackId = null;
   selectedTrackBounds = null;
+  selectedTrackGeoBounds = null;
   selectedTrackMarkerIds = null;
   
   try {
@@ -2698,6 +2756,7 @@ function setMonthFilter(month, onlyUI = false) {
   currentMonthFilter = month || '';
   selectedTrackId = null;
   selectedTrackBounds = null;
+  selectedTrackGeoBounds = null;
   selectedTrackMarkerIds = null;
   syncFilterButtonsUI();
   if (!onlyUI) renderMap();
@@ -3241,6 +3300,7 @@ function hideDiaryOverlay(skipUrlUpdate = false) {
 function showFullMapFromDiary() {
   selectedTrackId = null;
   selectedTrackBounds = null;
+  selectedTrackGeoBounds = null;
   selectedTrackMarkerIds = null;
 
   hideDiaryOverlay();
@@ -3303,6 +3363,7 @@ function focusOnTrack(trackId, mode) {
 
   selectedTrackId = trackId;
   selectedTrackBounds = getTrackTimeRange(t);
+    selectedTrackGeoBounds = getTrackGeoBounds(t);
   selectedTrackMarkerIds = null;
 
   if (mode === 'GIRO') currentMode = 'GIRI';
@@ -3674,10 +3735,10 @@ $$
       `);
 
 
-             actions.push(`
+         actions.push(`
         <button class="diary-action-btn"
           onclick="focusOnTrack(${t.id}, '${it.kind}')"
-       >🗺️ Vedi tappa sulla mappa</button>
+        >${T('viewTrackOnMap')}</button>
       `);
 
        
