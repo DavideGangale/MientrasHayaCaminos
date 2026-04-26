@@ -1,10 +1,82 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-04-19T22:23:18.337Z",
+  "_exportDate": "2026-04-26T12:03:49.003Z",
   "tipo": "diario_mese",
   "mese": "2026-04",
-  "count": 56,
+  "count": 60,
   "entries": [
+    {
+      "id": 1776981761612,
+      "ts": 1776981761612,
+      "data": "23/04/2026",
+      "ora": "17:02",
+      "paese": "Colombia",
+      "km": "1144.5",
+      "testo": "I",
+      "tags": [],
+      "geo": {
+        "lat": 7.063297135980414,
+        "lon": -73.16705482854549
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=116f4f4gIMiC2IQfZkrc3qxK8vrf1T00G",
+      "foto": null
+    },
+    {
+      "id": 1776860168733,
+      "ts": 1776860168733,
+      "data": "22/04/2026",
+      "ora": "07:16",
+      "paese": "Colombia",
+      "km": "443.88",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 7.063245,
+        "lon": -73.166985
+      },
+      "videoUrl": "https://youtu.be/zqSd9bvHx5g",
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1776726794922,
+      "ts": 1776726794922,
+      "data": "20/04/2026",
+      "ora": "18:13",
+      "paese": "Colombia",
+      "km": "1099.0",
+      "testo": "Mesa de los santos",
+      "tags": [],
+      "geo": {
+        "lat": 6.906760745811104,
+        "lon": -73.03271730562038
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=10512gcIFVAf7anhkyqSRDpf1dCIkntLn",
+      "foto": null
+    },
+    {
+      "id": 1776726054923,
+      "ts": 1776726054923,
+      "data": "20/04/2026",
+      "ora": "18:00",
+      "paese": "Colombia",
+      "km": "1099.0",
+      "testo": "Mesa de los santos",
+      "tags": [],
+      "geo": {
+        "lat": 6.927694567406901,
+        "lon": -73.04042841240496
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1WqD2eyr-vzpAhsIvNC-zlwGPe_jXXuEj",
+      "foto": null
+    },
     {
       "id": 1776636771082,
       "ts": 1776636771082,
