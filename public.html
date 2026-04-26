@@ -1332,9 +1332,7 @@
 
   <div id="graphModal" class="modal">
     <div class="modal-card" style="max-width: 860px;">
-      <div class="modal-close">
-        <button onclick="closeGraphModal()">×</button>
-      </div>
+      <div class="modal-close"> <button onclick="closeGraphModal()">×</button>    </div>
 
       <h2 id="graphTitle" class="modal-title">📈 Grafico</h2>
 
@@ -1352,6 +1350,20 @@
     </div>
   </div>
 
+
+<div id="trackFuelModal" class="modal">
+  <div class="modal-card narrow">
+    <div class="modal-close">
+      <button onclick="closeTrackFuelModal()">×</button>
+    </div>
+
+    <h2 class="modal-title">⛽ Rifornimenti</h2>
+    <div id="trackFuelModalBody"></div>
+  </div>
+</div>
+
+  
+  
   <div id="lightbox" onclick="closeLightbox()">
     <button id="lightboxClose" onclick="event.stopPropagation(); closeLightbox()">×</button>
     <img id="lightboxImg" onclick="event.stopPropagation();">
@@ -1372,7 +1384,7 @@ let MARKER_POSITION_COUNT = {};
 let HOST_FORM_URL = '';
 let VESPA_CLUB_FORM_URL = '';
 let THANKS_DATA = [];
-
+let TRACK_RELATED_CACHE = {};
   function noCacheUrl(url) {
   const sep = String(url).includes('?') ? '&' : '?';
   return String(url) + sep + 'v=' + Date.now();
@@ -1393,6 +1405,7 @@ let selectedTrackBounds = null;
   
 let selectedTrackGeoBounds = null; 
 let selectedTrackMarkerIds = null;
+let selectedTrackRelatedData = null;
 let LANG = localStorage.getItem('vt_pub_lang') || 'it';
 
 const I18N = {
@@ -2749,12 +2762,13 @@ if (noMarkerVisible) {
   }
 
 
-const diario = Array.isArray(DATA.diario) ? DATA.diario : [];
-
+const diario = selectedTrackRelatedData
+  ? (Array.isArray(selectedTrackRelatedData.diary) ? selectedTrackRelatedData.diary : [])
+  : (Array.isArray(DATA.diario) ? DATA.diario : []);
 function drawDiaryMarker(d, onlyVideos = false) {
   if (currentCountry && d.paese !== currentCountry) return;
   if (currentMonthFilter && getYearMonthFromPublicEntry(d) !== currentMonthFilter) return;
-  if (selectedTrackId && !isItemInsideSelectedTrack(d)) return;
+ // if (selectedTrackId && !isItemInsideSelectedTrack(d)) return;
   if (!d.geo) return;
 
   const lat = Number(d.geo.lat);
@@ -2817,11 +2831,13 @@ diario.forEach(d => drawDiaryMarker(d, false));
 // poi video per ultimi
 diario.forEach(d => drawDiaryMarker(d, true));
 
-  const manutenzioni = Array.isArray(DATA.manutenzioni) ? DATA.manutenzioni : [];
+  const manutenzioni = selectedTrackRelatedData
+  ? (Array.isArray(selectedTrackRelatedData.maint) ? selectedTrackRelatedData.maint : [])
+  : (Array.isArray(DATA.manutenzioni) ? DATA.manutenzioni : []);
   manutenzioni.forEach(m => {
     if (currentCountry && m.paese !== currentCountry) return;
     if (currentMonthFilter && getYearMonthFromPublicEntry(m) !== currentMonthFilter) return;
-    if (selectedTrackId && !isItemInsideSelectedTrack(m)) return;
+   // if (selectedTrackId && !isItemInsideSelectedTrack(m)) return;
     if (!m.geo) return;
     if (!isMarkerTypeVisible('MAINT')) return;
 
@@ -2832,11 +2848,13 @@ diario.forEach(d => drawDiaryMarker(d, true));
     creaMarker(lat, lon, iconMaint, buildMaintPopup(m));
   });
 
-  const rifornimenti = Array.isArray(DATA.rifornimenti) ? DATA.rifornimenti : [];
+  const rifornimenti = selectedTrackRelatedData
+  ? (Array.isArray(selectedTrackRelatedData.fuel) ? selectedTrackRelatedData.fuel : [])
+  : (Array.isArray(DATA.rifornimenti) ? DATA.rifornimenti : []);
   rifornimenti.forEach(r => {
     if (currentCountry && r.paese !== currentCountry) return;
     if (currentMonthFilter && getYearMonthFromPublicEntry(r) !== currentMonthFilter) return;
-    if (selectedTrackId && !isItemInsideSelectedTrack(r)) return;
+   // if (selectedTrackId && !isItemInsideSelectedTrack(r)) return;
     if (!isMarkerTypeVisible('FUEL')) return;
 
     const lat = Number(
@@ -2858,11 +2876,13 @@ diario.forEach(d => drawDiaryMarker(d, true));
     creaMarker(lat, lon, iconFuel, buildFuelPopup(r));
   });
 
-  const carburazioni = Array.isArray(DATA.carburazioni) ? DATA.carburazioni : [];
+  const carburazioni = selectedTrackRelatedData
+  ? (Array.isArray(selectedTrackRelatedData.carb) ? selectedTrackRelatedData.carb : [])
+  : (Array.isArray(DATA.carburazioni) ? DATA.carburazioni : []);
   carburazioni.forEach(c => {
        if (currentCountry && c.paese !== currentCountry) return;
     if (currentMonthFilter && getYearMonthFromPublicEntry(c) !== currentMonthFilter) return;
-    if (selectedTrackId && !isItemInsideSelectedTrack(c)) return;
+   // if (selectedTrackId && !isItemInsideSelectedTrack(c)) return;
     if (!c.geo) return;
     if (!isMarkerTypeVisible('CARB')) return;
 
@@ -2916,6 +2936,8 @@ function setMode(mode, onlyUI = false) {
   selectedTrackBounds = null;
   selectedTrackGeoBounds = null;
   selectedTrackMarkerIds = null;
+  selectedTrackRelatedData = null;
+  
   syncFilterButtonsUI();
   if (!onlyUI) renderMap();
 }
@@ -2926,7 +2948,7 @@ async function setCountry(country, onlyUI = false) {
   selectedTrackBounds = null;
   selectedTrackGeoBounds = null;
   selectedTrackMarkerIds = null;
-  
+  selectedTrackRelatedData = null;
   try {
     await caricaPaeseSeServe(currentCountry);
     popolaMesi();
@@ -2944,6 +2966,7 @@ function setMonthFilter(month, onlyUI = false) {
   selectedTrackBounds = null;
   selectedTrackGeoBounds = null;
   selectedTrackMarkerIds = null;
+  selectedTrackRelatedData = null;
   syncFilterButtonsUI();
   if (!onlyUI) renderMap();
 }
@@ -3000,7 +3023,7 @@ function resetFilters() {
   selectedTrackBounds = null;
   selectedTrackGeoBounds = null;
   selectedTrackMarkerIds = null;
-
+  selectedTrackRelatedData = null;
   DATA = unisciDatasetGlobale();
   popolaMesi();
   syncFilterButtonsUI();
@@ -3401,6 +3424,58 @@ function closeGraphModal() {
   document.getElementById('graphModal').classList.remove('open');
 }
 
+  function openTrackFuelModal(trackId) {
+  const modal = document.getElementById('trackFuelModal');
+  const body = document.getElementById('trackFuelModalBody');
+  if (!modal || !body) return;
+
+  const group = TRACK_RELATED_CACHE[String(trackId)];
+  const items = Array.isArray(group?.fuel) ? group.fuel : [];
+
+  if (!items.length) {
+    body.innerHTML = `<div style="color:#888;">${T('refuelsInTrack')}: 0</div>`;
+    modal.classList.add('open');
+    return;
+  }
+
+  body.innerHTML = items.map((r) => {
+    const qta = Number(r?.qta ?? r?.litri ?? 0);
+    const costo = Number(r?.costoBenzUsd ?? r?.costo ?? 0);
+    const oil = getOilInfoFromRefuel(r);
+
+    const lat = Number(r?.geo?.lat ?? r?.lat ?? r?.latitude);
+    const lon = Number(r?.geo?.lon ?? r?.geo?.lng ?? r?.lon ?? r?.lng ?? r?.longitude);
+
+    return `
+      <div class="support-card" style="margin-top:10px;">
+        <div style="font-weight:900; color:#fff;">📅 ${escapeHtml(r?.data || '')} ${escapeHtml(r?.ora || '')}</div>
+        <div style="margin-top:6px; color:#ddd;">⛽ <b>${qta.toFixed(2)} L</b></div>
+        ${costo > 0 ? `<div style="margin-top:4px; color:#9be28d;">💰 
+$$
+{costo.toFixed(2)}</div>` : ''}
+        ${oil.oilL != null ? `<div style="margin-top:4px; color:#ddd;">🛢️ ${T('oilUsed')}: <b>${oil.oilL.toFixed(2)} L</b></div>` : ''}
+        ${oil.oilCost != null ? `<div style="margin-top:4px; color:#9be28d;">💰 ${T('oilCost')}:
+$$
+{oil.oilCost.toFixed(2)}</div>` : ''}
+        ${(isFinite(lat) && isFinite(lon)) ? `
+          <button class="popup-cta" style="margin-top:10px;" onclick="closeTrackFuelModal(); focusOnMap(${lat}, ${lon})">
+            ${T('viewOnMap')}
+          </button>
+        ` : ''}
+      </div>
+    `;
+  }).join('');
+
+  modal.classList.add('open');
+}
+
+function closeTrackFuelModal() {
+  const modal = document.getElementById('trackFuelModal');
+  const body = document.getElementById('trackFuelModalBody');
+  if (body) body.innerHTML = '';
+  if (modal) modal.classList.remove('open');
+}
+
 /* ===== DIARY PAGE LOGIC ===== */
 
 function normalizeToArray(x) {
@@ -3500,7 +3575,7 @@ function showFullMapFromDiary() {
   selectedTrackBounds = null;
   selectedTrackGeoBounds = null;
   selectedTrackMarkerIds = null;
-
+  selectedTrackRelatedData = null;
   hideDiaryOverlay();
 
   setTimeout(() => {
@@ -3563,7 +3638,8 @@ function focusOnTrack(trackId, mode) {
   selectedTrackBounds = getTrackTimeRange(t);
     selectedTrackGeoBounds = getTrackGeoBounds(t);
   selectedTrackMarkerIds = null;
-
+  selectedTrackRelatedData = TRACK_RELATED_CACHE[String(trackId)] || null;
+  
   if (mode === 'GIRO') currentMode = 'GIRI';
   else currentMode = 'TAPPE';
 
@@ -3680,7 +3756,13 @@ function renderDiaryList() {
     const relatedFuel = getFuelItemsForTrack(t);
     const relatedMaint = getMaintItemsForTrack(t);
     const relatedCarb = getCarbItemsForTrack(t);
-
+    TRACK_RELATED_CACHE[String(t.id)] = {
+      track: t,
+      diary: relatedDiary,
+      fuel: relatedFuel,
+      maint: relatedMaint,
+      carb: relatedCarb
+    };
     const mediaHtml = getTrackRelatedMediaHtml(t, relatedDiary);
     const diaryTextHtml = getTrackRelatedDiaryTextHtml(relatedDiary);
     const fuelSummaryHtml = getFuelSummaryHtml(relatedFuel);
@@ -3714,15 +3796,44 @@ function renderDiaryList() {
           <div class="diary-meta">${meta}</div>
         </div>
 
-        <div class="diary-text"><b>${escapeHtml(t.titolo || '')}</b></div>
+               <div class="diary-text"><b>${escapeHtml(t.titolo || '')}</b></div>
 
-        ${t.note ? `<div class="diary-text" style="margin-top:6px;">${escapeHtml(t.note)}</div>` : ''}
+        <div class="diary-meta" style="margin-top:10px;">
+          📏 <b>${km.toFixed(1)} km</b> · ⏱️ ${h}h ${mm}m
+          ${t.velMax != null ? ` · 🏎️ max <b>${escapeHtml(t.velMax)}</b> km/h` : ''}
+          ${t.velMedia != null ? ` · 📌 media <b>${escapeHtml(t.velMedia)}</b> km/h` : ''}
+        </div>
 
-        ${diaryTextHtml}
+        ${(tt.startTxt || tt.endTxt) ? `
+          <div class="diary-meta" style="margin-top:8px;">
+            🕘 ${T('departure')}: <b>${escapeHtml(tt.startTxt || '--')}</b> · ${T('arrival')}: <b>${escapeHtml(tt.endTxt || '--')}</b>
+          </div>
+        ` : ''}
+
+        ${(a0 != null || a1 != null) ? `
+          <div class="diary-meta" style="margin-top:6px;">
+            ⛰️ ${T('altStartEnd')}: <b>${escapeHtml(a0 != null ? a0 : '--')}</b>m → <b>${escapeHtml(a1 != null ? a1 : '--')}</b>m
+          </div>
+        ` : ''}
+
+               ${refuelsCount != null ? `
+          <div class="diary-meta" style="margin-top:6px;">
+            <button class="diary-action-btn" onclick="openTrackFuelModal(${t.id})">
+              ⛽ ${T('refuelsInTrack')}: <b>${escapeHtml(refuelsCount)}</b>
+            </button>
+          </div>
+        ` : ''}
+
+        <div class="diary-meta" style="margin-top:8px;">
+          ⛽ stimata: <b>${benzStim.toFixed(2)} L</b> (${consStim} km/L)
+          ${benzReal > 0 ? `<br>🔥 reale: <b>${benzReal.toFixed(2)} L</b> (${consReal} km/L)` : ''}
+        </div>
 
         ${mediaHtml}
 
-        <div class="diary-meta" style="margin-top:10px;">
+        ${t.note ? `<div class="diary-text" style="margin-top:10px;">${escapeHtml(t.note)}</div>` : ''}
+
+        ${diaryTextHtml}
           📏 <b>${km.toFixed(1)} km</b> · ⏱️ ${h}h ${mm}m
           ${t.velMax != null ? ` · 🏎️ max <b>${escapeHtml(t.velMax)}</b> km/h` : ''}
           ${t.velMedia != null ? ` · 📌 media <b>${escapeHtml(t.velMedia)}</b> km/h` : ''}
