@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-04-26T17:17:38.006Z",
+  "exportedAt": "2026-04-26T17:18:00.483Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -817,6 +817,21 @@
         "lon": -73.18130361837298
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1xqcaykB5f2ibkG-6rghHs3HOX8-sUFge"
+    },
+    {
+      "ts": 1777223872802,
+      "id": 1777223872802,
+      "paese": "",
+      "km": "",
+      "testo": "",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 7.111241537604123,
+        "lon": -73.18130361837298
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1wsASDPOsB4DEXpOgZnjLLSQljcs8kVdw"
     }
   ]
 }
