@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-04-23T22:02:51.570Z",
+  "exportedAt": "2026-04-26T15:49:46.497Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -727,6 +727,21 @@
         "lon": -73.16705482854549
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=116f4f4gIMiC2IQfZkrc3qxK8vrf1T00G"
+    },
+    {
+      "ts": 1777218579414,
+      "id": 1777218579414,
+      "paese": "",
+      "km": "",
+      "testo": "Pons",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 7.0633009893373915,
+        "lon": -73.1670742277476
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1XSgls5zCnmGmw31DIdMFqrT-s23nKKzg"
     }
   ]
 }
