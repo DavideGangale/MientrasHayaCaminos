@@ -449,16 +449,16 @@
       background: #1d1d1d;
     }
 
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 2200;
-      background: rgba(0,0,0,0.72);
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-    }
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 6000;
+  background: rgba(0,0,0,0.72);
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
 
     .modal.open {
       display: flex;
@@ -2170,30 +2170,27 @@ function getAltStartEndFromTelemetry(t) {
 function countRefuelsForTrack(t) {
   if (!DATA) return null;
   const rif = Array.isArray(DATA.rifornimenti) ? DATA.rifornimenti : [];
-
-  const start = getStartTs(t);
-  const durSec = Number(t?.durata || 0);
-  if (!isFinite(start) || !isFinite(durSec) || durSec <= 0) return null;
-
-  const end = start + durSec * 1000;
+  const range = getTrackTimeRange(t);
+  if (!range) return null;
 
   let n = 0;
   for (const r of rif) {
     const ts = getStartTs(r);
     if (!isFinite(ts)) continue;
-    if (ts >= start && ts <= end) n++;
+    if (ts >= range.start && ts <= range.end) n++;
   }
   return n;
 }
-function getTrackTimeRange(t) {
-  const start = getStartTs(t);
-  const durSec = Number(t?.durata || 0);
 
-  if (!isFinite(start) || !isFinite(durSec) || durSec <= 0) return null;
+function getTrackTimeRange(t) {
+  const durSec = Number(t?.durata || 0);
+  const endTs = parseDateTimeTs(t?.data, t?.ora);
+
+  if (!isFinite(endTs) || !isFinite(durSec) || durSec <= 0) return null;
 
   return {
-    start,
-    end: start + durSec * 1000
+    start: endTs - durSec * 1000,
+    end: endTs
   };
 }
 
@@ -2289,11 +2286,13 @@ function isItemInsideSelectedTrack(item) {
 }
   
 function getTrackStartEndTimeStrings(t) {
-  const start = getStartTs(t);
-  const durSec = Number(t?.durata || 0);
-  if (!isFinite(start) || !isFinite(durSec) || durSec <= 0) return { startTxt: '', endTxt: '' };
-  const end = start + durSec * 1000;
-  return { startTxt: fmtHHMM(start), endTxt: fmtHHMM(end) };
+  const range = getTrackTimeRange(t);
+  if (!range) return { startTxt: '', endTxt: '' };
+
+  return {
+    startTxt: fmtHHMM(range.start),
+    endTxt: fmtHHMM(range.end)
+  };
 }
 
 function getOilInfoFromRefuel(r) {
@@ -2322,6 +2321,116 @@ function getOilInfoFromRefuel(r) {
   };
 }
 
+  function isItemInTrackTimeRange(item, track) {
+  const range = getTrackTimeRange(track);
+  if (!range) return false;
+
+  const ts = getStartTs(item);
+  if (!isFinite(ts)) return false;
+
+  return ts >= range.start && ts <= range.end;
+}
+
+function getDiaryItemsForTrack(track) {
+  const arr = Array.isArray(DATA?.diario) ? DATA.diario : [];
+  return arr.filter(x => isItemInTrackTimeRange(x, track));
+}
+
+function getFuelItemsForTrack(track) {
+  const arr = Array.isArray(DATA?.rifornimenti) ? DATA.rifornimenti : [];
+  return arr.filter(x => isItemInTrackTimeRange(x, track));
+}
+
+function getMaintItemsForTrack(track) {
+  const arr = Array.isArray(DATA?.manutenzioni) ? DATA.manutenzioni : [];
+  return arr.filter(x => isItemInTrackTimeRange(x, track));
+}
+
+function getCarbItemsForTrack(track) {
+  const arr = Array.isArray(DATA?.carburazioni) ? DATA.carburazioni : [];
+  return arr.filter(x => isItemInTrackTimeRange(x, track));
+}
+
+function getTrackRelatedMediaHtml(track, diaryItems) {
+  const media = [];
+
+  // media della tappa stessa
+  const trackMedia = buildMediaBlockFromAny(track);
+  if (trackMedia) media.push(trackMedia);
+
+  // media dai post diario collegati
+  for (const d of diaryItems) {
+    const mediaBlock = buildMediaBlockFromAny(d);
+    if (mediaBlock) media.push(mediaBlock);
+  }
+
+  return media.join('');
+}
+
+function getTrackRelatedDiaryTextHtml(diaryItems) {
+  if (!Array.isArray(diaryItems) || diaryItems.length === 0) return '';
+
+  const blocks = diaryItems
+    .map(d => {
+      const txt = String(d?.testo || '').trim();
+      if (!txt) return '';
+      return `<div class="diary-text" style="margin-top:8px;">${escapeHtml(txt)}</div>`;
+    })
+    .filter(Boolean);
+
+  return blocks.join('');
+}
+
+function getFuelSummaryHtml(items) {
+  if (!Array.isArray(items) || items.length === 0) return '';
+
+  return `
+    <div class="diary-meta" style="margin-top:10px;">
+      <b>${T('refuel')}:</b> ${items.length}
+    </div>
+    <div class="diary-meta" style="margin-top:6px;">
+      ${items.map(r => {
+        const qta = Number(r?.qta ?? r?.litri ?? 0);
+        const dest = escapeHtml(r?.dest ?? r?.note ?? '');
+        return `⛽ ${qta.toFixed(2)} L${dest ? ` — ${dest}` : ''}`;
+      }).join('<br>')}
+    </div>
+  `;
+}
+
+function getMaintSummaryHtml(items) {
+  if (!Array.isArray(items) || items.length === 0) return '';
+
+  return `
+    <div class="diary-meta" style="margin-top:10px;">
+      <b>${T('workshop')}:</b> ${items.length}
+    </div>
+    <div class="diary-meta" style="margin-top:6px;">
+      ${items.map(m => {
+        const nome = escapeHtml(m?.nome || '');
+        const desc = escapeHtml(m?.desc || '');
+        return `🔧 ${nome}${desc ? ` — ${desc}` : ''}`;
+      }).join('<br>')}
+    </div>
+  `;
+}
+
+function getCarbSummaryHtml(items) {
+  if (!Array.isArray(items) || items.length === 0) return '';
+
+  return `
+    <div class="diary-meta" style="margin-top:10px;">
+      <b>${T('carbSetup')}:</b> ${items.length}
+    </div>
+    <div class="diary-meta" style="margin-top:6px;">
+      ${items.map(c => {
+        const alt = escapeHtml(c?.alt || 0);
+        const nota = escapeHtml(c?.nota || '');
+        return `🌬️ ${T('altitude')}: ${alt} m${nota ? ` — ${nota}` : ''}`;
+      }).join('<br>')}
+    </div>
+  `;
+}
   
 function resetMarkerOffsetCache() {
   MARKER_POSITION_COUNT = {};
@@ -3530,7 +3639,6 @@ function buildMediaBlockFromAny(obj) {
 }
 
 function renderDiaryList() {
-    console.log('renderDiaryList chiamata');
   const list = document.getElementById('diaryList');
   if (!list) return;
 
@@ -3539,254 +3647,86 @@ function renderDiaryList() {
     return;
   }
 
-  const items = [];
+  const trackItems = [];
 
-  // TAPPE + GIRI
   const tappe = Array.isArray(DATA.tappe) ? DATA.tappe : [];
   const turismo = Array.isArray(DATA.turismo) ? DATA.turismo : [];
 
   for (const t of tappe) {
-    const latlngs = Array.isArray(t?.traccia) ? t.traccia : [];
-    let last = null;
-    if (latlngs.length >= 2) {
-      const p = latlngs[latlngs.length - 1];
-      last = Array.isArray(p) ? { lat: p[0], lon: p[1] } : { lat: p.lat, lon: p.lon ?? p.lng };
-    }
-
-    items.push({
+    trackItems.push({
       kind: 'TAPPA',
       ts: getBestTs(t),
-      paese: t?.paese || '',
-      data: t?.data || '',
-      ora: t?.ora || '',
-      lat: last ? Number(last.lat) : null,
-      lon: last ? Number(last.lon) : null,
       raw: t
     });
   }
 
   for (const t of turismo) {
-    const latlngs = Array.isArray(t?.traccia) ? t.traccia : [];
-    let last = null;
-    if (latlngs.length >= 2) {
-      const p = latlngs[latlngs.length - 1];
-      last = Array.isArray(p) ? { lat: p[0], lon: p[1] } : { lat: p.lat, lon: p.lon ?? p.lng };
-    }
-
-    items.push({
+    trackItems.push({
       kind: 'GIRO',
       ts: getBestTs(t),
-      paese: t?.paese || '',
-      data: t?.data || '',
-      ora: t?.ora || '',
-      lat: last ? Number(last.lat) : null,
-      lon: last ? Number(last.lon) : null,
       raw: t
     });
   }
 
-  // DIARIO
-  const diario = Array.isArray(DATA.diario) ? DATA.diario : [];
-  for (const d of diario) {
-    const lat = Number(d?.geo?.lat);
-    const lon = Number(d?.geo?.lon ?? d?.geo?.lng);
+  trackItems.sort((a, b) => Number(b.ts) - Number(a.ts));
 
-    items.push({
-      kind: 'DIARIO',
-      ts: getBestTs(d),
-      paese: d?.paese || '',
-      data: d?.data || '',
-      ora: d?.ora || '',
-      lat: isFinite(lat) ? lat : null,
-      lon: isFinite(lon) ? lon : null,
-      raw: d
-    });
-  }
+  list.innerHTML = trackItems.map(it => {
+    const t = it.raw || {};
+    const { a0, a1 } = getAltStartEndFromTelemetry(t);
+    const tt = getTrackStartEndTimeStrings(t);
+    const refuelsCount = countRefuelsForTrack(t);
 
-  // MANUTENZIONI
-  const manut = Array.isArray(DATA.manutenzioni) ? DATA.manutenzioni : [];
-  for (const m of manut) {
-    const lat = Number(m?.geo?.lat);
-    const lon = Number(m?.geo?.lon ?? m?.geo?.lng);
+    const relatedDiary = getDiaryItemsForTrack(t);
+    const relatedFuel = getFuelItemsForTrack(t);
+    const relatedMaint = getMaintItemsForTrack(t);
+    const relatedCarb = getCarbItemsForTrack(t);
 
-    items.push({
-      kind: 'MAINT',
-      ts: getBestTs(m),
-      paese: m?.paese || '',
-      data: m?.data || '',
-      ora: m?.ora || '',
-      lat: isFinite(lat) ? lat : null,
-      lon: isFinite(lon) ? lon : null,
-      raw: m
-    });
-  }
+    const mediaHtml = getTrackRelatedMediaHtml(t, relatedDiary);
+    const diaryTextHtml = getTrackRelatedDiaryTextHtml(relatedDiary);
+    const fuelSummaryHtml = getFuelSummaryHtml(relatedFuel);
+    const maintSummaryHtml = getMaintSummaryHtml(relatedMaint);
+    const carbSummaryHtml = getCarbSummaryHtml(relatedCarb);
 
-  // RIFORNIMENTI
-  const rif = Array.isArray(DATA.rifornimenti) ? DATA.rifornimenti : [];
-  for (const r of rif) {
-    const lat = Number(r?.geo?.lat ?? r?.lat ?? r?.latitude);
-    const lon = Number(r?.geo?.lon ?? r?.geo?.lng ?? r?.lon ?? r?.lng ?? r?.longitude);
+    const h = Math.floor((t.durata || 0) / 3600);
+    const mm = Math.floor(((t.durata || 0) % 3600) / 60);
 
-    items.push({
-      kind: 'FUEL',
-      ts: getBestTs(r),
-      paese: r?.paese || '',
-      data: r?.data || '',
-      ora: r?.ora || '',
-      lat: isFinite(lat) ? lat : null,
-      lon: isFinite(lon) ? lon : null,
-      raw: r
-    });
-  }
+    const benzStim = Number(t.benzinaStimataLitri ?? t.benzina ?? 0);
+    const benzReal = Number(t.benzinaRealeLitri ?? 0);
+    const km = Number(t.km || 0);
 
-  // CARBURAZIONI
-  const carb = Array.isArray(DATA.carburazioni) ? DATA.carburazioni : [];
-  for (const c of carb) {
-    const lat = Number(c?.geo?.lat);
-    const lon = Number(c?.geo?.lon ?? c?.geo?.lng);
+    const consStim = (benzStim > 0) ? (km / benzStim).toFixed(2) : '--';
+    const consReal = (benzReal > 0) ? (km / benzReal).toFixed(2) : '--';
 
-    items.push({
-      kind: 'CARB',
-      ts: getBestTs(c),
-      paese: c?.paese || '',
-      data: c?.data || '',
-      ora: c?.ora || '',
-      lat: isFinite(lat) ? lat : null,
-      lon: isFinite(lon) ? lon : null,
-      raw: c
-    });
-  }
+    const badgeClass = (it.kind === 'GIRO') ? 'badge-giro' : 'badge-tappa';
+    const badgeText = (it.kind === 'GIRO') ? `🛵 ${T('giri')}` : `🏁 ${T('tappa')}`;
 
-  // Ordine cronologico: dal più vecchio al più nuovo
- // Ultimi post prima
-items.sort((a, b) => Number(b.ts) - Number(a.ts));
-
-  // Render HTML
-  list.innerHTML = items.map(it => {
     const metaPieces = [];
-    if (it.paese) metaPieces.push(`🌎 <b>${escapeHtml(it.paese)}</b>`);
-    metaPieces.push(`📅 ${escapeHtml(it.data || '')} ${escapeHtml(it.ora || '')}`);
+    if (t.paese) metaPieces.push(`🌎 <b>${escapeHtml(t.paese)}</b>`);
+    metaPieces.push(`📅 ${escapeHtml(t.data || '')} ${escapeHtml(t.ora || '')}`);
     const meta = metaPieces.join(' · ');
 
-    let badgeClass = '';
-    let badgeText = '';
-    let bodyHtml = '';
-    let mediaHtml = '';
-    let actions = [];
+    const hasGraph = Array.isArray(t.telemetry) && t.telemetry.length >= 3;
 
-    if (it.kind === 'DIARIO') {
-      badgeClass = 'badge-diario';
-      badgeText = `📝 ${T('diary')}`;   // <-- invece di "📝 Diario"
-      const d = it.raw || {};
-      bodyHtml = `<div class="diary-text">${escapeHtml(d.testo || '')}</div>`;
-      mediaHtml = buildMediaBlockFromAny(d);
-    }
-
-    if (it.kind === 'MAINT') {
-      badgeClass = 'badge-maint';
-      badgeText = `${T('workshop')}`;  // <-- invece di "🔧 Officina"
-      const m = it.raw || {};
-            mediaHtml = buildMediaBlockFromAny(m);
-      const costo = Number(m?.costoUsd || 0);
-      bodyHtml = `
-        <div class="diary-text"><b>${escapeHtml(m.nome || '')}</b></div>
-        ${m.desc ? `<div class="diary-text" style="margin-top:6px;">${escapeHtml(m.desc)}</div>` : ''}
-        ${costo > 0 ? `<div class="diary-meta" style="margin-top:8px;color:#9be28d;">💰 ${T('cost')}: <b>
-$$
-{costo.toFixed(2)}</b></div>` : ''}
-      `;
-    }
-
-    if (it.kind === 'FUEL') {
-      badgeClass = 'badge-fuel';
-      badgeText = `${T('refuel')}`;   // <-- invece di "⛽ Rifornimento"
-      const r = it.raw || {};
-      const oil = getOilInfoFromRefuel(r);
-      const costo = Number(r?.costoBenzUsd ?? r?.costo ?? 0);
-      const qta = Number(r?.qta ?? r?.litri ?? 0);
-      const dest = r?.dest ?? r?.note ?? '';
-
-      bodyHtml = `
-        <div class="diary-text">📦 <b>${qta.toFixed(2)} L</b> (${escapeHtml(dest)})</div>
-        ${r?.km != null ? `<div class="diary-meta" style="margin-top:6px;">📏 km ${escapeHtml(r.km)}</div>` : ''}
-        ${costo > 0 ? `<div class="diary-meta" style="margin-top:8px;color:#9be28d;">💰 ${T('paid')}: <b>$${costo.toFixed(2)}</b></div>` : ''}
-                ${oil.oilL != null ? `<div class="diary-meta" style="margin-top:6px;">🛢️ ${T('oilUsed')}: <b>${oil.oilL.toFixed(2)} L</b></div>` : ''}
-        ${oil.oilCost != null ? `<div class="diary-meta" style="margin-top:4px;color:#9be28d;">💰 ${T('oilCost')}: $<b>${oil.oilCost.toFixed(2)}</b></div>` : ''}
-      `;
-
-      mediaHtml = buildMediaBlockFromAny(r);
-    }
-
-    if (it.kind === 'CARB') {
-      badgeClass = 'badge-carb';
-      badgeText = `${T('carbSetup')}`;  // <-- invece di "🌬️ Carburazione"
-      const c = it.raw || {};
-            const plug = pickFirst(c, ['candela', 'sparkPlug', 'bujia']);
-            const jetMain  = pickFirst(c, ['gettoMax', 'gettoMassimo', 'chicMax', 'mainJet']);
-      const jetPilot = pickFirst(c, ['gettoMin', 'gettoMinimo', 'chicMin', 'pilotJet', 'idleJet']);
-
-      const screwIdle = pickFirst(c, ['viteMinimo', 'viteRallenti', 'idleScrew', 'idleSpeedScrew']);
-      const screwAir  = pickFirst(c, ['viteAria', 'viteMiscela', 'airScrew', 'mixtureScrew']);
-
-      const screwIdleTurns = pickFirst(c, ['viteMinimoGiri', 'giriViteMinimo', 'idleScrewTurns']);
-      const screwAirTurns  = pickFirst(c, ['viteAriaGiri', 'giriViteAria', 'airScrewTurns']);
-
-      const idleTxt = (screwIdleTurns != null)
-        ? `${fmtTurns(screwIdleTurns)} ${T('turns')}`
-        : (screwIdle != null ? fmtTurns(screwIdle) : '');
-
-      const airTxt = (screwAirTurns != null)
-        ? `${fmtTurns(screwAirTurns)} ${T('turns')}`
-        : (screwAir != null ? fmtTurns(screwAir) : '');
-
-      bodyHtml = `
-        <div class="diary-text">
-          ${T('carbJetMain')}: <b>${escapeHtml(jetMain ?? '')}</b> ·
-          ${T('carbJetPilot')}: <b>${escapeHtml(jetPilot ?? '')}</b>
+    return `
+      <div class="diary-card">
+        <div class="diary-head">
+          <div class="diary-badge ${badgeClass}">${badgeText}</div>
+          <div class="diary-meta">${meta}</div>
         </div>
 
-        ${(idleTxt || airTxt) ? `
-          <div class="diary-meta" style="margin-top:8px;">
-            ${idleTxt ? `${T('carbScrewIdle')}: <b>${escapeHtml(idleTxt)}</b>` : ''}
-            ${idleTxt && airTxt ? ' · ' : ''}
-            ${airTxt ? `${T('carbScrewAir')}: <b>${escapeHtml(airTxt)}</b>` : ''}
-          </div>
-        ` : ''}
-
-        <div class="diary-meta" style="margin-top:6px;">⛰️ ${T('altitude')}: <b>${escapeHtml(c.alt || 0)}</b> m</div>
-               ${plug ? `<div class="diary-meta" style="margin-top:8px;">🔥 ${T('carbSparkPlug')}: <b>${escapeHtml(plug)}</b></div>` : ''}
-        ${c.nota ? `<div class="diary-meta" style="margin-top:8px;font-style:italic;">"${escapeHtml(c.nota)}"</div>` : ''}
-      `;
-    }
-
-     if (it.kind === 'TAPPA' || it.kind === 'GIRO') {
-      badgeClass = (it.kind === 'GIRO') ? 'badge-giro' : 'badge-tappa';
-       badgeText  = (it.kind === 'GIRO') ? `🛵 ${T('giri')}`     // oppure crea una key tipo T('ride') se preferisci
-    : `🏁 ${T('tappa')}`;
-      const t = it.raw || {};
-      const { a0, a1 } = getAltStartEndFromTelemetry(t);
-      const tt = getTrackStartEndTimeStrings(t);
-      const refuelsCount = countRefuelsForTrack(t);
-      const h = Math.floor((t.durata || 0) / 3600);
-      const mm = Math.floor(((t.durata || 0) % 3600) / 60);
-
-      const benzStim = Number(t.benzinaStimataLitri ?? t.benzina ?? 0);
-      const benzReal = Number(t.benzinaRealeLitri ?? 0);
-      const km = Number(t.km || 0);
-
-      const consStim = (benzStim > 0) ? (km / benzStim).toFixed(2) : '--';
-      const consReal = (benzReal > 0) ? (km / benzReal).toFixed(2) : '--';
-
-      bodyHtml = `
         <div class="diary-text"><b>${escapeHtml(t.titolo || '')}</b></div>
+
         ${t.note ? `<div class="diary-text" style="margin-top:6px;">${escapeHtml(t.note)}</div>` : ''}
+
+        ${diaryTextHtml}
+
+        ${mediaHtml}
 
         <div class="diary-meta" style="margin-top:10px;">
           📏 <b>${km.toFixed(1)} km</b> · ⏱️ ${h}h ${mm}m
           ${t.velMax != null ? ` · 🏎️ max <b>${escapeHtml(t.velMax)}</b> km/h` : ''}
           ${t.velMedia != null ? ` · 📌 media <b>${escapeHtml(t.velMedia)}</b> km/h` : ''}
         </div>
-
 
         ${(tt.startTxt || tt.endTxt) ? `
           <div class="diary-meta" style="margin-top:8px;">
@@ -3800,54 +3740,31 @@ $$
           </div>
         ` : ''}
 
-        ${(refuelsCount != null && it.kind === 'TAPPA') ? `
+        ${refuelsCount != null ? `
           <div class="diary-meta" style="margin-top:6px;">
             ⛽ ${T('refuelsInTrack')}: <b>${escapeHtml(refuelsCount)}</b>
           </div>
         ` : ''}
 
-
-
         <div class="diary-meta" style="margin-top:8px;">
           ⛽ stimata: <b>${benzStim.toFixed(2)} L</b> (${consStim} km/L)
           ${benzReal > 0 ? `<br>🔥 reale: <b>${benzReal.toFixed(2)} L</b> (${consReal} km/L)` : ''}
         </div>
-      `;
 
-      mediaHtml = buildMediaBlockFromAny(t);
+        ${fuelSummaryHtml}
+        ${maintSummaryHtml}
+        ${carbSummaryHtml}
 
-      const hasGraph = Array.isArray(t.telemetry) && t.telemetry.length >= 3;
-      actions.push(`
-        <button class="diary-action-btn ${hasGraph ? 'primary' : ''}"
-          onclick="window.apriGraficoPercorsoPublic(${t.id})"
-          ${hasGraph ? '' : 'disabled'}
-        >${T('openGraph')}</button>
-      `);
+        <div class="diary-actions">
+          <button class="diary-action-btn ${hasGraph ? 'primary' : ''}"
+            onclick="window.apriGraficoPercorsoPublic(${t.id})"
+            ${hasGraph ? '' : 'disabled'}
+          >${T('openGraph')}</button>
 
-
-         actions.push(`
-        <button class="diary-action-btn"
-          onclick="focusOnTrack(${t.id}, '${it.kind}')"
-        >${T('viewTrackOnMap')}</button>
-      `);
-
-       
-    }
-
-    // Azione "vedi su mappa" se abbiamo coordinate
-    if (isFinite(it.lat) && isFinite(it.lon)) {
-      actions.push(`<button class="diary-action-btn" onclick="focusOnMap(${it.lat}, ${it.lon})">${T('viewOnMap')}</button>`);
-    }
-
-    return `
-      <div class="diary-card">
-        <div class="diary-head">
-          <div class="diary-badge ${badgeClass}">${badgeText}</div>
-          <div class="diary-meta">${meta}</div>
+          <button class="diary-action-btn"
+            onclick="focusOnTrack(${t.id}, '${it.kind}')"
+          >${T('viewTrackOnMap')}</button>
         </div>
-        ${bodyHtml}
-        ${mediaHtml}
-        ${actions.length ? `<div class="diary-actions">${actions.join('')}</div>` : ''}
       </div>
     `;
   }).join('');
