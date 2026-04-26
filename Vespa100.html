@@ -4866,6 +4866,8 @@ function lightboxPrev() {
 function getDiarioMediaEntriesByRange(startTs, endTs) {
   const diario = caricaJSON('vt_diario', []);
   const diarioPublicSrc = diario.filter(x => x && x.isPublic);
+    const fotoLocaliNonCaricate = diarioPublicSrc.filter(d => !!d.foto && !d.fotoUrl).length;
+  console.log('Foto diario ancora locali/non caricate su Drive:', fotoLocaliNonCaricate);
   if (!Array.isArray(diario) || !startTs || !endTs) return [];
 
   const margin = 15 * 60 * 1000; // 15 min
@@ -6416,7 +6418,10 @@ function enqueueFoto(kind, id) {
           if (idx === -1) continue;
 
           const entry = diario[idx];
-          if (entry.fotoUrl) continue;      // già uploadata
+          if (entry.fotoUrl) {
+  done++;
+  continue; // già uploadata
+}
           if (!entry.foto) { continue; }    // non ho base64, non posso
 
           const key = 'diario_' + entry.id;
@@ -8955,11 +8960,16 @@ async function syncInboxNowJSONP() {
     const list = Array.isArray(diario) ? diario : [];
     const existing = new Set(list.map(x => String(x.id)));
 
+    const uploadQueue = getUploadQueue();
+    const queueKeys = new Set(
+      (Array.isArray(uploadQueue) ? uploadQueue : []).map(x => `${x.kind}:${x.id}`)
+    );
+
     let added = 0;
     let maxTs = since;
+    let queueChanged = false;
 
     for (const raw of entries) {
-      // filtra solo nuovi (ts > since)
       const ts = Number(raw?.ts || raw?.id || 0);
       if (!ts || ts <= since) continue;
 
@@ -8970,11 +8980,21 @@ async function syncInboxNowJSONP() {
       list.unshift(e);
       existing.add(String(e.id));
       added++;
+
+      // auto-queue per upload Drive delle foto importate da iPhone
+      if (e.foto && !e.fotoUrl) {
+        const qKey = `diario:${e.id}`;
+        if (!queueKeys.has(qKey)) {
+          uploadQueue.push({ kind: 'diario', id: e.id });
+          queueKeys.add(qKey);
+          queueChanged = true;
+        }
+      }
+
       if (e.ts > maxTs) maxTs = e.ts;
     }
 
     if (added === 0) {
-      // anche se il feed è lungo, magari erano tutti già importati
       salva('vt_inboxLastTs', String(Math.max(maxTs, since)));
       showToast('✅ Inbox: nulla di nuovo');
       return;
@@ -8982,6 +9002,11 @@ async function syncInboxNowJSONP() {
 
     salva('vt_diario', list);
     salva('vt_inboxLastTs', String(maxTs));
+
+    if (queueChanged) {
+      setUploadQueue(uploadQueue);
+      updateDriveSyncInfo?.();
+    }
 
     renderDiarioFull?.();
     showToast(`✅ Importati ${added} post da iPhone`);
@@ -9038,6 +9063,11 @@ async function syncDriveGithubOneClick() {
     if (q0 > 0) {
       showToast(`☁️ 2/3 Sync Drive... (${q0} foto in coda)`, 3000);
       await processUploadQueue(999); // tenta di caricarle tutte
+    const qAfter = (getUploadQueue?.() || []).length;
+    if (qAfter > 0) {
+      showToast(`⚠️ Restano ${qAfter} foto non caricate su Drive. Pubblico comunque, ma alcune immagini potrebbero mancare.`, 5000);
+    }
+  
     } else {
       showToast('☁️ 2/3 Drive: nessuna foto in coda', 2200);
     }
@@ -11710,7 +11740,7 @@ function simplifyTelemetry(telem, step = 2, maxPts = 260) {
 
 
 async function costruisciArchivioPubblicoSpezzato() {
-  const MAX_FOTO_DIARIO = 30;
+  const MAX_FOTO_DIARIO = 100;
   const FOTO_MAX_W = 900;
   const FOTO_QUALITY = 0.60;
 
@@ -11774,16 +11804,19 @@ const turismoPub = turismoPublicSrc.map(t => ({
     telemetry: simplifyTelemetry(t.telemetry, 2, 260),
     traccia: simplifyTrace(t.traccia, 3)
   }));
-
   const diarioSorted = [...diarioPublicSrc].sort((a,b) =>
-  Number(b.ts || b.id || 0) - Number(a.ts || a.id || 0)
-);
-  const idsConFoto = diarioSorted.filter(d => !!d.foto).map(d => d.id);
+    Number(b.ts || b.id || 0) - Number(a.ts || a.id || 0)
+  );
+
+  const idsConFoto = diarioSorted
+    .filter(d => !!d.foto && !d.fotoUrl)
+    .map(d => d.id);
+
   const keepFotoIds = new Set(idsConFoto.slice(0, MAX_FOTO_DIARIO));
 
   const diarioPub = await Promise.all(diarioSorted.map(async d => {
-    const keepFoto = !!d.foto && keepFotoIds.has(d.id);
-    const fotoUrl = d.fotoUrl || null;
+    const fotoUrl = (d.fotoUrl && String(d.fotoUrl).trim()) ? String(d.fotoUrl).trim() : null;
+    const keepFoto = !!d.foto && !fotoUrl && keepFotoIds.has(d.id);
 
     return {
       id: d.id,
@@ -11798,7 +11831,7 @@ const turismoPub = turismoPublicSrc.map(t => ({
       videoUrl: d.videoUrl || null,
       videoPlanned: !!d.videoPlanned,
       fotoUrl: fotoUrl,
-      foto: (!fotoUrl && keepFoto) ? await sanitizeImageDataUrl(d.foto, FOTO_MAX_W, FOTO_QUALITY) : null
+      foto: keepFoto ? await sanitizeImageDataUrl(d.foto, FOTO_MAX_W, FOTO_QUALITY) : null
     };
   }));
 
