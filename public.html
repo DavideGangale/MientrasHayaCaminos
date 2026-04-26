@@ -2365,19 +2365,64 @@ function getCarbItemsForTrack(track) {
 }
 
 function getTrackRelatedMediaHtml(track, diaryItems) {
-  const media = [];
+  const mediaBlocks = [];
 
-  // media della tappa stessa
-  const trackMedia = buildMediaBlockFromAny(track);
-  if (trackMedia) media.push(trackMedia);
+  const seen = new Set();
 
-  // media dai post diario collegati
-  for (const d of diaryItems) {
-    const mediaBlock = buildMediaBlockFromAny(d);
-    if (mediaBlock) media.push(mediaBlock);
+  function pushUniqueMediaBlockFrom(obj) {
+    const photosRaw =
+      (normalizeToArray(obj?.fotoUrls).length ? normalizeToArray(obj?.fotoUrls) : [])
+        .concat(normalizeToArray(obj?.fotoUrl))
+        .concat(normalizeToArray(obj?.foto))
+        .filter(Boolean);
+
+    const videosRaw =
+      (normalizeToArray(obj?.videoUrls).length ? normalizeToArray(obj?.videoUrls) : [])
+        .concat(normalizeToArray(obj?.videoUrl))
+        .concat(normalizeToArray(obj?.video))
+        .filter(Boolean);
+
+    const planned = !!obj?.videoPlanned;
+
+    const media = [];
+
+    for (const p of photosRaw) {
+      const src = driveToDirectImageUrl(p);
+      if (!src || seen.has(`img:${src}`)) continue;
+      seen.add(`img:${src}`);
+
+      const safe = String(src).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+      media.push(`<img class="diary-thumb" src="${src}" onclick="openLightbox('${safe}')">`);
+    }
+
+    for (const v of videosRaw) {
+      const id = getYouTubeId(v);
+      if (!id || seen.has(`yt:${id}`)) continue;
+      seen.add(`yt:${id}`);
+
+      const thumb = `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+      media.push(`<div class="video-thumb" style="background-image:url('${thumb}')" onclick="openVideoModal('${id}')"></div>`);
+    }
+
+    if (planned && !seen.has(`planned:${obj?.id || Math.random()}`)) {
+      seen.add(`planned:${obj?.id || Math.random()}`);
+      media.push(`<div class="diary-card" style="padding:10px;border-style:dashed;color:#ffb74d;font-weight:900;">${T('videoComing')}</div>`);
+    }
+
+    if (media.length > 0) {
+      mediaBlocks.push(`<div class="diary-media">${media.join('')}</div>`);
+    }
   }
 
-  return media.join('');
+  // prima media della tappa/giro stesso
+  pushUniqueMediaBlockFrom(track);
+
+  // poi media dei post collegati
+  for (const d of (Array.isArray(diaryItems) ? diaryItems : [])) {
+    pushUniqueMediaBlockFrom(d);
+  }
+
+  return mediaBlocks.join('');
 }
 
 function getTrackRelatedDiaryTextHtml(diaryItems) {
@@ -2387,7 +2432,12 @@ function getTrackRelatedDiaryTextHtml(diaryItems) {
     .map(d => {
       const txt = String(d?.testo || '').trim();
       if (!txt) return '';
-      return `<div class="diary-text" style="margin-top:8px;">${escapeHtml(txt)}</div>`;
+
+      return `
+        <div class="diary-text" style="margin-top:10px;">
+          ${escapeHtml(txt)}
+        </div>
+      `;
     })
     .filter(Boolean);
 
@@ -3451,11 +3501,11 @@ function closeGraphModal() {
         <div style="font-weight:900; color:#fff;">📅 ${escapeHtml(r?.data || '')} ${escapeHtml(r?.ora || '')}</div>
         <div style="margin-top:6px; color:#ddd;">⛽ <b>${qta.toFixed(2)} L</b></div>
         ${costo > 0 ? `<div style="margin-top:4px; color:#9be28d;">💰 
-$$
+$
 {costo.toFixed(2)}</div>` : ''}
         ${oil.oilL != null ? `<div style="margin-top:4px; color:#ddd;">🛢️ ${T('oilUsed')}: <b>${oil.oilL.toFixed(2)} L</b></div>` : ''}
         ${oil.oilCost != null ? `<div style="margin-top:4px; color:#9be28d;">💰 ${T('oilCost')}:
-$$
+$
 {oil.oilCost.toFixed(2)}</div>` : ''}
         ${(isFinite(lat) && isFinite(lon)) ? `
           <button class="popup-cta" style="margin-top:10px;" onclick="closeTrackFuelModal(); focusOnMap(${lat}, ${lon})">
@@ -3789,14 +3839,14 @@ function renderDiaryList() {
 
     const hasGraph = Array.isArray(t.telemetry) && t.telemetry.length >= 3;
 
-    return `
+       return `
       <div class="diary-card">
         <div class="diary-head">
           <div class="diary-badge ${badgeClass}">${badgeText}</div>
           <div class="diary-meta">${meta}</div>
         </div>
 
-               <div class="diary-text"><b>${escapeHtml(t.titolo || '')}</b></div>
+        <div class="diary-text"><b>${escapeHtml(t.titolo || '')}</b></div>
 
         <div class="diary-meta" style="margin-top:10px;">
           📏 <b>${km.toFixed(1)} km</b> · ⏱️ ${h}h ${mm}m
@@ -3816,14 +3866,6 @@ function renderDiaryList() {
           </div>
         ` : ''}
 
-               ${refuelsCount != null ? `
-          <div class="diary-meta" style="margin-top:6px;">
-            <button class="diary-action-btn" onclick="openTrackFuelModal(${t.id})">
-              ⛽ ${T('refuelsInTrack')}: <b>${escapeHtml(refuelsCount)}</b>
-            </button>
-          </div>
-        ` : ''}
-
         <div class="diary-meta" style="margin-top:8px;">
           ⛽ stimata: <b>${benzStim.toFixed(2)} L</b> (${consStim} km/L)
           ${benzReal > 0 ? `<br>🔥 reale: <b>${benzReal.toFixed(2)} L</b> (${consReal} km/L)` : ''}
@@ -3834,39 +3876,24 @@ function renderDiaryList() {
         ${t.note ? `<div class="diary-text" style="margin-top:10px;">${escapeHtml(t.note)}</div>` : ''}
 
         ${diaryTextHtml}
-          📏 <b>${km.toFixed(1)} km</b> · ⏱️ ${h}h ${mm}m
-          ${t.velMax != null ? ` · 🏎️ max <b>${escapeHtml(t.velMax)}</b> km/h` : ''}
-          ${t.velMedia != null ? ` · 📌 media <b>${escapeHtml(t.velMedia)}</b> km/h` : ''}
-        </div>
-
-        ${(tt.startTxt || tt.endTxt) ? `
-          <div class="diary-meta" style="margin-top:8px;">
-            🕘 ${T('departure')}: <b>${escapeHtml(tt.startTxt || '--')}</b> · ${T('arrival')}: <b>${escapeHtml(tt.endTxt || '--')}</b>
-          </div>
-        ` : ''}
-
-        ${(a0 != null || a1 != null) ? `
-          <div class="diary-meta" style="margin-top:6px;">
-            ⛰️ ${T('altStartEnd')}: <b>${escapeHtml(a0 != null ? a0 : '--')}</b>m → <b>${escapeHtml(a1 != null ? a1 : '--')}</b>m
-          </div>
-        ` : ''}
-
-        ${refuelsCount != null ? `
-          <div class="diary-meta" style="margin-top:6px;">
-            ⛽ ${T('refuelsInTrack')}: <b>${escapeHtml(refuelsCount)}</b>
-          </div>
-        ` : ''}
-
-        <div class="diary-meta" style="margin-top:8px;">
-          ⛽ stimata: <b>${benzStim.toFixed(2)} L</b> (${consStim} km/L)
-          ${benzReal > 0 ? `<br>🔥 reale: <b>${benzReal.toFixed(2)} L</b> (${consReal} km/L)` : ''}
-        </div>
-
-        ${fuelSummaryHtml}
-        ${maintSummaryHtml}
-        ${carbSummaryHtml}
 
         <div class="diary-actions">
+          <button class="diary-action-btn" onclick="openTrackFuelModal(${t.id})">
+            ⛽ ${T('refuelsInTrack')}: <b>${escapeHtml(refuelsCount ?? 0)}</b>
+          </button>
+
+          ${relatedMaint.length ? `
+            <button class="diary-action-btn" disabled>
+              🔧 ${T('workshop')}: <b>${relatedMaint.length}</b>
+            </button>
+          ` : ''}
+
+          ${relatedCarb.length ? `
+            <button class="diary-action-btn" disabled>
+              🌬️ ${T('carbSetup')}: <b>${relatedCarb.length}</b>
+            </button>
+          ` : ''}
+
           <button class="diary-action-btn ${hasGraph ? 'primary' : ''}"
             onclick="window.apriGraficoPercorsoPublic(${t.id})"
             ${hasGraph ? '' : 'disabled'}
