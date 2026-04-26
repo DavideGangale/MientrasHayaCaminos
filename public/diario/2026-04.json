@@ -1,10 +1,28 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-04-26T12:49:30.160Z",
+  "_exportDate": "2026-04-26T15:51:43.571Z",
   "tipo": "diario_mese",
   "mese": "2026-04",
   "count": 60,
   "entries": [
+    {
+      "id": 1777218579414,
+      "ts": 1777218579414,
+      "data": "26/04/2026",
+      "ora": "10:49",
+      "paese": "Colombia",
+      "km": "1192.5",
+      "testo": "Pons",
+      "tags": [],
+      "geo": {
+        "lat": 7.0633009893373915,
+        "lon": -73.1670742277476
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1XSgls5zCnmGmw31DIdMFqrT-s23nKKzg",
+      "foto": null
+    },
     {
       "id": 1776981761612,
       "ts": 1776981761612,
@@ -57,24 +75,6 @@
       "videoUrl": null,
       "videoPlanned": false,
       "fotoUrl": "https://drive.google.com/uc?export=view&id=10512gcIFVAf7anhkyqSRDpf1dCIkntLn",
-      "foto": null
-    },
-    {
-      "id": 1776726054923,
-      "ts": 1776726054923,
-      "data": "20/04/2026",
-      "ora": "18:00",
-      "paese": "Colombia",
-      "km": "1099.0",
-      "testo": "Mesa de los santos",
-      "tags": [],
-      "geo": {
-        "lat": 6.927694567406901,
-        "lon": -73.04042841240496
-      },
-      "videoUrl": null,
-      "videoPlanned": false,
-      "fotoUrl": "https://drive.google.com/uc?export=view&id=1WqD2eyr-vzpAhsIvNC-zlwGPe_jXXuEj",
       "foto": null
     },
     {
