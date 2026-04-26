@@ -3474,7 +3474,7 @@ function closeGraphModal() {
   document.getElementById('graphModal').classList.remove('open');
 }
 
-  function openTrackFuelModal(trackId) {
+function openTrackFuelModal(trackId) {
   const modal = document.getElementById('trackFuelModal');
   const body = document.getElementById('trackFuelModalBody');
   if (!modal || !body) return;
@@ -3499,14 +3499,9 @@ function closeGraphModal() {
     return `
       <div class="support-card" style="margin-top:10px;">
         <div style="font-weight:900; color:#fff;">📅 ${escapeHtml(r?.data || '')} ${escapeHtml(r?.ora || '')}</div>
-        <div style="margin-top:6px; color:#ddd;">⛽ <b>${qta.toFixed(2)} L</b></div>
-        ${costo > 0 ? `<div style="margin-top:4px; color:#9be28d;">💰 
-$
-{costo.toFixed(2)}</div>` : ''}
+        <div style="margin-top:6px; color:#ddd;">⛽ <b>${qta.toFixed(2)} L</b></div>${costo > 0 ? `<div style="margin-top:4px; color:#9be28d;">💰 $${costo.toFixed(2)}</div>` : ''}
         ${oil.oilL != null ? `<div style="margin-top:4px; color:#ddd;">🛢️ ${T('oilUsed')}: <b>${oil.oilL.toFixed(2)} L</b></div>` : ''}
-        ${oil.oilCost != null ? `<div style="margin-top:4px; color:#9be28d;">💰 ${T('oilCost')}:
-$
-{oil.oilCost.toFixed(2)}</div>` : ''}
+        ${oil.oilCost != null ? `<div style="margin-top:4px; color:#9be28d;">💰 ${T('oilCost')}:$${oil.oilCost.toFixed(2)}</div>` : ''}
         ${(isFinite(lat) && isFinite(lon)) ? `
           <button class="popup-cta" style="margin-top:10px;" onclick="closeTrackFuelModal(); focusOnMap(${lat}, ${lon})">
             ${T('viewOnMap')}
