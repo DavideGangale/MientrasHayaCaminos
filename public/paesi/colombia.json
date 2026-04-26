@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-04-26T12:03:49.010Z",
+  "_exportDate": "2026-04-26T12:49:30.161Z",
   "tipo": "paese",
   "paese": "Colombia",
   "slug": "colombia",
@@ -77749,8 +77749,8 @@
         "lat": 5.067838635300349,
         "lon": -74.59489580250772
       },
-      "videoUrl": null,
-      "videoPlanned": true,
+      "videoUrl": "https://youtube.com/shorts/7zhcDTRfJY4?si=aXtvnKBnpvvxnjkV",
+      "videoPlanned": false,
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1nfNR_HaOxLf5pcRpcdMji8J_AucIULeN",
       "foto": null
     },
