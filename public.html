@@ -2365,11 +2365,10 @@ function getCarbItemsForTrack(track) {
 }
 
 function getTrackRelatedMediaHtml(track, diaryItems) {
-  const mediaBlocks = [];
-
   const seen = new Set();
+  const media = [];
 
-  function pushUniqueMediaBlockFrom(obj) {
+  function collectFrom(obj) {
     const photosRaw =
       (normalizeToArray(obj?.fotoUrls).length ? normalizeToArray(obj?.fotoUrls) : [])
         .concat(normalizeToArray(obj?.fotoUrl))
@@ -2383,8 +2382,6 @@ function getTrackRelatedMediaHtml(track, diaryItems) {
         .filter(Boolean);
 
     const planned = !!obj?.videoPlanned;
-
-    const media = [];
 
     for (const p of photosRaw) {
       const src = driveToDirectImageUrl(p);
@@ -2404,44 +2401,23 @@ function getTrackRelatedMediaHtml(track, diaryItems) {
       media.push(`<div class="video-thumb" style="background-image:url('${thumb}')" onclick="openVideoModal('${id}')"></div>`);
     }
 
-    if (planned && !seen.has(`planned:${obj?.id || Math.random()}`)) {
-      seen.add(`planned:${obj?.id || Math.random()}`);
-      media.push(`<div class="diary-card" style="padding:10px;border-style:dashed;color:#ffb74d;font-weight:900;">${T('videoComing')}</div>`);
-    }
-
-    if (media.length > 0) {
-      mediaBlocks.push(`<div class="diary-media">${media.join('')}</div>`);
+    if (planned) {
+      const key = `planned:${obj?.id || Math.random()}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        media.push(`<div class="diary-card" style="padding:10px;border-style:dashed;color:#ffb74d;font-weight:900;">${T('videoComing')}</div>`);
+      }
     }
   }
 
-  // prima media della tappa/giro stesso
-  pushUniqueMediaBlockFrom(track);
+  collectFrom(track);
 
-  // poi media dei post collegati
-  for (const d of (Array.isArray(diaryItems) ? diaryItems : [])) {
-    pushUniqueMediaBlockFrom(d);
-  }
-
-  return mediaBlocks.join('');
+  if (!media.length) return '';
+  return `<div class="diary-media">${media.join('')}</div>`;
 }
 
 function getTrackRelatedDiaryTextHtml(diaryItems) {
-  if (!Array.isArray(diaryItems) || diaryItems.length === 0) return '';
-
-  const blocks = diaryItems
-    .map(d => {
-      const txt = String(d?.testo || '').trim();
-      if (!txt) return '';
-
-      return `
-        <div class="diary-text" style="margin-top:10px;">
-          ${escapeHtml(txt)}
-        </div>
-      `;
-    })
-    .filter(Boolean);
-
-  return blocks.join('');
+  return '';
 }
 
 function getFuelSummaryHtml(items) {
@@ -2494,6 +2470,60 @@ function getCarbSummaryHtml(items) {
     </div>
   `;
 }
+
+function getTrackRelatedPostsHtml(track, diaryItems) {
+  if (!Array.isArray(diaryItems) || diaryItems.length === 0) return '';
+
+  return diaryItems.map(d => {
+    const mediaParts = [];
+
+    const photosRaw =
+      (normalizeToArray(d?.fotoUrls).length ? normalizeToArray(d?.fotoUrls) : [])
+        .concat(normalizeToArray(d?.fotoUrl))
+        .concat(normalizeToArray(d?.foto))
+        .filter(Boolean);
+
+    const videosRaw =
+      (normalizeToArray(d?.videoUrls).length ? normalizeToArray(d?.videoUrls) : [])
+        .concat(normalizeToArray(d?.videoUrl))
+        .concat(normalizeToArray(d?.video))
+        .filter(Boolean);
+
+    for (const p of photosRaw) {
+      const src = driveToDirectImageUrl(p);
+      if (!src) continue;
+      const safe = String(src).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+      mediaParts.push(`<img class="diary-thumb" src="${src}" onclick="openLightbox('${safe}')">`);
+    }
+
+    for (const v of videosRaw) {
+      const id = getYouTubeId(v);
+      if (!id) continue;
+      const thumb = `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+      mediaParts.push(`<div class="video-thumb" style="background-image:url('${thumb}')" onclick="openVideoModal('${id}')"></div>`);
+    }
+
+    if (d?.videoPlanned && videosRaw.length === 0) {
+      mediaParts.push(`<div class="diary-card" style="padding:10px;border-style:dashed;color:#ffb74d;font-weight:900;">${T('videoComing')}</div>`);
+    }
+
+    const mediaHtml = mediaParts.length
+      ? `<div class="diary-media" style="margin-top:10px;">${mediaParts.join('')}</div>`
+      : '';
+
+    const txt = String(d?.testo || '').trim();
+
+    if (!mediaHtml && !txt) return '';
+
+    return `
+      <div style="margin-top:12px;">
+        ${mediaHtml}
+        ${txt ? `<div class="diary-text" style="margin-top:8px;">${escapeHtml(txt)}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
   
 function resetMarkerOffsetCache() {
   MARKER_POSITION_COUNT = {};
@@ -3808,8 +3838,8 @@ function renderDiaryList() {
       maint: relatedMaint,
       carb: relatedCarb
     };
-    const mediaHtml = getTrackRelatedMediaHtml(t, relatedDiary);
-    const diaryTextHtml = getTrackRelatedDiaryTextHtml(relatedDiary);
+     const mediaHtml = getTrackRelatedMediaHtml(t, relatedDiary);
+    const relatedPostsHtml = getTrackRelatedPostsHtml(t, relatedDiary);
     const fuelSummaryHtml = getFuelSummaryHtml(relatedFuel);
     const maintSummaryHtml = getMaintSummaryHtml(relatedMaint);
     const carbSummaryHtml = getCarbSummaryHtml(relatedCarb);
@@ -3870,7 +3900,7 @@ function renderDiaryList() {
 
         ${t.note ? `<div class="diary-text" style="margin-top:10px;">${escapeHtml(t.note)}</div>` : ''}
 
-        ${diaryTextHtml}
+        ${relatedPostsHtml}
 
         <div class="diary-actions">
           <button class="diary-action-btn" onclick="openTrackFuelModal(${t.id})">
