@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-04-26T17:18:19.371Z",
+  "exportedAt": "2026-04-28T17:51:09.650Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -847,6 +847,21 @@
         "lon": -73.18130361837298
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1HDBCcoNgu3Wcbbb9zdAx_iBanbmaxHky"
+    },
+    {
+      "ts": 1777398650520,
+      "id": 1777398650520,
+      "paese": "",
+      "km": "",
+      "testo": "Girón Cartagena",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 7.063296446137044,
+        "lon": -73.1670368714093
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1dF-pQfOsrWIs_UDMw83bIbuKWZpHN2Od"
     }
   ]
 }
