@@ -1,12 +1,36 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-04-26T15:51:43.570Z",
+  "_exportDate": "2026-04-29T11:36:35.981Z",
   "tipo": "officina",
   "stats": {
-    "spesaRicambiUsd": 11.60653108627321,
+    "spesaRicambiUsd": 52.05774191693799,
     "spesaManodoperaUsd": 4.045121083066478
   },
   "manutenzioni": [
+    {
+      "id": 1777306225868,
+      "data": "27/04/2026",
+      "ora": "11:10",
+      "paese": "Colombia",
+      "km": "1209.9",
+      "nome": "Montaggio Llanta trasera",
+      "desc": "",
+      "costoLocal": 0,
+      "valuta": "COP",
+      "costoUsd": 0,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1JhQeYt8GQ2Vuk_tDzsP8O-SgYGfX0kmL",
+      "fotoUrl2": null,
+      "fotoUrlList": [
+        "https://drive.google.com/uc?export=view&id=1JhQeYt8GQ2Vuk_tDzsP8O-SgYGfX0kmL"
+      ],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "ricambiUsati": [],
+      "geo": {
+        "lat": 7.073455,
+        "lon": -73.1638583
+      }
+    },
     {
       "id": 1776959720909,
       "data": "23/04/2026",
@@ -271,6 +295,20 @@
       "intervalKm": 0,
       "usedKm": 0,
       "lastKm": 9062.1
+    },
+    {
+      "id": "1777306108590_6e2da362149548",
+      "nome": "Llanta trasera",
+      "qta": 0,
+      "wear": "interval",
+      "intervalKm": 8000,
+      "usedKm": 0,
+      "lastKm": 1209.8504,
+      "costoLocal": 150000,
+      "costoUsd": 40.451210830664785,
+      "valuta": "COP",
+      "fxToUsd": 0.00026967473887109855,
+      "durata": 0
     }
   ]
 }
