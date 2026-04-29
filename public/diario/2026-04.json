@@ -1,10 +1,154 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-04-26T15:51:43.571Z",
+  "_exportDate": "2026-04-29T11:36:35.985Z",
   "tipo": "diario_mese",
   "mese": "2026-04",
-  "count": 60,
+  "count": 68,
   "entries": [
+    {
+      "id": 1777398650520,
+      "ts": 1777398650520,
+      "data": "28/04/2026",
+      "ora": "12:50",
+      "paese": "Colombia",
+      "km": "1256.9",
+      "testo": "Girón Cartagena",
+      "tags": [],
+      "geo": {
+        "lat": 7.063296446137044,
+        "lon": -73.1670368714093
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1dF-pQfOsrWIs_UDMw83bIbuKWZpHN2Od",
+      "foto": null
+    },
+    {
+      "id": 1777223893243,
+      "ts": 1777223893243,
+      "data": "26/04/2026",
+      "ora": "12:18",
+      "paese": "Colombia",
+      "km": "1206.9",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 7.111241537604123,
+        "lon": -73.18130361837298
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1HDBCcoNgu3Wcbbb9zdAx_iBanbmaxHky",
+      "foto": null
+    },
+    {
+      "id": 1777223872802,
+      "ts": 1777223872802,
+      "data": "26/04/2026",
+      "ora": "12:17",
+      "paese": "Colombia",
+      "km": "1206.9",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 7.111241537604123,
+        "lon": -73.18130361837298
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1wsASDPOsB4DEXpOgZnjLLSQljcs8kVdw",
+      "foto": null
+    },
+    {
+      "id": 1777223849409,
+      "ts": 1777223849409,
+      "data": "26/04/2026",
+      "ora": "12:17",
+      "paese": "Colombia",
+      "km": "1206.9",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 7.111241537604123,
+        "lon": -73.18130361837298
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1xqcaykB5f2ibkG-6rghHs3HOX8-sUFge",
+      "foto": null
+    },
+    {
+      "id": 1777223826415,
+      "ts": 1777223826415,
+      "data": "26/04/2026",
+      "ora": "12:17",
+      "paese": "Colombia",
+      "km": "1206.9",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 7.1109501630596785,
+        "lon": -73.1817024911074
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1DtSbC-Caz-3kP8THks9oo9C1yglvmcGh",
+      "foto": null
+    },
+    {
+      "id": 1777223795256,
+      "ts": 1777223795256,
+      "data": "26/04/2026",
+      "ora": "12:16",
+      "paese": "Colombia",
+      "km": "1206.9",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 7.111281418723411,
+        "lon": -73.18116118154717
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1z7-kWS2DC4c946yUbN-aHgV2YXe37nOE",
+      "foto": null
+    },
+    {
+      "id": 1777223794037,
+      "ts": 1777223794037,
+      "data": "26/04/2026",
+      "ora": "12:16",
+      "paese": "Colombia",
+      "km": "1206.9",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 7.111281418723411,
+        "lon": -73.18116118154717
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1rt1PYkY-sU9Wimb3hxBR99MglssIw4cs",
+      "foto": null
+    },
+    {
+      "id": 1777219760740,
+      "ts": 1777219760740,
+      "data": "26/04/2026",
+      "ora": "11:09",
+      "paese": "Colombia",
+      "km": "1206.9",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 7.063300970706,
+        "lon": -73.16707421244905
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=16quGoUoWJxyaOTu0LrqXw4__lvO8apYT",
+      "foto": null
+    },
     {
       "id": 1777218579414,
       "ts": 1777218579414,
