@@ -2344,6 +2344,55 @@ function getOilInfoFromRefuel(r) {
   return ts >= range.start && ts <= range.end;
 }
 
+
+function isItemRelatedToTrack(item, track, maxKm = 8, timeMarginHours = 3) {
+  const range = getTrackTimeRange(track);
+  const ts = getStartTs(item);
+
+  // 1) match temporale con margine
+  if (range && isFinite(ts)) {
+    const marginMs = timeMarginHours * 60 * 60 * 1000;
+    if (ts >= (range.start - marginMs) && ts <= (range.end + marginMs)) {
+      return true;
+    }
+  }
+
+  // 2) fallback geografico: vicino alla traccia
+  const lat = Number(item?.geo?.lat ?? item?.lat ?? item?.latitude);
+  const lon = Number(item?.geo?.lon ?? item?.geo?.lng ?? item?.lon ?? item?.lng ?? item?.longitude);
+
+  if (!isFinite(lat) || !isFinite(lon)) return false;
+
+  const pts = Array.isArray(track?.traccia) ? track.traccia : [];
+  if (!pts.length) return false;
+
+  function distKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const toRad = deg => deg * Math.PI / 180;
+
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  for (const p of pts) {
+    const pLat = Number(Array.isArray(p) ? p[0] : p?.lat);
+    const pLon = Number(Array.isArray(p) ? p[1] : (p?.lon ?? p?.lng));
+    if (!isFinite(pLat) || !isFinite(pLon)) continue;
+
+    if (distKm(lat, lon, pLat, pLon) <= maxKm) return true;
+  }
+
+  return false;
+}
+  
 function getDiaryItemsForTrack(track) {
   const arr = Array.isArray(DATA?.diario) ? DATA.diario : [];
   return arr.filter(x => isItemInTrackTimeRange(x, track));
@@ -2351,7 +2400,7 @@ function getDiaryItemsForTrack(track) {
 
 function getFuelItemsForTrack(track) {
   const arr = Array.isArray(DATA?.rifornimenti) ? DATA.rifornimenti : [];
-  return arr.filter(x => isItemInTrackTimeRange(x, track));
+  return arr.filter(x => isItemRelatedToTrack(x, track, 10, 6));
 }
 
 function getMaintItemsForTrack(track) {
