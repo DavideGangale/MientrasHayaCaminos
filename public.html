@@ -2344,6 +2344,8 @@ function getOilInfoFromRefuel(r) {
   return ts >= range.start && ts <= range.end;
 }
 
+  
+
 function getDiaryItemsForTrack(track) {
   const arr = Array.isArray(DATA?.diario) ? DATA.diario : [];
   return arr.filter(x => isItemInTrackTimeRange(x, track));
@@ -2351,8 +2353,51 @@ function getDiaryItemsForTrack(track) {
 
 function getFuelItemsForTrack(track) {
   const arr = Array.isArray(DATA?.rifornimenti) ? DATA.rifornimenti : [];
-  return arr.filter(x => isItemInTrackTimeRange(x, track));
+  const range = getTrackTimeRange(track);
+
+  if (!range) {
+    console.log('getFuelItemsForTrack: range nullo per track', track);
+    return [];
+  }
+
+  console.log('TRACK RANGE', {
+    trackId: track?.id,
+    titolo: track?.titolo,
+    data: track?.data,
+    ora: track?.ora,
+    start: new Date(range.start).toLocaleString(),
+    end: new Date(range.end).toLocaleString()
+  });
+
+  return arr.filter(r => {
+    const ts = getStartTs(r);
+
+    console.log('REFUEL CHECK', {
+      id: r?.id,
+      data: r?.data,
+      ora: r?.ora,
+      ts: isFinite(ts) ? new Date(ts).toLocaleString() : 'invalid',
+      inside: isFinite(ts) ? (ts >= range.start && ts <= range.end) : false
+    });
+
+    if (!isFinite(ts)) return false;
+    return ts >= range.start && ts <= range.end;
+  });
 }
+  
+//function getFuelItemsForTrack(track) {
+//  const arr = Array.isArray(DATA?.rifornimenti) ? DATA.rifornimenti : [];
+//  const range = getTrackTimeRange(track);
+
+//  if (!range) return [];
+
+  //return arr.filter(r => {
+    //const ts = getStartTs(r);
+  //  if (!isFinite(ts)) return false;
+
+    //return ts >= range.start && ts <= range.end;
+ // });
+//}
 
 function getMaintItemsForTrack(track) {
   const arr = Array.isArray(DATA?.manutenzioni) ? DATA.manutenzioni : [];
