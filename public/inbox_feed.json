@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-04-28T17:51:09.650Z",
+  "exportedAt": "2026-05-17T15:11:00.677Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -862,6 +862,21 @@
         "lon": -73.1670368714093
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1dF-pQfOsrWIs_UDMw83bIbuKWZpHN2Od"
+    },
+    {
+      "ts": 1779030652231,
+      "id": 1779030652231,
+      "paese": "",
+      "km": "",
+      "testo": "Distinguished Gentlemens Ride 2026",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 7.067182185320192,
+        "lon": -73.16877877597715
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1z-XWnA9iEPD0gdIrxfVe-nIbxIw5MnbK"
     }
   ]
 }
