@@ -3952,8 +3952,9 @@ function serveFuelStart() {
   
 function startTrackingNow() {
   const btn = document.getElementById('btn-start-stop');
-if (!tappaAttuale.startTs) tappaAttuale.startTs = Date.now();
-salva('vt_tappaAttuale', tappaAttuale);
+  const isFirstStart = !tappaAttuale.startTs;
+  if (!tappaAttuale.startTs) tappaAttuale.startTs = Date.now();
+  salva('vt_tappaAttuale', tappaAttuale);
   inViaggio = true;
   if (btn) {
     btn.classList.remove('play');
@@ -3965,14 +3966,14 @@ salva('vt_tappaAttuale', tappaAttuale);
 
   if (timerGuida) clearInterval(timerGuida);
   timerGuida = setInterval(() => {
-  tappaAttuale.secondiGuida++;
-  salvaTappaThrottled(10000);   // salva ogni ~10s
-  aggiornaTempoGuidaUI();
-}, 1000);
+    tappaAttuale.secondiGuida++;
+    salvaTappaThrottled(10000);   // salva ogni ~10s
+    aggiornaTempoGuidaUI();
+  }, 1000);
 
   showToast('▶ Tracking avviato');
   aggiornaGuidaButtonsUI();
-  if (modalitaGuida === 'TAPPA') showPreRideBanner();
+  if (modalitaGuida === 'TAPPA' && isFirstStart) showPreRideBanner();
   syncWakeLock();
 }
 
@@ -12010,9 +12011,8 @@ const spesaBenzinaPaeseCalcolata =
       paese: paese,
       slug: slug,
       stats: {
-       km: Number(kmPaeseCalcolati || 0),
+        km: Number(kmPaeseCalcolati || 0),
         benzina: Number(benzinaPaeseCalcolata || 0),
-        
         olioMl: Number(dp.olioMl || 0),
         spesaBenzinaUsd: Number(dp.spesaBenzinaUsd || 0),
         spesaOlioUsd: Number(dp.spesaOlioUsd || 0),
@@ -12080,15 +12080,16 @@ const spesaBenzinaPaeseCalcolata =
 
   return files;
 }
+
 async function esportaDatiPubblici(azione = 'download') {
   try {
     const filesMap = await costruisciArchivioPubblicoSpezzato();
 
     if (azione === 'github') {
-  await pubblicaArchivioSpezzatoSuGitHub(filesMap);
-  markGithubSyncedForPublic();
-  return;
-}
+      await pubblicaArchivioSpezzatoSuGitHub(filesMap);
+      markGithubSyncedForPublic();
+      return;
+    }
 
     // download locale: per semplicità scarico almeno l'index
     // e poi anche gli altri file uno per uno
@@ -12118,7 +12119,6 @@ async function esportaDatiPubblici(azione = 'download') {
     showToast('❌ Errore export pubblico: ' + (e.message || e), 5000);
   }
 }
-
 
 function markGithubSyncedForPublic(){
   const now = Date.now();
@@ -12163,7 +12163,6 @@ function slugPaese(nome) {
 }
 
 function getYearMonthFromEntry(entry) {
-  // prova prima con ts
   if (entry && entry.ts) {
     const d = new Date(Number(entry.ts));
     if (!isNaN(d.getTime())) {
@@ -12173,7 +12172,6 @@ function getYearMonthFromEntry(entry) {
     }
   }
 
-  // fallback da data italiana tipo 25/03/2026
   const ds = String(entry?.data || '').trim();
   const m = ds.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
   if (m) {
@@ -12209,7 +12207,7 @@ function utf8_to_b64(str) {
   return btoa(unescape(encodeURIComponent(str)));
 }
 
-  async function fetchWithTimeout(url, options = {}, timeoutMs = 20000) {
+async function fetchWithTimeout(url, options = {}, timeoutMs = 20000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -12224,7 +12222,43 @@ function utf8_to_b64(str) {
   }
 }
 
-async function pubblicaFileSingoloSuGitHub(path, jsonObject) {
+async function fetchRepoFilesShaMap() {
+  const token = carica('vt_gh_token', '');
+  const repo = carica('vt_gh_repo', '');
+  if (!token || !repo) return null;
+
+  const headers = {
+    'Authorization': `token ${token}`,
+    'Accept': 'application/vnd.github.v3+json'
+  };
+
+  try {
+    const commitsRes = await fetchWithTimeout(`https://api.github.com/repos/${repo}/commits/HEAD`, { headers }, 15000);
+    if (!commitsRes.ok) throw new Error(`Errore HEAD commit: ${commitsRes.status}`);
+    const commitData = await commitsRes.json();
+    const treeSha = commitData.commit?.tree?.sha;
+    if (!treeSha) throw new Error('Tree SHA non trovato nel commit HEAD');
+
+    const treeRes = await fetchWithTimeout(`https://api.github.com/repos/${repo}/git/trees/${treeSha}?recursive=true`, { headers }, 25000);
+    if (!treeRes.ok) throw new Error(`Errore Git Tree: ${treeRes.status}`);
+    const treeData = await treeRes.json();
+
+    const shaMap = {};
+    if (Array.isArray(treeData.tree)) {
+      for (const node of treeData.tree) {
+        if (node.path && node.sha && node.type === 'blob') {
+          shaMap[node.path] = node.sha;
+        }
+      }
+    }
+    return shaMap;
+  } catch (e) {
+    console.warn('Impossibile recuperare mappa SHA da Git Tree, uso fallback GET individuale:', e);
+    return null;
+  }
+}
+
+async function pubblicaFileSingoloSuGitHub(path, jsonObject, cachedSha) {
   const token = carica('vt_gh_token', '');
   const repo = carica('vt_gh_repo', '');
 
@@ -12243,27 +12277,30 @@ async function pubblicaFileSingoloSuGitHub(path, jsonObject) {
 
   let sha = null;
 
-  // ===== GET SHA con retry =====
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    try {
-      const getRes = await fetchWithTimeout(apiUrl, {
-        method: 'GET',
-        headers
-      }, 20000);
+  if (cachedSha !== undefined) {
+    sha = cachedSha;
+  } else {
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const getRes = await fetchWithTimeout(apiUrl, {
+          method: 'GET',
+          headers
+        }, 20000);
 
-      if (getRes.ok) {
-        const getData = await getRes.json();
-        sha = getData.sha || null;
-      } else if (getRes.status !== 404) {
-        const txt = await getRes.text();
-        throw new Error(`GET ${path}: ${getRes.status} ${txt}`);
+        if (getRes.ok) {
+          const getData = await getRes.json();
+          sha = getData.sha || null;
+        } else if (getRes.status !== 404) {
+          const txt = await getRes.text();
+          throw new Error(`GET ${path}: ${getRes.status} ${txt}`);
+        }
+
+        break;
+      } catch (e) {
+        console.warn(`GET GitHub tentativo ${attempt}/3 fallito per ${path}`, e);
+        if (attempt === 3) throw e;
+        await new Promise(r => setTimeout(r, 1200 * attempt));
       }
-
-      break;
-    } catch (e) {
-      console.warn(`GET GitHub tentativo ${attempt}/3 fallito per ${path}`, e);
-      if (attempt === 3) throw e;
-      await new Promise(r => setTimeout(r, 1200 * attempt));
     }
   }
 
@@ -12274,7 +12311,6 @@ async function pubblicaFileSingoloSuGitHub(path, jsonObject) {
 
   if (sha) body.sha = sha;
 
-  // ===== PUT con retry =====
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
       const putRes = await fetchWithTimeout(apiUrl, {
@@ -12294,7 +12330,6 @@ async function pubblicaFileSingoloSuGitHub(path, jsonObject) {
         throw new Error(`${path}: ${errText || 'Errore API GitHub'}`);
       }
 
- 
       return true;
     } catch (e) {
       console.warn(`PUT GitHub tentativo ${attempt}/3 fallito per ${path}`, e);
@@ -12308,19 +12343,22 @@ async function pubblicaArchivioSpezzatoSuGitHub(filesMap) {
   const paths = Object.keys(filesMap || {});
   if (!paths.length) throw new Error('Nessun file da pubblicare');
 
+  const shaMap = await fetchRepoFilesShaMap();
+
   for (let i = 0; i < paths.length; i++) {
     const path = paths[i];
     try {
       showToast(`🐙 Pubblico ${i + 1}/${paths.length}: ${path}`, 1800);
       
-      await pubblicaFileSingoloSuGitHub(path, filesMap[path]);
+      const cachedSha = shaMap ? (shaMap[path] || null) : undefined;
+      await pubblicaFileSingoloSuGitHub(path, filesMap[path], cachedSha);
     } catch (e) {
       console.error('❌ Errore pubblicazione file:', path, e);
       throw new Error(`Errore pubblicazione ${path}: ${e.message || e}`);
     }
   }
 
-  showToast('🚀 Archivio pubblico spezzato pubblicato!', 4000);
+  showToast('🚀 Archivio público spezzato pubblicato!', 4000);
 }
   
 /* ============================================================
@@ -12746,4 +12784,6 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
+
 
