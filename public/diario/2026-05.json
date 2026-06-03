@@ -1,0 +1,27 @@
+{
+  "_version": "public-2.0",
+  "_exportDate": "2026-06-03T23:06:19.966Z",
+  "tipo": "diario_mese",
+  "mese": "2026-05",
+  "count": 1,
+  "entries": [
+    {
+      "id": 1779030652231,
+      "ts": 1779030652231,
+      "data": "17/05/2026",
+      "ora": "10:10",
+      "paese": "Colombia",
+      "km": "1688.4",
+      "testo": "DGR 2026",
+      "tags": [],
+      "geo": {
+        "lat": 7.067182185320192,
+        "lon": -73.16877877597715
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1z-XWnA9iEPD0gdIrxfVe-nIbxIw5MnbK",
+      "foto": null
+    }
+  ]
+}
