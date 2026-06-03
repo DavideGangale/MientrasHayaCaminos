@@ -12173,10 +12173,16 @@ function getYearMonthFromEntry(entry) {
   }
 
   const ds = String(entry?.data || '').trim();
-  const m = ds.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  let m = ds.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
   if (m) {
     const mm = String(m[2]).padStart(2, '0');
     return `${m[3]}-${mm}`;
+  }
+
+  m = ds.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (m) {
+    const mm = String(m[2]).padStart(2, '0');
+    return `${m[1]}-${mm}`;
   }
 
   return 'senza-data';
@@ -12784,6 +12790,7 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
