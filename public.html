@@ -897,11 +897,12 @@
       margin-top: -18px !important;
       color: #fff;
       z-index: 1000 !important;
-      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: filter 0.15s ease, box-shadow 0.15s ease;
     }
 
     .custom-marker:hover {
-      transform: scale(1.1) !important;
+      filter: brightness(1.25) saturate(110%) !important;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.7) !important;
       z-index: 2000 !important;
     }
 
@@ -1318,44 +1319,55 @@
       }
     }
 
-    /* Split Panel Layout for Desktop */
+    /* Floating Glassmorphic Drawer Layout for Desktop */
     @media (min-width: 1024px) {
       body {
-        display: flex !important;
-        flex-direction: row !important;
+        position: relative !important;
         height: 100vh !important;
         width: 100vw !important;
         overflow: hidden !important;
       }
       #appShell {
-        flex: 1 1 auto !important;
+        width: 100% !important;
         height: 100% !important;
         display: flex !important;
         flex-direction: column !important;
-        min-width: 0 !important;
       }
       #diaryPage {
-        position: relative !important;
-        inset: auto !important;
-        z-index: 100 !important;
+        position: absolute !important;
+        left: 20px !important;
+        top: 90px !important;
+        bottom: 20px !important;
+        width: 440px !important;
+        height: calc(100vh - 110px) !important;
+        z-index: 1000 !important;
         display: flex !important;
         flex-direction: column !important;
-        flex: 0 0 450px !important;
-        width: 450px !important;
-        height: 100% !important;
-        order: -1 !important;
-        border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
-        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4) !important;
-        background: var(--bg) !important;
+        border-radius: 24px !important;
+        background: rgba(9, 13, 22, 0.85) !important;
+        backdrop-filter: blur(20px) saturate(140%) !important;
+        -webkit-backdrop-filter: blur(20px) saturate(140%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6) !important;
+        overflow: hidden !important;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        transform: translateX(-480px) !important;
       }
-      #btnDiaryOpen, #btnStats {
-        display: none !important;
+      #diaryPage.open {
+        transform: translateX(0) !important;
       }
       #diaryTopBar {
         padding: 16px !important;
+        border-radius: 24px 24px 0 0 !important;
+        background: rgba(13, 21, 39, 0.4) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
       }
       #diaryList {
         padding: 16px 16px 100px !important;
+      }
+      #btnDiaryOpen {
+        display: inline-block !important; /* Keep it visible to open/close */
       }
     }
   </style>
@@ -4451,9 +4463,9 @@ async function loadData() {
       }
     }, 120);
 
-    // Se siamo su desktop, popoliamo il feed del diario immediatamente all'avvio
+    // Se siamo su desktop, apriamo il diario all'avvio
     if (window.innerWidth >= 1024) {
-      renderDiaryList();
+      showDiaryOverlay(true);
     }
 
     // Se l'URL chiede il diario, aprilo dopo il caricamento (utile su mobile)
@@ -4612,5 +4624,6 @@ window.onload = function () {
 </script>
 </body>
 </html>
+
 
 
