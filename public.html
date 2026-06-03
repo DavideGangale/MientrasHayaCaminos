@@ -1317,6 +1317,47 @@
         grid-template-columns: 1fr;
       }
     }
+
+    /* Split Panel Layout for Desktop */
+    @media (min-width: 1024px) {
+      body {
+        display: flex !important;
+        flex-direction: row !important;
+        height: 100vh !important;
+        width: 100vw !important;
+        overflow: hidden !important;
+      }
+      #appShell {
+        flex: 1 1 auto !important;
+        height: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        min-width: 0 !important;
+      }
+      #diaryPage {
+        position: relative !important;
+        inset: auto !important;
+        z-index: 100 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 0 0 450px !important;
+        width: 450px !important;
+        height: 100% !important;
+        order: -1 !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4) !important;
+        background: var(--bg) !important;
+      }
+      #btnDiaryOpen, #btnStats {
+        display: none !important;
+      }
+      #diaryTopBar {
+        padding: 16px !important;
+      }
+      #diaryList {
+        padding: 16px 16px 100px !important;
+      }
+    }
   </style>
 </head>
 
@@ -4349,22 +4390,73 @@ async function loadData() {
 
     DATA = unisciDatasetGlobale();
 
+    // Imposta il paese attuale come filtro attivo all'avvio
+    const paeseAttuale = INDEX_DATA?.paeseAttuale || '';
+    if (paeseAttuale) {
+      currentCountry = paeseAttuale;
+    }
+
     popolaPaesi();
     popolaMesi();
     applyLang();
     updateStatsMini();
     syncFilterButtonsUI();
-              renderMap(false);
+    
+    // Disegna la mappa inizialmente
+    renderMap(true); // skip auto fit per impostare il fit custom qui sotto
+
+    // Centra sull'ultima tappa/giro registrato
+    const ultimeT = INDEX_DATA?.ultimeTappe || [];
+    let zoomedToLatest = false;
+    if (ultimeT.length > 0) {
+      const ultimaTappaPaese = ultimeT.find(x => !currentCountry || x.paese === currentCountry) || ultimeT[0];
+      if (ultimaTappaPaese && Array.isArray(ultimaTappaPaese.traccia)) {
+        const latlngs = ultimaTappaPaese.traccia.map(p =>
+          Array.isArray(p) ? [p[0], p[1]] : [p.lat, p.lon || p.lng]
+        );
+        if (latlngs.length >= 2) {
+          const latestBounds = L.latLngBounds(latlngs);
+          if (latestBounds.isValid()) {
+            map.fitBounds(latestBounds.pad(0.15));
+            zoomedToLatest = true;
+          }
+        }
+      }
+    }
+
+    // Se non è stato possibile zoomare sull'ultima tappa, usa l'auto fit generico
+    if (!zoomedToLatest && map) {
+      renderMap(false);
+    }
 
     // Forza il corretto layout Leaflet dopo il primo render
     setTimeout(() => {
       if (map) {
         map.invalidateSize();
-        renderMap(false);
+        // Se siamo su desktop, rinfreschiamo lo zoom sull'ultima tappa
+        if (window.innerWidth >= 1024 && ultimeT.length > 0) {
+          const ultimaTappaPaese = ultimeT.find(x => !currentCountry || x.paese === currentCountry) || ultimeT[0];
+          if (ultimaTappaPaese && Array.isArray(ultimaTappaPaese.traccia)) {
+            const latlngs = ultimaTappaPaese.traccia.map(p =>
+              Array.isArray(p) ? [p[0], p[1]] : [p.lat, p.lon || p.lng]
+            );
+            if (latlngs.length >= 2) {
+              const latestBounds = L.latLngBounds(latlngs);
+              if (latestBounds.isValid()) {
+                map.fitBounds(latestBounds.pad(0.15));
+              }
+            }
+          }
+        }
       }
     }, 120);
 
-    // Se l'URL chiede il diario, aprilo dopo il caricamento
+    // Se siamo su desktop, popoliamo il feed del diario immediatamente all'avvio
+    if (window.innerWidth >= 1024) {
+      renderDiaryList();
+    }
+
+    // Se l'URL chiede il diario, aprilo dopo il caricamento (utile su mobile)
     const view = new URLSearchParams(window.location.search).get('view');
     if (view === 'diary') {
       setTimeout(() => {
@@ -4520,4 +4612,5 @@ window.onload = function () {
 </script>
 </body>
 </html>
+
 
