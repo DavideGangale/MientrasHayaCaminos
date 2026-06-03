@@ -3330,9 +3330,11 @@ if (oldTan != null && localStorage.getItem('vt_tanica1CapLitri') == null) {
   salva('vt_tanica1CapLitri', oldTan);
   salva('vt_tanica2CapLitri', '0');
 }
-const oldScorta = localStorage.getItem('vt_scortaLitri');
-if (oldScorta != null && localStorage.getItem('vt_scorta1Litri') == null) {
-  salva('vt_scorta1Litri', oldScorta);
+const oldScortaVal = parseFloat(localStorage.getItem('vt_scortaLitri')) || 0;
+const sc1Val = parseFloat(localStorage.getItem('vt_scorta1Litri')) || 0;
+const sc2Val = parseFloat(localStorage.getItem('vt_scorta2Litri')) || 0;
+if (oldScortaVal > 0 && sc1Val === 0 && sc2Val === 0) {
+  salva('vt_scorta1Litri', String(oldScortaVal.toFixed(3)));
   salva('vt_scorta2Litri', '0.0');
 }
 
@@ -12850,9 +12852,3 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
-
-
-
-
-
-
