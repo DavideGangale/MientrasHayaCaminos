@@ -5611,16 +5611,17 @@ function calcKmDaPercorsiSalvati(paeseScope = null) {
   const unitaLabel = (unitaAttuale === 'L') ? 'L' : 'gal';
   setText('ui-unita-volume', unitaLabel);
 
+  const decScorta = (unitaAttuale === 'G') ? 2 : 1;
   const scortaVisUI = (unitaAttuale === 'L') ? scortaL : (scortaL / FAT_GAL);
-  setText('ui-scorta-rapida', scortaVisUI.toFixed(1));
-  setText('scorta-ui', scortaVisUI.toFixed(1));
+  setText('ui-scorta-rapida', scortaVisUI.toFixed(decScorta));
+  setText('scorta-ui', scortaVisUI.toFixed(decScorta));
 
   const scorta1 = parseFloat(carica('vt_scorta1Litri','0')) || 0;
   const scorta2 = parseFloat(carica('vt_scorta2Litri','0')) || 0;
   const scorta1Vis = (unitaAttuale === 'L') ? scorta1 : (scorta1 / FAT_GAL);
   const scorta2Vis = (unitaAttuale === 'L') ? scorta2 : (scorta2 / FAT_GAL);
-  setText('scorta-sx-ui', scorta1Vis.toFixed(1));
-  setText('scorta-dx-ui', scorta2Vis.toFixed(1));
+  setText('scorta-sx-ui', scorta1Vis.toFixed(decScorta));
+  setText('scorta-dx-ui', scorta2Vis.toFixed(decScorta));
 
   // =========================
   // STATS (Globali / Paese)
@@ -12852,3 +12853,4 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
