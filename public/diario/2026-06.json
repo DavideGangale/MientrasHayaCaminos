@@ -1,0 +1,78 @@
+{
+  "_version": "public-2.0",
+  "_exportDate": "2026-06-03T23:06:19.966Z",
+  "tipo": "diario_mese",
+  "mese": "2026-06",
+  "count": 4,
+  "entries": [
+    {
+      "id": 1780429538217,
+      "ts": 1780429538217,
+      "data": "02/06/2026",
+      "ora": "14:45",
+      "paese": "Colombia",
+      "km": "2138.7",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 4.862166470524427,
+        "lon": -74.4293624417906
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1Qf6hBlL7RZWuNdyqfM1f_4kFqa7tf9FJ",
+      "foto": null
+    },
+    {
+      "id": 1780418387966,
+      "ts": 1780418387966,
+      "data": "02/06/2026",
+      "ora": "11:39",
+      "paese": "Colombia",
+      "km": "2090.9",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 5.367044821244215,
+        "lon": -74.57696997763111
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1W3RLCa0ol3a1Pjpe8jJqmqxMFTbLSK_v",
+      "foto": null
+    },
+    {
+      "id": 1780399203649,
+      "ts": 1780399203649,
+      "data": "02/06/2026",
+      "ora": "06:20",
+      "paese": "Colombia",
+      "km": "1829.8",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 7.1242223059816725,
+        "lon": -73.584980144975
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1xHVIkvoANZARwMwSAyCF-0UKd0c19mqP",
+      "foto": null
+    },
+    {
+      "id": 1780398217916,
+      "ts": 1780398217916,
+      "data": "02/06/2026",
+      "ora": "06:03",
+      "paese": "Colombia",
+      "km": "1829.8",
+      "testo": "",
+      "tags": [],
+      "geo": null,
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1bVKv8Tx7gyT3JxUVJ2P0e-_Q7TJbJ8Jq",
+      "foto": null
+    }
+  ]
+}
