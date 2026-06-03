@@ -1546,7 +1546,8 @@ overflow: auto;
 
       <div class="toggle-container">
         <button id="btn-dest-vespa" class="toggle-btn active dest-v" onclick="selezionaDest('V')">🏍️ IN VESPA</button>
-        <button id="btn-dest-tanica" class="toggle-btn dest-t" onclick="selezionaDest('T')">🛢️ NELLE TANICHE</button>
+        <button id="btn-dest-tanica-sx" class="toggle-btn dest-t" onclick="selezionaDest('TSX')">🛢️ TANICA SX</button>
+        <button id="btn-dest-tanica-dx" class="toggle-btn dest-t" onclick="selezionaDest('TDX')">🛢️ TANICA DX</button>
       </div>
 
       <label class="inp-label">Quantità acquistata</label>
@@ -1595,9 +1596,19 @@ overflow: auto;
     <!-- USA TANICHE -->
     <div class="dash-card" style="border:2px solid var(--giallo);">
       <h2 style="margin-top:0; color:var(--giallo);">🛢️ Usa Scorta Taniche</h2>
-      <div style="font-size:13px; color:#aaa; margin-bottom:10px;">
-        Disponibile: <strong style="color:white; font-size:18px;" id="scorta-ui">0.0</strong>
+      <div style="font-size:13px; color:#aaa; margin-bottom:12px;">
+        Totale Disponibile: <strong style="color:white; font-size:18px;" id="scorta-ui">0.0</strong>
         <span class="txt-unita">L</span>
+      </div>
+      <div style="display:flex; justify-content:space-around; margin-bottom:15px; font-size:13px; color:#aaa; background:#1b1d28; padding:8px; border-radius:8px;">
+        <div>👈 Tanica SX: <strong style="color:white; font-size:16px;" id="scorta-sx-ui">0.0</strong> <span class="txt-unita">L</span></div>
+        <div>👉 Tanica DX: <strong style="color:white; font-size:16px;" id="scorta-dx-ui">0.0</strong> <span class="txt-unita">L</span></div>
+      </div>
+
+      <div style="font-size:13px; color:#aaa; margin-bottom:5px;">Sorgente travaso:</div>
+      <div class="toggle-container" style="margin-bottom:15px;">
+        <button id="btn-src-sx" class="toggle-btn active dest-t" onclick="selezionaSorgente('SX')">👈 TANICA SX</button>
+        <button id="btn-src-dx" class="toggle-btn dest-t" onclick="selezionaSorgente('DX')">👉 TANICA DX</button>
       </div>
 
       <label class="inp-label">Quantità versata in Vespa</label>
@@ -1703,10 +1714,10 @@ overflow: auto;
     <label class="inp-label">Capacità serbatoio (L)</label>
     <input type="number" id="set-serbatoio-L" step="0.01" min="1" placeholder="Es. 7.57">
 
-    <label class="inp-label">Capacità Tanica 1 (L)</label>
+    <label class="inp-label">Capacità Tanica SX (L)</label>
     <input type="number" id="set-tanica1-L" step="0.01" min="0" placeholder="Es. 5.68">
 
-    <label class="inp-label">Capacità Tanica 2 (L)</label>
+    <label class="inp-label">Capacità Tanica DX (L)</label>
     <input type="number" id="set-tanica2-L" step="0.01" min="0" placeholder="Es. 5.68">
 
     <div style="font-size:12px;color:#777;text-align:left;margin-top:6px;">
@@ -2814,6 +2825,7 @@ const FAT_GAL = 3.78541;
 let dest = 'V';
 let mixC = 2.0;
 let mixT = 2.0;
+let sorgenteTravaso = 'SX';
 
 let pendingFuelTappaId = null;
 
@@ -3193,6 +3205,8 @@ initDB('vt_driveAutoSync', '1');               // 1 = auto sync quando torna onl
 initDB('vt_inboxLastTs', '0');        // ultimo timestamp importato
   
   initDB('vt_scortaLitri', '0.0');
+  initDB('vt_scorta1Litri', '0.0');
+  initDB('vt_scorta2Litri', '0.0');
   initDB('vt_olioTotaleMl', '0');
   initDB('vt_benzinaUsata', '0.0');
 
@@ -3315,6 +3329,11 @@ if (oldTan != null && localStorage.getItem('vt_tanica1CapLitri') == null) {
   // metto tutto nella tanica1 e 0 nella tanica2
   salva('vt_tanica1CapLitri', oldTan);
   salva('vt_tanica2CapLitri', '0');
+}
+const oldScorta = localStorage.getItem('vt_scortaLitri');
+if (oldScorta != null && localStorage.getItem('vt_scorta1Litri') == null) {
+  salva('vt_scorta1Litri', oldScorta);
+  salva('vt_scorta2Litri', '0.0');
 }
 
 
@@ -5594,6 +5613,13 @@ function calcKmDaPercorsiSalvati(paeseScope = null) {
   setText('ui-scorta-rapida', scortaVisUI.toFixed(1));
   setText('scorta-ui', scortaVisUI.toFixed(1));
 
+  const scorta1 = parseFloat(carica('vt_scorta1Litri','0')) || 0;
+  const scorta2 = parseFloat(carica('vt_scorta2Litri','0')) || 0;
+  const scorta1Vis = (unitaAttuale === 'L') ? scorta1 : (scorta1 / FAT_GAL);
+  const scorta2Vis = (unitaAttuale === 'L') ? scorta2 : (scorta2 / FAT_GAL);
+  setText('scorta-sx-ui', scorta1Vis.toFixed(1));
+  setText('scorta-dx-ui', scorta2Vis.toFixed(1));
+
   // =========================
   // STATS (Globali / Paese)
   // =========================
@@ -5696,12 +5722,22 @@ function cambiaPaese() {
 function selezionaDest(d) {
   dest = d;
   const bv = document.getElementById('btn-dest-vespa');
-  const bt = document.getElementById('btn-dest-tanica');
+  const btsx = document.getElementById('btn-dest-tanica-sx');
+  const btdx = document.getElementById('btn-dest-tanica-dx');
   const sec = document.getElementById('sezioneMiscelaCompra');
 
   if (bv) bv.classList.toggle('active', d === 'V');
-  if (bt) bt.classList.toggle('active', d === 'T');
+  if (btsx) btsx.classList.toggle('active', d === 'TSX');
+  if (btdx) btdx.classList.toggle('active', d === 'TDX');
   if (sec) sec.style.display = (d === 'V') ? 'block' : 'none';
+}
+
+function selezionaSorgente(s) {
+  sorgenteTravaso = s;
+  const bsx = document.getElementById('btn-src-sx');
+  const bdx = document.getElementById('btn-src-dx');
+  if (bsx) bsx.classList.toggle('active', s === 'SX');
+  if (bdx) bdx.classList.toggle('active', s === 'DX');
 }
 
 /* ============================================================
@@ -5863,23 +5899,45 @@ datiPaesi[paese].olioMl = (Number(datiPaesi[paese].olioMl || 0) + Number(olioMl 
         `🧪 <b>Olio 2T da aggiungere:</b> ` + `<span style="font-size:20px; color:var(--giallo); font-weight:bold;">${olioMl} ml</span><br>` +
         `⛽ Benzina netta: ${benzPura.toFixed(2)} L<br>` + (totaleBenzLocal > 0 ? `💰 Totale benzina: <b>${totaleBenzLocal.toFixed(2)} ${cur}</b> ` + `(≈ <b> $${totaleBenzUsd.toFixed(2)}</b>)<br>`: '') + `🧪 Valore olio usato (da stock): <b> $${costoOlioUsatoUsd.toFixed(2)}</b>`;
 
-    // ===================== DESTINAZIONE: TANICHE =====================
-    } else {
-      const scortaAttualeL = parseFloat(carica('vt_scortaLitri', '0')) || 0;
-const nuovaScorta = scortaAttualeL + qtaLitri;
-
-const capTan = getTanicheCapLitri();
-if (capTan > 0 && nuovaScorta > capTan + 0.0001) {
-  showToast(`⚠️ Operazione bloccata: scorta ${nuovaScorta.toFixed(2)} L supera capacità taniche (${capTan.toFixed(2)} L)`, 4500);
-  return; // ✅ NON salva, NON logga
-}
-
-// salva nuova scorta (solo se ok)
-salva('vt_scortaLitri', nuovaScorta);
+    // ===================== DESTINAZIONE: TANICA SX =====================
+    } else if (dest === 'TSX') {
+      const scortaAttualeL = parseFloat(carica('vt_scorta1Litri', '0')) || 0;
+      const nuovaScorta = scortaAttualeL + qtaLitri;
+      const capTan = parseFloat(carica('vt_tanica1CapLitri', '0')) || 0;
+      if (capTan > 0 && nuovaScorta > capTan + 0.0001) {
+        showToast(`⚠️ Operazione bloccata: scorta Tanica SX ${nuovaScorta.toFixed(2)} L supera capacità (${capTan.toFixed(2)} L)`, 4500);
+        return;
+      }
+      salva('vt_scorta1Litri', nuovaScorta.toFixed(3));
+      
+      const scorta2 = parseFloat(carica('vt_scorta2Litri', '0')) || 0;
+      salva('vt_scortaLitri', (nuovaScorta + scorta2).toFixed(3));
 
       risultatoHTML =
-        `✅ <b>Aggiunto nelle taniche:</b> ${qtaLitri.toFixed(2)} L<br>` +
-        `🛢️ <b>Scorta totale:</b> ${nuovaScorta.toFixed(2)} L<br>` +
+        `✅ <b>Aggiunto in Tanica SX:</b> ${qtaLitri.toFixed(2)} L<br>` +
+        `🛢️ <b>Scorta Tanica SX:</b> ${nuovaScorta.toFixed(2)} / ${capTan.toFixed(2)} L<br>` +
+        (totaleBenzLocal > 0
+          ? `💰 Totale benzina: <b>${totaleBenzLocal.toFixed(2)} ${cur}</b> ` +
+            `(≈ <b>$${totaleBenzUsd.toFixed(2)}</b>)`
+          : '');
+
+    // ===================== DESTINAZIONE: TANICA DX =====================
+    } else if (dest === 'TDX') {
+      const scortaAttualeL = parseFloat(carica('vt_scorta2Litri', '0')) || 0;
+      const nuovaScorta = scortaAttualeL + qtaLitri;
+      const capTan = parseFloat(carica('vt_tanica2CapLitri', '0')) || 0;
+      if (capTan > 0 && nuovaScorta > capTan + 0.0001) {
+        showToast(`⚠️ Operazione bloccata: scorta Tanica DX ${nuovaScorta.toFixed(2)} L supera capacità (${capTan.toFixed(2)} L)`, 4500);
+        return;
+      }
+      salva('vt_scorta2Litri', nuovaScorta.toFixed(3));
+      
+      const scorta1 = parseFloat(carica('vt_scorta1Litri', '0')) || 0;
+      salva('vt_scortaLitri', (scorta1 + nuovaScorta).toFixed(3));
+
+      risultatoHTML =
+        `✅ <b>Aggiunto in Tanica DX:</b> ${qtaLitri.toFixed(2)} L<br>` +
+        `🛢️ <b>Scorta Tanica DX:</b> ${nuovaScorta.toFixed(2)} / ${capTan.toFixed(2)} L<br>` +
         (totaleBenzLocal > 0
           ? `💰 Totale benzina: <b>${totaleBenzLocal.toFixed(2)} ${cur}</b> ` +
             `(≈ <b>$${totaleBenzUsd.toFixed(2)}</b>)`
@@ -5908,7 +5966,7 @@ salva('vt_scortaLitri', nuovaScorta);
       ora: now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }),
       paese,
       qta: qtaLitri.toFixed(2),
-      dest: (dest === 'V') ? 'Vespa' : 'Tanica',
+      dest: (dest === 'V') ? 'Vespa' : (dest === 'TSX' ? 'Tanica SX' : 'Tanica DX'),
       mix: (dest === 'V') ? (mixC + '%') : '--',
 
       isPublic: DEFAULT_PUBLIC,
@@ -5969,10 +6027,13 @@ function registraTravaso() {
   if (!qtaInput) { showToast('⚠️ Inserisci una quantità valida'); return; }
 
   const qtaLitri = (unitaAttuale === 'G') ? qtaInput * FAT_GAL : qtaInput;
-  const scorta = parseFloat(carica('vt_scortaLitri','0')) || 0;
+  
+  const keyScorta = (sorgenteTravaso === 'SX') ? 'vt_scorta1Litri' : 'vt_scorta2Litri';
+  const nomeTanica = (sorgenteTravaso === 'SX') ? 'Tanica SX' : 'Tanica DX';
+  const scorta = parseFloat(carica(keyScorta, '0')) || 0;
 
   if (qtaLitri > scorta + 0.0001) {
-    showToast('⚠️ Scorta insufficiente! Disponibili: ' + scorta.toFixed(2) + ' L');
+    showToast(`⚠️ Scorta insufficiente in ${nomeTanica}! Disponibili: ` + scorta.toFixed(2) + ' L');
     return;
   }
 
@@ -5990,41 +6051,36 @@ function registraTravaso() {
 
   setOlioStock(stOlio.ml - olioMl, stOlio.usd - costoOlioUsato);
 
-  const nuovaScorta = Math.max(0, scorta - qtaLitri);
-  salva('vt_scortaLitri', nuovaScorta);
+  // aggiorna scorta di questa tanica
+  const nuovaScortaTanica = Math.max(0, scorta - qtaLitri);
+  salva(keyScorta, nuovaScortaTanica.toFixed(3));
 
-  // ✅ AGGIORNA STIMA SERBATOIO (hai versato dentro)
+  // aggiorna scorta totale
+  const scortaSX = parseFloat(carica('vt_scorta1Litri', '0')) || 0;
+  const scortaDX = parseFloat(carica('vt_scorta2Litri', '0')) || 0;
+  salva('vt_scortaLitri', (scortaSX + scortaDX).toFixed(3));
+
+  // aggiorna stima serbatoio
   const serbPrima = parseFloat(carica('vt_serbatoioLitri','0')) || 0;
-
-  
-  //const serbDopo  = Math.min(SERBATOIO_LITRI, serbPrima + qtaLitri);
   const cap = getSerbatoioCapLitri();
   const serbDopo = Math.min(cap, serbPrima + qtaLitri);
-
   salva('vt_serbatoioLitri', serbDopo.toFixed(3));
-  
+
   tappaAttuale.fuelAddedLitri = (tappaAttuale.fuelAddedLitri || 0) + qtaLitri;
   salva('vt_tappaAttuale', tappaAttuale);
 
-// NON aggiorniamo vt_benzinaUsata qui:
-// il travaso mette benzina nel serbatoio, ma non significa che sia già stata consumata.
-//salva('vt_benzinaUsata', (parseFloat(carica('vt_benzinaUsata','0')) || 0) + benzPura);
-  
   salva('vt_olioTotaleMl', (parseFloat(carica('vt_olioTotaleMl','0')) || 0) + olioMl);
 
-const paese = carica('vt_paeseAttuale','Colombia');
-const datiPaesi = caricaJSON('vt_datiPaesi', {});
-if (!datiPaesi[paese]) datiPaesi[paese] = { km:0, benzina:0, spesaBenzinaUsd:0, spesaOlioUsd:0, spesaRicambiUsd:0, spesaManodoperaUsd:0 };
+  const paese = carica('vt_paeseAttuale','Colombia');
+  const datiPaesi = caricaJSON('vt_datiPaesi', {});
+  if (!datiPaesi[paese]) datiPaesi[paese] = { km:0, benzina:0, spesaBenzinaUsd:0, spesaOlioUsd:0, spesaRicambiUsd:0, spesaManodoperaUsd:0 };
 
-// spesa olio (USD): qui il costo lo hai in "costoOlioUsato"
-salva('vt_spesaOlioUsd', (parseFloat(carica('vt_spesaOlioUsd', '0')) || 0) + costoOlioUsato);
-datiPaesi[paese].spesaOlioUsd = (datiPaesi[paese].spesaOlioUsd || 0) + costoOlioUsato;
-  // ✅ Olio usato per paese (ml)
-datiPaesi[paese].olioMl = (Number(datiPaesi[paese].olioMl || 0) + Number(olioMl || 0));
-salva('vt_datiPaesi', datiPaesi);
+  salva('vt_spesaOlioUsd', (parseFloat(carica('vt_spesaOlioUsd', '0')) || 0) + costoOlioUsato);
+  datiPaesi[paese].spesaOlioUsd = (datiPaesi[paese].spesaOlioUsd || 0) + costoOlioUsato;
+  datiPaesi[paese].olioMl = (Number(datiPaesi[paese].olioMl || 0) + Number(olioMl || 0));
+  salva('vt_datiPaesi', datiPaesi);
 
   datiPaesi[paese].benzina = (datiPaesi[paese].benzina || 0) + benzPura;
-  //datiPaesi[paese].spesaOlio = (datiPaesi[paese].spesaOlio || 0) + costoOlioUsato;
   salva('vt_datiPaesi', datiPaesi);
 
   tappaAttuale.benzinaUsata = (tappaAttuale.benzinaUsata || 0) + benzPura;
@@ -6039,7 +6095,7 @@ salva('vt_datiPaesi', datiPaesi);
     ora: now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),
     paese,
     qta: qtaLitri.toFixed(2),
-    dest: 'Tanica→Vespa',
+    dest: `${nomeTanica}→Vespa`,
     mix: mixT + '%',
     prezzoUnit: null,
     costoBenz: null,
@@ -6049,23 +6105,26 @@ salva('vt_datiPaesi', datiPaesi);
   });
   salva('vt_logCarburanti', logCarb);
 
-  const res = document.getElementById('risultatoTravaso');
-  if (res) {
-    res.innerHTML = `
-      ✅ <b>Versati:</b> ${qtaLitri.toFixed(2)} L<br>
-      🧪 <b>Olio 2T da aggiungere:</b>
-        <span style="font-size:20px; color:var(--giallo); font-weight:bold;">${olioMl} ml</span><br>
-              
-      💵 <b>Valore olio usato:</b> <b>$${costoOlioUsato.toFixed(2)}</b><br>
-    
-      🛢️ <b>Scorta rimasta:</b> ${nuovaScorta.toFixed(2)} L
-    `;
-    res.style.display = 'block';
-  }
-
   document.getElementById('inputTravaso').value = '';
   aggiornaUI();
   showToast('🛢️ Travaso registrato!');
+
+  const res = document.getElementById('risultatoTravaso');
+  if (res) {
+    const unitaLabel = (unitaAttuale === 'L') ? 'L' : 'gal';
+    const qtaTravasoVis = (unitaAttuale === 'L') ? qtaLitri : (qtaLitri / FAT_GAL);
+    const livelloTanicaVis = (unitaAttuale === 'L') ? nuovaScortaTanica : (nuovaScortaTanica / FAT_GAL);
+    res.innerHTML = `
+      ✅ <b>Travasato in Vespa:</b> ${qtaTravasoVis.toFixed(2)} ${unitaLabel} da ${nomeTanica}<br>
+      🧪 <b>Olio 2T da aggiungere:</b>
+        <span style="font-size:20px; color:var(--giallo); font-weight:bold;">${olioMl} ml</span> (mix ${mixT}%)<br>
+              
+      💵 <b>Valore olio usato:</b> <b>$${costoOlioUsato.toFixed(2)}</b><br>
+    
+      🛢️ <b>Livello attuale ${nomeTanica}:</b> ${livelloTanicaVis.toFixed(2)} ${unitaLabel}
+    `;
+    res.style.display = 'block';
+  }
 }
 
 /* ============================================================
@@ -12791,6 +12850,7 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
