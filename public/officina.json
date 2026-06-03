@@ -1,12 +1,40 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-04-29T11:44:42.550Z",
+  "_exportDate": "2026-06-03T23:06:19.966Z",
   "tipo": "officina",
   "stats": {
     "spesaRicambiUsd": 52.05774191693799,
-    "spesaManodoperaUsd": 4.045121083066478
+    "spesaManodoperaUsd": 8.090242166132956
   },
   "manutenzioni": [
+    {
+      "id": 1777548667418,
+      "data": "30/04/2026",
+      "ora": "06:31",
+      "paese": "Colombia",
+      "km": "1505.4",
+      "nome": "Montaggio Cambio Olio 300ml",
+      "desc": "",
+      "costoLocal": 15000,
+      "valuta": "COP",
+      "costoUsd": 4.045121083066478,
+      "fotoUrl": null,
+      "fotoUrl2": null,
+      "fotoUrlList": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "ricambiUsati": [
+        {
+          "invId": "inv11",
+          "qta": 1,
+          "nome": "Cambio Olio 300ml"
+        }
+      ],
+      "geo": {
+        "lat": 7.0632752,
+        "lon": -73.1670407
+      }
+    },
     {
       "id": 1777306225868,
       "data": "27/04/2026",
@@ -250,11 +278,11 @@
     {
       "id": "inv11",
       "nome": "Cambio Olio 300ml",
-      "qta": 3,
+      "qta": 2,
       "wear": "interval",
       "intervalKm": 2000,
-      "usedKm": 1200,
-      "lastKm": 7862.1,
+      "usedKm": 0,
+      "lastKm": 1505.41,
       "costoLocal": 39,
       "costoUsd": 0.010517314815972843,
       "valuta": "COP",
