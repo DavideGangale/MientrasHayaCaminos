@@ -12117,6 +12117,7 @@ async function esportaDatiPubblici(azione = 'download') {
   } catch (e) {
     console.warn('esportaDatiPubblici error:', e);
     showToast('❌ Errore export pubblico: ' + (e.message || e), 5000);
+    throw e;
   }
 }
 
@@ -12790,6 +12791,7 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
