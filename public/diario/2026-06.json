@@ -1,10 +1,46 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-06-03T23:06:19.966Z",
+  "_exportDate": "2026-06-03T23:39:46.123Z",
   "tipo": "diario_mese",
   "mese": "2026-06",
-  "count": 4,
+  "count": 6,
   "entries": [
+    {
+      "id": 1780529614448,
+      "ts": 1780529614448,
+      "data": "03/06/2026",
+      "ora": "18:33",
+      "paese": "Colombia",
+      "km": "47.79",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 4.8668433,
+        "lon": -74.4317433
+      },
+      "videoUrl": "https://youtube.com/shorts/JiQB2QKwg6w?si=DYNsuIhhVVOT_BeN",
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
+    {
+      "id": 1780529557210,
+      "ts": 1780529557210,
+      "data": "03/06/2026",
+      "ora": "18:32",
+      "paese": "Colombia",
+      "km": "402.48",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 6.88515,
+        "lon": -73.7520967
+      },
+      "videoUrl": "https://youtube.com/shorts/pWE-Vmqphlk?si=LEmCteU3AOz1GAB5",
+      "videoPlanned": false,
+      "fotoUrl": null,
+      "foto": null
+    },
     {
       "id": 1780429538217,
       "ts": 1780429538217,
