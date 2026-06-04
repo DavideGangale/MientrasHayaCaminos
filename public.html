@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="it">
 <head>
   <link rel="icon" href="data:,">
@@ -218,6 +218,18 @@
     .btn-primary:hover {
       box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.35);
       filter: brightness(1.1);
+    }
+
+    .btn-brand {
+      background: linear-gradient(135deg, var(--brand) 0%, #1d4ed8 100%) !important;
+      color: #fff !important;
+      border: none !important;
+    }
+
+    .btn-brand:hover {
+      box-shadow: 0 6px 16px rgba(59, 130, 246, 0.45) !important;
+      filter: brightness(1.15) !important;
+      transform: translateY(-2px) !important;
     }
 
     .btn-secondary {
@@ -1371,6 +1383,7 @@
       #diaryTopBar .lang-switch,
       #diaryTopBar .socials,
       #btnDiaryStats,
+      #btnDiaryShowcaseOpen,
       #diaryBottomActions {
         display: none !important;
       }
@@ -1425,8 +1438,9 @@
               </svg>
             </a>
           </div>
-          <button id="btnDiaryOpen" class="btn btn-secondary" onclick="showDiaryOverlay()">📖 Apri il diario</button>
+          <button id="btnShowcaseOpen" class="btn btn-secondary" onclick="openShowcaseModal()">📱 Scopri l'App</button>
           <button id="btnStats" class="btn btn-secondary" onclick="apriStats()">📊 Statistiche</button>
+          <button id="btnDiaryOpen" class="btn btn-brand" onclick="showDiaryOverlay()">📖 Apri il diario</button>
         
         </div>
       </div>
@@ -1478,8 +1492,9 @@
         </a>
       </div>
 
+      <button id="btnDiaryShowcaseOpen" class="btn btn-secondary" onclick="openShowcaseModal()">📱 Scopri l'App</button>
       <button id="btnDiaryStats" class="btn btn-secondary" onclick="apriStats()">📊 Statistiche</button>
-      <button id="btnDiaryBackToMap" class="btn btn-secondary" onclick="showFullMapFromDiary()">🗺️ Vedi mappa completa</button>
+      <button id="btnDiaryBackToMap" class="btn btn-brand" onclick="showFullMapFromDiary()">🗺️ Vedi mappa completa</button>
     </div>
   </div>
 </div>
@@ -1623,6 +1638,24 @@
       </p>
 
       <div id="thanksModalList" class="thanks-list"></div>
+    </div>
+  </div>
+
+  <!-- Modal Vetrina App (Showcase) -->
+  <div id="showcaseModal" class="modal">
+    <div class="modal-card" style="max-width: 540px;">
+      <div class="modal-close">
+        <button onclick="closeShowcaseModal()">×</button>
+      </div>
+
+      <h2 id="showcaseModalTitle" class="modal-title">📱 App VespaTrek</h2>
+      <p id="showcaseModalIntro" class="modal-intro" style="color: var(--brand); font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px;"></p>
+
+      <div style="text-align: center; margin-bottom: 20px;">
+        <img src="public/app_showcase.png" alt="VespaTrek App Showcase" style="width: 100%; max-width: 280px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+      </div>
+
+      <div id="showcaseModalList" class="showcase-list" style="text-align: left; max-height: 250px; overflow-y: auto; padding-right: 8px; margin-bottom: 10px;"></div>
     </div>
   </div>
 
@@ -1786,26 +1819,37 @@ const I18N = {
     refuelsInTrack: 'Rifornimenti nella tappa',
     oilUsed: 'Olio 2T usato',
     oilCost: 'Costo olio 2T',
-    diaryBtn: '📖 Diario',
+    diaryBtn: '📖 Torna al diario',
     diaryTitle: '📖 Diario di viaggio',
     diarySubtitle: 'Finchè ci sono Strade...',
     backToMap: '← Mappa',
-fullMapBtn: '🗺️ Vedi mappa completa',
+    fullMapBtn: '🗺️ Torna alla mappa',
     viewOnMap: '📍 Vedi sulla mappa',
-viewTrackOnMap: '🗺️ Vedi tappa sulla mappa',
+    viewTrackOnMap: '🗺️ Vedi tappa sulla mappa',
     diary: 'Diario',
     partsUsed: 'Ricambi usati',
-
+    showcaseBtn: '📱 Scopri l\'App',
+    showcaseTitle: '📱 App VespaTrek',
+    showcaseStatus: '🚀 DISPONIBILE A BREVE (Coming Soon)',
+    showcaseFeat1Title: '🎛️ Dashboard di Viaggio',
+    showcaseFeat1Desc: 'Monitoraggio live di velocità, chilometri percorsi, altitudine e tempo di guida. Tutto in una sola schermata pulita.',
+    showcaseFeat2Title: '🏁 Tracciamento Tappe & Giri',
+    showcaseFeat2Desc: 'Registra le tappe giornaliere e i giri turistici via GPS. Funziona al 100% offline, ideale per le zone remote.',
+    showcaseFeat3Title: '⛽ Gestione Taniche (Scorte)',
+    showcaseFeat3Desc: 'Controllo indipendente del carburante nelle taniche ausiliarie (Tanica SX / DX) con calcolo intelligente per il travaso e miscela.',
+    showcaseFeat4Title: '📖 Diario di Bordo & Foto',
+    showcaseFeat4Desc: 'Annota aneddoti, registra rifornimenti e scatta foto geolocalizzate che si collegano direttamente alla mappa pubblica.',
+    showcaseFeat5Title: '🔧 Officina & Carburazione',
+    showcaseFeat5Desc: 'Registra le regolazioni dei getti, spillo e viti del carburatore, e traccia ogni manutenzione e pezzo di ricambio sostituito.',
 
     statsHoursOnRoad: '⏱️ Ore su Strada',
     total: 'Totale',
-statsAltitudeRange: 'Rango Altezza',
-statsRefuelsCount: '⛽ Numero Rifornimenti',
-statsMaintCount: '🔧 Numero Interventi',
-statsCarbCount: '🌬️ Numero Carburazioni',
-statsFuel: 'Statistiche Rifornimenti',
-statsOil: 'Statistiche Olio 2T',
-    
+    statsAltitudeRange: 'Rango Altezza',
+    statsRefuelsCount: '⛽ Numero Rifornimenti',
+    statsMaintCount: '🔧 Numero Interventi',
+    statsCarbCount: '🌬️ Numero Carburazioni',
+    statsFuel: 'Statistiche Rifornimenti',
+    statsOil: 'Statistiche Olio 2T',
     openGraph: '📈 Grafico'
   },
   en: {
@@ -1844,11 +1888,11 @@ statsOil: 'Statistiche Olio 2T',
     workshop: '🔧 Workshop',
     cost: 'Cost',
     carbSetup: '🌬️ Carb setup',
-        carbJetMain: 'Main jet',
+    carbJetMain: 'Main jet',
     carbJetPilot: 'Pilot jet',
     carbScrewIdle: 'Idle speed screw',
     carbScrewAir: 'Air/mixture screw',
-        carbSparkPlug: 'Spark plug',
+    carbSparkPlug: 'Spark plug',
     turns: 'turns',
     altitude: 'Altitude',
     filters: '🧭 Filters',
@@ -1889,23 +1933,36 @@ statsOil: 'Statistiche Olio 2T',
     refuelsInTrack: 'Refuels in this track',
     oilUsed: '2T oil used',
     oilCost: '2T oil cost',
-    diaryBtn: '📖 Diary',
+    diaryBtn: '📖 Back to diary',
     diaryTitle: '📖 Travel diary',
     diarySubtitle: 'Until roads are available...',
     backToMap: '← Map',
-fullMapBtn: '🗺️ View full map',
+    fullMapBtn: '🗺️ Back to map',
     viewOnMap: '📍 View on map',
-viewTrackOnMap: '🗺️ View stage on map',
+    viewTrackOnMap: '🗺️ View stage on map',
     diary: 'Diary',
     partsUsed: "Parts used",
-       statsHoursOnRoad: '⏱️ Hours on the Road',
+    showcaseBtn: '📱 Discover the App',
+    showcaseTitle: '📱 VespaTrek App',
+    showcaseStatus: '🚀 AVAILABLE SOON',
+    showcaseFeat1Title: '🎛️ Trip Dashboard',
+    showcaseFeat1Desc: 'Live monitoring of speed, mileage, altitude, and driving time. All in a single clean screen.',
+    showcaseFeat2Title: '🏁 Track Trips & Rides',
+    showcaseFeat2Desc: 'Record daily stages and sightseeing rides via GPS. Works 100% offline, ideal for remote areas.',
+    showcaseFeat3Title: '⛽ Jerrycan Fuel Management',
+    showcaseFeat3Desc: 'Independent tracking of auxiliary fuel containers (Left / Right) with intelligent mixing and decanting calculator.',
+    showcaseFeat4Title: '📖 Travel Log & Photos',
+    showcaseFeat4Desc: 'Write notes, log refuels, and take geolocated photos linked directly to the public map.',
+    showcaseFeat5Title: '🔧 Workshop & Carb Settings',
+    showcaseFeat5Desc: 'Log carburetor jetting, needle, and screw adjustments, and keep track of maintenance and spare parts.',
+    statsHoursOnRoad: '⏱️ Hours on the Road',
     total: 'Total',
-statsAltitudeRange: 'Altitude Range',
-statsRefuelsCount: '⛽ Number of Fuel Stops',
-statsMaintCount: '🔧 Number of Repairs',
-statsCarbCount: '🌬️ Numero Carduration',
-statsFuel: 'Fuel Stats',
-statsOil: 'Oil Stats',
+    statsAltitudeRange: 'Altitude Range',
+    statsRefuelsCount: '⛽ Number of Fuel Stops',
+    statsMaintCount: '🔧 Number of Repairs',
+    statsCarbCount: '🌬️ Numero Carduration',
+    statsFuel: 'Fuel Stats',
+    statsOil: 'Oil Stats',
     openGraph: '📈 Chart'
   },
   es: {
@@ -1944,11 +2001,11 @@ statsOil: 'Oil Stats',
     workshop: '🔧 Taller',
     cost: 'Costo',
     carbSetup: '🌬️ Carburación',
-        carbJetMain: 'Chicler máximo',
+    carbJetMain: 'Chicler máximo',
     carbJetPilot: 'Chicler mínimo',
     carbScrewIdle: 'Tornillo de ralentí',
     carbScrewAir: 'Tornillo de aire',
-        carbSparkPlug: 'Bujía',
+    carbSparkPlug: 'Bujía',
     turns: 'vueltas',
     altitude: 'Altitud',
     filters: '🧭 Filtros',
@@ -1989,15 +2046,28 @@ statsOil: 'Oil Stats',
     refuelsInTrack: 'Repostajes en la etapa',
     oilUsed: 'Aceite 2T usado',
     oilCost: 'Costo aceite 2T',
-    diaryBtn: '📖 Diario',
+    diaryBtn: '📖 Volver al diario',
     diaryTitle: '📖 Diario de viaje',
     diarySubtitle: 'Mientra haya caminos...',
     backToMap: '← Mapa',
-fullMapBtn: '🗺️ Ver mapa completo',
+    fullMapBtn: '🗺️ Volver al mapa',
     viewOnMap: '📍 Ver en el mapa',
-viewTrackOnMap: '🗺️ Ver etapa en el mapa',
+    viewTrackOnMap: '🗺️ Ver etapa en el mapa',
     openGraph: '📈 Gráfico',
     partsUsed: "Repuestos usados",
+    showcaseBtn: '📱 Descubre la App',
+    showcaseTitle: '📱 App VespaTrek',
+    showcaseStatus: '🚀 PRÓXIMAMENTE DISPONIBLE',
+    showcaseFeat1Title: '🎛️ Panel de Viaje',
+    showcaseFeat1Desc: 'Monitoreo en vivo de velocidad, kilómetros recorridos, altitud y tiempo de conducción. Todo en una pantalla limpia.',
+    showcaseFeat2Title: '🏁 Registro de Rutas',
+    showcaseFeat2Desc: 'Registra etapas diarias y paseos turísticos mediante GPS. Funciona 100% offline, ideal para zonas remotas.',
+    showcaseFeat3Title: '⛽ Gestión de Bidones',
+    showcaseFeat3Desc: 'Control independiente del combustible en tanques auxiliares (Izquierdo / Derecho) con calculadora de mezcla y trasvase.',
+    showcaseFeat4Title: '📖 Diario de Ruta & Fotos',
+    showcaseFeat4Desc: 'Escribe anécdotas, registra repostajes y toma fotos geolocalizadas vinculadas directamente al mapa público.',
+    showcaseFeat5Title: '🔧 Taller & Carburación',
+    showcaseFeat5Desc: 'Registra los ajustes de chicleres, aguja y tornillos del carburador, y haz un seguimiento de mantenimientos y repuestos.'
 
        statsHoursOnRoad: '⏱️ Horas de Carretera',
     total: 'Total',
@@ -2090,6 +2160,12 @@ function applyLang() {
 
   const btnOpenFilters = document.getElementById('btnOpenFilters');
   if (btnOpenFilters) btnOpenFilters.innerHTML = `🧭 <strong>${T('filters').replace('🧭 ', '')}</strong>`;
+
+  const btnShowcaseOpen = document.getElementById('btnShowcaseOpen');
+  if (btnShowcaseOpen) btnShowcaseOpen.innerText = T('showcaseBtn');
+
+  const btnDiaryShowcaseOpen = document.getElementById('btnDiaryShowcaseOpen');
+  if (btnDiaryShowcaseOpen) btnDiaryShowcaseOpen.innerText = T('showcaseBtn');
 
   const btnStats = document.getElementById('btnStats');
   if (btnStats) btnStats.innerText = T('statsBtn');
@@ -3791,6 +3867,64 @@ function closeThanksModal() {
   document.getElementById('thanksModal').classList.remove('open');
 }
 
+function openShowcaseModal() {
+  renderShowcaseModal();
+  document.getElementById('showcaseModal').classList.add('open');
+}
+
+function closeShowcaseModal() {
+  document.getElementById('showcaseModal').classList.remove('open');
+}
+
+function renderShowcaseModal() {
+  document.getElementById('showcaseModalTitle').innerHTML = T('showcaseTitle');
+  document.getElementById('showcaseModalIntro').innerHTML = T('showcaseStatus');
+  
+  const featsHtml = `
+    <div style="margin-bottom: 14px;">
+      <h4 style="color: white; font-size: 14px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+        ${T('showcaseFeat1Title')}
+      </h4>
+      <p style="color: var(--text-muted); font-size: 12px; line-height: 1.4;">
+        ${T('showcaseFeat1Desc')}
+      </p>
+    </div>
+    <div style="margin-bottom: 14px;">
+      <h4 style="color: white; font-size: 14px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+        ${T('showcaseFeat2Title')}
+      </h4>
+      <p style="color: var(--text-muted); font-size: 12px; line-height: 1.4;">
+        ${T('showcaseFeat2Desc')}
+      </p>
+    </div>
+    <div style="margin-bottom: 14px;">
+      <h4 style="color: white; font-size: 14px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+        ${T('showcaseFeat3Title')}
+      </h4>
+      <p style="color: var(--text-muted); font-size: 12px; line-height: 1.4;">
+        ${T('showcaseFeat3Desc')}
+      </p>
+    </div>
+    <div style="margin-bottom: 14px;">
+      <h4 style="color: white; font-size: 14px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+        ${T('showcaseFeat4Title')}
+      </h4>
+      <p style="color: var(--text-muted); font-size: 12px; line-height: 1.4;">
+        ${T('showcaseFeat4Desc')}
+      </p>
+    </div>
+    <div style="margin-bottom: 14px;">
+      <h4 style="color: white; font-size: 14px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+        ${T('showcaseFeat5Title')}
+      </h4>
+      <p style="color: var(--text-muted); font-size: 12px; line-height: 1.4;">
+        ${T('showcaseFeat5Desc')}
+      </p>
+    </div>
+  `;
+  document.getElementById('showcaseModalList').innerHTML = featsHtml;
+}
+
 function goToHostExternalForm() {
   if (!HOST_FORM_URL) {
     alert(T('hostFormUnavailable'));
@@ -4268,12 +4402,12 @@ function renderDiaryList() {
             </button>
           ` : ''}
 
-          <button class="diary-action-btn ${hasGraph ? 'primary' : ''}"
+          <button class="diary-action-btn"
             onclick="window.apriGraficoPercorsoPublic(${t.id})"
             ${hasGraph ? '' : 'disabled'}
           >${T('openGraph')}</button>
 
-          <button class="diary-action-btn"
+          <button class="diary-action-btn primary"
             onclick="focusOnTrack(${t.id}, '${it.kind}')"
           >${T('viewTrackOnMap')}</button>
         </div>
