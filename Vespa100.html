@@ -11842,6 +11842,8 @@ const tappePub = tappePublicSrc.map(t => ({
     consumoRealeKmL: t.consumoRealeKmL ?? null,
     titolo: t.titolo || '',
     note: t.note || '',
+    startTs: t.startTs || null,
+    endTs: t.endTs || null,
     telemetry: simplifyTelemetry(t.telemetry, 2, 260),
     traccia: simplifyTrace(t.traccia, 3)
   }));
@@ -11864,6 +11866,8 @@ const turismoPub = turismoPublicSrc.map(t => ({
     consumoRealeKmL: t.consumoRealeKmL ?? null,
     titolo: t.titolo || '',
     note: t.note || '',
+    startTs: t.startTs || null,
+    endTs: t.endTs || null,
     telemetry: simplifyTelemetry(t.telemetry, 2, 260),
     traccia: simplifyTrace(t.traccia, 3)
   }));
@@ -12853,3 +12857,4 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
