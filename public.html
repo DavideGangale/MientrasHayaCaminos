@@ -4,7 +4,7 @@
   <link rel="icon" href="data:,">
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
-  <title>VespaTrek — Live Map</title>
+  <title>Mientras Haya Caminos... — Live Map</title>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -1357,7 +1357,7 @@
         bottom: 20px !important;
         width: 440px !important;
         height: calc(100vh - 110px) !important;
-        z-index: 1000 !important;
+        z-index: 1100 !important;
         display: flex !important;
         flex-direction: column !important;
         border-radius: 24px !important;
@@ -1391,7 +1391,14 @@
         padding: 16px 16px 100px !important;
       }
       #btnDiaryOpen {
-        display: inline-block !important; /* Keep it visible to open/close */
+        position: fixed !important;
+        left: 20px !important;
+        top: 90px !important;
+        z-index: 1050 !important;
+        display: inline-flex !important;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.45) !important;
       }
       /* Shift map overlay buttons to the right to avoid overlapping with left panel */
       .map-actions {
@@ -1413,7 +1420,7 @@
       <div class="topbar-main">
         <div class="brand-block">
          <div class="brand-copy">
-            <div id="appTitle" class="brand-title">VespaTrek PX150</div>
+            <div id="appTitle" class="brand-title">Mientras Haya Caminos...</div>
             <div id="appSubtitle" class="brand-subtitle">Mientras Haya Caminos...</div>
           </div>
         </div>
@@ -1438,9 +1445,9 @@
               </svg>
             </a>
           </div>
-          <button id="btnShowcaseOpen" class="btn btn-secondary" onclick="openShowcaseModal()">📱 Scopri l'App</button>
-          <button id="btnStats" class="btn btn-secondary" onclick="apriStats()">📊 Statistiche</button>
           <button id="btnDiaryOpen" class="btn btn-brand" onclick="showDiaryOverlay()">📖 Apri il diario</button>
+          <button id="btnStats" class="btn btn-secondary" onclick="apriStats()">📊 Statistiche</button>
+          <button id="btnShowcaseOpen" class="btn btn-secondary" onclick="openShowcaseModal()">📱 Scopri l'App</button>
         
         </div>
       </div>
@@ -1451,7 +1458,7 @@
     <div id="mapWrap">
       <div class="map-actions">
         <button id="btnOpenFilters" class="floating-btn" onclick="openFiltersDrawer()">🧭 <strong>Filtri</strong></button>
-     
+        <button id="btnSeeAllTracks" class="floating-btn" onclick="showAllTracks()">🌎 <strong>Vedi tutto</strong></button>
       </div>
 <div class="map-actions-bottom">
   <button id="btnThanksOpen" class="floating-btn" onclick="openThanksModal()">🙏 <strong>Ringraziamenti</strong></button>
@@ -1492,9 +1499,9 @@
         </a>
       </div>
 
-      <button id="btnDiaryShowcaseOpen" class="btn btn-secondary" onclick="openShowcaseModal()">📱 Scopri l'App</button>
+      <button id="btnDiaryCollapse" class="btn btn-secondary" onclick="hideDiaryOverlay()" title="Chiudi" style="font-weight:bold; font-size:16px;">«</button>
       <button id="btnDiaryStats" class="btn btn-secondary" onclick="apriStats()">📊 Statistiche</button>
-      <button id="btnDiaryBackToMap" class="btn btn-brand" onclick="showFullMapFromDiary()">🗺️ Vedi mappa completa</button>
+      <button id="btnDiaryShowcaseOpen" class="btn btn-secondary" onclick="openShowcaseModal()">📱 Scopri l'App</button>
     </div>
   </div>
 </div>
@@ -1739,7 +1746,7 @@ let LANG = localStorage.getItem('vt_pub_lang') || 'it';
 
 const I18N = {
   it: {
-    live: 'VespaTrek PX150',
+    live: 'Mientras Haya Caminos...',
     subtitle: 'Finché ci sono strade...',
     allTracks: '🛣️ Tutto',
     onlyTappe: '🏁 Tappe',
@@ -1819,11 +1826,12 @@ const I18N = {
     refuelsInTrack: 'Rifornimenti nella tappa',
     oilUsed: 'Olio 2T usato',
     oilCost: 'Costo olio 2T',
-    diaryBtn: '📖 Torna al diario',
+    diaryBtn: '📖 Apri il diario',
     diaryTitle: '📖 Diario di viaggio',
     diarySubtitle: 'Finchè ci sono Strade...',
     backToMap: '← Mappa',
     fullMapBtn: '🗺️ Torna alla mappa',
+    seeAllBtn: '🌎 Vedi tutto',
     viewOnMap: '📍 Vedi sulla mappa',
     viewTrackOnMap: '🗺️ Vedi tappa sulla mappa',
     diary: 'Diario',
@@ -1853,7 +1861,7 @@ const I18N = {
     openGraph: '📈 Grafico'
   },
   en: {
-    live: 'VespaTrek PX150',
+    live: 'Mientras Haya Caminos...',
     subtitle: 'Until roads are available...',
     allTracks: '🛣️ All',
     onlyTappe: '🏁 Trips',
@@ -1966,7 +1974,7 @@ const I18N = {
     openGraph: '📈 Chart'
   },
   es: {
-    live: 'VespaTrek PX150',
+    live: 'Mientras Haya Caminos...',
     subtitle: 'Mientras haya caminos...',
     allTracks: '🛣️ Todo',
     onlyTappe: '🏁 Etapas',
@@ -2046,11 +2054,12 @@ const I18N = {
     refuelsInTrack: 'Repostajes en la etapa',
     oilUsed: 'Aceite 2T usado',
     oilCost: 'Costo aceite 2T',
-    diaryBtn: '📖 Volver al diario',
-    diaryTitle: '📖 Diario de viaje',
+    diaryBtn: '📖 Abrir diario',
+    diaryTitle: '📖 Diario di viaje',
     diarySubtitle: 'Mientra haya caminos...',
     backToMap: '← Mapa',
     fullMapBtn: '🗺️ Volver al mapa',
+    seeAllBtn: '🌎 Ver todo',
     viewOnMap: '📍 Ver en el mapa',
     viewTrackOnMap: '🗺️ Ver etapa en el mapa',
     openGraph: '📈 Gráfico',
@@ -2150,13 +2159,16 @@ function updateLangButtons() {
 }
 
 function applyLang() {
-  const title = (DATA && DATA.titolo) ? DATA.titolo : T('live');
+  const title = (DATA && DATA.titolo && DATA.titolo !== 'VespaTrek PX150') ? DATA.titolo : T('live');
 
   const appTitleEl = document.getElementById('appTitle');
   if (appTitleEl) appTitleEl.innerText = title;
 
   const appSubtitleEl = document.getElementById('appSubtitle');
   if (appSubtitleEl) appSubtitleEl.innerText = T('subtitle');
+
+  const btnSeeAllTracks = document.getElementById('btnSeeAllTracks');
+  if (btnSeeAllTracks) btnSeeAllTracks.innerHTML = `🌎 <strong>${T('seeAllBtn').replace('🌎 ', '')}</strong>`;
 
   const btnOpenFilters = document.getElementById('btnOpenFilters');
   if (btnOpenFilters) btnOpenFilters.innerHTML = `🧭 <strong>${T('filters').replace('🧭 ', '')}</strong>`;
@@ -2182,8 +2194,7 @@ function applyLang() {
   const ds = document.getElementById('diarySubtitle');
   if (ds) ds.innerText = T('diarySubtitle');
 
-  const back = document.getElementById('btnDiaryBackToMap');
-  if (back) back.innerText = T('fullMapBtn') || T('backToMap');
+  // collapse button has static « text, no dynamic text needed
 
   const btnHost = document.getElementById('btnHost');
   if (btnHost) {
@@ -2399,7 +2410,7 @@ function unisciDatasetGlobale() {
   manutenzioni.sort((a,b) => Number(b.id || 0) - Number(a.id || 0));
 
   return {
-    titolo: INDEX_DATA?.titolo || 'VespaTrek PX150',
+    titolo: INDEX_DATA?.titolo || 'Mientras Haya Caminos...',
     paeseAttuale: INDEX_DATA?.paeseAttuale || '',
     stats: INDEX_DATA?.stats || {},
     datiPaesi: buildDatiPaesiMapFromIndex(),
@@ -2419,7 +2430,7 @@ function unisciDatasetPaese(paeseData) {
   const rif  = Array.isArray(paeseData?.rifornimenti) ? paeseData.rifornimenti : [];
 
   return {
-    titolo: INDEX_DATA?.titolo || 'VespaTrek PX150',
+    titolo: INDEX_DATA?.titolo || 'Mientras Haya Caminos...',
     paeseAttuale: paeseNome,
     stats: INDEX_DATA?.stats || {},
     datiPaesi: buildDatiPaesiMapFromIndex(),
@@ -4128,6 +4139,15 @@ function hideDiaryOverlay(skipUrlUpdate = false) {
 }
 
   
+function showAllTracks() {
+  selectedTrackId = null;
+  selectedTrackBounds = null;
+  selectedTrackGeoBounds = null;
+  selectedTrackMarkerIds = null;
+  selectedTrackRelatedData = null;
+  renderMap(false);
+}
+
 function showFullMapFromDiary() {
   selectedTrackId = null;
   selectedTrackBounds = null;
@@ -4169,7 +4189,9 @@ function closeVideoModal() {
 function focusOnMap(lat, lon) {
   if (!isFinite(lat) || !isFinite(lon)) return;
 
-  hideDiaryOverlay();
+  if (window.innerWidth < 1024) {
+    hideDiaryOverlay();
+  }
 
   setTimeout(() => {
     if (!map) return;
@@ -4211,7 +4233,9 @@ function focusOnTrack(trackId, mode) {
   };
 
   syncFilterButtonsUI();
-  hideDiaryOverlay();
+  if (window.innerWidth < 1024) {
+    hideDiaryOverlay();
+  }
 
   setTimeout(() => {
     renderMap(false);
@@ -4787,4 +4811,5 @@ window.onload = function () {
 </script>
 </body>
 </html>
+
 
