@@ -1363,11 +1363,27 @@
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
       }
+      #diaryTopBar .lang-switch,
+      #diaryTopBar .socials,
+      #btnDiaryStats,
+      #diaryBottomActions {
+        display: none !important;
+      }
       #diaryList {
         padding: 16px 16px 100px !important;
       }
       #btnDiaryOpen {
         display: inline-block !important; /* Keep it visible to open/close */
+      }
+      /* Shift map overlay buttons to the right to avoid overlapping with left panel */
+      .map-actions {
+        left: auto !important;
+        right: 20px !important;
+      }
+      .map-actions-bottom {
+        left: auto !important;
+        right: 20px !important;
+        flex-direction: row-reverse !important;
       }
     }
   </style>
@@ -4624,6 +4640,7 @@ window.onload = function () {
 </script>
 </body>
 </html>
+
 
 
 
