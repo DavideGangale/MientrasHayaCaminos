@@ -232,6 +232,10 @@
       transform: translateY(-2px) !important;
     }
 
+    .btn-hidden {
+      display: none !important;
+    }
+
     .btn-secondary {
       background: rgba(30, 41, 59, 0.7);
       color: var(--text);
@@ -1655,11 +1659,11 @@
         <button onclick="closeShowcaseModal()">×</button>
       </div>
 
-      <h2 id="showcaseModalTitle" class="modal-title">📱 App VespaTrek</h2>
+      <h2 id="showcaseModalTitle" class="modal-title">📱 App</h2>
       <p id="showcaseModalIntro" class="modal-intro" style="color: var(--brand); font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px;"></p>
 
       <div style="text-align: center; margin-bottom: 20px;">
-        <img src="public/app_showcase.png" alt="VespaTrek App Showcase" style="width: 100%; max-width: 280px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <img src="public/app_showcase.png" alt="App Showcase" style="width: 100%; max-width: 280px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
       </div>
 
       <div id="showcaseModalList" class="showcase-list" style="text-align: left; max-height: 250px; overflow-y: auto; padding-right: 8px; margin-bottom: 10px;"></div>
@@ -1837,7 +1841,7 @@ const I18N = {
     diary: 'Diario',
     partsUsed: 'Ricambi usati',
     showcaseBtn: '📱 Scopri l\'App',
-    showcaseTitle: '📱 App VespaTrek',
+    showcaseTitle: '📱 App del Viaggio',
     showcaseStatus: '🚀 DISPONIBILE A BREVE (Coming Soon)',
     showcaseFeat1Title: '🎛️ Dashboard di Viaggio',
     showcaseFeat1Desc: 'Monitoraggio live di velocità, chilometri percorsi, altitudine e tempo di guida. Tutto in una sola schermata pulita.',
@@ -1951,7 +1955,7 @@ const I18N = {
     diary: 'Diary',
     partsUsed: "Parts used",
     showcaseBtn: '📱 Discover the App',
-    showcaseTitle: '📱 VespaTrek App',
+    showcaseTitle: '📱 Travel App',
     showcaseStatus: '🚀 AVAILABLE SOON',
     showcaseFeat1Title: '🎛️ Trip Dashboard',
     showcaseFeat1Desc: 'Live monitoring of speed, mileage, altitude, and driving time. All in a single clean screen.',
@@ -2065,7 +2069,7 @@ const I18N = {
     openGraph: '📈 Gráfico',
     partsUsed: "Repuestos usados",
     showcaseBtn: '📱 Descubre la App',
-    showcaseTitle: '📱 App VespaTrek',
+    showcaseTitle: '📱 App de Viaje',
     showcaseStatus: '🚀 PRÓXIMAMENTE DISPONIBLE',
     showcaseFeat1Title: '🎛️ Panel de Viaje',
     showcaseFeat1Desc: 'Monitoreo en vivo de velocidad, kilómetros recorridos, altitud y tiempo de conducción. Todo en una pantalla limpia.',
@@ -4117,7 +4121,7 @@ function showDiaryOverlay(skipUrlUpdate = false) {
   // Nasconde il bottone di apertura sul desktop quando il diario è aperto
   const btnOpen = document.getElementById('btnDiaryOpen');
   if (btnOpen) {
-    btnOpen.style.display = 'none';
+    btnOpen.classList.add('btn-hidden');
   }
 
   // forza il diary sopra la mappa
@@ -4139,11 +4143,7 @@ function hideDiaryOverlay(skipUrlUpdate = false) {
   // Ripristina il bottone di apertura
   const btnOpen = document.getElementById('btnDiaryOpen');
   if (btnOpen) {
-    if (window.innerWidth >= 1024) {
-      btnOpen.style.display = 'inline-flex';
-    } else {
-      btnOpen.style.display = 'inline-block';
-    }
+    btnOpen.classList.remove('btn-hidden');
   }
 
   setTimeout(() => {
