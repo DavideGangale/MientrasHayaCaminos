@@ -4114,6 +4114,12 @@ function showDiaryOverlay(skipUrlUpdate = false) {
   page.classList.add('open');
   page.setAttribute('aria-hidden', 'false');
 
+  // Nasconde il bottone di apertura sul desktop quando il diario è aperto
+  const btnOpen = document.getElementById('btnDiaryOpen');
+  if (btnOpen) {
+    btnOpen.style.display = 'none';
+  }
+
   // forza il diary sopra la mappa
   page.style.zIndex = '5000';
 
@@ -4129,6 +4135,16 @@ function hideDiaryOverlay(skipUrlUpdate = false) {
   page.classList.remove('open');
   page.style.display = 'none';
   page.setAttribute('aria-hidden', 'true');
+
+  // Ripristina il bottone di apertura
+  const btnOpen = document.getElementById('btnDiaryOpen');
+  if (btnOpen) {
+    if (window.innerWidth >= 1024) {
+      btnOpen.style.display = 'inline-flex';
+    } else {
+      btnOpen.style.display = 'inline-block';
+    }
+  }
 
   setTimeout(() => {
     if (map) {
@@ -4811,5 +4827,4 @@ window.onload = function () {
 </script>
 </body>
 </html>
-
 
