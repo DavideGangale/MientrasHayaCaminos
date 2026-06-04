@@ -517,6 +517,11 @@
       border-color: rgba(255,255,255,0.25);
     }
 
+    .drawer-select option {
+      background: #0d1527;
+      color: #fff;
+    }
+
     .drawer-footer {
       border-top: 1px solid rgba(255,255,255,0.06);
       padding: 16px 20px 20px;
@@ -2487,6 +2492,14 @@ function countRefuelsForTrack(t) {
 }
 
 function getTrackTimeRange(t) {
+  if (t?.startTs && t?.endTs) {
+    const s = Number(t.startTs);
+    const e = Number(t.endTs);
+    if (isFinite(s) && isFinite(e) && s > 0 && e > s) {
+      return { start: s, end: e };
+    }
+  }
+
   const durSec = Number(t?.durata || 0);
   const endTs = parseDateTimeTs(t?.data, t?.ora);
 
@@ -4640,7 +4653,4 @@ window.onload = function () {
 </script>
 </body>
 </html>
-
-
-
 
