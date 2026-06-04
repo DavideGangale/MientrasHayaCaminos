@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-06-03T23:39:46.124Z",
+  "_exportDate": "2026-06-04T00:25:47.821Z",
   "tipo": "paese",
   "paese": "Colombia",
   "slug": "colombia",
@@ -32,6 +32,8 @@
       "consumoRealeKmL": 12.63,
       "titolo": "",
       "note": "",
+      "startTs": 1780425759989,
+      "endTs": 1780430681000,
       "telemetry": [
         {
           "km": 0.009942931751037137,
@@ -5459,6 +5461,8 @@
       "consumoRealeKmL": 23.63,
       "titolo": "Bucaramanga Villetta",
       "note": "",
+      "startTs": 1780393490880,
+      "endTs": 1780425714120,
       "telemetry": [
         {
           "km": 0.009186309320010138,
@@ -34142,6 +34146,8 @@
       "consumoRealeKmL": 24.67,
       "titolo": "",
       "note": "",
+      "startTs": 1777398855332,
+      "endTs": 1777425926794,
       "telemetry": [
         {
           "km": 0.0083995011779882,
@@ -52101,6 +52107,8 @@
       "consumoRealeKmL": 23.82,
       "titolo": "Bogotá Girón",
       "note": "",
+      "startTs": 1776599488500,
+      "endTs": 1776637221917,
       "telemetry": [
         {
           "km": 0.008515242561564799,
@@ -58354,6 +58362,8 @@
       "consumoRealeKmL": null,
       "titolo": "Faca - Di Carbone",
       "note": "De regreso una visita a los amigos Oscar y David que estaban de mantenimientos",
+      "startTs": 1775250937937,
+      "endTs": 1775251429654,
       "telemetry": [
         {
           "km": 0.009026527837531278,
@@ -59111,6 +59121,8 @@
       "consumoRealeKmL": 7.89,
       "titolo": "Le Petit Jardin",
       "note": "Un delicioso almuerzo donde Isa",
+      "startTs": 1775244310640,
+      "endTs": 1775246627031,
       "telemetry": [
         {
           "km": 0.008276708162652824,
@@ -60494,6 +60506,8 @@
       "consumoRealeKmL": 35.47,
       "titolo": "Facatativa - Sasaima - La Vega",
       "note": "un paseo de dia festivo",
+      "startTs": 1775228583478,
+      "endTs": 1775239336937,
       "telemetry": [
         {
           "km": 0.00822371725186817,
@@ -62265,6 +62279,8 @@
       "consumoRealeKmL": 8.22,
       "titolo": "gentlemen ride",
       "note": "",
+      "startTs": 1779029405437,
+      "endTs": 1779136432444,
       "telemetry": [
         {
           "km": 0.009075228838501044,
@@ -63754,6 +63770,8 @@
       "consumoRealeKmL": null,
       "titolo": "",
       "note": "",
+      "startTs": 1777911004969,
+      "endTs": 1779029397223,
       "telemetry": [
         {
           "km": 0.008376811795208359,
@@ -67749,6 +67767,8 @@
       "consumoRealeKmL": null,
       "titolo": "",
       "note": "",
+      "startTs": 1777905621004,
+      "endTs": 1777910981396,
       "telemetry": [
         {
           "km": 0.008517147737851451,
@@ -69228,6 +69248,8 @@
       "consumoRealeKmL": 16.27,
       "titolo": "",
       "note": "",
+      "startTs": 1777843650947,
+      "endTs": 1777905544383,
       "telemetry": [
         {
           "km": 0.008585303405848009,
@@ -70761,6 +70783,8 @@
       "consumoRealeKmL": null,
       "titolo": "",
       "note": "",
+      "startTs": 1777753181160,
+      "endTs": 1777799001441,
       "telemetry": [
         {
           "km": 0.008362097727425216,
@@ -73846,6 +73870,8 @@
       "consumoRealeKmL": null,
       "titolo": "",
       "note": "",
+      "startTs": 1777653306268,
+      "endTs": 1777692024019,
       "telemetry": [
         {
           "km": 0.04379606535386757,
@@ -75983,6 +76009,8 @@
       "consumoRealeKmL": 13.47,
       "titolo": "",
       "note": "",
+      "startTs": 1777595694256,
+      "endTs": 1777608621162,
       "telemetry": [
         {
           "km": 0.023508770624647332,
@@ -79088,6 +79116,8 @@
       "consumoRealeKmL": 6.85,
       "titolo": "",
       "note": "",
+      "startTs": 1777472218335,
+      "endTs": 1777511736488,
       "telemetry": [
         {
           "km": 0.026949323194129942,
@@ -82267,6 +82297,8 @@
       "consumoRealeKmL": 23.97,
       "titolo": "",
       "note": "",
+      "startTs": 1777384268998,
+      "endTs": 1777390840119,
       "telemetry": [
         {
           "km": 0.008441722293517835,
@@ -84858,6 +84890,8 @@
       "consumoRealeKmL": 27.53,
       "titolo": "",
       "note": "",
+      "startTs": 1777222537800,
+      "endTs": 1777332747964,
       "telemetry": [
         {
           "km": 0.012433836119885723,
@@ -89557,6 +89591,8 @@
       "consumoRealeKmL": null,
       "titolo": "",
       "note": "",
+      "startTs": 1777141117464,
+      "endTs": 1777215568839,
       "telemetry": [
         {
           "km": 0.011172021715736837,
@@ -92408,6 +92444,8 @@
       "consumoRealeKmL": null,
       "titolo": "",
       "note": "",
+      "startTs": 1777076320609,
+      "endTs": 1777087902296,
       "telemetry": [
         {
           "km": 0.018978940083430002,
@@ -94901,6 +94939,8 @@
       "consumoRealeKmL": null,
       "titolo": "",
       "note": "",
+      "startTs": 1776886384567,
+      "endTs": 1776914430383,
       "telemetry": [
         {
           "km": 0.008905163960636666,
@@ -98058,6 +98098,8 @@
       "consumoRealeKmL": 477.2,
       "titolo": "",
       "note": "",
+      "startTs": 1776776115377,
+      "endTs": 1776806999576,
       "telemetry": [
         {
           "km": 0.008210068165401018,
@@ -102907,6 +102949,8 @@
       "consumoRealeKmL": 25.94,
       "titolo": "",
       "note": "",
+      "startTs": 1776719373049,
+      "endTs": 1776749230246,
       "telemetry": [
         {
           "km": 0.010070639191012492,
@@ -109268,6 +109312,8 @@
       "consumoRealeKmL": null,
       "titolo": "",
       "note": "",
+      "startTs": 1776695072824,
+      "endTs": 1776700150887,
       "telemetry": [
         {
           "km": 0.00852531244336521,
@@ -109551,6 +109597,8 @@
       "consumoRealeKmL": 11.45,
       "titolo": "fac",
       "note": "",
+      "startTs": 1776474388120,
+      "endTs": 1776530349068,
       "telemetry": [
         {
           "km": 0.016363207835850498,
@@ -115438,6 +115486,8 @@
       "consumoRealeKmL": null,
       "titolo": "",
       "note": "",
+      "startTs": 1776357482736,
+      "endTs": 1776360537799,
       "telemetry": [
         {
           "km": 0.00965799523239423,
@@ -115731,6 +115781,8 @@
       "consumoRealeKmL": null,
       "titolo": "recije Jessica",
       "note": "",
+      "startTs": 1776353967109,
+      "endTs": 1776355789697,
       "telemetry": [
         {
           "km": 0.009936050706098298,
@@ -116338,6 +116390,8 @@
       "consumoRealeKmL": 83.54,
       "titolo": "curso Bogotá",
       "note": "",
+      "startTs": 1776342636216,
+      "endTs": 1776353709002,
       "telemetry": [
         {
           "km": 0.00983510256406279,
@@ -121453,6 +121507,8 @@
       "consumoRealeKmL": null,
       "titolo": "gafas nuevas",
       "note": "",
+      "startTs": 1776281102185,
+      "endTs": 1776282133406,
       "telemetry": [
         {
           "km": 0.010331377053114587,
@@ -121838,6 +121894,8 @@
       "consumoRealeKmL": null,
       "titolo": "",
       "note": "",
+      "startTs": 1776272535650,
+      "endTs": 1776273895949,
       "telemetry": [
         {
           "km": 0.00851683240138128,
@@ -122237,6 +122295,8 @@
       "consumoRealeKmL": 5.61,
       "titolo": "visita",
       "note": "",
+      "startTs": 1776179805682,
+      "endTs": 1776186071439,
       "telemetry": [
         {
           "km": 0.009236092126896002,
@@ -123192,6 +123252,8 @@
       "consumoRealeKmL": null,
       "titolo": "marijane",
       "note": "",
+      "startTs": 1776123148069,
+      "endTs": 1776125776666,
       "telemetry": [
         {
           "km": 0.011733455083442416,
@@ -124095,6 +124157,8 @@
       "consumoRealeKmL": 29.76,
       "titolo": "paseo san francisco",
       "note": "",
+      "startTs": 1776010219192,
+      "endTs": 1776026526091,
       "telemetry": [
         {
           "km": 0.00872534732781435,
@@ -130240,6 +130304,8 @@
       "consumoRealeKmL": null,
       "titolo": "ff",
       "note": "",
+      "startTs": 1775830732833,
+      "endTs": 1775849383368,
       "telemetry": [
         {
           "km": 0.013292725193756683,
@@ -130945,6 +131011,8 @@
       "consumoRealeKmL": 4.37,
       "titolo": "compras",
       "note": "",
+      "startTs": 1775754241749,
+      "endTs": 1775757673384,
       "telemetry": [
         {
           "km": 0.010846475458718833,
@@ -131630,6 +131698,8 @@
       "consumoRealeKmL": 2.91,
       "titolo": "compra medicinas",
       "note": "",
+      "startTs": 1775578041916,
+      "endTs": 1775579897540,
       "telemetry": [
         {
           "km": 0.010240015592526287,
@@ -132103,6 +132173,8 @@
       "consumoRealeKmL": null,
       "titolo": "visita oftalmologo",
       "note": "",
+      "startTs": 1775566158600,
+      "endTs": 1775577738679,
       "telemetry": [
         {
           "km": 0.00920539939723521,
@@ -132660,6 +132732,8 @@
       "consumoRealeKmL": 813.78,
       "titolo": "a faca de vuelta",
       "note": "",
+      "startTs": 1775508952029,
+      "endTs": 1775514635126,
       "telemetry": [
         {
           "km": 0.008994304794695849,
@@ -137255,6 +137329,8 @@
       "consumoRealeKmL": null,
       "titolo": "",
       "note": "",
+      "startTs": 1775502874823,
+      "endTs": 1775508941092,
       "telemetry": [
         {
           "km": 0.008394159648045678,
@@ -137456,6 +137532,8 @@
       "consumoRealeKmL": null,
       "titolo": "",
       "note": "",
+      "startTs": 1775490834815,
+      "endTs": 1775493720232,
       "telemetry": [
         {
           "km": 0.01662838704573794,
@@ -137671,6 +137749,8 @@
       "consumoRealeKmL": 21.89,
       "titolo": "candelaria",
       "note": "",
+      "startTs": 1775484299356,
+      "endTs": 1775490440478,
       "telemetry": [
         {
           "km": 0.008539735424849218,
@@ -142106,6 +142186,8 @@
       "consumoRealeKmL": null,
       "titolo": "pop",
       "note": "",
+      "startTs": 1775483974641,
+      "endTs": 1775484283108,
       "telemetry": [
         {
           "km": 0.00973582531384253,
@@ -142181,6 +142263,8 @@
       "consumoRealeKmL": 12.71,
       "titolo": "zipacon, cachipay faca",
       "note": "paseo",
+      "startTs": 1775401273490,
+      "endTs": 1775432561628,
       "telemetry": [
         {
           "km": 0.0094256758295113,
@@ -148584,6 +148668,8 @@
       "consumoRealeKmL": null,
       "titolo": "a recojer a Oscar",
       "note": "",
+      "startTs": 1775400250127,
+      "endTs": 1775401084788,
       "telemetry": [
         {
           "km": 0.008138405806402085,
@@ -148899,6 +148985,8 @@
       "consumoRealeKmL": 17.42,
       "titolo": "Bojaca",
       "note": "",
+      "startTs": 1775343115628,
+      "endTs": 1775397611770,
       "telemetry": [
         {
           "km": 0.008120286331246241,
@@ -154342,6 +154430,8 @@
       "consumoRealeKmL": null,
       "titolo": "",
       "note": "",
+      "startTs": 1775340440950,
+      "endTs": 1775343105058,
       "telemetry": [
         {
           "km": 0.01241833234375777,
@@ -155123,6 +155213,8 @@
       "consumoRealeKmL": null,
       "titolo": "provo",
       "note": "",
+      "startTs": 1775319060840,
+      "endTs": 1775320606795,
       "telemetry": [
         {
           "km": 0.010852809280532892,
@@ -156560,6 +156652,8 @@
       "consumoRealeKmL": 81.06,
       "titolo": "encuentro Vespa Club Bogota",
       "note": "Una rodada for Faca, tomando cerveza y jegermaister",
+      "startTs": 1774810704758,
+      "endTs": 1774841837930,
       "telemetry": [
         {
           "km": 0.010034160031947986,
@@ -157853,6 +157947,8 @@
       "consumoRealeKmL": 15.12,
       "titolo": "Reunion Vespa Club Bogotá",
       "note": "Almuerzo con los del Club de Bogotá",
+      "startTs": 1774786886714,
+      "endTs": 1774795189060,
       "telemetry": [
         {
           "km": 0.008197696204028987,
