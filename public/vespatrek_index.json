@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-06-03T23:39:46.124Z",
+  "_exportDate": "2026-06-04T00:25:47.821Z",
   "titolo": "VespaTrek PX150",
   "paeseAttuale": "Colombia",
   "diarioTagsPreset": [
@@ -284,6 +284,8 @@
       "consumoRealeKmL": 12.63,
       "titolo": "",
       "note": "",
+      "startTs": 1780425759989,
+      "endTs": 1780430681000,
       "telemetry": [
         {
           "km": 0.009942931751037137,
@@ -5711,6 +5713,8 @@
       "consumoRealeKmL": 23.63,
       "titolo": "Bucaramanga Villetta",
       "note": "",
+      "startTs": 1780393490880,
+      "endTs": 1780425714120,
       "telemetry": [
         {
           "km": 0.009186309320010138,
@@ -34394,6 +34398,8 @@
       "consumoRealeKmL": 8.22,
       "titolo": "gentlemen ride",
       "note": "",
+      "startTs": 1779029405437,
+      "endTs": 1779136432444,
       "telemetry": [
         {
           "km": 0.009075228838501044,
@@ -35883,6 +35889,8 @@
       "consumoRealeKmL": null,
       "titolo": "",
       "note": "",
+      "startTs": 1777911004969,
+      "endTs": 1779029397223,
       "telemetry": [
         {
           "km": 0.008376811795208359,
@@ -39878,6 +39886,8 @@
       "consumoRealeKmL": null,
       "titolo": "",
       "note": "",
+      "startTs": 1777905621004,
+      "endTs": 1777910981396,
       "telemetry": [
         {
           "km": 0.008517147737851451,
@@ -41357,6 +41367,8 @@
       "consumoRealeKmL": 16.27,
       "titolo": "",
       "note": "",
+      "startTs": 1777843650947,
+      "endTs": 1777905544383,
       "telemetry": [
         {
           "km": 0.008585303405848009,
@@ -42890,6 +42902,8 @@
       "consumoRealeKmL": null,
       "titolo": "",
       "note": "",
+      "startTs": 1777753181160,
+      "endTs": 1777799001441,
       "telemetry": [
         {
           "km": 0.008362097727425216,
@@ -45975,6 +45989,8 @@
       "consumoRealeKmL": null,
       "titolo": "",
       "note": "",
+      "startTs": 1777653306268,
+      "endTs": 1777692024019,
       "telemetry": [
         {
           "km": 0.04379606535386757,
@@ -48112,6 +48128,8 @@
       "consumoRealeKmL": 13.47,
       "titolo": "",
       "note": "",
+      "startTs": 1777595694256,
+      "endTs": 1777608621162,
       "telemetry": [
         {
           "km": 0.023508770624647332,
@@ -51217,6 +51235,8 @@
       "consumoRealeKmL": 6.85,
       "titolo": "",
       "note": "",
+      "startTs": 1777472218335,
+      "endTs": 1777511736488,
       "telemetry": [
         {
           "km": 0.026949323194129942,
@@ -54396,6 +54416,8 @@
       "consumoRealeKmL": 24.67,
       "titolo": "",
       "note": "",
+      "startTs": 1777398855332,
+      "endTs": 1777425926794,
       "telemetry": [
         {
           "km": 0.0083995011779882,
@@ -72355,6 +72377,8 @@
       "consumoRealeKmL": 23.97,
       "titolo": "",
       "note": "",
+      "startTs": 1777384268998,
+      "endTs": 1777390840119,
       "telemetry": [
         {
           "km": 0.008441722293517835,
