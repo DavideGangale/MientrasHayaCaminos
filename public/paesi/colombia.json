@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-06-06T13:39:09.162Z",
+  "_exportDate": "2026-06-06T13:58:15.144Z",
   "tipo": "paese",
   "paese": "Colombia",
   "slug": "colombia",
@@ -159864,6 +159864,24 @@
     }
   ],
   "diario": [
+    {
+      "id": 1780754226572,
+      "ts": 1780754226572,
+      "data": "06/06/2026",
+      "ora": "08:57",
+      "paese": "Colombia",
+      "km": "2138.7",
+      "testo": "Bols8",
+      "tags": [],
+      "geo": {
+        "lat": 4.806037348750141,
+        "lon": -74.36060278448166
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1wYlqXEnLOfQLscfZwFUmilQK_H5tnQox",
+      "foto": null
+    },
     {
       "id": 1780751917483,
       "ts": 1780751917483,
