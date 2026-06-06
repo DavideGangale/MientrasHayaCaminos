@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-06-06T13:18:45.115Z",
+  "exportedAt": "2026-06-06T13:57:14.461Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -964,6 +964,21 @@
         "lon": -74.36060193328242
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1KttwW9hcMGadKwGve4bH2x41E1PmDV8O"
+    },
+    {
+      "ts": 1780754226572,
+      "id": 1780754226572,
+      "paese": "",
+      "km": "",
+      "testo": "Bols8",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 4.806037348750141,
+        "lon": -74.36060278448166
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1wYlqXEnLOfQLscfZwFUmilQK_H5tnQox"
     }
   ]
 }
