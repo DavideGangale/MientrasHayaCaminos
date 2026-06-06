@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-06-06T11:54:51.390Z",
+  "_exportDate": "2026-06-06T13:39:09.162Z",
   "titolo": "VespaTrek PX150",
   "paeseAttuale": "Colombia",
   "diarioTagsPreset": [
@@ -51,6 +51,42 @@
     }
   ],
   "ultimiPost": [
+    {
+      "id": 1780751917483,
+      "ts": 1780751917483,
+      "data": "06/06/2026",
+      "ora": "08:18",
+      "paese": "Colombia",
+      "km": "2138.7",
+      "testo": "Pppoppppoooooooo",
+      "tags": [],
+      "geo": {
+        "lat": 4.806044186332144,
+        "lon": -74.36060193328242
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1KttwW9hcMGadKwGve4bH2x41E1PmDV8O",
+      "foto": null
+    },
+    {
+      "id": 1780750090115,
+      "ts": 1780750090115,
+      "data": "06/06/2026",
+      "ora": "07:48",
+      "paese": "Colombia",
+      "km": "2138.7",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 4.806049926970224,
+        "lon": -74.36060038846293
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1CX3UZ2ADC7KgCwtpbYnfU1mrPRaxqORA",
+      "foto": null
+    },
     {
       "id": 1780529614448,
       "ts": 1780529614448,
@@ -226,42 +262,6 @@
       "videoUrl": null,
       "videoPlanned": false,
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1wsASDPOsB4DEXpOgZnjLLSQljcs8kVdw",
-      "foto": null
-    },
-    {
-      "id": 1777223849409,
-      "ts": 1777223849409,
-      "data": "26/04/2026",
-      "ora": "12:17",
-      "paese": "Colombia",
-      "km": "1206.9",
-      "testo": "",
-      "tags": [],
-      "geo": {
-        "lat": 7.111241537604123,
-        "lon": -73.18130361837298
-      },
-      "videoUrl": null,
-      "videoPlanned": false,
-      "fotoUrl": "https://drive.google.com/uc?export=view&id=1xqcaykB5f2ibkG-6rghHs3HOX8-sUFge",
-      "foto": null
-    },
-    {
-      "id": 1777223826415,
-      "ts": 1777223826415,
-      "data": "26/04/2026",
-      "ora": "12:17",
-      "paese": "Colombia",
-      "km": "1206.9",
-      "testo": "",
-      "tags": [],
-      "geo": {
-        "lat": 7.1109501630596785,
-        "lon": -73.1817024911074
-      },
-      "videoUrl": null,
-      "videoPlanned": false,
-      "fotoUrl": "https://drive.google.com/uc?export=view&id=1DtSbC-Caz-3kP8THks9oo9C1yglvmcGh",
       "foto": null
     }
   ],
@@ -74967,7 +74967,7 @@
       {
         "mese": "2026-06",
         "path": "public/diario/2026-06.json",
-        "count": 6
+        "count": 8
       },
       {
         "mese": "2026-05",
