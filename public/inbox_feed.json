@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-06-26T17:28:54.148Z",
+  "exportedAt": "2026-06-26T17:29:02.826Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -1024,6 +1024,21 @@
         "lon": -74.36643081769375
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1d6OjGPc2tA6Kn3UnLHFHOY3vkLeLlpRX"
+    },
+    {
+      "ts": 1782494896502,
+      "id": 1782494896502,
+      "paese": "",
+      "km": "",
+      "testo": "Encuentros en la ruta",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 4.918861389981246,
+        "lon": -75.05378302302213
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1VzEjM6yO3HwJHkWG35DUHPj9MeC9OyFF"
     },
     {
       "ts": 1782494898057,
