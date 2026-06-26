@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-06-26T10:40:32.173Z",
+  "exportedAt": "2026-06-26T10:41:13.062Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -994,6 +994,36 @@
         "lon": -74.36678517420526
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=13g6igTRuhyYmG461if0_nmYBAdeHQzHL"
+    },
+    {
+      "ts": 1782470425071,
+      "id": 1782470425071,
+      "paese": "",
+      "km": "",
+      "testo": "Saliendo para manizales",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 4.819847645296093,
+        "lon": -74.36678517420526
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1Lb89v2oN9RvFd-rMugfQ5bu-RDuLOow3"
+    },
+    {
+      "ts": 1782470466547,
+      "id": 1782470466547,
+      "paese": "",
+      "km": "",
+      "testo": "Saliendo",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 4.820050078507342,
+        "lon": -74.36643081769375
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1d6OjGPc2tA6Kn3UnLHFHOY3vkLeLlpRX"
     }
   ]
 }
