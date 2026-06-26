@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-06-06T13:57:14.461Z",
+  "exportedAt": "2026-06-26T10:40:32.173Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -979,6 +979,21 @@
         "lon": -74.36060278448166
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1wYlqXEnLOfQLscfZwFUmilQK_H5tnQox"
+    },
+    {
+      "ts": 1782470423518,
+      "id": 1782470423518,
+      "paese": "",
+      "km": "",
+      "testo": "Saliendo para manizales",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 4.819847645296093,
+        "lon": -74.36678517420526
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=13g6igTRuhyYmG461if0_nmYBAdeHQzHL"
     }
   ]
 }
