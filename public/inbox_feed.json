@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-06-29T16:36:58.280Z",
+  "exportedAt": "2026-06-29T16:37:28.148Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -1114,6 +1114,21 @@
         "lon": -75.63692474342275
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1AS2aTSZ-6qa0bi0lrgxts_8q7JszhKEG"
+    },
+    {
+      "ts": 1782751040523,
+      "id": 1782751040523,
+      "paese": "",
+      "km": "",
+      "testo": "Pereira",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 4.855628596459884,
+        "lon": -75.63687183492642
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1WlW0uZu7NAUqduiNtl_Z7hMnxqBBPDFa"
     }
   ]
 }
