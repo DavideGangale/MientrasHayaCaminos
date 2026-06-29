@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-06-26T20:50:15.697Z",
+  "exportedAt": "2026-06-29T16:36:58.280Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -1084,6 +1084,36 @@
         "lon": -75.26189714389754
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1nrKRX4Kc66EJpe-CFsSu5aCdDwYZn2ue"
+    },
+    {
+      "ts": 1782751010512,
+      "id": 1782751010512,
+      "paese": "",
+      "km": "",
+      "testo": "Pereira",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 4.85562035189294,
+        "lon": -75.63692474342275
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1qwZ1Z2Ams1IUGiBd0OlJ8NgfCZWpa-ow"
+    },
+    {
+      "ts": 1782751011805,
+      "id": 1782751011805,
+      "paese": "",
+      "km": "",
+      "testo": "Pereira",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 4.85562035189294,
+        "lon": -75.63692474342275
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1AS2aTSZ-6qa0bi0lrgxts_8q7JszhKEG"
     }
   ]
 }
