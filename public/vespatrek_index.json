@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-07-05T14:17:28.103Z",
+  "_exportDate": "2026-07-05T14:30:01.883Z",
   "titolo": "Mientras Haya Caminos",
   "paeseAttuale": "Colombia",
   "diarioTagsPreset": [
@@ -40,8 +40,8 @@
       "slug": "colombia",
       "path": "public/paesi/colombia.json",
       "stats": {
-        "km": 2526.980000000001,
-        "benzina": 134.783,
+        "km": 2970.859999999999,
+        "benzina": 153.419,
         "spesaBenzinaUsd": 193.50052440639604,
         "olioMl": 3566,
         "spesaOlioUsd": 49.33890276141139,
