@@ -1,10 +1,190 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-06-06T13:58:15.143Z",
+  "_exportDate": "2026-07-05T00:40:13.460Z",
   "tipo": "diario_mese",
   "mese": "2026-06",
-  "count": 9,
+  "count": 19,
   "entries": [
+    {
+      "id": 1782751040523,
+      "ts": 1782751040523,
+      "data": "29/06/2026",
+      "ora": "11:37",
+      "paese": "Colombia",
+      "km": "2733.0",
+      "testo": "Pereira",
+      "tags": [],
+      "geo": {
+        "lat": 4.855628596459884,
+        "lon": -75.63687183492642
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1WlW0uZu7NAUqduiNtl_Z7hMnxqBBPDFa",
+      "foto": null
+    },
+    {
+      "id": 1782751011805,
+      "ts": 1782751011805,
+      "data": "29/06/2026",
+      "ora": "11:36",
+      "paese": "Colombia",
+      "km": "2733.0",
+      "testo": "Pereira",
+      "tags": [],
+      "geo": {
+        "lat": 4.85562035189294,
+        "lon": -75.63692474342275
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1AS2aTSZ-6qa0bi0lrgxts_8q7JszhKEG",
+      "foto": null
+    },
+    {
+      "id": 1782751010512,
+      "ts": 1782751010512,
+      "data": "29/06/2026",
+      "ora": "11:36",
+      "paese": "Colombia",
+      "km": "2733.0",
+      "testo": "Pereira",
+      "tags": [],
+      "geo": {
+        "lat": 4.85562035189294,
+        "lon": -75.63692474342275
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1qwZ1Z2Ams1IUGiBd0OlJ8NgfCZWpa-ow",
+      "foto": null
+    },
+    {
+      "id": 1782507001172,
+      "ts": 1782507001172,
+      "data": "26/06/2026",
+      "ora": "15:50",
+      "paese": "Colombia",
+      "km": "2482.5",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 4.891399916353683,
+        "lon": -75.26189714389754
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1nrKRX4Kc66EJpe-CFsSu5aCdDwYZn2ue",
+      "foto": null
+    },
+    {
+      "id": 1782507000138,
+      "ts": 1782507000138,
+      "data": "26/06/2026",
+      "ora": "15:50",
+      "paese": "Colombia",
+      "km": "2482.5",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 4.891399916353683,
+        "lon": -75.26189714389754
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1Xkz-no9CFWAD39xBt2brh7ZgGyD3VAE9",
+      "foto": null
+    },
+    {
+      "id": 1782494898057,
+      "ts": 1782494898057,
+      "data": "26/06/2026",
+      "ora": "12:28",
+      "paese": "Colombia",
+      "km": "2482.5",
+      "testo": "Encuentros en la ruta",
+      "tags": [],
+      "geo": {
+        "lat": 4.918861389981246,
+        "lon": -75.05378302302213
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1zmKmHUrmOb_i64qSJ7yfYUJCRGsDLJ3B",
+      "foto": null
+    },
+    {
+      "id": 1782494896502,
+      "ts": 1782494896502,
+      "data": "26/06/2026",
+      "ora": "12:28",
+      "paese": "Colombia",
+      "km": "2482.5",
+      "testo": "Encuentros en la ruta",
+      "tags": [],
+      "geo": {
+        "lat": 4.918861389981246,
+        "lon": -75.05378302302213
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1VzEjM6yO3HwJHkWG35DUHPj9MeC9OyFF",
+      "foto": null
+    },
+    {
+      "id": 1782470466547,
+      "ts": 1782470466547,
+      "data": "26/06/2026",
+      "ora": "05:41",
+      "paese": "Colombia",
+      "km": "2342.4",
+      "testo": "Saliendo",
+      "tags": [],
+      "geo": {
+        "lat": 4.820050078507342,
+        "lon": -74.36643081769375
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1d6OjGPc2tA6Kn3UnLHFHOY3vkLeLlpRX",
+      "foto": null
+    },
+    {
+      "id": 1782470425071,
+      "ts": 1782470425071,
+      "data": "26/06/2026",
+      "ora": "05:40",
+      "paese": "Colombia",
+      "km": "2342.4",
+      "testo": "Saliendo para manizales",
+      "tags": [],
+      "geo": {
+        "lat": 4.819847645296093,
+        "lon": -74.36678517420526
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1Lb89v2oN9RvFd-rMugfQ5bu-RDuLOow3",
+      "foto": null
+    },
+    {
+      "id": 1782470423518,
+      "ts": 1782470423518,
+      "data": "26/06/2026",
+      "ora": "05:40",
+      "paese": "Colombia",
+      "km": "2342.4",
+      "testo": "Saliendo para manizales",
+      "tags": [],
+      "geo": {
+        "lat": 4.819847645296093,
+        "lon": -74.36678517420526
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=13g6igTRuhyYmG461if0_nmYBAdeHQzHL",
+      "foto": null
+    },
     {
       "id": 1780754226572,
       "ts": 1780754226572,
