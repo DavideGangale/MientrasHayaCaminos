@@ -8,14 +8,14 @@
   <meta name="theme-color" content="#d32f2f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="VespaTrek">
+<meta name="apple-mobile-web-app-title" content="Mientras Haya Caminos">
 
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 
   
-  <title>VespaTrek PX150</title>
+  <title>Mientras Haya Caminos</title>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -1381,7 +1381,7 @@ overflow: auto;
   <!-- ===== LOADING ===== -->
   <div id="loading">
     <div style="font-size:48px; margin-bottom:15px;">🛵</div>
-    <div style="font-size:20px; font-weight:bold; letter-spacing:2px;">VESPATREK PX150</div>
+    <div style="font-size:20px; font-weight:bold; letter-spacing:2px;">MIENTRAS HAYA CAMINOS</div>
     <div class="loading-bar-container">
       <div class="loading-bar" id="loading-bar"></div>
     </div>
@@ -1419,7 +1419,7 @@ overflow: auto;
 
   <!-- ===== HEADER ===== -->
 <div class="header">
-  VESPATREK PX150
+  MIENTRAS HAYA CAMINOS
 </div>
 
  <!-- ==================== PAGINA 1: GUIDA ==================== -->
@@ -1879,7 +1879,7 @@ overflow: auto;
 <div id="modalRicambi" class="modal-overlay fullscreen">
   <div class="modal-content" style="border-color:#ff9800; max-width:560px;">
     <button class="close-modal" onclick="chiudiModal('modalRicambi')">×</button>
-    <h2 style="color:#ff9800; text-align:center; margin-top:0;">🧰 Officina VespaTrek</h2>
+    <h2 style="color:#ff9800; text-align:center; margin-top:0;">🧰 Officina</h2>
 
     <!-- QUI DENTRO incolla la vecchia card "Bauletto & Ricambi" che hai tagliato -->
     <div class="dash-card" style="padding:15px;">
@@ -2357,6 +2357,14 @@ overflow: auto;
     <input id="det-titolo" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Titolo (es. Bogotá → Medellín / Centro storico)">
 
     <textarea id="det-note" rows="4"  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Note: cosa hai visto, com’è andata, problemi, incontri..."></textarea>
+
+    <div style="margin-top:10px; margin-bottom:15px; text-align:left;">
+      <label for="det-tipo" style="color:#aaa; font-size:12px; display:block; margin-bottom:4px; font-weight:bold;">TIPO PERCORSO</label>
+      <select id="det-tipo" class="inp-select">
+        <option value="tappa">Tappa (Viaggio principale)</option>
+        <option value="turismo">Turismo (Giri locali)</option>
+      </select>
+    </div>
 
     <button class="btn-azione" style="background:#ff9800;color:black;" onclick="salvaDettagliPercorso()">
       💾 Salva dettagli
@@ -5781,8 +5789,8 @@ function registraAcquisto() {
     const qtaInput = validaInput('inputCompra', 0.01, 999);
     if (!qtaInput) { showToast('⚠️ Inserisci una quantità valida'); return; }
 
-    // Sempre in litri internamente
-    const qtaLitri = (unitaAttuale === 'G') ? (qtaInput * FAT_GAL) : qtaInput;
+    // Sempre in litri internamente (arrotondato a 3 decimali per evitare bug di precisione float con i galloni)
+    const qtaLitri = parseFloat(((unitaAttuale === 'G') ? (qtaInput * FAT_GAL) : qtaInput).toFixed(3));
 
     const paese = carica('vt_paeseAttuale', 'Colombia');
 
@@ -6029,7 +6037,8 @@ function registraTravaso() {
   const qtaInput = validaInput('inputTravaso', 0.01, 999);
   if (!qtaInput) { showToast('⚠️ Inserisci una quantità valida'); return; }
 
-  const qtaLitri = (unitaAttuale === 'G') ? qtaInput * FAT_GAL : qtaInput;
+  // Sempre in litri internamente (arrotondato a 3 decimali per evitare bug di precisione float con i galloni)
+  const qtaLitri = parseFloat(((unitaAttuale === 'G') ? qtaInput * FAT_GAL : qtaInput).toFixed(3));
   
   const keyScorta = (sorgenteTravaso === 'SX') ? 'vt_scorta1Litri' : 'vt_scorta2Litri';
   const nomeTanica = (sorgenteTravaso === 'SX') ? 'Tanica SX' : 'Tanica DX';
@@ -9403,9 +9412,10 @@ window.apriDettagliPercorso = function (id) {
   if (!found) { showToast('⚠️ Elemento non trovato'); return; }
 
   detPercorsoId = id;
-detPercorsoTipoRef = (found.key === 'vt_turismo') ? 'turismo' : 'tappa';
+  detPercorsoTipoRef = (found.key === 'vt_turismo') ? 'turismo' : 'tappa';
   const titoloEl = document.getElementById('det-titolo');
   const noteEl   = document.getElementById('det-note');
+  const tipoEl   = document.getElementById('det-tipo');
   if (!titoloEl || !noteEl) {
     showToast('⚠️ Modal dettagli non presente (det-titolo/det-note)');
     return;
@@ -9413,6 +9423,9 @@ detPercorsoTipoRef = (found.key === 'vt_turismo') ? 'turismo' : 'tappa';
 
   titoloEl.value = found.item.titolo || '';
   noteEl.value   = found.item.note || '';
+  if (tipoEl) {
+    tipoEl.value = detPercorsoTipoRef;
+  }
 
   apriModal('modalDettagli');
 };
@@ -9425,11 +9438,34 @@ window.salvaDettagliPercorso = function () {
 
   const titolo = (document.getElementById('det-titolo')?.value || '').trim();
   const note   = (document.getElementById('det-note')?.value || '').trim();
+  const tipoNuovo = document.getElementById('det-tipo')?.value || 'tappa';
 
-  found.list[found.idx].titolo = titolo;
-  found.list[found.idx].note   = note;
+  const keyOriginale = found.key; // 'vt_tappe' o 'vt_turismo'
+  const keyNuova = (tipoNuovo === 'turismo') ? 'vt_turismo' : 'vt_tappe';
 
-  salva(found.key, found.list);
+  if (keyOriginale !== keyNuova) {
+    // Rimuove l'oggetto dalla vecchia lista
+    const item = found.list.splice(found.idx, 1)[0];
+    
+    // Aggiorna titolo, note e tipo
+    item.titolo = titolo;
+    item.note   = note;
+    item.tipo = (tipoNuovo === 'turismo') ? 'Turismo' : 'Tappa';
+    
+    // Lo inserisce in cima alla nuova lista
+    const nuovaLista = caricaJSON(keyNuova, []);
+    nuovaLista.unshift(item);
+    
+    // Ordiniamo per id decrescente
+    nuovaLista.sort((a, b) => (b.id || 0) - (a.id || 0));
+    
+    salva(keyOriginale, found.list);
+    salva(keyNuova, nuovaLista);
+  } else {
+    found.list[found.idx].titolo = titolo;
+    found.list[found.idx].note   = note;
+    salva(keyOriginale, found.list);
+  }
 
   chiudiModal('modalDettagli');
   renderTappe();
@@ -12115,7 +12151,7 @@ const spesaBenzinaPaeseCalcolata =
   files['public/vespatrek_index.json'] = {
     _version: 'public-2.0',
     _exportDate: new Date().toISOString(),
-    titolo: 'VespaTrek PX150',
+    titolo: 'Mientras Haya Caminos',
     paeseAttuale: carica('vt_paeseAttuale','Colombia'),
     diarioTagsPreset: DIARIO_TAGS_PRESET,
 
@@ -12857,4 +12893,3 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
-
