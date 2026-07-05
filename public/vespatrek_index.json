@@ -1,7 +1,7 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-07-05T00:40:13.465Z",
-  "titolo": "VespaTrek PX150",
+  "_exportDate": "2026-07-05T14:17:28.103Z",
+  "titolo": "Mientras Haya Caminos",
   "paeseAttuale": "Colombia",
   "diarioTagsPreset": [
     "Paesaggi",
@@ -27,7 +27,7 @@
   ],
   "stats": {
     "kmTotali": 2970.86,
-    "benzinaUsataLitri": 153.41900000000007,
+    "benzinaUsataLitri": 153.41900000000004,
     "olioTotaleLitri": 3.566,
     "spesaBenzinaUsd": 197.28945448753498,
     "spesaOlioUsd": 49.33890276141139,
@@ -40,8 +40,8 @@
       "slug": "colombia",
       "path": "public/paesi/colombia.json",
       "stats": {
-        "km": 2970.8599999999997,
-        "benzina": 153.41900000000004,
+        "km": 2526.980000000001,
+        "benzina": 134.783,
         "spesaBenzinaUsd": 193.50052440639604,
         "olioMl": 3566,
         "spesaOlioUsd": 49.33890276141139,
@@ -15380,7 +15380,7 @@
     },
     {
       "id": 1782771458047,
-      "tipo": "Turismo",
+      "tipo": "Tappa",
       "data": "29/06/2026",
       "ora": "17:17",
       "paese": "Colombia",
