@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-06-29T16:37:28.148Z",
+  "exportedAt": "2026-07-10T14:04:15.539Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -1129,6 +1129,36 @@
         "lon": -75.63687183492642
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1WlW0uZu7NAUqduiNtl_Z7hMnxqBBPDFa"
+    },
+    {
+      "ts": 1783692243467,
+      "id": 1783692243467,
+      "paese": "",
+      "km": "",
+      "testo": "Santa sofia",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 5.713233090585361,
+        "lon": -73.60364522874018
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1JFs_C53Z-xAnGpXrJC3D6ft6BPmrOSkp"
+    },
+    {
+      "ts": 1783692245168,
+      "id": 1783692245168,
+      "paese": "",
+      "km": "",
+      "testo": "Santa sofia",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 5.713233090585361,
+        "lon": -73.60364522874018
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1Q1j-3XUB70SJw56eht5vE3Heu-xrXcq9"
     }
   ]
 }
