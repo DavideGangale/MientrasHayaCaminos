@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-07-10T14:04:15.539Z",
+  "exportedAt": "2026-07-10T14:04:41.810Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -1159,6 +1159,21 @@
         "lon": -73.60364522874018
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1Q1j-3XUB70SJw56eht5vE3Heu-xrXcq9"
+    },
+    {
+      "ts": 1783692274047,
+      "id": 1783692274047,
+      "paese": "",
+      "km": "",
+      "testo": "Santa sofia",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 5.7134883298746715,
+        "lon": -73.60366489258668
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1ZAeCYMl5ZQ27x65fau8bhpOQMJaC9wSg"
     }
   ]
 }
