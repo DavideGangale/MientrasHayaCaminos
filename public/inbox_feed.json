@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-07-10T14:04:41.810Z",
+  "exportedAt": "2026-07-10T20:01:48.122Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -1174,6 +1174,36 @@
         "lon": -73.60366489258668
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1ZAeCYMl5ZQ27x65fau8bhpOQMJaC9wSg"
+    },
+    {
+      "ts": 1783713699189,
+      "id": 1783713699189,
+      "paese": "",
+      "km": "",
+      "testo": "Cano",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 6.7538325162667165,
+        "lon": -73.00489839173201
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=19nuV5PUZijBDGMZ0ulDTo9JyECCgJSWL"
+    },
+    {
+      "ts": 1783713700507,
+      "id": 1783713700507,
+      "paese": "",
+      "km": "",
+      "testo": "Cano",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 6.7538325162667165,
+        "lon": -73.00489839173201
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1sT6wukVGh8BkOWh3gKhunk_btkCV-lpV"
     }
   ]
 }
