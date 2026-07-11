@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-07-10T20:02:11.437Z",
+  "exportedAt": "2026-07-11T12:29:04.615Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -1219,6 +1219,21 @@
         "lon": -73.0049096482092
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1WvsMtVASPJKI3YW8E2VSaSywnI6dQh85"
+    },
+    {
+      "ts": 1783772937104,
+      "id": 1783772937104,
+      "paese": "",
+      "km": "",
+      "testo": "Hjggj",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 7.123464557389801,
+        "lon": -73.10632939941908
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1IbfZ9eKtPKkrlv3vCQ4YvcKlAZq-FLMd"
     }
   ]
 }
