@@ -2959,6 +2959,7 @@ let tappaAttuale = nuovaTappa(0);
 ============================================================ */
 let wakeLock = null;
 let wakeLockEnabled = true;
+let bgAudio = null;
 
 async function requestWakeLock() {
   if (!wakeLockEnabled) return;
@@ -2980,9 +2981,41 @@ async function releaseWakeLock() {
   wakeLock = null;
 }
 
+function requestAudioWakeLock() {
+  if (bgAudio) return;
+  try {
+    bgAudio = document.createElement('audio');
+    bgAudio.id = 'bg-audio-wakelock';
+    bgAudio.loop = true;
+    // Silent 1-second WAV loop base64 (tiny and cross-browser compatible)
+    bgAudio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAIA';
+    bgAudio.volume = 0.01; // extremely low volume to keep background task active on iOS Safari
+    bgAudio.play().then(() => {
+      console.log('Audio wake lock active (silence loop)');
+    }).catch(e => {
+      console.warn('Audio wake lock play error:', e);
+    });
+  } catch (e) {
+    console.warn('Audio wake lock setup error:', e);
+  }
+}
+
+function releaseAudioWakeLock() {
+  if (bgAudio) {
+    try { bgAudio.pause(); } catch(e) {}
+    bgAudio = null;
+    console.log('Audio wake lock released');
+  }
+}
+
 function syncWakeLock() {
-  if (inViaggio && document.visibilityState === 'visible') requestWakeLock();
-  else releaseWakeLock();
+  if (inViaggio) {
+    if (document.visibilityState === 'visible') requestWakeLock();
+    requestAudioWakeLock();
+  } else {
+    releaseWakeLock();
+    releaseAudioWakeLock();
+  }
 }
 
 document.addEventListener('visibilitychange', () => {
