@@ -1,0 +1,135 @@
+{
+  "_version": "public-2.0",
+  "_exportDate": "2026-07-15T06:44:53.382Z",
+  "tipo": "diario_mese",
+  "mese": "2026-07",
+  "count": 7,
+  "entries": [
+    {
+      "id": 1783772937104,
+      "ts": 1783772937104,
+      "data": "11/07/2026",
+      "ora": "07:28",
+      "paese": "Colombia",
+      "km": "3176.7",
+      "testo": "Hjggj",
+      "tags": [],
+      "geo": {
+        "lat": 7.123464557389801,
+        "lon": -73.10632939941908
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1IbfZ9eKtPKkrlv3vCQ4YvcKlAZq-FLMd",
+      "foto": null
+    },
+    {
+      "id": 1783713724962,
+      "ts": 1783713724962,
+      "data": "10/07/2026",
+      "ora": "15:02",
+      "paese": "Colombia",
+      "km": "3176.7",
+      "testo": "Jj",
+      "tags": [],
+      "geo": {
+        "lat": 6.753825938001996,
+        "lon": -73.0049096482092
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1WvsMtVASPJKI3YW8E2VSaSywnI6dQh85",
+      "foto": null
+    },
+    {
+      "id": 1783713700507,
+      "ts": 1783713700507,
+      "data": "10/07/2026",
+      "ora": "15:01",
+      "paese": "Colombia",
+      "km": "3176.7",
+      "testo": "Cano",
+      "tags": [],
+      "geo": {
+        "lat": 6.7538325162667165,
+        "lon": -73.00489839173201
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1sT6wukVGh8BkOWh3gKhunk_btkCV-lpV",
+      "foto": null
+    },
+    {
+      "id": 1783713699189,
+      "ts": 1783713699189,
+      "data": "10/07/2026",
+      "ora": "15:01",
+      "paese": "Colombia",
+      "km": "3176.7",
+      "testo": "Cano",
+      "tags": [],
+      "geo": {
+        "lat": 6.7538325162667165,
+        "lon": -73.00489839173201
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=19nuV5PUZijBDGMZ0ulDTo9JyECCgJSWL",
+      "foto": null
+    },
+    {
+      "id": 1783692274047,
+      "ts": 1783692274047,
+      "data": "10/07/2026",
+      "ora": "09:04",
+      "paese": "Colombia",
+      "km": "3192.3",
+      "testo": "Santa sofia",
+      "tags": [],
+      "geo": {
+        "lat": 5.7134883298746715,
+        "lon": -73.60366489258668
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1ZAeCYMl5ZQ27x65fau8bhpOQMJaC9wSg",
+      "foto": null
+    },
+    {
+      "id": 1783692245168,
+      "ts": 1783692245168,
+      "data": "10/07/2026",
+      "ora": "09:04",
+      "paese": "Colombia",
+      "km": "3192.3",
+      "testo": "Santa sofia",
+      "tags": [],
+      "geo": {
+        "lat": 5.713233090585361,
+        "lon": -73.60364522874018
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1Q1j-3XUB70SJw56eht5vE3Heu-xrXcq9",
+      "foto": null
+    },
+    {
+      "id": 1783692243467,
+      "ts": 1783692243467,
+      "data": "10/07/2026",
+      "ora": "09:04",
+      "paese": "Colombia",
+      "km": "3192.3",
+      "testo": "Santa sofia",
+      "tags": [],
+      "geo": {
+        "lat": 5.713233090585361,
+        "lon": -73.60364522874018
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1JFs_C53Z-xAnGpXrJC3D6ft6BPmrOSkp",
+      "foto": null
+    }
+  ]
+}
