@@ -2797,7 +2797,6 @@ let lastTimestamp = null;
 
 let coordinateTracciato = [];
 let watchId = null;
-let lastGpsCallbackTimestamp = Date.now();
   let gpsDisponibile = false;
 let ultimoErroreGps = '';
 
@@ -3759,7 +3758,6 @@ function startGPS() {
 
   watchId = navigator.geolocation.watchPosition(
     (pos) => {
-      lastGpsCallbackTimestamp = Date.now();
       gpsDisponibile = true;
       ultimoErroreGps = '';
 
@@ -3768,7 +3766,6 @@ function startGPS() {
       updatePosition(pos);
     },
     (err) => {
-      lastGpsCallbackTimestamp = Date.now(); // lo aggiorniamo comunque per evitare loop infiniti
       gpsDisponibile = false;
 
       if (err && err.code === 1) ultimoErroreGps = 'Permesso posizione negato';
@@ -3783,10 +3780,6 @@ function startGPS() {
   );
 }
 
-function restartGPS() {
-  console.log("Riavvio forzato del GPS per evitare il congelamento da parte di iOS...");
-  startGPS();
-}
 
 function bearingDeg(lat1, lon1, lat2, lon2) {
   const toRad = (d) => d * Math.PI / 180;
@@ -4043,11 +4036,6 @@ function startTrackingNow() {
     tappaAttuale.secondiGuida++;
     salvaTappaThrottled(10000);   // salva ogni ~10s
     aggiornaTempoGuidaUI();
-
-    // Controllo anti-sospensione GPS (se siamo offline/background e non riceviamo posizioni da > 25 secondi)
-    if (Date.now() - lastGpsCallbackTimestamp > 25000) {
-      restartGPS();
-    }
   }, 1000);
 
   showToast('▶ Tracking avviato');
@@ -12943,4 +12931,5 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
 
