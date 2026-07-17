@@ -824,7 +824,7 @@ color:#fff;
 .guida-ico.play{ background:var(--verde); color:#000; }
 .guida-ico.stop{ background:#f44336; color:#000; }
 
-.guida-ico.end{ background:#ff9800; color:#000; }
+.guida-ico.end{ background:#2196F3; color:#000; }
 
     
 
@@ -2364,6 +2364,17 @@ overflow: auto;
         <option value="tappa">Tappa (Viaggio principale)</option>
         <option value="turismo">Turismo (Giri locali)</option>
       </select>
+    </div>
+
+    <div style="margin-top:15px; padding-top:15px; border-top:1px dashed #444; text-align:left; margin-bottom:15px;">
+      <label style="color:#aaa; font-size:12px; display:block; margin-bottom:6px; font-weight:bold;">📍 IMPORTA TRACCIA GPX (SE SEI STATO OFFLINE/BACKGROUND)</label>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <button type="button" class="btn-secondary" style="margin-top:0; flex:1; font-size:13px; padding:10px;" onclick="document.getElementById('import-gpx-file').click()">
+          📂 Carica File .gpx
+        </button>
+        <span id="gpx-import-status" style="font-size:12px; color:#4caf50; font-weight:bold; flex:1.2; word-break:break-word;"></span>
+      </div>
+      <input type="file" id="import-gpx-file" accept=".gpx" style="display:none;" onchange="importaGPXInDettagli(this)">
     </div>
 
     <button class="btn-azione" style="background:#ff9800;color:black;" onclick="salvaDettagliPercorso()">
@@ -9445,6 +9456,65 @@ window.trovaPercorsoById = function (id) {
   return null;
 };
 
+let importedGpxCoords = null;
+let importedGpxKm = 0;
+
+window.importaGPXInDettagli = function (input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    try {
+      const text = e.target.result;
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(text, "text/xml");
+      const trkpts = xmlDoc.getElementsByTagName("trkpt");
+
+      if (trkpts.length === 0) {
+        showToast("⚠️ Nessun punto traccia trovato nel GPX");
+        return;
+      }
+
+      const coords = [];
+      let totalDist = 0;
+      let prevPt = null;
+
+      for (let i = 0; i < trkpts.length; i++) {
+        const lat = parseFloat(trkpts[i].getAttribute("lat"));
+        const lon = parseFloat(trkpts[i].getAttribute("lon"));
+        if (isFinite(lat) && isFinite(lon)) {
+          coords.push([lat, lon]);
+          
+          if (prevPt) {
+            const d = calcolaDistanza(prevPt[0], prevPt[1], lat, lon);
+            totalDist += d;
+          }
+          prevPt = [lat, lon];
+        }
+      }
+
+      if (coords.length < 2) {
+        showToast("⚠️ Traccia GPX insufficiente");
+        return;
+      }
+
+      importedGpxCoords = coords;
+      importedGpxKm = parseFloat(totalDist.toFixed(2));
+
+      const statusEl = document.getElementById("gpx-import-status");
+      if (statusEl) {
+        statusEl.innerText = `✅ GPX caricato: ${coords.length} punti (${importedGpxKm} km)`;
+      }
+      showToast("✅ GPX pronto! Clicca su Salva dettagli per confermare.");
+    } catch (err) {
+      console.error(err);
+      showToast("❌ Errore nella lettura del file GPX");
+    }
+  };
+  reader.readAsText(file);
+};
+
 window.apriDettagliPercorso = function (id) {
   const found = window.trovaPercorsoById(id);
   if (!found) { showToast('⚠️ Elemento non trovato'); return; }
@@ -9465,6 +9535,14 @@ window.apriDettagliPercorso = function (id) {
     tipoEl.value = detPercorsoTipoRef;
   }
 
+  // Reset import GPX
+  importedGpxCoords = null;
+  importedGpxKm = 0;
+  const statusEl = document.getElementById('gpx-import-status');
+  if (statusEl) statusEl.innerText = '';
+  const fileInput = document.getElementById('import-gpx-file');
+  if (fileInput) fileInput.value = '';
+
   apriModal('modalDettagli');
 };
 
@@ -9477,6 +9555,16 @@ window.salvaDettagliPercorso = function () {
   const titolo = (document.getElementById('det-titolo')?.value || '').trim();
   const note   = (document.getElementById('det-note')?.value || '').trim();
   const tipoNuovo = document.getElementById('det-tipo')?.value || 'tappa';
+
+  // Se è stata importata una traccia GPX, aggiorna traccia, km e benzina stimata
+  if (importedGpxCoords) {
+    found.list[found.idx].traccia = compressTrace(importedGpxCoords, 30000);
+    found.list[found.idx].km = importedGpxKm;
+    const consumoBase = (typeof getConsumoUsatoKmPerL === 'function') ? getConsumoUsatoKmPerL() : CONSUMO_MEDIO;
+    const stimLitri = (consumoBase && consumoBase > 0) ? (importedGpxKm / consumoBase) : 0;
+    found.list[found.idx].benzina = parseFloat(stimLitri.toFixed(2));
+    found.list[found.idx].benzinaStimataLitri = parseFloat(stimLitri.toFixed(3));
+  }
 
   const keyOriginale = found.key; // 'vt_tappe' o 'vt_turismo'
   const keyNuova = (tipoNuovo === 'turismo') ? 'vt_turismo' : 'vt_tappe';
@@ -12931,5 +13019,6 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
 
 
