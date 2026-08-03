@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-08-03T13:09:38.239Z",
+  "_exportDate": "2026-08-03T13:14:23.204Z",
   "titolo": "Mientras Haya Caminos",
   "paeseAttuale": "Italia",
   "diarioTagsPreset": [
@@ -27,7 +27,7 @@
   ],
   "stats": {
     "kmTotali": 3313.43,
-    "benzinaUsataLitri": 168.891,
+    "benzinaUsataLitri": 168.89100000000002,
     "olioTotaleLitri": 4.396,
     "spesaBenzinaUsd": 246.37041147222752,
     "spesaOlioUsd": 64.65791302427127,
@@ -4492,7 +4492,7 @@
     },
     {
       "id": 1785674467844,
-      "tipo": "Tappa",
+      "tipo": "Turismo",
       "data": "02/08/2026",
       "ora": "14:41",
       "paese": "Italia",
