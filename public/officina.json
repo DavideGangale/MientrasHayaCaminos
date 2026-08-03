@@ -1,9 +1,9 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-08-03T09:45:39.647Z",
+  "_exportDate": "2026-08-03T13:09:38.231Z",
   "tipo": "officina",
   "stats": {
-    "spesaRicambiUsd": 52.05774191693799,
+    "spesaRicambiUsd": 70.96611906708507,
     "spesaManodoperaUsd": 8.090242166132956
   },
   "manutenzioni": [
@@ -159,7 +159,7 @@
         "lon": -74.3606878
       },
       "fotoCandela": null,
-      "paese": "Colombia"
+      "paese": "Italia"
     },
     {
       "id": 1774884720591,
@@ -177,18 +177,22 @@
         "lon": -74.35554
       },
       "fotoCandela": null,
-      "paese": "Colombia"
+      "paese": "Italia"
     }
   ],
   "inventario": [
     {
       "id": "inv1",
       "nome": "Cavi Cambio",
-      "qta": 2,
+      "qta": 3,
       "wear": "interval",
       "intervalKm": 6000,
       "usedKm": 1800,
-      "lastKm": 7262.1
+      "lastKm": 7262.1,
+      "costoLocal": 7000,
+      "costoUsd": 2.1698137713283536,
+      "valuta": "COP",
+      "fxToUsd": 0.00030997339590405055
     },
     {
       "id": "inv2",
@@ -220,11 +224,15 @@
     {
       "id": "inv5",
       "nome": "Cavo Acceleratore",
-      "qta": 0,
+      "qta": 1,
       "wear": "interval",
       "intervalKm": 6000,
       "usedKm": 2300,
-      "lastKm": 6762.1
+      "lastKm": 6762.1,
+      "costoLocal": 9000,
+      "costoUsd": 2.789760563136455,
+      "valuta": "COP",
+      "fxToUsd": 0.00030997339590405055
     },
     {
       "id": "inv6",
@@ -238,15 +246,15 @@
     {
       "id": "inv7",
       "nome": "Ganasce freno post.",
-      "qta": 0,
+      "qta": 1,
       "wear": "interval",
       "intervalKm": 3000,
       "usedKm": 0,
       "lastKm": 1144.55,
-      "costoLocal": 43000,
-      "costoUsd": 11.596013771457237,
+      "costoLocal": 88000,
+      "costoUsd": 25.54481658713951,
       "valuta": "COP",
-      "fxToUsd": 0.00026967473887109855
+      "fxToUsd": 0.00030997339590405055
     },
     {
       "id": "inv8",
