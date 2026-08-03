@@ -1,8 +1,8 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-08-03T09:45:39.654Z",
+  "_exportDate": "2026-08-03T13:09:38.239Z",
   "titolo": "Mientras Haya Caminos",
-  "paeseAttuale": "Colombia",
+  "paeseAttuale": "Italia",
   "diarioTagsPreset": [
     "Paesaggi",
     "Vespistas",
@@ -31,7 +31,7 @@
     "olioTotaleLitri": 4.396,
     "spesaBenzinaUsd": 246.37041147222752,
     "spesaOlioUsd": 64.65791302427127,
-    "spesaRicambiUsd": 52.05774191693799,
+    "spesaRicambiUsd": 70.96611906708507,
     "spesaManodoperaUsd": 8.090242166132956
   },
   "paesi": [
@@ -40,13 +40,27 @@
       "slug": "colombia",
       "path": "public/paesi/colombia.json",
       "stats": {
-        "km": 3223.6499999999996,
-        "benzina": 165.299,
+        "km": 3149.8599999999997,
+        "benzina": 162.34700000000004,
         "spesaBenzinaUsd": 242.58148139108857,
         "olioMl": 4396,
         "spesaOlioUsd": 64.65791302427127,
-        "spesaRicambiUsd": 52.05774191693799,
+        "spesaRicambiUsd": 70.96611906708507,
         "spesaManodoperaUsd": 8.090242166132956
+      }
+    },
+    {
+      "paese": "Italia",
+      "slug": "italia",
+      "path": "public/paesi/italia.json",
+      "stats": {
+        "km": 73.78999999999999,
+        "benzina": 2.952,
+        "spesaBenzinaUsd": 0,
+        "olioMl": 0,
+        "spesaOlioUsd": 0,
+        "spesaRicambiUsd": 0,
+        "spesaManodoperaUsd": 0
       }
     }
   ],
@@ -274,7 +288,7 @@
       "tipo": "Turismo",
       "data": "02/08/2026",
       "ora": "20:47",
-      "paese": "Colombia",
+      "paese": "Italia",
       "km": 36.47,
       "durata": 75,
       "altMin": 36,
@@ -4481,7 +4495,7 @@
       "tipo": "Tappa",
       "data": "02/08/2026",
       "ora": "14:41",
-      "paese": "Colombia",
+      "paese": "Italia",
       "km": 37.32,
       "durata": 287,
       "altMin": 42,
@@ -48870,6 +48884,11 @@
         "paese": "Colombia",
         "slug": "colombia",
         "path": "public/paesi/colombia.json"
+      },
+      {
+        "paese": "Italia",
+        "slug": "italia",
+        "path": "public/paesi/italia.json"
       }
     ],
     "diarioMensile": [
