@@ -1,9 +1,9 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-08-03T13:28:56.819Z",
+  "_exportDate": "2026-08-04T17:12:47.902Z",
   "tipo": "diario_mese",
   "mese": "2026-04",
-  "count": 67,
+  "count": 70,
   "entries": [
     {
       "id": 1777398650520,
@@ -201,6 +201,24 @@
       "videoUrl": null,
       "videoPlanned": false,
       "fotoUrl": "https://drive.google.com/uc?export=view&id=10512gcIFVAf7anhkyqSRDpf1dCIkntLn",
+      "foto": null
+    },
+    {
+      "id": 1776726054923,
+      "ts": 1776726054923,
+      "data": "21/04/2026",
+      "ora": "01:00",
+      "paese": "Italia",
+      "km": "3480.2",
+      "testo": "Mesa de los santos",
+      "tags": [],
+      "geo": {
+        "lat": 6.927694567406901,
+        "lon": -73.04042841240496
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1WqD2eyr-vzpAhsIvNC-zlwGPe_jXXuEj",
       "foto": null
     },
     {
@@ -1182,6 +1200,46 @@
       "videoUrl": "https://youtube.com/shorts/xCr3GBpqygs?si=D_3ohf28elkgXGJZ",
       "videoPlanned": false,
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1OJ743UgrNfVPHBn0Q72UqoNYm3pCOL9h",
+      "foto": null
+    },
+    {
+      "id": 1775090747107,
+      "ts": 1775090747107,
+      "data": "02/04/2026",
+      "ora": "02:45",
+      "paese": "Italia",
+      "km": "3480.2",
+      "testo": "Esos Club Bogotá",
+      "tags": [
+        "Vespa",
+        "Piaggio",
+        "dicarbonegastrobar"
+      ],
+      "geo": {
+        "lat": 4.806004247196552,
+        "lon": -74.36063734065583
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1YecOhEezNdkRutVpe7YwkoBnTqm2V3n0",
+      "foto": null
+    },
+    {
+      "id": 1775069095798,
+      "ts": 1775069095798,
+      "data": "01/04/2026",
+      "ora": "20:44",
+      "paese": "Italia",
+      "km": "3480.2",
+      "testo": "Ttt",
+      "tags": [],
+      "geo": {
+        "lat": 4.806000978890526,
+        "lon": -74.36063569216664
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1DDfLpI_kvTHhpU0sJrPYCwA_T2V1aDMF",
       "foto": null
     },
     {
