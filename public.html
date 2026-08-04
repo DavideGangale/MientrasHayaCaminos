@@ -3205,6 +3205,11 @@ function renderMap(skipAutoFit = false) {
   layerMarkers.clearLayers();
   if (!DATA) return;
 
+  const btnSeeAll = document.getElementById('btnSeeAllTracks');
+  if (btnSeeAll) {
+    btnSeeAll.style.display = (selectedTrackId != null) ? 'block' : 'none';
+  }
+
   resetMarkerOffsetCache();
 
   let bounds = L.latLngBounds();
@@ -3288,7 +3293,10 @@ const diario = selectedTrackRelatedData
 function drawDiaryMarker(d, onlyVideos = false) {
   if (currentCountry && d.paese !== currentCountry) return;
   if (currentMonthFilter && getYearMonthFromPublicEntry(d) !== currentMonthFilter) return;
- // if (selectedTrackId && !isItemInsideSelectedTrack(d)) return;
+
+  const currentZoom = map ? map.getZoom() : 12;
+  if (currentZoom < 8) return;
+
   if (!d.geo) return;
 
   const lat = Number(d.geo.lat);
@@ -3357,9 +3365,11 @@ diario.forEach(d => drawDiaryMarker(d, true));
   manutenzioni.forEach(m => {
     if (currentCountry && m.paese !== currentCountry) return;
     if (currentMonthFilter && getYearMonthFromPublicEntry(m) !== currentMonthFilter) return;
-   // if (selectedTrackId && !isItemInsideSelectedTrack(m)) return;
     if (!m.geo) return;
     if (!isMarkerTypeVisible('MAINT')) return;
+
+    const currentZoom = map ? map.getZoom() : 12;
+    if (currentZoom < 11) return;
 
     const lat = Number(m.geo.lat);
     const lon = Number(m.geo.lon ?? m.geo.lng);
@@ -3374,8 +3384,10 @@ diario.forEach(d => drawDiaryMarker(d, true));
   rifornimenti.forEach(r => {
     if (currentCountry && r.paese !== currentCountry) return;
     if (currentMonthFilter && getYearMonthFromPublicEntry(r) !== currentMonthFilter) return;
-   // if (selectedTrackId && !isItemInsideSelectedTrack(r)) return;
     if (!isMarkerTypeVisible('FUEL')) return;
+
+    const currentZoom = map ? map.getZoom() : 12;
+    if (currentZoom < 10) return;
 
     const lat = Number(
       r?.geo?.lat ??
@@ -3402,9 +3414,11 @@ diario.forEach(d => drawDiaryMarker(d, true));
   carburazioni.forEach(c => {
        if (currentCountry && c.paese !== currentCountry) return;
     if (currentMonthFilter && getYearMonthFromPublicEntry(c) !== currentMonthFilter) return;
-   // if (selectedTrackId && !isItemInsideSelectedTrack(c)) return;
     if (!c.geo) return;
     if (!isMarkerTypeVisible('CARB')) return;
+
+    const currentZoom = map ? map.getZoom() : 12;
+    if (currentZoom < 11) return;
 
     const lat = Number(c.geo.lat);
     const lon = Number(c.geo.lon ?? c.geo.lng);
@@ -3661,6 +3675,10 @@ function popolaPaesi() {
     optStats.innerText = '📍 ' + nome;
     selectStats.appendChild(optStats);
   });
+
+  if (currentCountry) {
+    selectMap.value = currentCountry;
+  }
 }
 
 function apriStats() {
@@ -4389,12 +4407,12 @@ function renderDiaryList() {
 
        return `
       <div class="diary-card">
-        <div class="diary-head">
+        <div class="diary-head" onclick="focusOnTrack(${t.id}, '${it.kind}')" style="cursor:pointer;" title="${T('viewTrackOnMap')}">
           <div class="diary-badge ${badgeClass}">${badgeText}</div>
           <div class="diary-meta">${meta}</div>
         </div>
 
-        <div class="diary-text"><b>${escapeHtml(t.titolo || '')}</b></div>
+        <div class="diary-text" onclick="focusOnTrack(${t.id}, '${it.kind}')" style="cursor:pointer;" title="${T('viewTrackOnMap')}"><b>${escapeHtml(t.titolo || '')}</b></div>
 
         <div class="diary-meta" style="margin-top:10px;">
           📏 <b>${km.toFixed(1)} km</b> · ⏱️ ${h}h ${mm}m
@@ -4605,11 +4623,17 @@ async function loadData() {
 
     DATA = unisciDatasetGlobale();
 
-    // Imposta il paese attuale come filtro attivo all'avvio (disabilitato per mostrare Globali di default)
-    // const paeseAttuale = INDEX_DATA?.paeseAttuale || '';
-    // if (paeseAttuale) {
-    //   currentCountry = paeseAttuale;
-    // }
+    // Imposta il paese attuale come filtro attivo all'avvio
+    const paeseAttuale = INDEX_DATA?.paeseAttuale || '';
+    if (paeseAttuale) {
+      currentCountry = paeseAttuale;
+    }
+
+    // Mostra solo l'ultima tappa registrata all'avvio per una mappa pulita e ordinata
+    const ultimeT = INDEX_DATA?.ultimeTappe || [];
+    if (ultimeT.length > 0) {
+      selectedTrackId = ultimeT[0].id;
+    }
 
     popolaPaesi();
     popolaMesi();
