@@ -4645,7 +4645,6 @@ async function loadData() {
     renderMap(true); // skip auto fit per impostare il fit custom qui sotto
 
     // Centra sull'ultima tappa/giro registrato
-    const ultimeT = INDEX_DATA?.ultimeTappe || [];
     let zoomedToLatest = false;
     if (ultimeT.length > 0) {
       const ultimaTappaPaese = ultimeT.find(x => !currentCountry || x.paese === currentCountry) || ultimeT[0];
