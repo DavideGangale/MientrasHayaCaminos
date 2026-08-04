@@ -4605,11 +4605,11 @@ async function loadData() {
 
     DATA = unisciDatasetGlobale();
 
-    // Imposta il paese attuale come filtro attivo all'avvio
-    const paeseAttuale = INDEX_DATA?.paeseAttuale || '';
-    if (paeseAttuale) {
-      currentCountry = paeseAttuale;
-    }
+    // Imposta il paese attuale come filtro attivo all'avvio (disabilitato per mostrare Globali di default)
+    // const paeseAttuale = INDEX_DATA?.paeseAttuale || '';
+    // if (paeseAttuale) {
+    //   currentCountry = paeseAttuale;
+    // }
 
     popolaPaesi();
     popolaMesi();
