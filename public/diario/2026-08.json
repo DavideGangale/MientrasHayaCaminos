@@ -1,0 +1,27 @@
+{
+  "_version": "public-2.0",
+  "_exportDate": "2026-08-04T17:12:47.902Z",
+  "tipo": "diario_mese",
+  "mese": "2026-08",
+  "count": 1,
+  "entries": [
+    {
+      "id": 1785846983449,
+      "ts": 1785846983449,
+      "data": "04/08/2026",
+      "ora": "14:36",
+      "paese": "Italia",
+      "km": "3480.2",
+      "testo": "Jsjsjd",
+      "tags": [],
+      "geo": {
+        "lat": 41.82242796760222,
+        "lon": 12.472346350562267
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=19RPahJuvIgghhvJpDkYzDpcUM3_9tD4E",
+      "foto": null
+    }
+  ]
+}
