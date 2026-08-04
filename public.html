@@ -4623,11 +4623,8 @@ async function loadData() {
 
     DATA = unisciDatasetGlobale();
 
-    // Imposta il paese attuale come filtro attivo all'avvio
-    const paeseAttuale = INDEX_DATA?.paeseAttuale || '';
-    if (paeseAttuale) {
-      currentCountry = paeseAttuale;
-    }
+    // Di default all'avvio, il filtro paese è impostato su Globali (vuoto)
+    currentCountry = '';
 
     // Mostra solo l'ultima tappa registrata all'avvio per una mappa pulita e ordinata
     const ultimeT = INDEX_DATA?.ultimeTappe || [];
@@ -4850,4 +4847,3 @@ window.onload = function () {
 </script>
 </body>
 </html>
-
