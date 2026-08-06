@@ -1,10 +1,28 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-08-04T17:12:47.902Z",
+  "_exportDate": "2026-08-06T05:40:13.515Z",
   "tipo": "diario_mese",
   "mese": "2026-08",
-  "count": 1,
+  "count": 2,
   "entries": [
+    {
+      "id": 1785926191721,
+      "ts": 1785926191721,
+      "data": "05/08/2026",
+      "ora": "12:36",
+      "paese": "Italia",
+      "km": "3693.8",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 40.82084914709696,
+        "lon": 14.579602902322524
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1V-jRre-gYwHtM79XSnifc1lKs89ISr5Y",
+      "foto": null
+    },
     {
       "id": 1785846983449,
       "ts": 1785846983449,
