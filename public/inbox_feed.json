@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-08-05T10:36:57.811Z",
+  "exportedAt": "2026-09-05T16:29:35.870Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -1264,6 +1264,21 @@
         "lon": 14.579602902322524
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1V-jRre-gYwHtM79XSnifc1lKs89ISr5Y"
+    },
+    {
+      "ts": 1788625767810,
+      "id": 1788625767810,
+      "paese": "",
+      "km": "",
+      "testo": "Camión Bogotá",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 4.647164116521021,
+        "lon": -74.07836948539617
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=13huBYfjC_GdS5ITQqo7S0Ew7qIgW82EW"
     }
   ]
 }
