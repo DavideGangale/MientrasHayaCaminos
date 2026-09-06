@@ -1,0 +1,27 @@
+{
+  "_version": "public-2.0",
+  "_exportDate": "2026-09-06T15:49:07.993Z",
+  "tipo": "diario_mese",
+  "mese": "2026-09",
+  "count": 1,
+  "entries": [
+    {
+      "id": 1788625767810,
+      "ts": 1788625767810,
+      "data": "05/09/2026",
+      "ora": "11:29",
+      "paese": "Colombia",
+      "km": "3835.8",
+      "testo": "Camión Bogotá",
+      "tags": [],
+      "geo": {
+        "lat": 4.647164116521021,
+        "lon": -74.07836948539617
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=13huBYfjC_GdS5ITQqo7S0Ew7qIgW82EW",
+      "foto": null
+    }
+  ]
+}
