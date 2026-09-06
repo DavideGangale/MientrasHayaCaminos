@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-08-15T17:23:47.139Z",
+  "_exportDate": "2026-09-06T15:49:07.988Z",
   "tipo": "officina",
   "stats": {
     "spesaRicambiUsd": 70.96611906708507,
@@ -159,7 +159,7 @@
         "lon": -74.3606878
       },
       "fotoCandela": null,
-      "paese": "Italia"
+      "paese": "Colombia"
     },
     {
       "id": 1774884720591,
@@ -177,7 +177,7 @@
         "lon": -74.35554
       },
       "fotoCandela": null,
-      "paese": "Italia"
+      "paese": "Colombia"
     }
   ],
   "inventario": [
