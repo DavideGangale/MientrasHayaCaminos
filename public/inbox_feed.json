@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-09-05T16:29:35.870Z",
+  "exportedAt": "2026-09-11T11:43:54.154Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -1279,6 +1279,21 @@
         "lon": -74.07836948539617
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=13huBYfjC_GdS5ITQqo7S0Ew7qIgW82EW"
+    },
+    {
+      "ts": 1789127021350,
+      "id": 1789127021350,
+      "paese": "",
+      "km": "",
+      "testo": "Rauda la cumbre de cundinamarca 3047mt slm",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 5.168717480269418,
+        "lon": -73.8870251365694
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1JVVY61O3OiHZfhQbeJ3Ru-5H4kNAqKK_"
     }
   ]
 }
