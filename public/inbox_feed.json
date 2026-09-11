@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-09-11T13:53:11.902Z",
+  "exportedAt": "2026-09-11T14:31:31.944Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -1324,6 +1324,21 @@
         "lon": -73.81538911600971
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1YzZx0kU4T71KzcQ4lIoInd02BVw66eFN"
+    },
+    {
+      "ts": 1789137077695,
+      "id": 1789137077695,
+      "paese": "",
+      "km": "",
+      "testo": "Boyaca",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 5.857096810511363,
+        "lon": -73.68126811899687
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1CEgtP5r6SXNsWrgtI87-c42lK9BVCzMT"
     }
   ]
 }
