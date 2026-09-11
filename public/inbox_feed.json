@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-09-11T11:43:54.154Z",
+  "exportedAt": "2026-09-11T12:50:42.162Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -1294,6 +1294,21 @@
         "lon": -73.8870251365694
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1JVVY61O3OiHZfhQbeJ3Ru-5H4kNAqKK_"
+    },
+    {
+      "ts": 1789131031013,
+      "id": 1789131031013,
+      "paese": "",
+      "km": "",
+      "testo": "Laguna",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 5.434668932781867,
+        "lon": -73.75406681764142
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1xNvyDDbZ_tz6Jhcqa0rWGOHDQColf5Xo"
     }
   ]
 }
