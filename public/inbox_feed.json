@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-09-11T12:50:42.162Z",
+  "exportedAt": "2026-09-11T13:53:11.902Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -1309,6 +1309,21 @@
         "lon": -73.75406681764142
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1xNvyDDbZ_tz6Jhcqa0rWGOHDQColf5Xo"
+    },
+    {
+      "ts": 1789134780984,
+      "id": 1789134780984,
+      "paese": "",
+      "km": "",
+      "testo": "Chichinquira",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 5.625037612807202,
+        "lon": -73.81538911600971
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1YzZx0kU4T71KzcQ4lIoInd02BVw66eFN"
     }
   ]
 }
