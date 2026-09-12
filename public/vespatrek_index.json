@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-09-11T15:19:19.715Z",
+  "_exportDate": "2026-09-12T10:13:54.940Z",
   "titolo": "Mientras Haya Caminos",
   "paeseAttuale": "Colombia",
   "diarioTagsPreset": [
@@ -26,11 +26,11 @@
     "Animali"
   ],
   "stats": {
-    "kmTotali": 3937.9227,
-    "benzinaUsataLitri": 201.49870799999997,
-    "olioTotaleLitri": 4.87,
-    "spesaBenzinaUsd": 320.78262489295395,
-    "spesaOlioUsd": 74.87428498985025,
+    "kmTotali": 3861.83,
+    "benzinaUsataLitri": 198.45499999999996,
+    "olioTotaleLitri": 4.98,
+    "spesaBenzinaUsd": 328.0769188453681,
+    "spesaOlioUsd": 77.24529925292474,
     "spesaRicambiUsd": 70.96611906708507,
     "spesaManodoperaUsd": 8.090242166132956
   },
@@ -42,9 +42,9 @@
       "stats": {
         "km": 3201.1099999999997,
         "benzina": 167.26299999999998,
-        "spesaBenzinaUsd": 266.7780046753588,
-        "olioMl": 4719,
-        "spesaOlioUsd": 71.6197908722032,
+        "spesaBenzinaUsd": 274.0722986277729,
+        "olioMl": 4829,
+        "spesaOlioUsd": 73.99080513527768,
         "spesaRicambiUsd": 70.96611906708507,
         "spesaManodoperaUsd": 8.090242166132956
       }
@@ -23143,7 +23143,7 @@
       {
         "mese": "2026-03",
         "path": "public/diario/2026-03.json",
-        "count": 15
+        "count": 5
       }
     ]
   }
