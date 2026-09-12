@@ -1,15 +1,15 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-09-11T15:19:19.715Z",
+  "_exportDate": "2026-09-12T10:13:54.940Z",
   "tipo": "paese",
   "paese": "Colombia",
   "slug": "colombia",
   "stats": {
     "km": 3201.1099999999997,
     "benzina": 167.26299999999998,
-    "olioMl": 4719,
-    "spesaBenzinaUsd": 266.7780046753588,
-    "spesaOlioUsd": 71.6197908722032,
+    "olioMl": 4829,
+    "spesaBenzinaUsd": 274.0722986277729,
+    "spesaOlioUsd": 73.99080513527768,
     "spesaRicambiUsd": 70.96611906708507,
     "spesaManodoperaUsd": 8.090242166132956
   },
@@ -255352,6 +255352,26 @@
     }
   ],
   "rifornimenti": [
+    {
+      "id": 1789146767573,
+      "ts": 1789146767573,
+      "data": "11/09/2026",
+      "ora": "12:12",
+      "paese": "Colombia",
+      "luogo": "N/D",
+      "km": "3957.7",
+      "qta": "5.52",
+      "dest": "Vespa",
+      "mix": "2%",
+      "prezzoUnit": "4263.816",
+      "costoBenzLocal": "23532.00",
+      "costoBenzUsd": "7.29",
+      "costoOlio": "2.37",
+      "geo": {
+        "lat": 6.5552967,
+        "lon": -73.1424317
+      }
+    },
     {
       "id": 1789124012813,
       "ts": 1789124012813,
