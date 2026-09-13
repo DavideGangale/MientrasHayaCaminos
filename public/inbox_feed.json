@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-09-11T14:31:31.944Z",
+  "exportedAt": "2026-09-13T13:16:41.464Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -1339,6 +1339,21 @@
         "lon": -73.68126811899687
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1CEgtP5r6SXNsWrgtI87-c42lK9BVCzMT"
+    },
+    {
+      "ts": 1789305392122,
+      "id": 1789305392122,
+      "paese": "",
+      "km": "",
+      "testo": "Uckfug",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 7.063326201637014,
+        "lon": -73.16706611828494
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1UEYsK9BeQzKO3evvWGjk00BbH1SRMtOv"
     }
   ]
 }
