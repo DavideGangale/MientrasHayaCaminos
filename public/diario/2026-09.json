@@ -1,10 +1,28 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-09-13T12:27:22.241Z",
+  "_exportDate": "2026-09-13T13:23:03.456Z",
   "tipo": "diario_mese",
   "mese": "2026-09",
-  "count": 5,
+  "count": 6,
   "entries": [
+    {
+      "id": 1789305392122,
+      "ts": 1789305392122,
+      "data": "13/09/2026",
+      "ora": "08:16",
+      "paese": "Colombia",
+      "km": "3892.3",
+      "testo": "Uckfug",
+      "tags": [],
+      "geo": {
+        "lat": 7.063326201637014,
+        "lon": -73.16706611828494
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1UEYsK9BeQzKO3evvWGjk00BbH1SRMtOv",
+      "foto": null
+    },
     {
       "id": 1789137077695,
       "ts": 1789137077695,
