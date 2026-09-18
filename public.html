@@ -1739,7 +1739,7 @@ let currentMarkerFilters = {
   FUEL: false,
   CARB: false
 };
-let currentMonthFilter = '';
+let currentMonthFilter = null;
 let selectedTrackId = null; 
 let selectedTrackBounds = null;
   
@@ -3552,7 +3552,7 @@ function resetFilters() {
     FUEL: false,
     CARB: false
   };
-   currentMonthFilter = '';
+   currentMonthFilter = null;
   selectedTrackId = null;
   selectedTrackBounds = null;
   selectedTrackGeoBounds = null;
@@ -3636,13 +3636,12 @@ function popolaMesi() {
     sel.appendChild(opt);
   });
 
-// NON auto-selezionare un mese: default = tutti i mesi
+// Auto-seleziona l'ultimo mese disponibile di default
 if (mesi.length > 0) {
-  // Se l'utente aveva già scelto un mese e quel mese esiste ancora, mantienilo
-  if (currentMonthFilter && mesi.includes(currentMonthFilter)) {
-    // ok
-  } else {
-    currentMonthFilter = '';
+  if (currentMonthFilter === null) {
+    currentMonthFilter = mesi[mesi.length - 1];
+  } else if (currentMonthFilter !== '' && !mesi.includes(currentMonthFilter)) {
+    currentMonthFilter = mesi[mesi.length - 1];
   }
 } else {
   currentMonthFilter = '';
@@ -4847,4 +4846,3 @@ window.onload = function () {
 </script>
 </body>
 </html>
-
