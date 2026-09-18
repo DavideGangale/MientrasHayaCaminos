@@ -11,12 +11,23 @@
       "note_es": "Gracias a mis patrocinadores principales por ayudarme a hacer realidad este sueño"
     },
 
+{
+      "name": "Solo Vespa Garage",
+      "country": "Colombia",
+      "city": "Bogotá",
+      "type": "Mano de obra",
+      "note_it": "Grazie al amigo René para el arreglo completo del motor.",
+      "note_en": "Thanks to my friend René for completely overhauling the engine.",
+      "note_es": "Gracias al Amigo René para el arreglo completo del motor."
+    },
+
+    
  {
       "name": "Vespa Club Ocaso",
       "country": "Colombia",
       "city": "Bogotá",
       "type": "Repuestos",
-      "note_it": "Grazie al club Ocaso para poner a disposicion repuestos para el larreglo del motor.",
+      "note_it": "Grazie al club Ocaso mettere a disposizione i pezzi di ricambio necessari alla riparazione del motore.",
       "note_en": "Thank you to the Ocaso Club for providing spare parts to repair the engine.",
       "note_es": "Gracias al club Ocaso para poner a disposicion los repuestos para el arreglo del motor."
     },
