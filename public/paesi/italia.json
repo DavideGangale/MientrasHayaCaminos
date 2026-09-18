@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-09-18T11:47:59.480Z",
+  "_exportDate": "2026-09-18T11:59:09.803Z",
   "tipo": "paese",
   "paese": "Italia",
   "slug": "italia",
@@ -32,26 +32,6 @@
       "videoUrl": null,
       "videoPlanned": false,
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1WqD2eyr-vzpAhsIvNC-zlwGPe_jXXuEj",
-      "foto": null
-    },
-    {
-      "id": 1774906730307,
-      "ts": 1774906730307,
-      "data": "30/03/2026",
-      "ora": "23:38",
-      "paese": "Italia",
-      "km": "3480.2",
-      "testo": "Se me había soltado la cruceta",
-      "tags": [
-        "ProblemasTecnicos"
-      ],
-      "geo": {
-        "lat": 4.806001608636656,
-        "lon": -74.36063540086325
-      },
-      "videoUrl": "https://youtu.be/AbqCsDj8c3Q?si=8NHyrqwlQ1MorEhh",
-      "videoPlanned": false,
-      "fotoUrl": null,
       "foto": null
     }
   ],
