@@ -1,46 +1,10 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-09-18T11:19:48.031Z",
+  "_exportDate": "2026-09-18T11:29:36.152Z",
   "tipo": "diario_mese",
   "mese": "2026-07",
-  "count": 3,
+  "count": 1,
   "entries": [
-    {
-      "id": 1783713700507,
-      "ts": 1783713700507,
-      "data": "10/07/2026",
-      "ora": "15:01",
-      "paese": "Colombia",
-      "km": "3176.7",
-      "testo": "Cano",
-      "tags": [],
-      "geo": {
-        "lat": 6.7538325162667165,
-        "lon": -73.00489839173201
-      },
-      "videoUrl": null,
-      "videoPlanned": false,
-      "fotoUrl": "https://drive.google.com/uc?export=view&id=1sT6wukVGh8BkOWh3gKhunk_btkCV-lpV",
-      "foto": null
-    },
-    {
-      "id": 1783713699189,
-      "ts": 1783713699189,
-      "data": "10/07/2026",
-      "ora": "15:01",
-      "paese": "Colombia",
-      "km": "3176.7",
-      "testo": "Cano",
-      "tags": [],
-      "geo": {
-        "lat": 6.7538325162667165,
-        "lon": -73.00489839173201
-      },
-      "videoUrl": null,
-      "videoPlanned": false,
-      "fotoUrl": "https://drive.google.com/uc?export=view&id=19nuV5PUZijBDGMZ0ulDTo9JyECCgJSWL",
-      "foto": null
-    },
     {
       "id": 1783692245168,
       "ts": 1783692245168,
