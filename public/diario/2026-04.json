@@ -1,9 +1,9 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-09-18T11:47:59.479Z",
+  "_exportDate": "2026-09-18T11:59:09.802Z",
   "tipo": "diario_mese",
   "mese": "2026-04",
-  "count": 63,
+  "count": 62,
   "entries": [
     {
       "id": 1777398650520,
@@ -681,26 +681,6 @@
       "videoUrl": null,
       "videoPlanned": false,
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1Jh_stx4c62ckHVWZR6h73rUUWCxv9JG8",
-      "foto": null
-    },
-    {
-      "id": 1775326220197,
-      "ts": 1775326220197,
-      "data": "",
-      "ora": "",
-      "paese": "Colombia",
-      "km": "",
-      "testo": "Priva iphone",
-      "tags": [
-        "Probó la"
-      ],
-      "geo": {
-        "lat": 4.806171381544611,
-        "lon": -74.36040790134565
-      },
-      "videoUrl": null,
-      "videoPlanned": false,
-      "fotoUrl": "https://drive.google.com/uc?export=view&id=1RjWbfHMKW5F6jI-A3gvuC_lB3rYNdKpi",
       "foto": null
     },
     {
