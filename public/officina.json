@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-09-15T20:41:36.784Z",
+  "_exportDate": "2026-09-18T11:19:48.031Z",
   "tipo": "officina",
   "stats": {
     "spesaRicambiUsd": 70.96611906708507,
@@ -142,44 +142,7 @@
       }
     }
   ],
-  "carburazioni": [
-    {
-      "id": 1774910721890,
-      "data": "30/03/2026",
-      "ora": "17:45",
-      "alt": 2674,
-      "chicMax": 125,
-      "chicMin": 70,
-      "viteAria": "1.75",
-      "viteMinimo": "2.25",
-      "candela": "Bianca e secca",
-      "nota": "Faceva troppo fumo al minimo",
-      "geo": {
-        "lat": 4.8059166,
-        "lon": -74.3606878
-      },
-      "fotoCandela": null,
-      "paese": "Colombia"
-    },
-    {
-      "id": 1774884720591,
-      "data": "30/03/2026",
-      "ora": "10:32",
-      "alt": 2674,
-      "chicMax": 110,
-      "chicMin": 75,
-      "viteAria": "1.25",
-      "viteMinimo": "1.75",
-      "candela": "Marroncina, direi normale",
-      "nota": "prova getti altezza",
-      "geo": {
-        "lat": 4.8197633,
-        "lon": -74.35554
-      },
-      "fotoCandela": null,
-      "paese": "Colombia"
-    }
-  ],
+  "carburazioni": [],
   "inventario": [
     {
       "id": "inv1",
