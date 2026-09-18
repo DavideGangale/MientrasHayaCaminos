@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-09-18T11:34:11.998Z",
+  "_exportDate": "2026-09-18T11:47:59.479Z",
   "tipo": "officina",
   "stats": {
     "spesaRicambiUsd": 70.96611906708507,
@@ -85,60 +85,6 @@
       "geo": {
         "lat": 7.0637679,
         "lon": -73.1669542
-      }
-    },
-    {
-      "id": 1775222403590,
-      "data": "03/04/2026",
-      "ora": "08:20",
-      "paese": "Colombia",
-      "km": "77.7",
-      "nome": "Montaggio Pneumatico",
-      "desc": "He ponchado y ya mi neumatico tenia muchos parces, asi que puse uno nuevo, para esto los cargos!!",
-      "costoLocal": 0,
-      "valuta": "COP",
-      "costoUsd": 0,
-      "fotoUrl": "https://drive.google.com/uc?export=view&id=1-ZqksLDucMk6po4SDTfT0DAdtQkLdVxk",
-      "fotoUrl2": null,
-      "fotoUrlList": [
-        "https://drive.google.com/uc?export=view&id=1-ZqksLDucMk6po4SDTfT0DAdtQkLdVxk"
-      ],
-      "videoUrl": null,
-      "videoPlanned": false,
-      "ricambiUsati": [
-        {
-          "invId": "inv8",
-          "qta": 1,
-          "nome": "Pneumatico"
-        }
-      ],
-      "geo": {
-        "lat": 4.8058912,
-        "lon": -74.3605943
-      }
-    },
-    {
-      "id": 1774881487255,
-      "data": "30/03/2026",
-      "ora": "09:38",
-      "paese": "Colombia",
-      "km": "77.7",
-      "nome": "La crucetaaaa",
-      "desc": "Se soltó la cruceta!!! meno mal estaba René y en 5 minutos ya estabamos en marcha",
-      "costoLocal": 0,
-      "valuta": "COP",
-      "costoUsd": 0,
-      "fotoUrl": "https://drive.google.com/uc?export=view&id=1bmyPGsAGeDESVEvsvgHTwyAT6FHtlhIy",
-      "fotoUrl2": null,
-      "fotoUrlList": [
-        "https://drive.google.com/uc?export=view&id=1bmyPGsAGeDESVEvsvgHTwyAT6FHtlhIy"
-      ],
-      "videoUrl": "https://youtu.be/AbqCsDj8c3Q?si=gJWrPnE6aThp7xIV",
-      "videoPlanned": false,
-      "ricambiUsati": [],
-      "geo": {
-        "lat": 4.8197633,
-        "lon": -74.35554
       }
     }
   ],
