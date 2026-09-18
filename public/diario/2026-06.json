@@ -1,9 +1,9 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-09-15T20:41:36.792Z",
+  "_exportDate": "2026-09-18T11:19:48.031Z",
   "tipo": "diario_mese",
   "mese": "2026-06",
-  "count": 19,
+  "count": 14,
   "entries": [
     {
       "id": 1782751040523,
@@ -21,42 +21,6 @@
       "videoUrl": null,
       "videoPlanned": false,
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1WlW0uZu7NAUqduiNtl_Z7hMnxqBBPDFa",
-      "foto": null
-    },
-    {
-      "id": 1782751011805,
-      "ts": 1782751011805,
-      "data": "29/06/2026",
-      "ora": "11:36",
-      "paese": "Colombia",
-      "km": "2733.0",
-      "testo": "Pereira",
-      "tags": [],
-      "geo": {
-        "lat": 4.85562035189294,
-        "lon": -75.63692474342275
-      },
-      "videoUrl": null,
-      "videoPlanned": false,
-      "fotoUrl": "https://drive.google.com/uc?export=view&id=1AS2aTSZ-6qa0bi0lrgxts_8q7JszhKEG",
-      "foto": null
-    },
-    {
-      "id": 1782751010512,
-      "ts": 1782751010512,
-      "data": "29/06/2026",
-      "ora": "11:36",
-      "paese": "Colombia",
-      "km": "2733.0",
-      "testo": "Pereira",
-      "tags": [],
-      "geo": {
-        "lat": 4.85562035189294,
-        "lon": -75.63692474342275
-      },
-      "videoUrl": null,
-      "videoPlanned": false,
-      "fotoUrl": "https://drive.google.com/uc?export=view&id=1qwZ1Z2Ams1IUGiBd0OlJ8NgfCZWpa-ow",
       "foto": null
     },
     {
@@ -183,60 +147,6 @@
       "videoUrl": null,
       "videoPlanned": false,
       "fotoUrl": "https://drive.google.com/uc?export=view&id=13g6igTRuhyYmG461if0_nmYBAdeHQzHL",
-      "foto": null
-    },
-    {
-      "id": 1780754226572,
-      "ts": 1780754226572,
-      "data": "06/06/2026",
-      "ora": "08:57",
-      "paese": "Colombia",
-      "km": "2138.7",
-      "testo": "Bols8",
-      "tags": [],
-      "geo": {
-        "lat": 4.806037348750141,
-        "lon": -74.36060278448166
-      },
-      "videoUrl": null,
-      "videoPlanned": false,
-      "fotoUrl": "https://drive.google.com/uc?export=view&id=1wYlqXEnLOfQLscfZwFUmilQK_H5tnQox",
-      "foto": null
-    },
-    {
-      "id": 1780751917483,
-      "ts": 1780751917483,
-      "data": "06/06/2026",
-      "ora": "08:18",
-      "paese": "Colombia",
-      "km": "2138.7",
-      "testo": "Pppoppppoooooooo",
-      "tags": [],
-      "geo": {
-        "lat": 4.806044186332144,
-        "lon": -74.36060193328242
-      },
-      "videoUrl": null,
-      "videoPlanned": false,
-      "fotoUrl": "https://drive.google.com/uc?export=view&id=1KttwW9hcMGadKwGve4bH2x41E1PmDV8O",
-      "foto": null
-    },
-    {
-      "id": 1780750090115,
-      "ts": 1780750090115,
-      "data": "06/06/2026",
-      "ora": "07:48",
-      "paese": "Colombia",
-      "km": "2138.7",
-      "testo": "",
-      "tags": [],
-      "geo": {
-        "lat": 4.806049926970224,
-        "lon": -74.36060038846293
-      },
-      "videoUrl": null,
-      "videoPlanned": false,
-      "fotoUrl": "https://drive.google.com/uc?export=view&id=1CX3UZ2ADC7KgCwtpbYnfU1mrPRaxqORA",
       "foto": null
     },
     {
