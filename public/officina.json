@@ -1,93 +1,12 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-09-18T11:59:09.802Z",
+  "_exportDate": "2026-09-18T12:31:50.386Z",
   "tipo": "officina",
   "stats": {
     "spesaRicambiUsd": 70.96611906708507,
     "spesaManodoperaUsd": 8.090242166132956
   },
-  "manutenzioni": [
-    {
-      "id": 1777548667418,
-      "data": "30/04/2026",
-      "ora": "06:31",
-      "paese": "Colombia",
-      "km": "1505.4",
-      "nome": "Montaggio Cambio Olio 300ml",
-      "desc": "",
-      "costoLocal": 15000,
-      "valuta": "COP",
-      "costoUsd": 4.045121083066478,
-      "fotoUrl": null,
-      "fotoUrl2": null,
-      "fotoUrlList": [],
-      "videoUrl": null,
-      "videoPlanned": false,
-      "ricambiUsati": [
-        {
-          "invId": "inv11",
-          "qta": 1,
-          "nome": "Cambio Olio 300ml"
-        }
-      ],
-      "geo": {
-        "lat": 7.0632752,
-        "lon": -73.1670407
-      }
-    },
-    {
-      "id": 1777306225868,
-      "data": "27/04/2026",
-      "ora": "11:10",
-      "paese": "Colombia",
-      "km": "1209.9",
-      "nome": "Montaggio Llanta trasera",
-      "desc": "",
-      "costoLocal": 0,
-      "valuta": "COP",
-      "costoUsd": 0,
-      "fotoUrl": "https://drive.google.com/uc?export=view&id=1JhQeYt8GQ2Vuk_tDzsP8O-SgYGfX0kmL",
-      "fotoUrl2": null,
-      "fotoUrlList": [
-        "https://drive.google.com/uc?export=view&id=1JhQeYt8GQ2Vuk_tDzsP8O-SgYGfX0kmL"
-      ],
-      "videoUrl": null,
-      "videoPlanned": false,
-      "ricambiUsati": [],
-      "geo": {
-        "lat": 7.073455,
-        "lon": -73.1638583
-      }
-    },
-    {
-      "id": 1776959720909,
-      "data": "23/04/2026",
-      "ora": "10:55",
-      "paese": "Colombia",
-      "km": "1144.5",
-      "nome": "Montaggio Ganasce freno post.",
-      "desc": "",
-      "costoLocal": 15000,
-      "valuta": "COP",
-      "costoUsd": 4.045121083066478,
-      "fotoUrl": null,
-      "fotoUrl2": null,
-      "fotoUrlList": [],
-      "videoUrl": null,
-      "videoPlanned": false,
-      "ricambiUsati": [
-        {
-          "invId": "inv7",
-          "qta": 1,
-          "nome": "Ganasce freno post."
-        }
-      ],
-      "geo": {
-        "lat": 7.0637679,
-        "lon": -73.1669542
-      }
-    }
-  ],
+  "manutenzioni": [],
   "carburazioni": [],
   "inventario": [
     {
