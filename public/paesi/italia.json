@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-09-18T11:59:09.803Z",
+  "_exportDate": "2026-09-18T12:31:50.386Z",
   "tipo": "paese",
   "paese": "Italia",
   "slug": "italia",
@@ -15,26 +15,7 @@
   },
   "tappe": [],
   "turismo": [],
-  "diario": [
-    {
-      "id": 1776726054923,
-      "ts": 1776726054923,
-      "data": "21/04/2026",
-      "ora": "01:00",
-      "paese": "Italia",
-      "km": "3480.2",
-      "testo": "Mesa de los santos",
-      "tags": [],
-      "geo": {
-        "lat": 6.927694567406901,
-        "lon": -73.04042841240496
-      },
-      "videoUrl": null,
-      "videoPlanned": false,
-      "fotoUrl": "https://drive.google.com/uc?export=view&id=1WqD2eyr-vzpAhsIvNC-zlwGPe_jXXuEj",
-      "foto": null
-    }
-  ],
+  "diario": [],
   "rifornimenti": [],
   "carburazioni": [],
   "manutenzioni": []
