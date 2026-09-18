@@ -4256,6 +4256,13 @@ function focusOnTrack(trackId, mode) {
   if (mode === 'GIRO') currentMode = 'GIRI';
   else currentMode = 'TAPPE';
 
+  const trackMonth = getYearMonthFromPercorso(t);
+  if (trackMonth) {
+    currentMonthFilter = trackMonth;
+    const sel = document.getElementById('filter-month');
+    if (sel) sel.value = trackMonth;
+  }
+
   // Quando apro una singola tappa, attivo tutti i marker
   currentMarkerFilters = {
     FOTO: true,
@@ -4846,3 +4853,4 @@ window.onload = function () {
 </script>
 </body>
 </html>
+
