@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-09-15T20:41:36.800Z",
+  "_exportDate": "2026-09-18T11:19:48.041Z",
   "tipo": "paese",
   "paese": "Italia",
   "slug": "italia",
@@ -32,28 +32,6 @@
       "videoUrl": null,
       "videoPlanned": false,
       "fotoUrl": "https://drive.google.com/uc?export=view&id=1WqD2eyr-vzpAhsIvNC-zlwGPe_jXXuEj",
-      "foto": null
-    },
-    {
-      "id": 1775090747107,
-      "ts": 1775090747107,
-      "data": "02/04/2026",
-      "ora": "02:45",
-      "paese": "Italia",
-      "km": "3480.2",
-      "testo": "Esos Club Bogotá",
-      "tags": [
-        "Vespa",
-        "Piaggio",
-        "dicarbonegastrobar"
-      ],
-      "geo": {
-        "lat": 4.806004247196552,
-        "lon": -74.36063734065583
-      },
-      "videoUrl": null,
-      "videoPlanned": false,
-      "fotoUrl": "https://drive.google.com/uc?export=view&id=1YecOhEezNdkRutVpe7YwkoBnTqm2V3n0",
       "foto": null
     },
     {
