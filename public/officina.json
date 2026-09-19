@@ -1,10 +1,10 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-09-19T20:22:10.827Z",
+  "_exportDate": "2026-09-19T21:52:53.827Z",
   "tipo": "officina",
   "stats": {
-    "spesaRicambiUsd": 70.96611906708507,
-    "spesaManodoperaUsd": 8.090242166132956
+    "spesaRicambiUsd": 0,
+    "spesaManodoperaUsd": 0
   },
   "manutenzioni": [],
   "carburazioni": [],
