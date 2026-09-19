@@ -1,10 +1,46 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-09-19T01:24:31.874Z",
+  "_exportDate": "2026-09-19T16:57:43.825Z",
   "tipo": "diario_mese",
   "mese": "2026-09",
-  "count": 6,
+  "count": 8,
   "entries": [
+    {
+      "id": 1789823845652,
+      "ts": 1789823845652,
+      "data": "19/09/2026",
+      "ora": "08:17",
+      "paese": "Colombia",
+      "km": "4840.3",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 6.159417866734936,
+        "lon": -75.50650170079945
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1WXNf3EoX-Mh62qIEgmiVnqUQ-ct33z-L",
+      "foto": null
+    },
+    {
+      "id": 1789822316020,
+      "ts": 1789822316020,
+      "data": "19/09/2026",
+      "ora": "07:51",
+      "paese": "Colombia",
+      "km": "4840.3",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 6.152740113874649,
+        "lon": -75.41167387168129
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1isKiXUi3AmMYQWPjEZ_tG-3yk4bzGpjv",
+      "foto": null
+    },
     {
       "id": 1789770210817,
       "ts": 1789770210817,
