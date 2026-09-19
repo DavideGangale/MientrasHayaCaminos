@@ -1,10 +1,100 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-09-18T12:31:50.386Z",
+  "_exportDate": "2026-09-19T01:24:31.874Z",
   "tipo": "diario_mese",
   "mese": "2026-09",
-  "count": 1,
+  "count": 6,
   "entries": [
+    {
+      "id": 1789770210817,
+      "ts": 1789770210817,
+      "data": "18/09/2026",
+      "ora": "17:23",
+      "paese": "Colombia",
+      "km": "4786.9",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 6.02107512167972,
+        "lon": -75.11395764414215
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1IBMnjhx_G5U90ZQVdFaGA0ZCT54D0wV0",
+      "foto": null
+    },
+    {
+      "id": 1789762820902,
+      "ts": 1789762820902,
+      "data": "18/09/2026",
+      "ora": "15:20",
+      "paese": "Colombia",
+      "km": "4786.9",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 5.9013447258676415,
+        "lon": -74.7239904385756
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1Nr7plMm2Kd9RvgdPowLC2zC0DYPg_Bgf",
+      "foto": null
+    },
+    {
+      "id": 1789761502355,
+      "ts": 1789761502355,
+      "data": "18/09/2026",
+      "ora": "14:58",
+      "paese": "Colombia",
+      "km": "4786.9",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 5.888103543705289,
+        "lon": -74.61623896946638
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1cBFaGBjLwnYl9jiO0CUFpJrX6OsUX0VO",
+      "foto": null
+    },
+    {
+      "id": 1789761494978,
+      "ts": 1789761494978,
+      "data": "18/09/2026",
+      "ora": "14:58",
+      "paese": "Colombia",
+      "km": "4786.9",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 5.888103543705289,
+        "lon": -74.61623896946638
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1l9O7QfYqOpNSd-0zjUX_56zekPzsjeXl",
+      "foto": null
+    },
+    {
+      "id": 1789751203317,
+      "ts": 1789751203317,
+      "data": "18/09/2026",
+      "ora": "12:06",
+      "paese": "Colombia",
+      "km": "4786.9",
+      "testo": "Guadua",
+      "tags": [],
+      "geo": {
+        "lat": 5.067617166951998,
+        "lon": -74.59489825232757
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=1BkrX-b5jdFv7HEiaZnKBXHR8KdWbVm3S",
+      "foto": null
+    },
     {
       "id": 1789730667217,
       "ts": 1789730666267,
