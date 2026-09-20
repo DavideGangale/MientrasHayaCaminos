@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-09-20T13:18:55.798Z",
+  "_exportDate": "2026-09-20T14:47:11.009Z",
   "tipo": "officina",
   "stats": {
     "spesaRicambiUsd": 0,
@@ -43,11 +43,12 @@
     {
       "id": "inv4",
       "nome": "Cavo Freno Posteriore",
-      "qta": 2,
+      "qta": 1,
       "wear": "interval",
       "intervalKm": 8000,
       "usedKm": 900,
-      "lastKm": 8162.1
+      "lastKm": 96.16999999999996,
+      "durata": 0
     },
     {
       "id": "inv5",
@@ -69,7 +70,8 @@
       "wear": "interval",
       "intervalKm": 5000,
       "usedKm": 2800,
-      "lastKm": 6262.1
+      "lastKm": -1803.83,
+      "durata": 0
     },
     {
       "id": "inv7",
@@ -87,11 +89,12 @@
     {
       "id": "inv8",
       "nome": "Pneumatico",
-      "qta": 1,
+      "qta": 3,
       "wear": "interval",
       "intervalKm": 10000,
       "usedKm": 0,
-      "lastKm": 77.7238
+      "lastKm": 996.17,
+      "durata": 0
     },
     {
       "id": "inv9",
@@ -105,11 +108,12 @@
     {
       "id": "inv10",
       "nome": "Dischi frizione",
-      "qta": 1,
+      "qta": 2,
       "wear": "interval",
       "intervalKm": 10000,
       "usedKm": 4300,
-      "lastKm": 4762.1
+      "lastKm": -3303.83,
+      "durata": 0
     },
     {
       "id": "inv11",
