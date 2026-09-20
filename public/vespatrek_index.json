@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-09-20T15:32:54.473Z",
+  "_exportDate": "2026-09-20T15:56:43.901Z",
   "titolo": "Mientras Haya Caminos",
   "paeseAttuale": "Colombia",
   "diarioTagsPreset": [
@@ -26,7 +26,7 @@
     "Animali"
   ],
   "stats": {
-    "kmTotali": 996.17,
+    "kmTotali": 996.2,
     "benzinaUsataLitri": 29.082,
     "olioTotaleLitri": 0.724,
     "spesaBenzinaUsd": 41.89,
