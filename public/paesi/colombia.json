@@ -1,12 +1,12 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-09-20T15:57:48.964Z",
+  "_exportDate": "2026-09-20T16:07:29.840Z",
   "tipo": "paese",
   "paese": "Colombia",
   "slug": "colombia",
   "stats": {
     "km": 996.17,
-    "benzina": 39.846000000000004,
+    "benzina": 29.081124212005623,
     "olioMl": 724,
     "spesaBenzinaUsd": 41.89,
     "spesaOlioUsd": 13.63,
