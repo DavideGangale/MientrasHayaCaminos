@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "exportedAt": "2026-09-20T16:29:36.233Z",
+  "exportedAt": "2026-09-21T19:09:10.737Z",
   "entries": [
     {
       "ts": 1774350690105,
@@ -1474,6 +1474,21 @@
         "lon": -75.55815259925302
       },
       "fotoUrl": "https://drive.google.com/uc?export=view&id=12i2QT68oBtusp-x-PRKI8cAaMxe6VDk5"
+    },
+    {
+      "ts": 1790017740163,
+      "id": 1790017740163,
+      "paese": "",
+      "km": "",
+      "testo": "Cafetales",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": 4.919042026428669,
+        "lon": -75.62697389850487
+      },
+      "fotoUrl": "https://drive.google.com/uc?export=view&id=11lj4IL7p9Cz8UXe8J1jpiwfQ_-7dY6rD"
     }
   ]
 }
