@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-09-22T02:24:47.200Z",
+  "_exportDate": "2026-09-22T03:48:59.867Z",
   "titolo": "Mientras Haya Caminos",
   "paeseAttuale": "Colombia",
   "diarioTagsPreset": [
@@ -27,7 +27,7 @@
   ],
   "stats": {
     "kmTotali": 1398.3,
-    "benzinaUsataLitri": 40.989999999999995,
+    "benzinaUsataLitri": 40.987,
     "olioTotaleLitri": 0.989,
     "spesaBenzinaUsd": 58.94,
     "spesaOlioUsd": 17.58,
@@ -41,7 +41,7 @@
       "path": "public/paesi/colombia.json",
       "stats": {
         "km": 1398.35,
-        "benzina": 40.991465708360145,
+        "benzina": 40.988465601087036,
         "spesaBenzinaUsd": 58.94,
         "olioMl": 989,
         "spesaOlioUsd": 17.58,
@@ -51,6 +51,78 @@
     }
   ],
   "ultimiPost": [
+    {
+      "id": 1790048897666,
+      "ts": 1790048897666,
+      "data": "21/09/2026",
+      "ora": "22:48",
+      "paese": "Colombia",
+      "km": "1398.3",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 4.457376904101481,
+        "lon": -75.78309153516635
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1790048897666.jpg",
+      "foto": null
+    },
+    {
+      "id": 1790047340409,
+      "ts": 1790047340409,
+      "data": "21/09/2026",
+      "ora": "22:22",
+      "paese": "Colombia",
+      "km": "1398.3",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 0,
+        "lon": 0
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1790047340409.jpg",
+      "foto": null
+    },
+    {
+      "id": 1790046569042,
+      "ts": 1790046569042,
+      "data": "21/09/2026",
+      "ora": "22:09",
+      "paese": "Colombia",
+      "km": "1398.3",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 0,
+        "lon": 0
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1790046569042.jpg",
+      "foto": null
+    },
+    {
+      "id": 1790045846589,
+      "ts": 1790045846589,
+      "data": "21/09/2026",
+      "ora": "21:57",
+      "paese": "Colombia",
+      "km": "1398.3",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 0,
+        "lon": 0
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1790045846589.jpg",
+      "foto": null
+    },
     {
       "id": 1790017740163,
       "ts": 1790017740163,
@@ -101,7 +173,7 @@
       "altMax": 2472,
       "velMax": 89,
       "velMedia": 26.3,
-      "benzinaStimataLitri": 10.853,
+      "benzinaStimataLitri": 9.69,
       "benzinaRealeLitri": null,
       "consumoStimatoKmL": null,
       "consumoRealeKmL": null,
@@ -5062,7 +5134,7 @@
       "altMax": 1722,
       "velMax": 57,
       "velMedia": 8.9,
-      "benzinaStimataLitri": 0.282,
+      "benzinaStimataLitri": 0.252,
       "benzinaRealeLitri": null,
       "consumoStimatoKmL": null,
       "consumoRealeKmL": null,
@@ -5747,7 +5819,7 @@
       "altMax": 2627,
       "velMax": 72,
       "velMedia": 8.1,
-      "benzinaStimataLitri": 4.952,
+      "benzinaStimataLitri": 4.421,
       "benzinaRealeLitri": null,
       "consumoStimatoKmL": null,
       "consumoRealeKmL": null,
@@ -9110,7 +9182,7 @@
       "altMax": 1724,
       "velMax": 68,
       "velMedia": 4.8,
-      "benzinaStimataLitri": 0.32,
+      "benzinaStimataLitri": 0.286,
       "benzinaRealeLitri": null,
       "consumoStimatoKmL": null,
       "consumoRealeKmL": null,
@@ -10037,7 +10109,7 @@
       "altMax": 1722,
       "velMax": 65,
       "velMedia": 17.5,
-      "benzinaStimataLitri": 0.321,
+      "benzinaStimataLitri": 0.287,
       "benzinaRealeLitri": 0,
       "consumoStimatoKmL": 25.02,
       "consumoRealeKmL": null,
@@ -10376,7 +10448,7 @@
       "altMax": 2614,
       "velMax": 73,
       "velMedia": 18.8,
-      "benzinaStimataLitri": 2.138,
+      "benzinaStimataLitri": 1.909,
       "benzinaRealeLitri": null,
       "consumoStimatoKmL": 25,
       "consumoRealeKmL": null,
@@ -11963,7 +12035,7 @@
       "altMax": 2724,
       "velMax": 92,
       "velMedia": 39.1,
-      "benzinaStimataLitri": 13.412,
+      "benzinaStimataLitri": 11.975,
       "benzinaRealeLitri": null,
       "consumoStimatoKmL": 25,
       "consumoRealeKmL": null,
@@ -14042,7 +14114,7 @@
       "altMax": 2677,
       "velMax": 92,
       "velMedia": 3.4,
-      "benzinaStimataLitri": 2.675,
+      "benzinaStimataLitri": 2.389,
       "benzinaRealeLitri": null,
       "consumoStimatoKmL": null,
       "consumoRealeKmL": null,
@@ -15959,7 +16031,7 @@
       "altMax": 2695,
       "velMax": 66,
       "velMedia": 25,
-      "benzinaStimataLitri": 1.023,
+      "benzinaStimataLitri": 0.914,
       "benzinaRealeLitri": 0,
       "consumoStimatoKmL": 25,
       "consumoRealeKmL": null,
@@ -16968,7 +17040,7 @@
       "altMax": 3097,
       "velMax": 91,
       "velMedia": 51.3,
-      "benzinaStimataLitri": 9.164,
+      "benzinaStimataLitri": 8.183,
       "benzinaRealeLitri": null,
       "consumoStimatoKmL": 25,
       "consumoRealeKmL": null,
@@ -18749,7 +18821,7 @@
       "altMax": 1979,
       "velMax": 94,
       "velMedia": 49.6,
-      "benzinaStimataLitri": 6.127,
+      "benzinaStimataLitri": 5.47,
       "benzinaRealeLitri": null,
       "consumoStimatoKmL": 25,
       "consumoRealeKmL": null,
@@ -20844,7 +20916,7 @@
       "altMax": 933,
       "velMax": 78,
       "velMedia": 15,
-      "benzinaStimataLitri": 0.634,
+      "benzinaStimataLitri": 0.566,
       "benzinaRealeLitri": null,
       "consumoStimatoKmL": 24.98,
       "consumoRealeKmL": null,
@@ -21424,7 +21496,7 @@
       {
         "mese": "2026-09",
         "path": "public/diario/2026-09.json",
-        "count": 2
+        "count": 6
       }
     ]
   }
