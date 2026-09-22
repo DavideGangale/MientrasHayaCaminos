@@ -57,7 +57,7 @@
   <button class="btn btn-blue" onclick="syncQueue()" id="sync-btn">🔄 INVIA TUTTO AL DIARIO (Richiede Internet)</button>
 </div>
 
-<iframe id="driveUploadFrame" name="driveUploadFrame" style="display:none;"></iframe>
+<iframe id="driveUploadFrame" name="driveUploadFrame" style="width:0; height:0; border:none; position:absolute; visibility:hidden;"></iframe>
 
 <script>
 // ================= UTILS & DB =================
@@ -231,8 +231,8 @@ window.addEventListener('message', (ev) => {
 function uploadViaFormIframe(dataUrl, filename) {
   return new Promise((resolve, reject) => {
     if (driveUploadPending) return reject(new Error('Upload in corso'));
-    const endpoint = ls('script_url');
-    const folderId = ls('drive_folder');
+    const endpoint = ls('script_url').trim();
+    const folderId = ls('drive_folder').trim();
     
     const reqId = 'r' + Date.now() + '_' + Math.random().toString(16).slice(2);
     driveUploadPending = { resolve, reject, reqId, timer: null };
@@ -252,7 +252,7 @@ function uploadViaFormIframe(dataUrl, filename) {
     addH('filename', filename);
     addH('folderId', folderId);
     addH('reqId', reqId);
-    addH('clientKey', ''); // Aggiunto per evitare crash su Apps Script
+    addH('clientKey', filename); // Aggiunto per evitare crash su Apps Script
 
     document.body.appendChild(form);
     driveUploadPending.timer = setTimeout(() => {
