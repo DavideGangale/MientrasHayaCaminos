@@ -29,12 +29,8 @@
   <h3 style="margin-top:0">⚙️ Impostazioni App</h3>
   <label>GitHub Token (es. ghp_...)</label>
   <input type="text" id="gh-token" placeholder="Token GitHub">
-  <label>GitHub Repository (es. davidegangale/...)</label>
-  <input type="text" id="gh-repo" placeholder="Repo">
-  <label>Google Apps Script URL (Upload Foto)</label>
-  <input type="text" id="script-url" placeholder="https://script.google.com/...">
-  <label>Drive Folder ID (opzionale)</label>
-  <input type="text" id="drive-folder" placeholder="Folder ID">
+  <label>GitHub Repository</label>
+  <input type="text" id="gh-repo" placeholder="davidegangale/MientrasHayaCaminos">
   <button class="btn btn-green" onclick="saveSettings()">💾 Salva Impostazioni</button>
 </div>
 
@@ -56,8 +52,6 @@
   <div id="queue-status">0 foto in coda</div>
   <button class="btn btn-blue" onclick="syncQueue()" id="sync-btn">🔄 INVIA TUTTO AL DIARIO (Richiede Internet)</button>
 </div>
-
-<iframe id="driveUploadFrame" name="driveUploadFrame" style="width:0; height:0; border:none; position:absolute; visibility:hidden;"></iframe>
 
 <script>
 // ================= UTILS & DB =================
@@ -120,21 +114,17 @@ function setLs(k, v) { localStorage.setItem(k, v); }
 // ================= SETTINGS =================
 window.onload = async () => {
   await initDB();
-  if (!ls('gh_token') || !ls('script_url')) {
+  if (!ls('gh_token')) {
     document.getElementById('settings-card').style.display = 'block';
   }
   
   document.getElementById('gh-token').value = ls('gh_token');
   document.getElementById('gh-repo').value = ls('gh_repo') || 'davidegangale/MientrasHayaCaminos';
-  document.getElementById('script-url').value = ls('script_url');
-  document.getElementById('drive-folder').value = ls('drive_folder');
 };
 
 function saveSettings() {
   setLs('gh_token', document.getElementById('gh-token').value.trim());
   setLs('gh_repo', document.getElementById('gh-repo').value.trim());
-  setLs('script_url', document.getElementById('script-url').value.trim());
-  setLs('drive_folder', document.getElementById('drive-folder').value.trim());
   document.getElementById('settings-card').style.display = 'none';
   showToast('✅ Impostazioni salvate!');
 }
@@ -152,7 +142,7 @@ function handlePhoto(input) {
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      const MAX = 1600;
+      const MAX = 1000;
       let w = img.width; let h = img.height;
       if (w > h && w > MAX) { h *= MAX/w; w = MAX; }
       else if (h > MAX) { w *= MAX/h; h = MAX; }
@@ -161,7 +151,7 @@ function handlePhoto(input) {
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, w, h);
       
-      currentPhotoBase64 = canvas.toDataURL('image/jpeg', 0.82);
+      currentPhotoBase64 = canvas.toDataURL('image/jpeg', 0.7);
       document.getElementById('preview').src = currentPhotoBase64;
       document.getElementById('preview-container').style.display = 'block';
       document.getElementById('gps-status').innerText = '⏳ Acquisizione GPS in corso...';
@@ -213,61 +203,30 @@ async function saveToQueue() {
   cancelPhoto();
 }
 
-// ================= UPLOAD LOGIC =================
-let driveUploadPending = null;
-
-window.addEventListener('message', (ev) => {
-  const msg = ev && ev.data;
-  if (!msg || msg.type !== 'VESPA_UPLOAD_RESULT') return;
-  if (!driveUploadPending) return;
-  const data = msg.data || {};
-  if (data.reqId !== driveUploadPending.reqId) return;
+async function uploadToGitHub(base64Data, filename) {
+  const repo = ls('gh_repo');
+  const token = ls('gh_token');
+  const url = `https://api.github.com/repos/${repo}/contents/public/photos/${filename}`;
+  const b64 = base64Data.split('base64,')[1];
   
-  if (driveUploadPending.timer) clearTimeout(driveUploadPending.timer);
-  driveUploadPending.resolve(data);
-  driveUploadPending = null;
-});
-
-function uploadViaFormIframe(dataUrl, filename) {
-  return new Promise((resolve, reject) => {
-    if (driveUploadPending) return reject(new Error('Upload in corso'));
-    const endpoint = ls('script_url').trim();
-    const folderId = ls('drive_folder').trim();
-    
-    const reqId = 'r' + Date.now() + '_' + Math.random().toString(16).slice(2);
-    driveUploadPending = { resolve, reject, reqId, timer: null };
-
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = endpoint + (endpoint.includes('?') ? '&' : '?') + 'reqId=' + encodeURIComponent(reqId);
-    form.target = 'driveUploadFrame';
-    form.style.display = 'none';
-
-    const addH = (n, v) => {
-      const i = document.createElement('input');
-      i.type = 'hidden'; i.name = n; i.value = v; form.appendChild(i);
-    };
-
-    addH('dataUrl', dataUrl);
-    addH('filename', filename);
-    addH('folderId', folderId);
-    addH('reqId', reqId);
-    addH('clientKey', filename); // Aggiunto per evitare crash su Apps Script
-
-    document.body.appendChild(form);
-    driveUploadPending.timer = setTimeout(() => {
-      if (driveUploadPending) driveUploadPending.reject(new Error('Timeout caricamento Drive'));
-      driveUploadPending = null;
-    }, 60000);
-    
-    form.submit();
-    setTimeout(() => { try { form.remove(); } catch(e){} }, 1500);
+  const res = await fetch(url, {
+    method: 'PUT',
+    headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: 'Upload photo from iPhone', content: b64, branch: 'main' })
   });
+  
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error('Errore GitHub upload: ' + txt);
+  }
+  
+  const data = await res.json();
+  return data.content.download_url;
 }
 
 async function syncQueue() {
   if (!navigator.onLine) { alert('Sei offline! Connettiti per inviare.'); return; }
-  if (!ls('gh_token') || !ls('script_url')) { alert('Configura prima le impostazioni nel menu a scomparsa!'); return; }
+  if (!ls('gh_token')) { alert('Configura prima le impostazioni nel menu a scomparsa!'); return; }
   
   const photos = await getPhotosFromDB();
   if (photos.length === 0) { showToast('Nessuna foto in coda da inviare.'); return; }
@@ -283,12 +242,12 @@ async function syncQueue() {
     
     for (const p of photos) {
       const filename = 'inbox_' + p.id + '.jpg';
-      const out = await uploadViaFormIframe(p.base64, filename);
-      if (!out || !out.ok || !out.url) throw new Error('Upload Google Drive fallito. Riprova più tardi.');
+      const outUrl = await uploadToGitHub(p.base64, filename);
+      if (!outUrl) throw new Error('Upload GitHub fallito.');
       
       const entry = {
         ts: p.ts, id: p.id, paese: '', km: '', testo: p.testo, tags: [], videoUrl: null, videoPlanned: false,
-        geo: p.geo, fotoUrl: out.url
+        geo: p.geo, fotoUrl: outUrl
       };
       
       inboxFeed.unshift(entry);
