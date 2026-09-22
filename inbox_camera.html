@@ -39,7 +39,7 @@
 </div>
 
 <div id="camera-card" class="card">
-  <input type="file" id="file-input" accept="image/*" capture="environment" style="display:none;" onchange="handlePhoto(this)">
+  <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="handlePhoto(this)">
   <button class="btn btn-blue" onclick="document.getElementById('file-input').click()" style="padding: 25px; font-size: 20px;">📷 Scatta Foto / Galleria</button>
   <button class="btn btn-grey" onclick="document.getElementById('settings-card').style.display='block'" style="padding: 10px; margin-top: 5px;">⚙️ Mostra Impostazioni</button>
   
@@ -152,7 +152,7 @@ function handlePhoto(input) {
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      const MAX = 1920;
+      const MAX = 1600;
       let w = img.width; let h = img.height;
       if (w > h && w > MAX) { h *= MAX/w; w = MAX; }
       else if (h > MAX) { w *= MAX/h; h = MAX; }
@@ -161,7 +161,7 @@ function handlePhoto(input) {
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, w, h);
       
-      currentPhotoBase64 = canvas.toDataURL('image/jpeg', 0.85);
+      currentPhotoBase64 = canvas.toDataURL('image/jpeg', 0.82);
       document.getElementById('preview').src = currentPhotoBase64;
       document.getElementById('preview-container').style.display = 'block';
       document.getElementById('gps-status').innerText = '⏳ Acquisizione GPS in corso...';
@@ -252,6 +252,7 @@ function uploadViaFormIframe(dataUrl, filename) {
     addH('filename', filename);
     addH('folderId', folderId);
     addH('reqId', reqId);
+    addH('clientKey', ''); // Aggiunto per evitare crash su Apps Script
 
     document.body.appendChild(form);
     driveUploadPending.timer = setTimeout(() => {
