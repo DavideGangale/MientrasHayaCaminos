@@ -1,12 +1,41 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-09-20T16:07:29.839Z",
+  "_exportDate": "2026-09-22T02:24:47.191Z",
   "tipo": "officina",
   "stats": {
     "spesaRicambiUsd": 0,
     "spesaManodoperaUsd": 0
   },
-  "manutenzioni": [],
+  "manutenzioni": [
+    {
+      "id": 1790043865710,
+      "data": "21/09/2026",
+      "ora": "21:24",
+      "paese": "Colombia",
+      "km": "1398.3",
+      "nome": "Montaggio Ganasce freno post.",
+      "desc": "",
+      "costoLocal": 0,
+      "valuta": "COP",
+      "costoUsd": 0,
+      "fotoUrl": null,
+      "fotoUrl2": null,
+      "fotoUrlList": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "ricambiUsati": [
+        {
+          "invId": "inv7",
+          "qta": 1,
+          "nome": "Ganasce freno post."
+        }
+      ],
+      "geo": {
+        "lat": 4.4571689,
+        "lon": -75.7827088
+      }
+    }
+  ],
   "carburazioni": [],
   "inventario": [
     {
@@ -80,11 +109,12 @@
       "wear": "interval",
       "intervalKm": 3000,
       "usedKm": 0,
-      "lastKm": 1144.55,
+      "lastKm": 1398.35,
       "costoLocal": 88000,
       "costoUsd": 25.54481658713951,
       "valuta": "COP",
-      "fxToUsd": 0.00030997339590405055
+      "fxToUsd": 0.00030997339590405055,
+      "durata": 0
     },
     {
       "id": "inv8",
