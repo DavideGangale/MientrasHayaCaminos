@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-09-24T02:18:24.303Z",
+  "_exportDate": "2026-09-24T11:36:58.111Z",
   "tipo": "officina",
   "stats": {
     "spesaRicambiUsd": 0,
@@ -129,11 +129,12 @@
     {
       "id": "inv9",
       "nome": "Kit frizione",
-      "qta": 1,
+      "qta": 0,
       "wear": "interval",
       "intervalKm": 12000,
       "usedKm": 4300,
-      "lastKm": 4762.1
+      "lastKm": -2687.9,
+      "durata": 0
     },
     {
       "id": "inv10",
