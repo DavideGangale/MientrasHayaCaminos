@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>VespaTrek Camera</title>
+<link rel="manifest" href="/MientrasHayaCaminos/manifest.json">
+<link rel="apple-touch-icon" href="/MientrasHayaCaminos/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
   body { background:#0d1117; color:#c9d1d9; font-family:sans-serif; margin:0; padding:15px; }
   h1 { margin-top:0; color:#58a6ff; text-align:center; font-size: 24px; }
@@ -309,6 +313,12 @@ async function saveInboxFeed(entries) {
     const t = await res.text();
     throw new Error('Errore salvataggio Inbox su GitHub: ' + t);
   }
+}
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/MientrasHayaCaminos/sw.js').catch(() => {});
+  });
 }
 </script>
 </body>
