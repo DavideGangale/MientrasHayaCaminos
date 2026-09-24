@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-09-24T02:18:24.304Z",
+  "_exportDate": "2026-09-24T11:36:58.112Z",
   "titolo": "Mientras Haya Caminos",
   "paeseAttuale": "Colombia",
   "diarioTagsPreset": [
@@ -145,7 +145,7 @@
   "ultimeTappe": [
     {
       "id": 1790216296346,
-      "tipo": "Turismo",
+      "tipo": "Tappa",
       "data": "23/09/2026",
       "ora": "21:18",
       "paese": "Colombia",
@@ -159,8 +159,8 @@
       "benzinaRealeLitri": null,
       "consumoStimatoKmL": null,
       "consumoRealeKmL": null,
-      "titolo": "[Auto] Giro 23/09/2026",
-      "note": "Salvataggio automatico per inattività (30 min)",
+      "titolo": "Recreso de Ibagué a Armenia",
+      "note": "Mañana seguiré hacia el sur despues de un pequeño desvio para pasar a saludar amigos en Ibagué",
       "startTs": 1790177661923,
       "endTs": 1790216296347,
       "telemetry": [
@@ -3724,7 +3724,7 @@
       "benzinaRealeLitri": null,
       "consumoStimatoKmL": null,
       "consumoRealeKmL": null,
-      "titolo": "Giro del 22/09/2026 22:47",
+      "titolo": "Visita amigos en Ibagué",
       "note": "",
       "startTs": 1790133104062,
       "endTs": 1790135233372,
