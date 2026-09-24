@@ -1,4 +1,4 @@
-const CACHE = 'vespatrek-v44';
+const CACHE = 'vespatrek-v45';
 const BASE = '/MientrasHayaCaminos/';
 
 self.addEventListener('install', (event) => {
@@ -7,6 +7,7 @@ self.addEventListener('install', (event) => {
 
     const urls = [
       BASE + 'Vespa100.html',
+      BASE + 'inbox_camera.html',
       BASE + 'manifest.json',
       BASE + 'icon-192.png',
       BASE + 'icon-512.png'
@@ -47,7 +48,10 @@ self.addEventListener('fetch', (event) => {
         return fresh;
       } catch (e) {
         const cached = await caches.match(req);
-        return cached || caches.match(BASE + 'Vespa100.html');
+        if (cached) return cached;
+        // Fallback in base all'URL richiesto
+        if (req.url.includes('inbox_camera.html')) return caches.match(BASE + 'inbox_camera.html');
+        return caches.match(BASE + 'Vespa100.html');
       }
     })());
     return;
