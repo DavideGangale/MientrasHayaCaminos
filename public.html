@@ -1449,10 +1449,8 @@
               </svg>
             </a>
           </div>
-          <button id="btnDiaryOpen" class="btn btn-brand" onclick="showDiaryOverlay()">📖 Apri il diario</button>
           <button id="btnStats" class="btn btn-secondary" onclick="apriStats()">📊 Statistiche</button>
           <button id="btnShowcaseOpen" class="btn btn-secondary" onclick="openShowcaseModal()">📱 Scopri l'App</button>
-        
         </div>
       </div>
 
@@ -1461,6 +1459,7 @@
 
     <div id="mapWrap">
       <div class="map-actions">
+        <button id="btnDiaryOpen" class="floating-btn" onclick="showDiaryOverlay()" style="background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); color: white; border-color: rgba(255,255,255,0.3); box-shadow: 0 4px 15px rgba(37,99,235,0.4);">📖 <strong>Apri il Diario</strong></button>
         <button id="btnOpenFilters" class="floating-btn" onclick="openFiltersDrawer()">🧭 <strong>Filtri</strong></button>
         <button id="btnSeeAllTracks" class="floating-btn" onclick="showAllTracks()">🌎 <strong>Vedi tutto</strong></button>
       </div>
@@ -3231,9 +3230,16 @@ function renderMap(skipAutoFit = false) {
     if (currentMonthFilter && getYearMonthFromPercorso(t) !== currentMonthFilter) return;
     if (!t.traccia || t.traccia.length < 2) return;
 
-    const latlngs = t.traccia.map(p =>
-      Array.isArray(p) ? [p[0], p[1]] : [p.lat, p.lon || p.lng]
-    );
+    let latlngs = [];
+    t.traccia.forEach(p => {
+      let lat = Array.isArray(p) ? p[0] : p.lat;
+      let lon = Array.isArray(p) ? p[1] : (p.lon ?? p.lng);
+      lat = Number(lat); lon = Number(lon);
+      if (isFinite(lat) && isFinite(lon) && (lat !== 0 || lon !== 0)) {
+        latlngs.push([lat, lon]);
+      }
+    });
+    if (latlngs.length < 2) return;
 
     const color = t.tipo === 'Turismo' ? '#4da3ff' : '#d94d4d';
 
@@ -3280,6 +3286,7 @@ if (noMarkerVisible) {
 
   function creaMarker(lat, lon, icona, popupHTML) {
     if (!isFinite(lat) || !isFinite(lon)) return;
+    if (lat === 0 && lon === 0) return;
     const [adjLat, adjLon] = getOffsetLatLon(lat, lon);
     const m = L.marker([adjLat, adjLon], { icon: icona }).addTo(layerMarkers);
     bounds.extend(m.getLatLng());
@@ -3543,7 +3550,7 @@ function applyFiltersAndClose() {
 }
 
 function resetFilters() {
-  currentMode = 'TAPPE';
+  currentMode = 'TUTTO';
   currentCountry = '';
   currentMarkerFilters = {
     FOTO: true,
@@ -4178,6 +4185,8 @@ function showAllTracks() {
   selectedTrackGeoBounds = null;
   selectedTrackMarkerIds = null;
   selectedTrackRelatedData = null;
+  currentMode = 'TUTTO';
+  syncFilterButtonsUI();
   renderMap(false);
 }
 
@@ -4366,9 +4375,20 @@ function renderDiaryList() {
     });
   }
 
+  const allTracks = [...tappe, ...turismo];
+  const isOrphan = (item) => !allTracks.some(t => isItemInTrackTimeRange(item, t));
+  const oDiary = (Array.isArray(DATA.diario) ? DATA.diario : []).filter(isOrphan);
+  const oMaint = (Array.isArray(DATA.manutenzioni) ? DATA.manutenzioni : []).filter(isOrphan);
+  
+  for(const d of oDiary) trackItems.push({ kind: 'DIARIO', ts: getBestTs(d) || d.ts || d.id, raw: d });
+  for(const m of oMaint) trackItems.push({ kind: 'MAINT', ts: getBestTs(m) || m.id, raw: m });
+
   trackItems.sort((a, b) => Number(b.ts) - Number(a.ts));
 
   list.innerHTML = trackItems.map(it => {
+    if (it.kind === 'DIARIO') return `<div class="diary-card"><div class="diary-badge" style="background:#7289da;color:#fff;">📖 Appunto</div><div class="diary-meta">📅 ${escapeHtml(it.raw.data || '')} ${escapeHtml(it.raw.ora || '')}</div><div class="diary-text">${escapeHtml(it.raw.testo || '')}</div>${it.raw.fotoUrl ? `<img src="${it.raw.fotoUrl}" style="width:100%; border-radius:8px; margin-top:10px;">` : ''}</div>`;
+    if (it.kind === 'MAINT') return `<div class="diary-card"><div class="diary-badge" style="background:#e67e22;color:#fff;">🔧 Manutenzione</div><div class="diary-meta">📅 ${escapeHtml(it.raw.data || '')} ${escapeHtml(it.raw.ora || '')}</div><div class="diary-text"><b>${escapeHtml(it.raw.titolo || '')}</b><br>${escapeHtml(it.raw.descrizione || '')}</div></div>`;
+
     const t = it.raw || {};
     const { a0, a1 } = getAltStartEndFromTelemetry(t);
     const tt = getTrackStartEndTimeStrings(t);
@@ -4647,20 +4667,26 @@ async function loadData() {
     // Disegna la mappa inizialmente
     renderMap(true); // skip auto fit per impostare il fit custom qui sotto
 
-    // Centra sull'ultima tappa/giro registrato
+    // Centra sulle ultime 3 tappe/giri registrati
     let zoomedToLatest = false;
     if (ultimeT.length > 0) {
-      const ultimaTappaPaese = ultimeT.find(x => !currentCountry || x.paese === currentCountry) || ultimeT[0];
-      if (ultimaTappaPaese && Array.isArray(ultimaTappaPaese.traccia)) {
-        const latlngs = ultimaTappaPaese.traccia.map(p =>
-          Array.isArray(p) ? [p[0], p[1]] : [p.lat, p.lon || p.lng]
-        );
-        if (latlngs.length >= 2) {
-          const latestBounds = L.latLngBounds(latlngs);
-          if (latestBounds.isValid()) {
-            map.fitBounds(latestBounds.pad(0.15));
-            zoomedToLatest = true;
-          }
+      const filteredTracks = currentCountry ? ultimeT.filter(x => x.paese === currentCountry) : ultimeT;
+      const tracksToZoom = filteredTracks.slice(0, 3).length > 0 ? filteredTracks.slice(0, 3) : ultimeT.slice(0, 3);
+      
+      let allLatLngs = [];
+      for (const track of tracksToZoom) {
+        if (Array.isArray(track.traccia)) {
+          allLatLngs.push(...track.traccia.map(p =>
+            Array.isArray(p) ? [p[0], p[1]] : [p.lat, p.lon || p.lng]
+          ));
+        }
+      }
+      
+      if (allLatLngs.length >= 2) {
+        const latestBounds = L.latLngBounds(allLatLngs);
+        if (latestBounds.isValid()) {
+          map.fitBounds(latestBounds.pad(0.15));
+          zoomedToLatest = true;
         }
       }
     }
@@ -4676,28 +4702,29 @@ async function loadData() {
         map.invalidateSize();
         // Se siamo su desktop, rinfreschiamo lo zoom sull'ultima tappa
         if (window.innerWidth >= 1024 && ultimeT.length > 0) {
-          const ultimaTappaPaese = ultimeT.find(x => !currentCountry || x.paese === currentCountry) || ultimeT[0];
-          if (ultimaTappaPaese && Array.isArray(ultimaTappaPaese.traccia)) {
-            const latlngs = ultimaTappaPaese.traccia.map(p =>
-              Array.isArray(p) ? [p[0], p[1]] : [p.lat, p.lon || p.lng]
-            );
-            if (latlngs.length >= 2) {
-              const latestBounds = L.latLngBounds(latlngs);
-              if (latestBounds.isValid()) {
-                map.fitBounds(latestBounds.pad(0.15));
-              }
+          const filteredTracks = currentCountry ? ultimeT.filter(x => x.paese === currentCountry) : ultimeT;
+          const tracksToZoom = filteredTracks.slice(0, 3).length > 0 ? filteredTracks.slice(0, 3) : ultimeT.slice(0, 3);
+          
+          let allLatLngs = [];
+          for (const track of tracksToZoom) {
+            if (Array.isArray(track.traccia)) {
+              allLatLngs.push(...track.traccia.map(p =>
+                Array.isArray(p) ? [p[0], p[1]] : [p.lat, p.lon || p.lng]
+              ));
+            }
+          }
+          
+          if (allLatLngs.length >= 2) {
+            const latestBounds = L.latLngBounds(allLatLngs);
+            if (latestBounds.isValid()) {
+              map.fitBounds(latestBounds.pad(0.15));
             }
           }
         }
       }
     }, 120);
 
-    // Se siamo su desktop, apriamo il diario all'avvio
-    if (window.innerWidth >= 1024) {
-      showDiaryOverlay(true);
-    }
-
-    // Se l'URL chiede il diario, aprilo dopo il caricamento (utile su mobile)
+    // Se l'URL chiede esplicitamente il diario, aprilo dopo il caricamento
     const view = new URLSearchParams(window.location.search).get('view');
     if (view === 'diary') {
       setTimeout(() => {
@@ -4836,21 +4863,14 @@ window.onload = function () {
   const url = new URL(window.location.href);
 
   if (!url.searchParams.get('view')) {
-    url.searchParams.set('view', 'diary');
+    url.searchParams.set('view', 'map');
     history.replaceState({}, '', url);
   }
 
   loadData();
-
-  setTimeout(() => {
-    if (typeof showDiaryOverlay === 'function') {
-      showDiaryOverlay(true);
-    }
-  }, 300);
 };
                     
   
 </script>
 </body>
 </html>
-
