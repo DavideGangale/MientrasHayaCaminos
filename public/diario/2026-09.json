@@ -1,10 +1,154 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-09-28T02:00:49.606Z",
+  "_exportDate": "2026-09-29T02:17:09.002Z",
   "tipo": "diario_mese",
   "mese": "2026-09",
-  "count": 17,
+  "count": 25,
   "entries": [
+    {
+      "id": 1790634487405,
+      "ts": 1790634487405,
+      "data": "28/09/2026",
+      "ora": "17:28",
+      "paese": "Colombia",
+      "km": "2433.2",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 1.211313027248345,
+        "lon": -77.2767452175755
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1790634487405.jpg",
+      "foto": null
+    },
+    {
+      "id": 1790634481119,
+      "ts": 1790634481119,
+      "data": "28/09/2026",
+      "ora": "17:28",
+      "paese": "Colombia",
+      "km": "2433.2",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 1.211313027248345,
+        "lon": -77.2767452175755
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1790634481119.jpg",
+      "foto": null
+    },
+    {
+      "id": 1790542331856,
+      "ts": 1790542331856,
+      "data": "27/09/2026",
+      "ora": "15:52",
+      "paese": "Colombia",
+      "km": "2411.1",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 1.139594225619526,
+        "lon": -77.15387940617921
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1790542331856.jpg",
+      "foto": null
+    },
+    {
+      "id": 1790542203064,
+      "ts": 1790542203064,
+      "data": "27/09/2026",
+      "ora": "15:50",
+      "paese": "Colombia",
+      "km": "2411.1",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 1.1386910593148352,
+        "lon": -77.15404498398038
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1790542203064.jpg",
+      "foto": null
+    },
+    {
+      "id": 1790535234742,
+      "ts": 1790535234742,
+      "data": "27/09/2026",
+      "ora": "13:53",
+      "paese": "Colombia",
+      "km": "2411.1",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 1.1312713823852145,
+        "lon": -77.17714926134126
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1790535234742.jpg",
+      "foto": null
+    },
+    {
+      "id": 1790534341962,
+      "ts": 1790534341962,
+      "data": "27/09/2026",
+      "ora": "13:39",
+      "paese": "Colombia",
+      "km": "2411.1",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 1.1360710645243919,
+        "lon": -77.17771121740795
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1790534341962.jpg",
+      "foto": null
+    },
+    {
+      "id": 1790534285922,
+      "ts": 1790534285922,
+      "data": "27/09/2026",
+      "ora": "13:38",
+      "paese": "Colombia",
+      "km": "2411.1",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 1.1360932459018387,
+        "lon": -77.17772151064631
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1790534285922.jpg",
+      "foto": null
+    },
+    {
+      "id": 1790534268660,
+      "ts": 1790534268660,
+      "data": "27/09/2026",
+      "ora": "13:37",
+      "paese": "Colombia",
+      "km": "2411.1",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 1.1361028992826478,
+        "lon": -77.17769294633884
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1790534268660.jpg",
+      "foto": null
+    },
     {
       "id": 1790460308333,
       "ts": 1790460308333,
