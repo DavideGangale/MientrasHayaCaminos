@@ -1613,6 +1613,11 @@
       </p>
 
       <div class="support-grid">
+        <div class="support-card" style="border: 2px solid #2563eb; background: rgba(37, 99, 235, 0.1);">
+          <h3 id="vakiTitle" class="support-card-title"></h3>
+          <p id="vakiText" class="support-card-text"></p>
+          <a id="vakiBtn" class="btn btn-brand" style="text-decoration: none; text-align: center; display: block;" href="https://vaki.co/es/vaki/un-ayuda-para-mi-viaje-al-fin-del-mundo-y-regreso?utm_source=copy&utm_medium=toolbar&utm_campaign=v4" target="_blank" rel="noopener"></a>
+        </div>
         <div class="support-card">
           <h3 id="supportCard1Title" class="support-card-title">Aiuto individuale</h3>
           <p id="supportCard1Text" class="support-card-text">
@@ -1807,6 +1812,9 @@ const I18N = {
     supportCard1Title: 'Aiuto individuale',
     supportCard1Text: 'Ospitalità, spazio per la tenda, un consiglio sulla zona, un aiuto pratico o anche solo un caffè lungo la strada.',
     hostOpenForm: 'Offri un aiuto',
+    vakiTitle: 'Supporto Economico (Vaki)',
+    vakiText: 'Se vuoi aiutare anche col valore di un semplice caffè, un pranzo o un pieno di benzina, clicca qui.',
+    vakiBtn: 'Sostieni su Vaki',
     vespaClubTitle: 'Vespa Club / gruppo',
     vespaClubText: 'Se fai parte di un Vespa Club o di un gruppo vespista, possiamo provare a organizzare un incontro o un giro in città.',
     vespaClubBtn: 'Proponi un incontro',
@@ -1922,6 +1930,9 @@ const I18N = {
     supportCard1Title: 'Individual help',
     supportCard1Text: 'A place to stay, tent space, local advice, practical help or even just a coffee along the way.',
     hostOpenForm: 'Offer help',
+    vakiTitle: 'Financial Support (Vaki)',
+    vakiText: 'If you want to help even with the value of a simple coffee, a lunch or a tank of gas, click here.',
+    vakiBtn: 'Support on Vaki',
     vespaClubTitle: 'Vespa Club / group',
     vespaClubText: 'If you are part of a Vespa Club or Vespa riders group, we can try to organize a meetup or a ride in your city.',
     vespaClubBtn: 'Suggest a meetup',
@@ -2035,6 +2046,9 @@ const I18N = {
     supportCard1Title: 'Ayuda individual',
     supportCard1Text: 'Hospedaje, espacio para la tienda, un consejo sobre la zona, ayuda práctica o incluso solo un café en el camino.',
     hostOpenForm: 'Ofrece ayuda',
+    vakiTitle: 'Apoyo Económico (Vaki)',
+    vakiText: 'Si quieres ayudar incluso con el valor de un simple café, un almuerzo o un tanque de gasolina, haz clic aquí.',
+    vakiBtn: 'Apoya en Vaki',
     vespaClubTitle: 'Vespa Club / grupo',
     vespaClubText: 'Si formas parte de un Vespa Club o de un grupo vespista, podemos intentar organizar un encuentro o una rodada en tu ciudad.',
     vespaClubBtn: 'Propón un encuentro',
@@ -3258,16 +3272,19 @@ function renderMap(skipAutoFit = false) {
     const popupHtml = buildTrackPopup(t);
     poly.bindPopup(popupHtml);
 
-    const lastPoint = latlngs[latlngs.length - 1];
-    const markerFine = L.marker(lastPoint, {
-      icon: L.divIcon({
-        className: 'custom-marker',
-        html: t.tipo === 'Turismo' ? '🛵' : '🏁',
-        iconSize: [30, 30]
-      })
-    }).addTo(layerTracce);
+    const currentZoom = map ? map.getZoom() : 12;
+    if (currentZoom >= 8) {
+      const lastPoint = latlngs[latlngs.length - 1];
+      const markerFine = L.marker(lastPoint, {
+        icon: L.divIcon({
+          className: 'custom-marker',
+          html: t.tipo === 'Turismo' ? '🛵' : '🏁',
+          iconSize: [30, 30]
+        })
+      }).addTo(layerTracce);
 
-    markerFine.bindPopup(popupHtml);
+      markerFine.bindPopup(popupHtml);
+    }
   });
 
 const noMarkerVisible =
@@ -3879,6 +3896,10 @@ function updateHostModalTexts() {
   document.getElementById('supportCard1Title').innerText = T('supportCard1Title');
   document.getElementById('supportCard1Text').innerText = T('supportCard1Text');
   document.getElementById('hostOpenFormBtn').innerText = T('hostOpenForm');
+
+  document.getElementById('vakiTitle').innerText = T('vakiTitle');
+  document.getElementById('vakiText').innerText = T('vakiText');
+  document.getElementById('vakiBtn').innerText = T('vakiBtn');
 
   document.getElementById('vespaClubTitle').innerText = T('vespaClubTitle');
   document.getElementById('vespaClubText').innerText = T('vespaClubText');
