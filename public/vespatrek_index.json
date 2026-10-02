@@ -1,8 +1,8 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-10-01T03:51:08.264Z",
+  "_exportDate": "2026-10-02T14:10:59.293Z",
   "titolo": "Mientras Haya Caminos",
-  "paeseAttuale": "Colombia",
+  "paeseAttuale": "Ecuador",
   "diarioTagsPreset": [
     "Paesaggi",
     "Vespistas",
@@ -40,11 +40,11 @@
       "slug": "colombia",
       "path": "public/paesi/colombia.json",
       "stats": {
-        "km": 2803.370000000001,
-        "benzina": 108.00510226496944,
-        "spesaBenzinaUsd": 146.15000000000003,
-        "olioMl": 2272,
-        "spesaOlioUsd": 37.04,
+        "km": 2549.0800000000004,
+        "benzina": 98.20810170672736,
+        "spesaBenzinaUsd": 138.82999999999998,
+        "olioMl": 2100,
+        "spesaOlioUsd": 34.14,
         "spesaRicambiUsd": 0,
         "spesaManodoperaUsd": 0
       }
@@ -54,11 +54,11 @@
       "slug": "ecuador",
       "path": "public/paesi/ecuador.json",
       "stats": {
-        "km": 9.02,
-        "benzina": 0.34751246622102117,
-        "spesaBenzinaUsd": 0,
-        "olioMl": 0,
-        "spesaOlioUsd": 0,
+        "km": 263.31,
+        "benzina": 10.144513024463091,
+        "spesaBenzinaUsd": 7.32,
+        "olioMl": 172,
+        "spesaOlioUsd": 2.9000000000000004,
         "spesaRicambiUsd": 0,
         "spesaManodoperaUsd": 0
       }
@@ -288,7 +288,7 @@
       "tipo": "Tappa",
       "data": "30/09/2026",
       "ora": "20:22",
-      "paese": "Colombia",
+      "paese": "Ecuador",
       "km": 254.29,
       "durata": 32735,
       "altMin": 1549,
@@ -299,7 +299,7 @@
       "benzinaRealeLitri": null,
       "consumoStimatoKmL": null,
       "consumoRealeKmL": null,
-      "titolo": "llegada a quito",
+      "titolo": "Tulcan - Quito",
       "note": "",
       "startTs": 1790784984458,
       "endTs": 1790817725517,
@@ -6980,7 +6980,7 @@
       "benzinaRealeLitri": null,
       "consumoStimatoKmL": null,
       "consumoRealeKmL": null,
-      "titolo": "Tappa del 30/09/2026 11:16",
+      "titolo": "Frontera - Tulcan",
       "note": "",
       "startTs": 1790780153625,
       "endTs": 1790784974246,
