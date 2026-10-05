@@ -1,12 +1,34 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-10-02T15:30:19.307Z",
+  "_exportDate": "2026-10-05T13:26:04.833Z",
   "tipo": "officina",
   "stats": {
     "spesaRicambiUsd": 0,
     "spesaManodoperaUsd": 0
   },
   "manutenzioni": [
+    {
+      "id": 1790955166555,
+      "data": "02/10/2026",
+      "ora": "10:32",
+      "paese": "Ecuador",
+      "km": "2812.4",
+      "nome": "Pulizia Carburatore",
+      "desc": "",
+      "costoLocal": 0,
+      "valuta": "USD",
+      "costoUsd": 0,
+      "fotoUrl": null,
+      "fotoUrl2": null,
+      "fotoUrlList": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "ricambiUsati": [],
+      "geo": {
+        "lat": -0.2043965,
+        "lon": -78.4833355
+      }
+    },
     {
       "id": 1790043865710,
       "data": "21/09/2026",
