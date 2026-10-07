@@ -1,10 +1,100 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-10-05T13:26:04.834Z",
+  "_exportDate": "2026-10-07T01:45:42.570Z",
   "tipo": "diario_mese",
   "mese": "2026-10",
-  "count": 5,
+  "count": 10,
   "entries": [
+    {
+      "id": 1791317698478,
+      "ts": 1791317698478,
+      "data": "06/10/2026",
+      "ora": "15:14",
+      "paese": "Ecuador",
+      "km": "3225.0",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": -0.003472748212519542,
+        "lon": -78.45337500803028
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1791317698478.jpg",
+      "foto": null
+    },
+    {
+      "id": 1791308135361,
+      "ts": 1791308135361,
+      "data": "06/10/2026",
+      "ora": "12:35",
+      "paese": "Ecuador",
+      "km": "3225.0",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 0.04877027075857981,
+        "lon": -78.4072419548508
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1791308135361.jpg",
+      "foto": null
+    },
+    {
+      "id": 1791308120229,
+      "ts": 1791308120229,
+      "data": "06/10/2026",
+      "ora": "12:35",
+      "paese": "Ecuador",
+      "km": "3225.0",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 0.04877143069518272,
+        "lon": -78.40724230303609
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1791308120229.jpg",
+      "foto": null
+    },
+    {
+      "id": 1791307952401,
+      "ts": 1791307952401,
+      "data": "06/10/2026",
+      "ora": "12:32",
+      "paese": "Ecuador",
+      "km": "3225.0",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": 0.04872345831249721,
+        "lon": -78.40722408152968
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1791307952401.jpg",
+      "foto": null
+    },
+    {
+      "id": 1791305554472,
+      "ts": 1791305554472,
+      "data": "06/10/2026",
+      "ora": "11:52",
+      "paese": "Ecuador",
+      "km": "3225.0",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": -0.00005029141902928268,
+        "lon": -78.35842489272203
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1791305554472.jpg",
+      "foto": null
+    },
     {
       "id": 1791171584807,
       "ts": 1791171584236,
