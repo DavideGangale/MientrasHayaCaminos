@@ -1,10 +1,100 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-10-07T01:45:42.570Z",
+  "_exportDate": "2026-10-14T07:23:37.296Z",
   "tipo": "diario_mese",
   "mese": "2026-10",
-  "count": 10,
+  "count": 15,
   "entries": [
+    {
+      "id": 1791746879224,
+      "ts": 1791746879224,
+      "data": "11/10/2026",
+      "ora": "14:27",
+      "paese": "Ecuador",
+      "km": "3506.0",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": -0.44349234096540296,
+        "lon": -77.95733987356425
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1791746879224.jpg",
+      "foto": null
+    },
+    {
+      "id": 1791746869367,
+      "ts": 1791746869367,
+      "data": "11/10/2026",
+      "ora": "14:27",
+      "paese": "Ecuador",
+      "km": "3506.0",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": -0.44349234096540296,
+        "lon": -77.95733987356425
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1791746869367.jpg",
+      "foto": null
+    },
+    {
+      "id": 1791746847377,
+      "ts": 1791746847377,
+      "data": "11/10/2026",
+      "ora": "14:27",
+      "paese": "Ecuador",
+      "km": "3506.0",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": -0.44349234096540296,
+        "lon": -77.95733987356425
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1791746847377.jpg",
+      "foto": null
+    },
+    {
+      "id": 1791735973774,
+      "ts": 1791735973774,
+      "data": "11/10/2026",
+      "ora": "11:26",
+      "paese": "Ecuador",
+      "km": "3506.0",
+      "testo": "Laguna Papallacta",
+      "tags": [],
+      "geo": {
+        "lat": -0.38157034199720663,
+        "lon": -78.1570678577555
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1791735973774.jpg",
+      "foto": null
+    },
+    {
+      "id": 1791721800406,
+      "ts": 1791721800406,
+      "data": "11/10/2026",
+      "ora": "07:30",
+      "paese": "Ecuador",
+      "km": "3506.0",
+      "testo": "Saliendo de Quito acompañado",
+      "tags": [],
+      "geo": {
+        "lat": -0.15976200957506803,
+        "lon": -78.4666159690728
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1791721800406.jpg",
+      "foto": null
+    },
     {
       "id": 1791317698478,
       "ts": 1791317698478,
