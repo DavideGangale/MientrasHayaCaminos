@@ -4,12 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>VespaTrek Camera</title>
+<link rel="manifest" href="/MientrasHayaCaminos/manifest_camera.json">
 <link rel="apple-touch-icon" href="/MientrasHayaCaminos/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="VT Camera">
 <style>
   body { background:#0d1117; color:#c9d1d9; font-family:sans-serif; margin:0; padding:15px; }
-  h1 { margin-top:0; color:#58a6ff; text-align:center; font-size: 24px; }
+  h1 { margin-top:0; color:#58a6ff; text-align:center; font-size: 24px; margin-bottom: 5px; }
   .card { background:#161b22; border:1px solid #30363d; padding:15px; border-radius:10px; margin-bottom:20px; }
   .btn { display:block; width:100%; padding:15px; border:none; border-radius:8px; font-size:18px; font-weight:bold; color:#fff; cursor:pointer; margin-bottom:10px; }
   .btn-green { background:#238636; }
@@ -26,6 +28,9 @@
 <body>
 
 <h1>📸 VespaTrek Camera</h1>
+<div id="offline-badge" style="text-align:center; font-size:13px; margin-bottom:12px; font-weight:bold; color:#8b949e;">
+  ⏳ Verifica modalità offline...
+</div>
 <div class="toast" id="toast">Messaggio</div>
 
 <div id="settings-card" class="card" style="display:none;">
@@ -114,9 +119,70 @@ async function updateQueueUI() {
 function ls(k) { return localStorage.getItem(k) || ''; }
 function setLs(k, v) { localStorage.setItem(k, v); }
 
+// ================= OFFLINE & SERVICE WORKER =================
+async function checkOfflineStatus() {
+  const badge = document.getElementById('offline-badge');
+  if (!badge) return;
+
+  if ('serviceWorker' in navigator) {
+    try {
+      const reg = await navigator.serviceWorker.register('/MientrasHayaCaminos/sw.js');
+      console.log('SW registrato:', reg);
+
+      // Pre-caricamento esplicito della cache per la pagina camera
+      if (window.caches) {
+        try {
+          const cache = await caches.open('vespatrek-v46');
+          await cache.add('/MientrasHayaCaminos/inbox_camera.html');
+          await cache.add('/MientrasHayaCaminos/manifest_camera.json');
+        } catch(err) {
+          console.warn('Cache pre-load warning:', err);
+        }
+      }
+
+      if (navigator.onLine) {
+        badge.innerHTML = '🟢 <b>Modalità Offline: PRONTA</b> (apribile senza internet)';
+        badge.style.color = '#3fb950';
+      } else {
+        badge.innerHTML = '📶 <b>Modalità Offline: ATTIVA</b> (senza connessione)';
+        badge.style.color = '#58a6ff';
+      }
+    } catch (e) {
+      console.warn('SW err:', e);
+      if (!navigator.onLine) {
+        badge.innerHTML = '📶 <b>Modalità Offline: ATTIVA</b>';
+        badge.style.color = '#58a6ff';
+      } else {
+        badge.innerHTML = '⚠️ Errore attivazione Service Worker';
+        badge.style.color = '#f85149';
+      }
+    }
+  } else {
+    badge.innerHTML = '⚠️ Browser senza supporto Service Worker';
+    badge.style.color = '#d29922';
+  }
+}
+
+window.addEventListener('online', () => {
+  const badge = document.getElementById('offline-badge');
+  if (badge) {
+    badge.innerHTML = '🟢 <b>Connesso</b> — Modalità Offline Pronta';
+    badge.style.color = '#3fb950';
+  }
+});
+
+window.addEventListener('offline', () => {
+  const badge = document.getElementById('offline-badge');
+  if (badge) {
+    badge.innerHTML = '📶 <b>Modalità Offline: ATTIVA</b> (senza connessione)';
+    badge.style.color = '#58a6ff';
+  }
+});
+
 // ================= SETTINGS =================
 window.onload = async () => {
   await initDB();
+  checkOfflineStatus();
   if (!ls('gh_token')) {
     document.getElementById('settings-card').style.display = 'block';
   }
@@ -314,11 +380,7 @@ async function saveInboxFeed(entries) {
   }
 }
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/MientrasHayaCaminos/sw.js').catch(() => {});
-  });
-}
+
 </script>
 </body>
 </html>
