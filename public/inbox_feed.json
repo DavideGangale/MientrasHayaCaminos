@@ -1,6 +1,21 @@
 {
   "entries": [
     {
+      "ts": 1792416383318,
+      "id": 1792416383318,
+      "paese": "",
+      "km": "",
+      "testo": "",
+      "tags": [],
+      "videoUrl": null,
+      "videoPlanned": false,
+      "geo": {
+        "lat": -1.3980398001163055,
+        "lon": -78.4208017588392
+      },
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1792416383318.jpg"
+    },
+    {
       "ts": 1792265351429,
       "id": 1792265351429,
       "paese": "",
