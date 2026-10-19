@@ -1,10 +1,64 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-10-14T07:23:37.296Z",
+  "_exportDate": "2026-10-19T12:00:28.742Z",
   "tipo": "diario_mese",
   "mese": "2026-10",
-  "count": 15,
+  "count": 18,
   "entries": [
+    {
+      "id": 1792265351429,
+      "ts": 1792265351429,
+      "data": "17/10/2026",
+      "ora": "14:29",
+      "paese": "Ecuador",
+      "km": "3630.1",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": -1.4003967277021,
+        "lon": -78.40052741350932
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1792265351429.jpg",
+      "foto": null
+    },
+    {
+      "id": 1792100803248,
+      "ts": 1792100803248,
+      "data": "15/10/2026",
+      "ora": "16:46",
+      "paese": "Ecuador",
+      "km": "3630.1",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": -1.4066649880273974,
+        "lon": -78.31828915521345
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1792100803248.jpg",
+      "foto": null
+    },
+    {
+      "id": 1792097058938,
+      "ts": 1792097058938,
+      "data": "15/10/2026",
+      "ora": "15:44",
+      "paese": "Ecuador",
+      "km": "3630.1",
+      "testo": "La amazona… hace media hora en una cascada tomando el sol, y ahora con traje de lluvia, y yabparó de llover",
+      "tags": [],
+      "geo": {
+        "lat": -1.4106540238091028,
+        "lon": -78.19118247129823
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1792097058938.jpg",
+      "foto": null
+    },
     {
       "id": 1791746879224,
       "ts": 1791746879224,
