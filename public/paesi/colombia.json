@@ -1,6 +1,6 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-11-02T11:54:57.152Z",
+  "_exportDate": "2026-11-02T14:02:18.565Z",
   "tipo": "paese",
   "paese": "Colombia",
   "slug": "colombia",
@@ -76145,42 +76145,6 @@
     }
   ],
   "diario": [
-    {
-      "id": 1790789707214,
-      "ts": 1790789707214,
-      "data": "30/09/2026",
-      "ora": "12:35",
-      "paese": "Colombia",
-      "km": "2812.4",
-      "testo": "",
-      "tags": [],
-      "geo": {
-        "lat": 0.4643498500813432,
-        "lon": -77.94368078008102
-      },
-      "videoUrl": null,
-      "videoPlanned": false,
-      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1790789707214.jpg",
-      "foto": null
-    },
-    {
-      "id": 1790719579642,
-      "ts": 1790719579642,
-      "data": "29/09/2026",
-      "ora": "17:06",
-      "paese": "Colombia",
-      "km": "2812.4",
-      "testo": "",
-      "tags": [],
-      "geo": {
-        "lat": 0.8047492144127381,
-        "lon": -77.58519349475424
-      },
-      "videoUrl": null,
-      "videoPlanned": false,
-      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1790719579642.jpg",
-      "foto": null
-    },
     {
       "id": 1790634487405,
       "ts": 1790634487405,
