@@ -1,8 +1,8 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-11-02T11:54:57.153Z",
+  "_exportDate": "2026-11-02T14:02:18.566Z",
   "titolo": "Mientras Haya Caminos",
-  "paeseAttuale": "Perù",
+  "paeseAttuale": "Peru",
   "diarioTagsPreset": [
     "Paesaggi",
     "Vespistas",
@@ -76,20 +76,6 @@
         "spesaRicambiUsd": 0,
         "spesaManodoperaUsd": 0
       }
-    },
-    {
-      "paese": "Perù",
-      "slug": "peru",
-      "path": "public/paesi/peru.json",
-      "stats": {
-        "km": 0,
-        "benzina": 0,
-        "spesaBenzinaUsd": 0,
-        "olioMl": 0,
-        "spesaOlioUsd": 0,
-        "spesaRicambiUsd": 0,
-        "spesaManodoperaUsd": 0
-      }
     }
   ],
   "ultimiPost": [
@@ -98,7 +84,7 @@
       "ts": 1793562300472,
       "data": "01/11/2026",
       "ora": "14:45",
-      "paese": "Perù",
+      "paese": "Peru",
       "km": "4899.8",
       "testo": "",
       "tags": [],
@@ -116,7 +102,7 @@
       "ts": 1793560339598,
       "data": "01/11/2026",
       "ora": "14:12",
-      "paese": "Perù",
+      "paese": "Peru",
       "km": "4899.8",
       "testo": "",
       "tags": [],
@@ -134,7 +120,7 @@
       "ts": 1793557843495,
       "data": "01/11/2026",
       "ora": "13:30",
-      "paese": "Perù",
+      "paese": "Peru",
       "km": "4899.8",
       "testo": "",
       "tags": [],
@@ -152,7 +138,7 @@
       "ts": 1793554827421,
       "data": "01/11/2026",
       "ora": "12:40",
-      "paese": "Perù",
+      "paese": "Peru",
       "km": "4899.8",
       "testo": "",
       "tags": [],
@@ -170,7 +156,7 @@
       "ts": 1793415658232,
       "data": "30/10/2026",
       "ora": "22:00",
-      "paese": "Peru",
+      "paese": "Ecuador",
       "km": "4790.7",
       "testo": "",
       "tags": [],
@@ -188,7 +174,7 @@
       "ts": 1793415647838,
       "data": "30/10/2026",
       "ora": "22:00",
-      "paese": "Peru",
+      "paese": "Ecuador",
       "km": "4790.7",
       "testo": "",
       "tags": [],
@@ -206,7 +192,7 @@
       "ts": 1793415435652,
       "data": "30/10/2026",
       "ora": "21:57",
-      "paese": "Peru",
+      "paese": "Ecuador",
       "km": "4790.7",
       "testo": "",
       "tags": [],
@@ -224,7 +210,7 @@
       "ts": 1793195878249,
       "data": "28/10/2026",
       "ora": "08:57",
-      "paese": "Peru",
+      "paese": "Ecuador",
       "km": "4790.7",
       "testo": "",
       "tags": [],
@@ -242,7 +228,7 @@
       "ts": 1793123717205,
       "data": "27/10/2026",
       "ora": "12:55",
-      "paese": "Peru",
+      "paese": "Ecuador",
       "km": "4790.7",
       "testo": "4164 mslm",
       "tags": [],
@@ -260,7 +246,7 @@
       "ts": 1793120110050,
       "data": "27/10/2026",
       "ora": "11:55",
-      "paese": "Peru",
+      "paese": "Ecuador",
       "km": "4790.7",
       "testo": "",
       "tags": [],
@@ -278,7 +264,7 @@
       "ts": 1793113289345,
       "data": "27/10/2026",
       "ora": "10:01",
-      "paese": "Peru",
+      "paese": "Ecuador",
       "km": "4790.7",
       "testo": "",
       "tags": [],
@@ -296,7 +282,7 @@
       "ts": 1793027270579,
       "data": "26/10/2026",
       "ora": "10:07",
-      "paese": "Peru",
+      "paese": "Ecuador",
       "km": "4790.7",
       "testo": "",
       "tags": [],
@@ -32900,11 +32886,6 @@
       },
       {
         "paese": "Peru",
-        "slug": "peru",
-        "path": "public/paesi/peru.json"
-      },
-      {
-        "paese": "Perù",
         "slug": "peru",
         "path": "public/paesi/peru.json"
       }
