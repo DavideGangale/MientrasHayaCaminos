@@ -1,4 +1,4 @@
-const CACHE = 'vespatrek-v46';
+const CACHE = 'vespatrek-v48';
 const BASE = '/MientrasHayaCaminos/';
 
 self.addEventListener('install', (event) => {
