@@ -43,12 +43,14 @@
 </div>
 
 <div id="camera-card" class="card">
-  <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="handlePhoto(this)">
+  <input type="file" id="file-input" accept="image/*" multiple style="display:none;" onchange="handlePhoto(this)">
   <button class="btn btn-blue" onclick="document.getElementById('file-input').click()" style="padding: 25px; font-size: 20px;">📷 Scatta Foto / Galleria</button>
   <button class="btn btn-grey" onclick="document.getElementById('settings-card').style.display='block'" style="padding: 10px; margin-top: 5px;">⚙️ Mostra Impostazioni</button>
   
   <div id="preview-container">
-    <img id="preview" src="">
+    <div id="photo-count-badge" style="font-size:14px; color:#58a6ff; font-weight:bold; margin-bottom:10px; display:none;"></div>
+    <img id="preview" src="" style="display:none;">
+    <div id="multi-preview" style="display:none; flex-wrap:wrap; justify-content:center; gap:8px; margin-bottom:12px;"></div>
     <textarea id="caption-input" rows="3" placeholder="Aggiungi una descrizione o testo... (opzionale)"></textarea>
     <div style="font-size: 12px; color: #8b949e; margin-bottom: 10px;" id="gps-status">⏳ Ricerca GPS in corso...</div>
     <button class="btn btn-green" onclick="saveToQueue()">📥 SALVA IN CODA (OFFLINE)</button>
@@ -132,7 +134,7 @@ async function checkOfflineStatus() {
       // Pre-caricamento esplicito della cache per la pagina camera
       if (window.caches) {
         try {
-          const cache = await caches.open('vespatrek-v46');
+          const cache = await caches.open('vespatrek-v48');
           await cache.add('/MientrasHayaCaminos/inbox_camera.html');
           await cache.add('/MientrasHayaCaminos/manifest_camera.json');
         } catch(err) {
@@ -198,77 +200,165 @@ function saveSettings() {
   showToast('✅ Impostazioni salvate!');
 }
 
-// ================= PHOTO HANDLING =================
-let currentPhotoBase64 = null;
+// ================= PHOTO HANDLING (SINGOLA & MULTIPLA) =================
+let currentPhotos = [];
 let currentGeo = null;
 
-function handlePhoto(input) {
-  const file = input.files[0];
-  if (!file) return;
-  
-  const reader = new FileReader();
-  reader.onload = e => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const MAX = 1000;
-      let w = img.width; let h = img.height;
-      if (w > h && w > MAX) { h *= MAX/w; w = MAX; }
-      else if (h > MAX) { w *= MAX/h; h = MAX; }
-      
-      canvas.width = w; canvas.height = h;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, w, h);
-      
-      currentPhotoBase64 = canvas.toDataURL('image/jpeg', 0.7);
-      document.getElementById('preview').src = currentPhotoBase64;
-      document.getElementById('preview-container').style.display = 'block';
-      document.getElementById('gps-status').innerText = '⏳ Acquisizione GPS in corso...';
-      
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          pos => { 
-            currentGeo = { lat: pos.coords.latitude, lon: pos.coords.longitude }; 
-            document.getElementById('gps-status').innerText = '✅ GPS Acquisito con successo!';
-          },
-          err => { 
-            console.warn('GPS Error', err); 
-            document.getElementById('gps-status').innerText = '❌ Nessun segnale GPS (verrà usata la posizione neutra)';
-          },
-          { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-        );
-      } else {
-        document.getElementById('gps-status').innerText = '❌ GPS non supportato.';
-      }
+function acquireGPS() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      pos => { 
+        currentGeo = { lat: pos.coords.latitude, lon: pos.coords.longitude }; 
+        const gpsEl = document.getElementById('gps-status');
+        if (gpsEl) gpsEl.innerText = `✅ GPS Acquisito (${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)})`;
+      },
+      err => { 
+        console.warn('GPS Error', err); 
+        const gpsEl = document.getElementById('gps-status');
+        if (gpsEl) gpsEl.innerText = '❌ Nessun segnale GPS (verrà usata la posizione neutra)';
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+  } else {
+    const gpsEl = document.getElementById('gps-status');
+    if (gpsEl) gpsEl.innerText = '❌ GPS non supportato.';
+  }
+}
+
+function processImageFile(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX = 1200;
+        let w = img.width; let h = img.height;
+        if (w > h && w > MAX) { h *= MAX/w; w = MAX; }
+        else if (h > MAX) { w *= MAX/h; h = MAX; }
+        
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.75));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
     };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handlePhoto(input) {
+  const files = Array.from(input.files || []);
+  if (files.length === 0) return;
+
+  currentPhotos = [];
+  document.getElementById('preview-container').style.display = 'block';
+  document.getElementById('gps-status').innerText = '⏳ Acquisizione GPS in corso...';
+  
+  // Avvia subito l'acquisizione GPS per questo punto
+  acquireGPS();
+
+  const previewEl = document.getElementById('preview');
+  const multiPreviewEl = document.getElementById('multi-preview');
+  const countBadge = document.getElementById('photo-count-badge');
+  
+  previewEl.style.display = 'none';
+  multiPreviewEl.style.display = 'block';
+  multiPreviewEl.innerHTML = `<div style="color:#8b949e; font-size:13px; padding:10px;">⏳ Elaborazione di ${files.length} foto in corso...</div>`;
+  if (countBadge) {
+    countBadge.innerText = `⏳ Elaborazione di ${files.length} foto...`;
+    countBadge.style.display = 'block';
+  }
+
+  const processed = [];
+  for (let i = 0; i < files.length; i++) {
+    try {
+      const b64 = await processImageFile(files[i]);
+      processed.push(b64);
+    } catch (e) {
+      console.warn('Errore elaborazione foto', i, e);
+    }
+  }
+
+  currentPhotos = processed;
+  renderPreviews();
+}
+
+function renderPreviews() {
+  const previewEl = document.getElementById('preview');
+  const multiPreviewEl = document.getElementById('multi-preview');
+  const countBadge = document.getElementById('photo-count-badge');
+  
+  if (!currentPhotos || currentPhotos.length === 0) {
+    cancelPhoto();
+    return;
+  }
+
+  if (countBadge) {
+    countBadge.innerText = currentPhotos.length === 1 
+      ? '📷 1 foto selezionata' 
+      : `📷 ${currentPhotos.length} foto selezionate dallo stesso punto`;
+    countBadge.style.display = 'block';
+  }
+
+  if (currentPhotos.length === 1) {
+    previewEl.src = currentPhotos[0];
+    previewEl.style.display = 'block';
+    multiPreviewEl.style.display = 'none';
+    multiPreviewEl.innerHTML = '';
+  } else {
+    previewEl.style.display = 'none';
+    multiPreviewEl.style.display = 'flex';
+    multiPreviewEl.innerHTML = currentPhotos.map((b64, idx) => `
+      <div style="position:relative; display:inline-block; margin:4px;">
+        <img src="${b64}" style="width:80px; height:80px; object-fit:cover; border-radius:8px; border:2px solid #58a6ff; display:block;">
+        <button type="button" onclick="removePhotoFromSelection(${idx})" style="position:absolute; top:-6px; right:-6px; background:#da3633; color:white; border:none; border-radius:50%; width:22px; height:22px; font-size:12px; font-weight:bold; cursor:pointer; line-height:20px; text-align:center; padding:0;">×</button>
+      </div>
+    `).join('');
+  }
+}
+
+function removePhotoFromSelection(idx) {
+  currentPhotos.splice(idx, 1);
+  renderPreviews();
 }
 
 function cancelPhoto() {
-  currentPhotoBase64 = null;
+  currentPhotos = [];
   currentGeo = null;
   document.getElementById('preview-container').style.display = 'none';
+  document.getElementById('preview').src = '';
+  document.getElementById('preview').style.display = 'none';
+  document.getElementById('multi-preview').innerHTML = '';
+  document.getElementById('multi-preview').style.display = 'none';
+  const countBadge = document.getElementById('photo-count-badge');
+  if (countBadge) countBadge.style.display = 'none';
   document.getElementById('caption-input').value = '';
   document.getElementById('file-input').value = '';
 }
 
 async function saveToQueue() {
-  if (!currentPhotoBase64) return;
-  const id = Date.now();
+  if (!currentPhotos || currentPhotos.length === 0) return;
+  const baseId = Date.now();
   const text = document.getElementById('caption-input').value.trim();
+  const geo = currentGeo || { lat: 0, lon: 0 };
   
-  const item = {
-    id: id,
-    ts: id,
-    testo: text,
-    geo: currentGeo || { lat: 0, lon: 0 },
-    base64: currentPhotoBase64
-  };
+  const count = currentPhotos.length;
+  for (let i = 0; i < count; i++) {
+    const item = {
+      id: baseId + i,
+      ts: baseId + i,
+      testo: text,
+      geo: geo,
+      base64: currentPhotos[i]
+    };
+    await addPhotoToDB(item);
+  }
   
-  await addPhotoToDB(item);
-  showToast('✅ Foto inserita in coda!');
+  showToast(count === 1 ? '✅ 1 foto salvata in coda!' : `✅ ${count} foto salvate in coda!`);
   cancelPhoto();
 }
 
@@ -278,10 +368,46 @@ async function uploadToGitHub(base64Data, filename) {
   const url = `https://api.github.com/repos/${repo}/contents/public/photos/${filename}`;
   const b64 = base64Data.split('base64,')[1];
   
+  // Controlla se il file esiste già su GitHub per recuperare l'eventuale sha
+  let existingSha = null;
+  try {
+    const checkRes = await fetch(url + `?ref=main&_t=${Date.now()}`, {
+      headers: {
+        'Authorization': 'token ' + token,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+    if (checkRes.ok) {
+      const checkData = await checkRes.json();
+      if (checkData && checkData.sha) {
+        existingSha = checkData.sha;
+        if (checkData.download_url) {
+          console.log('Foto già presente su GitHub, riuso download_url:', checkData.download_url);
+          return checkData.download_url;
+        }
+      }
+    }
+  } catch (errCheck) {
+    console.warn('Errore check sha foto:', errCheck);
+  }
+
+  const body = {
+    message: 'Upload photo from iPhone',
+    content: b64,
+    branch: 'main'
+  };
+  if (existingSha) {
+    body.sha = existingSha;
+  }
+  
   const res = await fetch(url, {
     method: 'PUT',
-    headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message: 'Upload photo from iPhone', content: b64, branch: 'main' })
+    headers: {
+      'Authorization': 'token ' + token,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
   });
   
   if (!res.ok) {
@@ -290,7 +416,7 @@ async function uploadToGitHub(base64Data, filename) {
   }
   
   const data = await res.json();
-  return data.content.download_url;
+  return data.content?.download_url || `https://raw.githubusercontent.com/${repo}/main/public/photos/${filename}`;
 }
 
 async function syncQueue() {
@@ -357,6 +483,32 @@ async function saveInboxFeed(entries) {
   const repo = ls('gh_repo');
   const token = ls('gh_token');
   const url = `https://api.github.com/repos/${repo}/contents/public/inbox_feed.json`;
+
+  let sha = window.lastInboxSha || null;
+  try {
+    const checkRes = await fetch(url + `?ref=main&_t=${Date.now()}`, {
+      headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if (checkRes.ok) {
+      const checkData = await checkRes.json();
+      if (checkData && checkData.sha) {
+        sha = checkData.sha;
+        try {
+          const remoteJson = JSON.parse(decodeURIComponent(escape(atob(checkData.content))));
+          if (Array.isArray(remoteJson.entries)) {
+            const existingIds = new Set(entries.map(e => String(e.id)));
+            for (const re of remoteJson.entries) {
+              if (!existingIds.has(String(re.id))) {
+                entries.push(re);
+              }
+            }
+          }
+        } catch(e) {}
+      }
+    }
+  } catch(e) {
+    console.warn('Check inbox_feed sha error:', e);
+  }
   
   const jsonStr = JSON.stringify({ entries: entries }, null, 2);
   const contentB64 = btoa(unescape(encodeURIComponent(jsonStr)));
@@ -366,7 +518,7 @@ async function saveInboxFeed(entries) {
     content: contentB64,
     branch: 'main'
   };
-  if (window.lastInboxSha) body.sha = window.lastInboxSha;
+  if (sha) body.sha = sha;
   
   const res = await fetch(url, {
     method: 'PUT',
