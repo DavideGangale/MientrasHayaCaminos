@@ -1,10 +1,46 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-11-12T21:49:28.758Z",
+  "_exportDate": "2026-11-17T12:46:38.781Z",
   "tipo": "diario_mese",
   "mese": "2026-11",
-  "count": 11,
+  "count": 13,
   "entries": [
+    {
+      "id": 1794837617906,
+      "ts": 1794837617906,
+      "data": "16/11/2026",
+      "ora": "09:00",
+      "paese": "Peru",
+      "km": "5716.7",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": -8.111430487938094,
+        "lon": -79.0228316206756
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1794837617906.jpg",
+      "foto": null
+    },
+    {
+      "id": 1794837125681,
+      "ts": 1794837125681,
+      "data": "16/11/2026",
+      "ora": "08:52",
+      "paese": "Peru",
+      "km": "5716.7",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": -8.111355842454651,
+        "lon": -79.02289191715549
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1794837125681.jpg",
+      "foto": null
+    },
     {
       "id": 1793832095756,
       "ts": 1793832095756,
