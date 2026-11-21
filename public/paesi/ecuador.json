@@ -1,12 +1,12 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-11-17T12:46:38.799Z",
+  "_exportDate": "2026-11-21T13:49:56.703Z",
   "tipo": "paese",
   "paese": "Ecuador",
   "slug": "ecuador",
   "stats": {
     "km": 2220.0399999999995,
-    "benzina": 91.82368464323821,
+    "benzina": 79.28740950747446,
     "olioMl": 1823,
     "spesaBenzinaUsd": 75.34,
     "spesaOlioUsd": 29.230000000000004,
