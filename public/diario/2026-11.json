@@ -1,10 +1,100 @@
 {
   "_version": "public-2.0",
-  "_exportDate": "2026-11-17T12:46:38.781Z",
+  "_exportDate": "2026-11-21T13:49:56.665Z",
   "tipo": "diario_mese",
   "mese": "2026-11",
-  "count": 13,
+  "count": 18,
   "entries": [
+    {
+      "id": 1795194811906,
+      "ts": 1795194811906,
+      "data": "20/11/2026",
+      "ora": "12:13",
+      "paese": "Peru",
+      "km": "5946.9",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": -8.669601352893379,
+        "lon": -78.12499810948793
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1795194811906.jpg",
+      "foto": null
+    },
+    {
+      "id": 1795189948890,
+      "ts": 1795189948890,
+      "data": "20/11/2026",
+      "ora": "10:52",
+      "paese": "Peru",
+      "km": "5946.9",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": -8.677345393233571,
+        "lon": -78.15807209357448
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1795189948890.jpg",
+      "foto": null
+    },
+    {
+      "id": 1795186260648,
+      "ts": 1795186260648,
+      "data": "20/11/2026",
+      "ora": "09:51",
+      "paese": "Peru",
+      "km": "5946.9",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": -8.672710536055833,
+        "lon": -78.19661451510916
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1795186260648.jpg",
+      "foto": null
+    },
+    {
+      "id": 1795117255231,
+      "ts": 1795117255231,
+      "data": "19/11/2026",
+      "ora": "14:40",
+      "paese": "Peru",
+      "km": "5946.9",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": -8.70849939772612,
+        "lon": -78.41254680727695
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1795117255231.jpg",
+      "foto": null
+    },
+    {
+      "id": 1795117255230,
+      "ts": 1795117255230,
+      "data": "19/11/2026",
+      "ora": "14:40",
+      "paese": "Peru",
+      "km": "5946.9",
+      "testo": "",
+      "tags": [],
+      "geo": {
+        "lat": -8.70849939772612,
+        "lon": -78.41254680727695
+      },
+      "videoUrl": null,
+      "videoPlanned": false,
+      "fotoUrl": "https://raw.githubusercontent.com/DavideGangale/MientrasHayaCaminos/main/public/photos/inbox_1795117255230.jpg",
+      "foto": null
+    },
     {
       "id": 1794837617906,
       "ts": 1794837617906,
